@@ -121,10 +121,7 @@ Name *cur_name;
 /*
   manages the conductor name list
 */
-int getConductorNum(name, name_list, num_cond)
-char *name;
-Name **name_list;
-int *num_cond;
+int getConductorNum(char *name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *prev_name;
   int i, alias_match();
@@ -163,9 +160,7 @@ int *num_cond;
   - returns NOTFND if name not found
   - name must have group name appended
 */
-int getConductorNumNoAdd(name, name_list)
-char *name;
-Name *name_list;
+int getConductorNumNoAdd(char *name, Name *name_list)
 {
   Name *cur_name, *prev_name;
   int i, alias_match();
@@ -184,9 +179,7 @@ Name *name_list;
 /*
   gets the name (aliases are ignored) corresponding to a conductor number
 */
-char *getConductorName(cond_num, name_list)
-Name **name_list;
-int cond_num;
+char *getConductorName(int cond_num, Name **name_list)
 {
   Name *cur_name;
   char *last_alias();
@@ -207,10 +200,7 @@ int cond_num;
 /*
   renames a conductor
 */
-int oldrenameConductor(old_name, new_name, name_list, num_cond)
-char *old_name, *new_name;
-int *num_cond;
-Name **name_list;
+int oldrenameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *cur_name2, *prev_name;
   int i, j;
@@ -248,10 +238,7 @@ Name **name_list;
 /*
   renames a conductor
 */
-int renameConductor(old_name, new_name, name_list, num_cond)
-char *old_name, *new_name;
-int *num_cond;
-Name **name_list;
+int renameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *cur_name2, *prev_name;
   int alias_match();

@@ -45,12 +45,15 @@ double *Beta, *Betam;		/* beta and beta*m array */
 double *tleg;		/* Temporary Legendre storage. */
 double **factFac;		/* factorial factor array: (n-m+1)...(n+m) */
 
+int costerms(int order);
+int sinterms(int order);
+void evalFactFac(double **array, int order);
+
 /* 
    Used various places.  Returns number of coefficients in the multipole 
    expansion. 
 */
-int multerms(order)
-int order;
+int multerms(int order)
 {
   return(costerms(order) + sinterms(order));
 }
@@ -58,8 +61,7 @@ int order;
 /*
   returns number of cos(m*phi)-weighted terms in the real (not cmpx) multi exp
 */
-int costerms(order)
-int order;
+int costerms(int order)
 {
   return(((order + 1) * (order + 2)) / 2);
 }
@@ -67,8 +69,7 @@ int order;
 /*
   returns number of sin(m*phi)-weighted terms in the real (not cmpx) multi exp
 */
-int sinterms(order)
-int order;
+int sinterms(int order)
 {
   return((((order + 1) * (order + 2)) / 2) - (order+1));
 }
@@ -188,9 +189,7 @@ int x;
 /*
   produces factorial factor array for mulMulti2P
 */
-void evalFactFac(array, order)
-int order;
-double **array;
+void evalFactFac(double **array, int order)
 {
   int n, m;			/* array[n][m] = (m+n)!/(n-m)! */
 

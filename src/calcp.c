@@ -35,6 +35,13 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 
+void Cross_Product(double vector1[], double vector2[], double result_vector[]);
+int flip_normal(charge *panel);
+int planarize(charge *pq);
+void centroid(charge *pp, double x2);
+void ComputeMoments(charge *pp);
+void dp(charge *panel);
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -80,8 +87,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 static int num2nd=0, num4th=0, numexact=0;
 static int num2ndsav=0, num4thsav=0, numexactsav=0;
 
-initcalcp(panel_list)
-  charge *panel_list;
+void initcalcp(charge *panel_list)
 {
   charge *pq, *npq;
   double vtemp[3];
@@ -232,8 +238,7 @@ initcalcp(panel_list)
 /*
   determine if normal needs to be flipped to get dielectric bdry cond right
 */
-oldflip_normal(panel)
-charge *panel;
+int oldflip_normal(charge *panel)
 {
   int i;
   double x, y, z;
@@ -314,8 +319,7 @@ charge *panel;
   - this function uses 0.0 as a breakpoint when really machine precision
     weighted checks should be done (really not an issue if ref point far)
 */
-flip_normal(panel)
-charge *panel;
+int flip_normal(charge *panel)
 {
   int i;
   double x, y, z;
@@ -371,8 +375,7 @@ charge *panel;
 Changes the corner points so that they lie in the plane defined by the
 panel diagonals and any midpoint of an edge.
 */
-planarize(pq)
-charge *pq;
+int planarize(charge *pq)
 {
   double origin[3], corner[3], delta[4][3], px, py, dx, dy, dz;
   int i, j, numcorners = pq->shape;
@@ -419,9 +422,7 @@ first moments vanish.  Calculation begins by projection into the
 coordinate system defined by the panel normal as the z-axis and
 edge02 as the x-axis.
 */
-centroid(pp, x2)
-charge *pp;
-double x2;
+void centroid(charge *pp, double x2)
 {
   double vertex1[3], vertex3[3];
   double sum, dl, x1, y1, x3, y3, xc, yc;
@@ -449,8 +450,7 @@ double x2;
 
 }
 
-double normalize(vector)
-  double vector[3];
+double normalize(double vector[3])
 {
   double length;
   int i;
@@ -465,8 +465,7 @@ double normalize(vector)
 }
 
 /* Assumes the vectors are normalized. */
-int If_Equal(vector1, vector2)
-  double vector1[3], vector2[3];
+int If_Equal(double vector1[3], double vector2[3])
 {
   int i;
 
@@ -476,8 +475,7 @@ int If_Equal(vector1, vector2)
 }
 
 /* Calculates result_vector = vector1 X vector2. */
-Cross_Product(vector1, vector2, result_vector)
-  double vector1[], vector2[], result_vector[];
+void Cross_Product(double vector1[], double vector2[], double result_vector[])
 {
   result_vector[XI] = vector1[YI]*vector2[ZI] - vector1[ZI]*vector2[YI];
   result_vector[YI] = vector1[ZI]*vector2[XI] - vector1[XI]*vector2[ZI];
@@ -501,9 +499,7 @@ the placement of the collocation point
     CASE5: eval pnt proj. on side extension (happens when paneled 
       faces meet at right angles, also possible other ways).
 */
-double calcp(panel, x, y, z, pfd)
-charge *panel;
-double x, y, z, *pfd;
+double calcp(charge *panel, double x, double y, double z, double *pfd)
 {
   double r[4], fe[4], xmxv[4], ymyv[4];
   double xc, yc, zc, zsq, xn, yn, zn, znabs, xsq, ysq, rsq, diagsq, dtol;
@@ -666,8 +662,7 @@ double x, y, z, *pfd;
 }
 
 
-dumpnums(flag, size)
-int flag, size;
+void dumpnums(int flag, int size)
 {
   double total;
 
@@ -700,8 +695,7 @@ int flag, size;
   }
 }
 
-double tilelength(nq)
-charge *nq;
+double tilelength(charge *nq)
 {
   return nq->max_diag;
 }
@@ -714,8 +708,7 @@ local system, array S(15).  First initialize array
 Note that S(2)=S(6)=0 due to transfer above
 */
 
-ComputeMoments(pp)
-charge *pp;
+void ComputeMoments(charge *pp)
 {
   int order=MAXORDER;
   int i, j, nside,  N, M, N1, M1, M2, MN1, MN2;
@@ -828,8 +821,7 @@ charge *pp;
 
 /* Debugging Print Routines follow. */
 
-dp(panel)
-charge *panel;
+void dp(charge *panel)
 {
   int i;
   double c[4][3];
@@ -875,8 +867,7 @@ charge *panel;
 #define DIS 2
 #define SCALE 5
 
-testCalcp(pp)
-charge *pp;
+void testCalcp(charge *pp)
 {
 
   double offx, offy, offz, x, y, z, mult;
@@ -903,10 +894,7 @@ charge *pp;
 }
 
 
-fileCorners(pp, f)
-FILE *f;
-charge *pp;
-
+void fileCorners(charge *pp, FILE *f)
 {
   int i;
 
@@ -916,9 +904,7 @@ charge *pp;
 
 
 /* Test the moment code. */
-calcpm(multi, x, y, z, origorder, order)
-double *multi, x, y, z;
-int order;
+void calcpm(double *multi, double x, double y, double z, int origorder, int order)
 {
   charge panel, *ppanel;
   double **mat, **mulMulti2P(), potential;

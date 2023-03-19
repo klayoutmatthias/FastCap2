@@ -36,6 +36,10 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
 
+/* mulDisplay.c */
+void dump_face(FILE *fp, face *fac);
+void dumpCorners(FILE *fp, double **mat, int rows, int cols);
+
 int cnt;			/* used in setting up the depth graph */
 
 /*

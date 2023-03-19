@@ -35,9 +35,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 
-main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
   int ttliter, i, j, num_cond;
   charge *chglist, *nq, *input_problem();

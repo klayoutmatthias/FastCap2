@@ -57,6 +57,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  * Revised 7-23-91 to support ANSI-C
  */
 #include <stdio.h>
+#include <string.h>
 
 typedef struct {
      long type;   /* type */

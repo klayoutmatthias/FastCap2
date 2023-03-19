@@ -50,6 +50,7 @@ void dump_ps_geometry(chglist, q, cond, use_ttl_chg)
 charge *chglist;
 double *q;
 int cond;
+int use_ttl_chg;
 {
   int i, j, k, numlines, numfaces, use_density;
   face **faces, **sfaces, **fastcap2faces(), **depthSortFaces();

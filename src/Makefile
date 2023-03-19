@@ -63,7 +63,8 @@ LIBS = -lm
 #  - also used to select the correct CC macro definition for AIX machines
 #
 # for generic machine use (timers not supported)
-CFLAGS = -O -DOTHER
+CFLAGS = -O -DOTHER -std=c99 -Wno-builtin-declaration-mismatch -Wno-int-to-pointer-cast \
+         -Wno-format -Wno-incompatible-pointer-types -Wno-unused-result -g
 # for most machines running 4.2/3 use (only necessary if timers are needed)
 #CFLAGS = -O -DFOUR
 # for most machines running System V use (only necessary if timers are needed)

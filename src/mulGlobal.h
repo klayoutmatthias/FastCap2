@@ -47,12 +47,28 @@ extern char *   realloc();
 #endif /* end if NEWS */
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdint.h>
+
+/* where is that? */
+void *sbrk(intptr_t increment);
 
 /* fastcap data structures */
 #include "mulStruct.h"
 
 /* execution time macros */
 #include "resusage.h"
+
+/* uglyalloc.c */
+char *ualloc(unsigned int nbytes);
+
+/* mulMulti.c */
+int multerms(int order);
+
+/* quickif.c */
+int getConductorNum(char *name, Name **name_list, int *num_cond);
 
 /* time variables/structs */
 #ifndef _TIME_                  /* if not on a Sun4 */

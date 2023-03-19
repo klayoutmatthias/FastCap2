@@ -36,7 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
 
-double black, white;		/* densities corresponding to shades */
+double black, white;            /* densities corresponding to shades */
 
 /*
   loads axes' lines
@@ -90,34 +90,34 @@ charge *make_charges_from_patches()
     for(i = 0; i < 4; i++) {
       current_grid = start_grid;
       while(current_grid != NULL) {
-	if(patch_pntr->corner[i] == current_grid->ID) {
-	  if(i == 0) {
-	    CALLOC(charge_pntr->corner0, 3, double *, ON, AMSC)
-	    for(k = 0; k < 3; k++) 
-		charge_pntr->corner0[k] = current_grid->coord[k];
-	  }
-	  else if(i == 1) {
-	    CALLOC(charge_pntr->corner1, 3, double *, ON, AMSC)
-	    for(k = 0; k < 3; k++) 
-		charge_pntr->corner1[k] = current_grid->coord[k];
-	  }
-	  else if(i == 2) {
-	    CALLOC(charge_pntr->corner2, 3, double *, ON, AMSC)
-	    for(k = 0; k < 3; k++) 
-		charge_pntr->corner2[k] = current_grid->coord[k];
-	  }
-	  else if(i == 3) {
-	    CALLOC(charge_pntr->corner3, 3, double *, ON, AMSC)
-	    for(k = 0; k < 3; k++) 
-		charge_pntr->corner3[k] = current_grid->coord[k];
-	  }
-	  else {
-	    fprintf(stderr, "make_charges_from_patches: panel has more than 4 sides\n");
-	    exit(0);
-	  }
-	  break;
-	}
-	current_grid = current_grid->next;
+        if(patch_pntr->corner[i] == current_grid->ID) {
+          if(i == 0) {
+            CALLOC(charge_pntr->corner0, 3, double *, ON, AMSC)
+            for(k = 0; k < 3; k++) 
+                charge_pntr->corner0[k] = current_grid->coord[k];
+          }
+          else if(i == 1) {
+            CALLOC(charge_pntr->corner1, 3, double *, ON, AMSC)
+            for(k = 0; k < 3; k++) 
+                charge_pntr->corner1[k] = current_grid->coord[k];
+          }
+          else if(i == 2) {
+            CALLOC(charge_pntr->corner2, 3, double *, ON, AMSC)
+            for(k = 0; k < 3; k++) 
+                charge_pntr->corner2[k] = current_grid->coord[k];
+          }
+          else if(i == 3) {
+            CALLOC(charge_pntr->corner3, 3, double *, ON, AMSC)
+            for(k = 0; k < 3; k++) 
+                charge_pntr->corner3[k] = current_grid->coord[k];
+          }
+          else {
+            fprintf(stderr, "make_charges_from_patches: panel has more than 4 sides\n");
+            exit(0);
+          }
+          break;
+        }
+        current_grid = current_grid->next;
       }
     }
 
@@ -168,16 +168,16 @@ int use_density;
     }
     else {
       if(chgs[panel->index] == 0.0) {
-	dif = 0.0;
+        dif = 0.0;
       }
       if(use_density) {
-	black = MAX(black, chgs[panel->index]/panel->area);
-	white = MIN(white, chgs[panel->index]/panel->area);
+        black = MAX(black, chgs[panel->index]/panel->area);
+        white = MIN(white, chgs[panel->index]/panel->area);
       }
       else {
-	black = MAX(black, chgs[panel->index]);
-	white = MIN(white, chgs[panel->index]);
-      }	  
+        black = MAX(black, chgs[panel->index]);
+        white = MIN(white, chgs[panel->index]);
+      }   
     }
 
   }
@@ -197,7 +197,7 @@ int use_density;
     if(panel->surf->type == DIELEC && rd_ == TRUE) continue;
 
     if(use_density)
-	face_list[i]->greylev = (chgs[panel->index]/panel->area - white)/dif;
+        face_list[i]->greylev = (chgs[panel->index]/panel->area - white)/dif;
     else face_list[i]->greylev = (chgs[panel->index] - white)/dif;
     i++;
   }
@@ -229,8 +229,8 @@ int iter;
 
   if((fp = fopen(file, "r")) == NULL) {
     fprintf(stderr, 
-	    "get_charge_densities: can't open charge file\n  `%s'\nto read\n", 
-	    file);
+            "get_charge_densities: can't open charge file\n  `%s'\nto read\n", 
+            file);
     exit(0);
   }
 
@@ -242,10 +242,10 @@ int iter;
     if(!header_found) {
       /* look for "Panel charges, iteration <iter>" */
       if(sscanf(linein, "%s %s %s %d", str1, str2, str3, &index) == 4) {
-	if(!strcmp(str1, "Panel") && !strcmp(str2, "charges,")
-	      && !strcmp(str3, "iteration") && index == iter) {
-	  header_found = TRUE;
-	}
+        if(!strcmp(str1, "Panel") && !strcmp(str2, "charges,")
+              && !strcmp(str3, "iteration") && index == iter) {
+          header_found = TRUE;
+        }
       }
       continue;
     }
@@ -253,28 +253,28 @@ int iter;
     /* check for q/A line */
     if(sscanf(linein, "%d %s %s %lf", &index, str1, str2, &density) == 4) {
       if(!strcmp(str1, "q/A") && !strcmp(str2, "=")) {
-	q[index] = density;
+        q[index] = density;
       }
     }
     /* check for end of list line */
     else if(sscanf(linein, "%s %s %s", str1, str2, str3) == 3) {
       if(!strcmp(str1, "End") && !strcmp(str2, "panel") 
-	 && !strcmp(str3, "charges")) {
-	break;
+         && !strcmp(str3, "charges")) {
+        break;
       }
     }
     else {
       fprintf(stderr, 
-	      "get_charge_densities: bad charge file format, line %d:\n%s\n",
-	      linecnt, linein);
+              "get_charge_densities: bad charge file format, line %d:\n%s\n",
+              linecnt, linein);
       exit(0);
     }
   }
 
   if(!header_found) {
     fprintf(stderr, 
-	    "get_charge_densities: can't find iteration %d data in\n `%s'\n",
-	    iter, file);
+            "get_charge_densities: can't find iteration %d data in\n `%s'\n",
+            iter, file);
     exit(0);
   }
 
@@ -302,7 +302,7 @@ int num;
   transfer fastcap panel info to face structs
 */
 face **fastcap2faces(numfaces, chglist, q, use_density)
-int *numfaces, use_density;	/* use_density = TRUE => use q/A not q */
+int *numfaces, use_density;     /* use_density = TRUE => use q/A not q */
 charge *chglist;
 double *q;
 {
@@ -337,7 +337,7 @@ double *q;
     }
     if(chgp->surf->type == DIELEC && tavg[0] > 1.3 && tavg[1] > 1.3 
        && tavg[2] > 1.3)
-	continue;
+        continue;
 #endif
 
     /* skip if panel is on conductor in q picture kill list */
@@ -362,7 +362,7 @@ double *q;
     /* allocate for corner coordinates */
     CALLOC(tail->c, tail->numsides, double *, ON, AMSC);
     for(i = 0; i < tail->numsides; i++)
-	CALLOC(tail->c[i], 3, double, ON, AMSC);
+        CALLOC(tail->c[i], 3, double, ON, AMSC);
     /* xfer corner coordinates */
     for(i = 0; i < tail->numsides; i++) {
       getAbsCoord(tail->c[i], chgp, i);
@@ -391,13 +391,13 @@ double *q;
   setupLine(axes, 1, 0.0, 0.0, 0.0, 0.0, axeslen, 0.0); /* y axis */
   setupLine(axes, 2, 0.0, 0.0, 0.0, 0.0, 0.0, axeslen); /* z axis */
   setupLine(axes, 3, 0.85*axeslen, -0.15*axeslen, 0.0, 
-	    1.15*axeslen, 0.15*axeslen, 0.0); /* x marker */
+            1.15*axeslen, 0.15*axeslen, 0.0); /* x marker */
   setupLine(axes, 4, 1.15*axeslen, -0.15*axeslen, 0.0, 
-	    0.85*axeslen, 0.15*axeslen, 0.0); /* x marker */
+            0.85*axeslen, 0.15*axeslen, 0.0); /* x marker */
   setupLine(axes, 5, 0.0, axeslen, 0.0, 
-	    -0.15*axeslen, 1.15*axeslen, 0.0); /* y marker */
+            -0.15*axeslen, 1.15*axeslen, 0.0); /* y marker */
   setupLine(axes, 6, 0.0, axeslen, 0.0, 
-	    0.15*axeslen, 1.15*axeslen, 0.0); /* y marker */
+            0.15*axeslen, 1.15*axeslen, 0.0); /* y marker */
 
   return(faces);
 }
@@ -421,7 +421,7 @@ double *q;
     then all those to the left must also be given
   good sizes: width 0, 1 or 2 (goes straight to postscript)
               arrow size 3.0
-	      dot size 2.0
+              dot size 2.0
   to get just a dot, put in tiny length line and arrow size
 */
 void readLines(fp, head, tail, numlines)
@@ -430,31 +430,31 @@ int *numlines;
 FILE *fp;
 {
   int flines = 0, falin = 0, fflag = 1, faflag = 1, getlines = 1, i, j;
-  int f_;		/* f_ == 1 => ignore face and fill info */
+  int f_;               /* f_ == 1 => ignore face and fill info */
   char linein[BUFSIZ], **chkp, *chk, *strtok(), *cp;
   char readfile[BUFSIZ], tempc[BUFSIZ];
   double arrowsize, dotsize;
   int temp, linewd;
   FILE *fpin, *fopen();
 
-  f_ = 1;			/* hardwire to take fill/face info as
-				   equivalent to end of file */
+  f_ = 1;                       /* hardwire to take fill/face info as
+                                   equivalent to end of file */
 
   chkp = &chk;                  /* pointers for error checking */
   /* input lines and add to linked list */
   while(fgets(linein, sizeof(linein), fp) != NULL) {
     if(linein[0] == 'e' || linein[0] == '\0') return;
-    if(linein[0] == 'r') {	/* do a recursive read */
+    if(linein[0] == 'r') {      /* do a recursive read */
       if(sscanf(linein, "%s %s", tempc, readfile) != 2) {
-	fprintf(stderr, 
-		"readLines: bad recursive read line format:\n%s\n", linein);
-	exit(0);
+        fprintf(stderr, 
+                "readLines: bad recursive read line format:\n%s\n", linein);
+        exit(0);
       }
       if((fpin = fopen(readfile, "r")) == NULL) {
-	fprintf(stderr, 
-		"readLines: can't open recursive read file\n `%s'\nto read\n",
-		readfile);
-	exit(0);
+        fprintf(stderr, 
+                "readLines: can't open recursive read file\n `%s'\nto read\n",
+                readfile);
+        exit(0);
       }
       readLines(fpin, head, tail, numlines);
       fclose(fpin);
@@ -462,68 +462,68 @@ FILE *fp;
     }
     if(linein[0] == 'F') {
       if(f_ == 0) {
-	fprintf(stderr, 
-		"readLines: attempt to input faces with a recursive read\n");
-	exit(0);
+        fprintf(stderr, 
+                "readLines: attempt to input faces with a recursive read\n");
+        exit(0);
       }
       else {
-	return;
+        return;
       }
     }
     if(linein[0] == '#') continue;
     if(linein[0] == 'f') {
       if(f_ == 0) {
-	fprintf(stderr, 
-		"readLines: attempt to input fills with a recursive read\n");
-	exit(0);
+        fprintf(stderr, 
+                "readLines: attempt to input fills with a recursive read\n");
+        exit(0);
       }
       else {
-	return;
+        return;
       }
     }
 
     /* input lines of line information */
-    if(fflag == 1) {		/* allocate a line struct; input a from line */
+    if(fflag == 1) {            /* allocate a line struct; input a from line */
       if(*numlines == 0) {
-	CALLOC((*tail), 1, line, ON, AMSC);
-	(*head) = (*tail);
-	(*tail)->prev = NULL;
+        CALLOC((*tail), 1, line, ON, AMSC);
+        (*head) = (*tail);
+        (*tail)->prev = NULL;
       }
       else {
-	CALLOC((*tail)->next, 1, line, ON, AMSC); /* link forward */
-	((*tail)->next)->prev = (*tail); /* link back */
-	(*tail) = (*tail)->next;
+        CALLOC((*tail)->next, 1, line, ON, AMSC); /* link forward */
+        ((*tail)->next)->prev = (*tail); /* link back */
+        (*tail) = (*tail)->next;
       }
       if(sscanf(linein,"%lf %lf %lf",&((*tail)->from[0]), &((*tail)->from[1]), 
-		&((*tail)->from[2])) != 3) {
-	fprintf(stderr,"readLines: from line %d bad, '%s'\n",flines+1,linein);
-	exit(0);
+                &((*tail)->from[2])) != 3) {
+        fprintf(stderr,"readLines: from line %d bad, '%s'\n",flines+1,linein);
+        exit(0);
       }
       (*tail)->index = *numlines;
       fflag = 0;
       flines++;
     }
-    else if(fflag == 0) {		/* input a to line */
+    else if(fflag == 0) {               /* input a to line */
       /* if arrow heads are used, line width must be specified */
       if(sscanf(linein, "%lf %lf %lf %d %lf %lf",
-		&((*tail)->to[0]), &((*tail)->to[1]), 
-		&((*tail)->to[2]), &linewd, &arrowsize, &dotsize) != 6) {
-	if(sscanf(linein, "%lf %lf %lf %d %lf",&((*tail)->to[0]), 
-		  &((*tail)->to[1]), &((*tail)->to[2]), 
-		  &linewd, &arrowsize) != 5) {
-	  if(sscanf(linein, "%lf %lf %lf %d", &((*tail)->to[0]), 
-		    &((*tail)->to[1]), &((*tail)->to[2]), &linewd) != 4) {
-	    if(sscanf(linein, "%lf %lf %lf", &((*tail)->to[0]), 
-		      &((*tail)->to[1]), &((*tail)->to[2])) != 3) {
-	      fprintf(stderr, 
-		      "readLines: to line %d bad, '%s'\n",flines+1, linein);
-	      exit(0);
-	    }
-	    linewd = LINE;
-	  }
-	  arrowsize = 0.0;
-	}
-	dotsize = 0.0;
+                &((*tail)->to[0]), &((*tail)->to[1]), 
+                &((*tail)->to[2]), &linewd, &arrowsize, &dotsize) != 6) {
+        if(sscanf(linein, "%lf %lf %lf %d %lf",&((*tail)->to[0]), 
+                  &((*tail)->to[1]), &((*tail)->to[2]), 
+                  &linewd, &arrowsize) != 5) {
+          if(sscanf(linein, "%lf %lf %lf %d", &((*tail)->to[0]), 
+                    &((*tail)->to[1]), &((*tail)->to[2]), &linewd) != 4) {
+            if(sscanf(linein, "%lf %lf %lf", &((*tail)->to[0]), 
+                      &((*tail)->to[1]), &((*tail)->to[2])) != 3) {
+              fprintf(stderr, 
+                      "readLines: to line %d bad, '%s'\n",flines+1, linein);
+              exit(0);
+            }
+            linewd = LINE;
+          }
+          arrowsize = 0.0;
+        }
+        dotsize = 0.0;
       }
       (*tail)->width = linewd;
       (*tail)->arrow = arrowsize;
@@ -556,7 +556,7 @@ char *line_file;
 
   if((fp = fopen(line_file, "r")) == NULL) {
     fprintf(stderr, "getLines: can't open .fig file\n `%s'\nto read\n",
-	    line_file);
+            line_file);
     exit(0);
   }
 
@@ -592,12 +592,12 @@ FILE *fp;
   for(i = 0; i < 7 && x_ == TRUE; i++) { /* check axes */
     for(j = 0; j < 2; j++) {
       if(i == 0 && j == 0) {
-	minx = axes[i][j][0];
-	miny = axes[i][j][1];
+        minx = axes[i][j][0];
+        miny = axes[i][j][1];
       }
       else {
-	minx = MIN(minx, axes[i][j][0]);
-	miny = MIN(miny, axes[i][j][1]);
+        minx = MIN(minx, axes[i][j][0]);
+        miny = MIN(miny, axes[i][j][1]);
       }
       xmax = MAX(xmax, axes[i][j][0]);
       ymax = MAX(ymax, axes[i][j][1]);
@@ -606,12 +606,12 @@ FILE *fp;
   for(i = 0; i < numfaces; i++) { /* check faces */
     for(j = 0; j < faces[i]->numsides; j++) {
       if(i == 0 && j == 0 && x_ == FALSE) {
-	minx = faces[i]->c[j][0];
-	miny = faces[i]->c[j][1];
+        minx = faces[i]->c[j][0];
+        miny = faces[i]->c[j][1];
       }
       else {
-	minx = MIN(minx, faces[i]->c[j][0]);
-	miny = MIN(miny, faces[i]->c[j][1]);
+        minx = MIN(minx, faces[i]->c[j][0]);
+        miny = MIN(miny, faces[i]->c[j][1]);
       }
       xmax = MAX(xmax, faces[i]->c[j][0]);
       ymax = MAX(ymax, faces[i]->c[j][1]);
@@ -634,7 +634,7 @@ FILE *fp;
     ymax = MAX(ymax, lines[i]->from[1]);
   }
 
-  *lowx = minx-2;		/* note 2pnt offset and truncation */
+  *lowx = minx-2;               /* note 2pnt offset and truncation */
   *lowy = miny-2;
   upx = xmax+2;
   upy = ymax+2;
@@ -650,11 +650,11 @@ FILE *fp;
 {
   int i;
 
-  for(i = 0; i < 7; i++) {	/* loop on axes' lines (pointers too) */
+  for(i = 0; i < 7; i++) {      /* loop on axes' lines (pointers too) */
     fprintf(fp, "%g %g moveto\n", axi[i][0][0], axi[i][0][1]);
     fprintf(fp, "%g %g lineto\n", axi[i][1][0], axi[i][1][1]);
     fprintf(fp, "%g setlinewidth %d setlinecap %d setlinejoin ",
-	      AXEWID, LINCAP, LINJIN);
+              AXEWID, LINCAP, LINJIN);
     fprintf(fp, " 0 setgray  stroke\n");
   }
   /*fprintf(stderr, "Axes inserted\n");*/
@@ -971,9 +971,9 @@ int numfaces;
 FILE *fp;
 {
   int f, i;
-  double x, y;			/* current point in plot */
-  double stepx, stepy;	       	/* step in x and y directions */
-  double font;			/* font size */
+  double x, y;                  /* current point in plot */
+  double stepx, stepy;          /* step in x and y directions */
+  double font;                  /* font size */
 
   /* start the input numbered graph refered to lower left corner
      - row numbers on right because it's easier */
@@ -1001,7 +1001,7 @@ FILE *fp;
     /* dump dot if an edge
     for(i = 0; i < faces[f]->numbehind; i++) {
       fprintf(fp, "%g %g dot\n", 
-	      x-(faces[f]->behind)[i]->index*stepx, y-faces[f]->index*stepy);
+              x-(faces[f]->behind)[i]->index*stepx, y-faces[f]->index*stepy);
     }
   } */
   /* dump title
@@ -1012,7 +1012,7 @@ FILE *fp;
   fprintf(fp, "0 0 32 0 0 (Input Ordering) ts\n}\n");
   fprintf(fp, "[0 0 0 1]\nsts\nvmrs\n"); */
 
-  /* y += (numfaces*stepy + 3*FONT);	/* offset 2nd array */
+  /* y += (numfaces*stepy + 3*FONT);    /* offset 2nd array */
 
   /* number each row and fill it in - graph ordering */
   for(f = 0; f < numfaces; f++) {
@@ -1024,7 +1024,7 @@ FILE *fp;
     fprintf(fp, "[0 0 0 1]\nsts\nvmrs\n");
     for(i = 0; i < faces[f]->numbehind; i++) {
       fprintf(fp, "%g %g dot\n", 
-	      x-(faces[f]->behind)[i]->depth*stepx, y-faces[f]->depth*stepy);
+              x-(faces[f]->behind)[i]->depth*stepx, y-faces[f]->depth*stepy);
     }
   }
   fprintf(fp, "%%%%IncludeFont: Times-Roman\n");
@@ -1050,7 +1050,7 @@ FILE *fp;
     fprintf(fp, "%d (%d):", faces[f]->depth, faces[f]->index);
     for(i = 0; i < faces[f]->numbehind && faces[f]->behind != NULL; i++) {
       fprintf(fp, " %d (%d)", (faces[f]->behind)[i]->depth,
-	      (faces[f]->behind)[i]->index);
+              (faces[f]->behind)[i]->index);
       if(i % 5 == 0 && i != 0) fprintf(fp, "\n");
     }
     if((i-1) % 5 != 0 || i == 1) fprintf(fp, "\n");
@@ -1060,18 +1060,18 @@ FILE *fp;
   for(f = 0; f < numfaces; f++) {
     for(k = 0; k < faces[f]->numbehind; k++) {
       if(faces[f]->depth >= (faces[f]->behind)[k]->depth) {
-	if(first == 0) {
-	  first = 1;
-	  fprintf(fp, "\nVertices whose depth lists are inconsistent\n");
-	}
-	fprintf(fp, "%d (%d):", faces[f]->depth, faces[f]->index);
-	for(i = 0; i < faces[f]->numbehind && faces[f]->behind != NULL; i++) {
-	  fprintf(fp, " %d (%d)", (faces[f]->behind)[i]->depth,
-		  (faces[f]->behind)[i]->index);
-	  if(i % 5 == 0 && i != 0) fprintf(fp, "\n");
-	}
-	if((i-1) % 5 != 0 || i == 1) fprintf(fp, "\n");
-	break;
+        if(first == 0) {
+          first = 1;
+          fprintf(fp, "\nVertices whose depth lists are inconsistent\n");
+        }
+        fprintf(fp, "%d (%d):", faces[f]->depth, faces[f]->index);
+        for(i = 0; i < faces[f]->numbehind && faces[f]->behind != NULL; i++) {
+          fprintf(fp, " %d (%d)", (faces[f]->behind)[i]->depth,
+                  (faces[f]->behind)[i]->index);
+          if(i % 5 == 0 && i != 0) fprintf(fp, "\n");
+        }
+        if((i-1) % 5 != 0 || i == 1) fprintf(fp, "\n");
+        break;
       }
     }
   }
@@ -1134,7 +1134,7 @@ FILE *fp;
     diddle_x = font_size/2.0;
   }
   dump_line_as_ps(fp, linein, string_x-diddle_x, y_top + font_size/2.0, 
-		  font_size);
+                  font_size);
 
   for(i = 0; i < nblocks; i++) {
     /* write a fill with border for the key block */
@@ -1150,9 +1150,9 @@ FILE *fp;
     fprintf(fp, "%g %g moveto\n", block_x, block_y);
     fprintf(fp, "%g %g lineto\n", block_x + white_width, block_y);
     fprintf(fp, "%g %g lineto\n", 
-	    block_x + white_width, block_y - font_size - font_size/10.0);
+            block_x + white_width, block_y - font_size - font_size/10.0);
     fprintf(fp, "%g %g lineto\n", 
-	    block_x, block_y - font_size - font_size/10.0);
+            block_x, block_y - font_size - font_size/10.0);
     fprintf(fp, "closepath\n");
     fprintf(fp, " 1.0 setgray fill\n");
 
@@ -1163,7 +1163,7 @@ FILE *fp;
     fprintf(fp, "%g %g lineto\n", block_x, block_y - block_hgt);
     fprintf(fp, "closepath\n");
     fprintf(fp, "%g setlinewidth %d setlinecap %d setlinejoin ",
-	    linewd, LINCAP, LINJIN);
+            linewd, LINCAP, LINJIN);
     fprintf(fp, " 0 setgray  stroke\n");
 
     /* dump the label */
@@ -1218,7 +1218,7 @@ FILE *fp;
     exit(0);
   }
 
-  w_ = 0;			/* hardwire for no width override */
+  w_ = 0;                       /* hardwire for no width override */
 
   /* dump the lines  */
   for(i = 0; i < numlines; i++) {
@@ -1233,51 +1233,51 @@ FILE *fp;
     fprintf(fp, "gsave\n");
     if(lines[i]->width == DASHED) {
       if(w_ == 0) 
-	  fprintf(fp, "%d setlinewidth 1 setlinecap 0 setlinejoin 3.863693",
-	      DASWTH);
+          fprintf(fp, "%d setlinewidth 1 setlinecap 0 setlinejoin 3.863693",
+              DASWTH);
       else fprintf(fp, "%d setlinewidth 1 setlinecap 0 setlinejoin 3.863693",
-	      OVRWTH);
+              OVRWTH);
       fprintf(fp, 
-	      " setmiterlimit [0 0 0 1]setcolor [2 4] 0 setdash {stroke}fp\n");
+              " setmiterlimit [0 0 0 1]setcolor [2 4] 0 setdash {stroke}fp\n");
     }
     else {
       if(w_ == 0)
-	  fprintf(fp, "%d setlinewidth 1 setlinecap 0 setlinejoin 3.863693",
-		  lines[i]->width);
+          fprintf(fp, "%d setlinewidth 1 setlinecap 0 setlinejoin 3.863693",
+                  lines[i]->width);
       else
-	  fprintf(fp, "%d setlinewidth 1 setlinecap 0 setlinejoin 3.863693",
-		  OVRWTH);
+          fprintf(fp, "%d setlinewidth 1 setlinecap 0 setlinejoin 3.863693",
+                  OVRWTH);
       fprintf(fp, " setmiterlimit [0 0 0 1]setcolor  {stroke}fp\n");
     }
     fprintf(fp, "grestore\n");
-    if(lines[i]->arrow > 0.0) {	/* put arrow head on to side if desired */
+    if(lines[i]->arrow > 0.0) { /* put arrow head on to side if desired */
       /* figure unit vector from `to' point to `from' point */
       for(j = 0; j < 2; j++) temp[j] = lines[i]->from[j]-lines[i]->to[j];
       temp1[0] = sqrt(temp[0]*temp[0]+temp[1]*temp[1]);
       for(j = 0; j < 2; j++) temp[j] /= temp1[0];
-      for(j = 0; j < 2; j++)	/* figure unit perpendicular */
-	  temp1[j] = 
-	      1.0/(temp[j]*sqrt(1.0/(temp[0]*temp[0])+1.0/(temp[1]*temp[1])));
+      for(j = 0; j < 2; j++)    /* figure unit perpendicular */
+          temp1[j] = 
+              1.0/(temp[j]*sqrt(1.0/(temp[0]*temp[0])+1.0/(temp[1]*temp[1])));
       temp1[0] = -temp1[0];
       /* draw the arrow */
       fprintf(fp, "%%%% Begin arrow head for line %d\n", i);
       fprintf(fp, "%g %g moveto\n", lines[i]->to[0], lines[i]->to[1]);
       fprintf(fp, "%g %g lineto\n", 
-	      lines[i]->to[0]+lines[i]->arrow*ALEN*temp[0]
-	      +lines[i]->arrow*(AWID/2)*temp1[0],
-	      lines[i]->to[1]+lines[i]->arrow*ALEN*temp[1]
-	      +lines[i]->arrow*(AWID/2)*temp1[1]);
+              lines[i]->to[0]+lines[i]->arrow*ALEN*temp[0]
+              +lines[i]->arrow*(AWID/2)*temp1[0],
+              lines[i]->to[1]+lines[i]->arrow*ALEN*temp[1]
+              +lines[i]->arrow*(AWID/2)*temp1[1]);
       fprintf(fp, "%g %g lineto\n", 
-	      lines[i]->to[0]+lines[i]->arrow*ALEN*temp[0]
-	      -lines[i]->arrow*(AWID/2)*temp1[0],
-	      lines[i]->to[1]+lines[i]->arrow*ALEN*temp[1]
-	      -lines[i]->arrow*(AWID/2)*temp1[1]);
+              lines[i]->to[0]+lines[i]->arrow*ALEN*temp[0]
+              -lines[i]->arrow*(AWID/2)*temp1[0],
+              lines[i]->to[1]+lines[i]->arrow*ALEN*temp[1]
+              -lines[i]->arrow*(AWID/2)*temp1[1]);
       fprintf(fp, "closepath\n");
       fprintf(fp, " 0 setgray fill\n");
       /* put dot on from end of line, if called for */
       if(lines[i]->dot > 0.0)
-	  fprintf(fp, "%g %g %g 0 360 arc closepath fill\n",
-		  lines[i]->from[0], lines[i]->from[1], lines[i]->dot*DOTSIZ);
+          fprintf(fp, "%g %g %g 0 360 arc closepath fill\n",
+                  lines[i]->from[0], lines[i]->from[1], lines[i]->dot*DOTSIZ);
     }
   }
 }
@@ -1308,9 +1308,9 @@ FILE *fp;
   fprintf(fp, "%%%%CreationDate: 4/19/90 10:47 AM\n");
 
   getBndingBox(faces, numfaces, lines, numlines, 
-	       &lowx, &lowy, fp, axes); /* prnt bnding box */
-  copyBody(fp);			/* copys the body of the header from
-				   "afhpsheader" */
+               &lowx, &lowy, fp, axes); /* prnt bnding box */
+  copyBody(fp);                 /* copys the body of the header from
+                                   "afhpsheader" */
   
   /* dump the text header if needed */
   if(n_ == TRUE || g_ == TRUE || c_ == TRUE || q_ == TRUE) {
@@ -1325,7 +1325,7 @@ FILE *fp;
     fprintf(fp, "3 index 3 index rmoveto\n");
     fprintf(fp, "}forall 7{pop}repeat}bdf\n");
     fprintf(fp, 
-	    "/sts{setcolor textopf setoverprint/ts{awidthshow}def exec}bdf\n");
+            "/sts{setcolor textopf setoverprint/ts{awidthshow}def exec}bdf\n");
     fprintf(fp, "/stol{setlinewidth setcolor textopf setoverprint newpath\n");
     fprintf(fp, "/ts{{false charpath stroke}ta}def exec}bdf\n");
   }
@@ -1337,7 +1337,7 @@ FILE *fp;
   fprintf(fp, "0 1 0 0 (Process Magenta) false newcmykcustomcolor\n");
   fprintf(fp, "0 0 1 0 (Process Yellow) false newcmykcustomcolor\n");
   fprintf(fp, 
-	  "0 0 0 1 (Process Black) false newcmykcustomcolor\n]def\nvms\n");
+          "0 0 0 1 (Process Black) false newcmykcustomcolor\n]def\nvms\n");
 
   /* dump command line as a comment */
   fprintf(fp, "%%%% ");
@@ -1355,7 +1355,7 @@ FILE *fp;
       /* fprintf(fp, "newpath\n");*/
       fprintf(fp, "%g %g moveto\n", faces[f]->c[0][0], faces[f]->c[0][1]);
       for(i = 1; i < faces[f]->numsides; i++) {
-	fprintf(fp, "%g %g lineto\n", faces[f]->c[i][0], faces[f]->c[i][1]);
+        fprintf(fp, "%g %g lineto\n", faces[f]->c[i][0], faces[f]->c[i][1]);
       }
       fprintf(fp, "closepath\n");
       /* fprintf(fp, "gsave\n");*/
@@ -1376,17 +1376,17 @@ FILE *fp;
     /* fprintf(fp, "gsave\n");*/
     if(faces[f]->width == DASHED) {
       fprintf(fp, "%d setlinewidth %d setlinecap %d setlinejoin 3.863693",
-	      DASWTH, LINCAP, LINJIN);
+              DASWTH, LINCAP, LINJIN);
       /* fprintf(fp, 
-	 " setmiterlimit [0 0 0 1]setcolor [2 4] 0 setdash {stroke}fp\n");*/
+         " setmiterlimit [0 0 0 1]setcolor [2 4] 0 setdash {stroke}fp\n");*/
       fprintf(fp, 
-	      " setmiterlimit [0 0 0 1]setcolor [2 4] 0 setdash stroke\n");
+              " setmiterlimit [0 0 0 1]setcolor [2 4] 0 setdash stroke\n");
     }
     else {
       /* fprintf(fp, "%g setlinewidth %d setlinecap %d setlinejoin 3.863693",
-	 faces[f]->width, LINCAP, LINJIN); */
+         faces[f]->width, LINCAP, LINJIN); */
       fprintf(fp, "%g setlinewidth %d setlinecap %d setlinejoin ",
-	      faces[f]->width, LINCAP, LINJIN);
+              faces[f]->width, LINCAP, LINJIN);
       /* fprintf(fp, "[0 0 0 1]setcolor  {stroke}fp\ngrestore\n"); */
       /* fprintf(fp, "[0 0 0 1]setcolor  stroke\n");*/
       fprintf(fp, " 0 setgray  stroke\n");
@@ -1412,7 +1412,7 @@ FILE *fp;
       dump_shading_key(fp, KEYBLKS, KEYPREC, KEYFONT, use_density);
     
   /* print footer */
-  if(c_ == TRUE) {			/* print command line if asked for */
+  if(c_ == TRUE) {                      /* print command line if asked for */
     for(f = 0, linein[0] = '\0'; f < argc; f++) {
       strcat(linein, argv[f]);
       strcat(linein, " ");

@@ -35,49 +35,57 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 
-cube *cstack[1024];		/* Stack used in several routines. */
+cube *cstack[1024];             /* Stack used in several routines. */
+
+static void getAllInter(ssystem *sys);
+static void set_vector_masks(ssystem *sys);
+static int placeq(int flag, ssystem *sys, char *charges);
+static void setMaxq(ssystem *sys);
+static void indexkid(ssystem *sys, cube *dad, int *pqindex, int *pcindex);
+static void linkcubes(ssystem *sys);
+static void getnbrs(ssystem *sys);
+void getrelations(ssystem *sys);
+void setPosition(ssystem *sys);
+void setExact(ssystem *sys, int numterms);
 
 /*
   sets up the partitioning of space and room for charges and expansions
 */
-ssystem *mulInit(autom, depth, order, charges)
-int autom;			/* ON => choose depth automatically */
-int depth, order;
-charge *charges;
+ssystem *mulInit(int autom, int depth, int order, charge *charges)
 {
   ssystem *sys;
   int qindex=1, cindex=1;
 
   CALLOC(sys, 1, ssystem, ON, AMSC);
-  sys->depth = depth;		/* overwritten below if autom = ON */
+  sys->depth = depth;           /* overwritten below if autom = ON */
   sys->order = order;
   
   sys->depth = placeq(autom, sys, charges); /* create cubes, put in charges */
 
-  getrelations(sys);		/* Get all the prnts and kids for each cube. */
+  getrelations(sys);            /* Get all the prnts and kids for each cube. */
 
-  setPosition(sys);		/* Figures out position of cube center. */
+  setPosition(sys);             /* Figures out position of cube center. */
   indexkid(sys, sys->cubes[0][0][0][0], &qindex, &cindex); 
-				/* Index chgs and cubes. */
+                                /* Index chgs and cubes. */
 
 #if ADAPT == ON
   setExact(sys, multerms(sys->order)); /* Note cubes to be done exactly and
-					   determine the number of nonempty
-					   kids for each cube. */
+                                           determine the number of nonempty
+                                           kids for each cube. */
 #else
-  setExact(sys, 0);		/* Note cubes to be done exactly and
-					   determine the number of nonempty
-					   kids for each cube. */
+  setExact(sys, 0);             /* Note cubes to be done exactly and
+                                           determine the number of nonempty
+                                           kids for each cube. */
 #endif
 
-  getnbrs(sys);			/* Get all the nearest neighbors. At bot level
-				   add as nearest nbrs cubes in exact block. */
-  linkcubes(sys);		/* Make linked-lists of direct, multis, and
-				   locals to do at each level. */
-  set_vector_masks(sys);	/* set up sys->is_dummy and sys->is_dielec */
+  getnbrs(sys);                 /* Get all the nearest neighbors. At bot level
+                                   add as nearest nbrs cubes in exact block. */
+  linkcubes(sys);               /* Make linked-lists of direct, multis, and
+                                   locals to do at each level. */
+  set_vector_masks(sys);        /* set up sys->is_dummy and sys->is_dielec */
   setMaxq(sys);                 /* Calculates the max # chgs in cubes treated
-				   exactly, and over lowest level cubes. */
-  getAllInter(sys);		/* Get the interaction lists at all levels. */
+                                   exactly, and over lowest level cubes. */
+  getAllInter(sys);             /* Get the interaction lists at all levels. */
 
   return(sys);
 }
@@ -97,10 +105,7 @@ charge *charges;
   - this routine is still called to set automatic levels if ADAPT is OFF,
      ie even when the calculation is not adaptive, so results can be compared
 */
-static int placeq(flag, sys, charges)
-int flag;			/* ON => set depth automatically */
-ssystem *sys;
-charge *charges;
+static int placeq(int flag, ssystem *sys, char *charges)
 {
   int i, j, k, l, side, totalq, isexact, multerms(), depth;
   int xindex, yindex, zindex, limit = multerms(sys->order), compflag;
@@ -165,7 +170,7 @@ charge *charges;
   /* set up mask vector: is_dielec[i] = TRUE => panel i is on DIELEC or BOTH */
   CALLOC(sys->is_dielec, totalq+1, int, ON, AMSC);
 
-  if(flag == ON) {		/* set depth of partitions automatically */
+  if(flag == ON) {              /* set depth of partitions automatically */
     /* alloc spine of cube pntr array - leave enough room for depth = MAXDEP */
     CALLOC(cubes, MAXDEP+1, cube****, ON, AMSC); 
 
@@ -173,10 +178,10 @@ charge *charges;
     for(side = 1, i=0; i <= 2; side *= 2, i++) {
       CALLOC(cubes[i], side, cube***, ON, AMSC);
       for(j=0; j < side; j++) {
-	CALLOC(cubes[i][j], side, cube**, ON, AMSC);
-	for(k=0; k < side; k++) {
-	  CALLOC(cubes[i][j][k], side, cube*, ON, AMSC);
-	}
+        CALLOC(cubes[i][j], side, cube**, ON, AMSC);
+        for(k=0; k < side; k++) {
+          CALLOC(cubes[i][j][k], side, cube*, ON, AMSC);
+        }
       }
     }
     /* side /= 2; */
@@ -186,58 +191,58 @@ charge *charges;
     for(isexact = FALSE; isexact == FALSE; side *= 2, i++) {
 
       if(i > MAXDEP) {
-	fprintf(stderr, 
-		"placeq: out of cube pntr space - increase MAXDEP == %d\n", 
-		MAXDEP);
-	exit(0);
+        fprintf(stderr, 
+                "placeq: out of cube pntr space - increase MAXDEP == %d\n", 
+                MAXDEP);
+        exit(0);
       }
 
       length = (1.01 * length0)/side;
 
       CALLOC(cubes[i], side, cube***, OFF, AMSC);
       if(cubes[i] == NULL) {
-	fprintf(stderr, "placeq: %d levels set up\n", i-1);
-	exit(0);
+        fprintf(stderr, "placeq: %d levels set up\n", i-1);
+        exit(0);
       }
       for(j=0; j < side; j++) {
-	CALLOC(cubes[i][j], side, cube**, OFF, AMSC);
-	if(cubes[i][j] == NULL) {
-	  fprintf(stderr, "placeq: %d levels set up\n", i-1);
-	  exit(0);
-	}
-	for(k=0; k < side; k++) {
-	  CALLOC(cubes[i][j][k], side, cube*, OFF, AMSC);
-	  if(cubes[i][j][k] == NULL) {
-	    fprintf(stderr, "placeq: %d levels set up\n", i-1);
-	    exit(0);
-	  }
-	}
+        CALLOC(cubes[i][j], side, cube**, OFF, AMSC);
+        if(cubes[i][j] == NULL) {
+          fprintf(stderr, "placeq: %d levels set up\n", i-1);
+          exit(0);
+        }
+        for(k=0; k < side; k++) {
+          CALLOC(cubes[i][j][k], side, cube*, OFF, AMSC);
+          if(cubes[i][j][k] == NULL) {
+            fprintf(stderr, "placeq: %d levels set up\n", i-1);
+            exit(0);
+          }
+        }
       }
 
       /* Count the number of charges per cube and allocate if needed */
       for(nextq = charges; nextq != NULL; nextq = nextq->next) {
-	xindex = (nextq->x - minx) / length;
-	yindex = (nextq->y - miny) / length;
-	zindex = (nextq->z - minz) / length;
-	nextc = cubes[i][xindex][yindex][zindex];
-	if(nextc == NULL) {
-	  CALLOC(nextc, 1, cube, OFF, AMSC);
-	  if(nextc == NULL) {
-	    fprintf(stderr, "placeq: %d levels set up\n", i-1);
-	    exit(0);
-	  }
-	  cubes[i][xindex][yindex][zindex] = nextc;
-	  nextc->upnumvects = 1;
-	  CALLOC(nextc->upnumeles, 1, int, OFF, AMSC);
-	  if(nextc->upnumeles == NULL) {
-	    fprintf(stderr, "placeq: %d levels set up\n", i-1);
-	    exit(0);
-	  }
-	  nextc->upnumeles[0] = 1;
-	}
-	else {
-	  nextc->upnumeles[0]++;
-	}
+        xindex = (nextq->x - minx) / length;
+        yindex = (nextq->y - miny) / length;
+        zindex = (nextq->z - minz) / length;
+        nextc = cubes[i][xindex][yindex][zindex];
+        if(nextc == NULL) {
+          CALLOC(nextc, 1, cube, OFF, AMSC);
+          if(nextc == NULL) {
+            fprintf(stderr, "placeq: %d levels set up\n", i-1);
+            exit(0);
+          }
+          cubes[i][xindex][yindex][zindex] = nextc;
+          nextc->upnumvects = 1;
+          CALLOC(nextc->upnumeles, 1, int, OFF, AMSC);
+          if(nextc->upnumeles == NULL) {
+            fprintf(stderr, "placeq: %d levels set up\n", i-1);
+            exit(0);
+          }
+          nextc->upnumeles[0] = 1;
+        }
+        else {
+          nextc->upnumeles[0]++;
+        }
       }
 
       /* if the current lowest level is not exact, loop back until it is */
@@ -246,53 +251,53 @@ charge *charges;
       cubes_this_level = 0;
       exact_cubes_this_level = 0;
       for(j = 0; j < side; j++) {
-	for(k = 0; k < side; k++) {
-	  for(l = 0; l < side; l++) {
-	    if(cubes[i][j][k][l] != NULL) {
-	      if(cubes[i][j][k][l]->upnumeles[0] > limit) {
-		isexact = FALSE;
-	      }
-	      else exact_cubes_this_level++;
-	      cubes_this_level++;
-	    }
-	  }
-	}
+        for(k = 0; k < side; k++) {
+          for(l = 0; l < side; l++) {
+            if(cubes[i][j][k][l] != NULL) {
+              if(cubes[i][j][k][l]->upnumeles[0] > limit) {
+                isexact = FALSE;
+              }
+              else exact_cubes_this_level++;
+              cubes_this_level++;
+            }
+          }
+        }
       }
 
       /*    decide whether to go down another level by checking exact/ttl */
       exact_ratio = (double)exact_cubes_this_level/(double)cubes_this_level;
       if(exact_ratio > EXRTSH) 
-	  isexact = TRUE;      	/* set up to terminate level build loop */
+          isexact = TRUE;       /* set up to terminate level build loop */
       /* fprintf(stdout, "Level %d, %g%% exact\n", i, exact_ratio*100.0); */
 
       /* clean up cube structs if need to go down another level */
       if(isexact == FALSE) {
-	for(j = 0; j < side; j++) {
-	  for(k = 0; k < side; k++) {
-	    for(l = 0; l < side; l++) {
-	      if(cubes[i][j][k][l] != NULL) {
-		cubes[i][j][k][l]->upnumeles[0] = 0;
-		cubes[i][j][k][l]->upnumvects = 0;
-	      }
-	    }
-	  }
-	}
+        for(j = 0; j < side; j++) {
+          for(k = 0; k < side; k++) {
+            for(l = 0; l < side; l++) {
+              if(cubes[i][j][k][l] != NULL) {
+                cubes[i][j][k][l]->upnumeles[0] = 0;
+                cubes[i][j][k][l]->upnumvects = 0;
+              }
+            }
+          }
+        }
       }
     }
-    depth = i - 1;		/* the automatically set depth */
+    depth = i - 1;              /* the automatically set depth */
     side /= 2;
   }
-  else {			/* old code - uses sys->depth for depth */
+  else {                        /* old code - uses sys->depth for depth */
     /* Allocate the cubes, note calloc used because zeros everything. */
     depth = sys->depth;
     CALLOC(cubes, sys->depth+1, cube****, ON, AMSC);
     for(side = 1, i=0; i <= depth; side *= 2, i++) {
       CALLOC(cubes[i], side, cube***, ON, AMSC);
       for(j=0; j < side; j++) {
-	CALLOC(cubes[i][j], side, cube**, ON, AMSC);
-	for(k=0; k < side; k++) {
-	  CALLOC(cubes[i][j][k], side, cube*, ON, AMSC);
-	}
+        CALLOC(cubes[i][j], side, cube**, ON, AMSC);
+        for(k=0; k < side; k++) {
+          CALLOC(cubes[i][j][k], side, cube*, ON, AMSC);
+        }
       }
     }
     side /= 2;
@@ -305,14 +310,14 @@ charge *charges;
       zindex = (nextq->z - minz) / length;
       nextc = cubes[depth][xindex][yindex][zindex];
       if(nextc == NULL) {
-	CALLOC(nextc, 1, cube, ON, AMSC);
-	cubes[depth][xindex][yindex][zindex] = nextc;
-	nextc->upnumvects = 1;
-	CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
-	nextc->upnumeles[0] = 1;
+        CALLOC(nextc, 1, cube, ON, AMSC);
+        cubes[depth][xindex][yindex][zindex] = nextc;
+        nextc->upnumvects = 1;
+        CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
+        nextc->upnumeles[0] = 1;
       }
       else {
-	nextc->upnumeles[0]++;
+        nextc->upnumeles[0]++;
       }
     }
   }
@@ -326,12 +331,12 @@ charge *charges;
       for(l=0; l < side; l++) {
         nextc = sys->cubes[depth][j][k][l];
         if(nextc != NULL) {  /* Only fill out nonempty cubes. */
-	/* Allocate for the charge ptrs, and get q vector pointer. */
-	  CALLOC(nextc->chgs, nextc->upnumeles[0], charge*, ON, AMSC);
-	  CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
-	/* Zero the numchgs to use as index. */
-	  nextc->upnumeles[0] = 0;
-	}
+        /* Allocate for the charge ptrs, and get q vector pointer. */
+          CALLOC(nextc->chgs, nextc->upnumeles[0], charge*, ON, AMSC);
+          CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
+        /* Zero the numchgs to use as index. */
+          nextc->upnumeles[0] = 0;
+        }
       }
     }
   }
@@ -341,9 +346,9 @@ charge *charges;
 #if 1 == 0
     if(tilelength(nextq) > length) {
       fprintf(stderr,
-	      "\nplaceq: Warning, a panel is larger than the cube supposedly containing it\n");
+              "\nplaceq: Warning, a panel is larger than the cube supposedly containing it\n");
       fprintf(stderr,"  cube length = %g panel length = %g\n", 
-	      length, tilelength(nextq));
+              length, tilelength(nextq));
       /* disfchg(nextq); */
     }
 #endif
@@ -357,18 +362,18 @@ charge *charges;
       compq = nextc->chgs[i];
       if((compq->x == nextq->x) &&
          (compq->y == nextq->y) && (compq->z == nextq->z)) {
-	fprintf(stderr, "placeq: Warning, removing identical");
-	if(compq->shape == 3) fprintf(stderr, " triangular");
-	else if(compq->shape == 4) fprintf(stderr, " quadrilateral");
-	else fprintf(stderr, " illegal-shape");
-	fprintf(stderr, " panel\n  rmved ctr = (%g %g %g) surf = `%s'", 
-		compq->x, compq->y, compq->z, hack_path(compq->surf->name));
-	fprintf(stderr, " trans = (%g %g %g)\n", compq->surf->trans[0],
-		compq->surf->trans[1], compq->surf->trans[2]);
-	fprintf(stderr, "  saved ctr = (%g %g %g) surf = `%s'", 
-		nextq->x, nextq->y, nextq->z, hack_path(nextq->surf->name));
-	fprintf(stderr, " trans = (%g %g %g)\n", nextq->surf->trans[0],
-		nextq->surf->trans[1], nextq->surf->trans[2]);
+        fprintf(stderr, "placeq: Warning, removing identical");
+        if(compq->shape == 3) fprintf(stderr, " triangular");
+        else if(compq->shape == 4) fprintf(stderr, " quadrilateral");
+        else fprintf(stderr, " illegal-shape");
+        fprintf(stderr, " panel\n  rmved ctr = (%g %g %g) surf = `%s'", 
+                compq->x, compq->y, compq->z, hack_path(compq->surf->name));
+        fprintf(stderr, " trans = (%g %g %g)\n", compq->surf->trans[0],
+                compq->surf->trans[1], compq->surf->trans[2]);
+        fprintf(stderr, "  saved ctr = (%g %g %g) surf = `%s'", 
+                nextq->x, nextq->y, nextq->z, hack_path(nextq->surf->name));
+        fprintf(stderr, " trans = (%g %g %g)\n", nextq->surf->trans[0],
+                nextq->surf->trans[1], nextq->surf->trans[2]);
         /* Remove charge from linked list. */
         for(compq = charges; compq->next != nextq; compq = compq->next) {};
         compq->next = nextq->next;
@@ -385,9 +390,7 @@ charge *charges;
 /* 
 Place the charges in the cube structure. 
 */
-static placeqold(sys, charges)
-ssystem *sys;
-charge *charges;
+static void placeqold(ssystem *sys, char *charges)
 {
 double length;
 double minx, maxx, miny, maxy, minz, maxz, tilelength();
@@ -454,12 +457,12 @@ cube *nextc, *****cubes = sys->cubes;
       for(l=0; l < side; l++) {
         nextc = sys->cubes[depth][j][k][l];
         if(nextc != NULL) {  /* Only fill out nonempty cubes. */
-	/* Allocate for the charge ptrs, and get q vector pointer. */
-	  CALLOC(nextc->chgs, nextc->upnumeles[0], charge*, ON, AMSC);
-	  CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
-	/* Zero the numchgs to use as index. */
-	  nextc->upnumeles[0] = 0;
-	}
+        /* Allocate for the charge ptrs, and get q vector pointer. */
+          CALLOC(nextc->chgs, nextc->upnumeles[0], charge*, ON, AMSC);
+          CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
+        /* Zero the numchgs to use as index. */
+          nextc->upnumeles[0] = 0;
+        }
       }
     }
   }
@@ -484,40 +487,39 @@ cube *nextc, *****cubes = sys->cubes;
 /*
 GetRelations allocates parents links the children. 
 */
-getrelations(sys)
-ssystem *sys;
+void getrelations(ssystem *sys)
 {
 cube *nextc, *parent, *****cubes = sys->cubes;
 int i, j, k, l, side;
   for(i = sys->depth, side = sys->side; i >= 0; i--, side /= 2) {
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
+        for(l=0; l < side; l++) {
           nextc = cubes[i][j][k][l];
-	  if(nextc != NULL) {
-	/* Get the parents and children pointers of nonempty cubes. */
-	    if(i < sys->depth) {
-	      nextc->numkids = 8; /* all cubes, even empties, are counted */
-	      CALLOC(nextc->kids, nextc->numkids, cube*, ON, AMSC);
-	      nextc->kids[0] = cubes[i+1][2*j][2*k][2*l]; /* empties get */
-	      nextc->kids[1] = cubes[i+1][2*j][2*k][2*l+1]; /* null pointers */
-	      nextc->kids[2] = cubes[i+1][2*j][2*k+1][2*l];
-	      nextc->kids[3] = cubes[i+1][2*j][2*k+1][2*l+1];
-	      nextc->kids[4] = cubes[i+1][2*j+1][2*k][2*l];
-	      nextc->kids[5] = cubes[i+1][2*j+1][2*k][2*l+1];
-	      nextc->kids[6] = cubes[i+1][2*j+1][2*k+1][2*l];
-	      nextc->kids[7] = cubes[i+1][2*j+1][2*k+1][2*l+1];
-	    }
-	    if(i > 0) {
-	      parent = cubes[i-1][j/2][k/2][l/2];
-	      if(parent == NULL) {
-		CALLOC(parent, 1, cube, ON, AMSC);
-		cubes[i-1][j/2][k/2][l/2] = parent;
-	      }
-	      nextc->parent = parent;
-	    }
-	  }
-	}
+          if(nextc != NULL) {
+        /* Get the parents and children pointers of nonempty cubes. */
+            if(i < sys->depth) {
+              nextc->numkids = 8; /* all cubes, even empties, are counted */
+              CALLOC(nextc->kids, nextc->numkids, cube*, ON, AMSC);
+              nextc->kids[0] = cubes[i+1][2*j][2*k][2*l]; /* empties get */
+              nextc->kids[1] = cubes[i+1][2*j][2*k][2*l+1]; /* null pointers */
+              nextc->kids[2] = cubes[i+1][2*j][2*k+1][2*l];
+              nextc->kids[3] = cubes[i+1][2*j][2*k+1][2*l+1];
+              nextc->kids[4] = cubes[i+1][2*j+1][2*k][2*l];
+              nextc->kids[5] = cubes[i+1][2*j+1][2*k][2*l+1];
+              nextc->kids[6] = cubes[i+1][2*j+1][2*k+1][2*l];
+              nextc->kids[7] = cubes[i+1][2*j+1][2*k+1][2*l+1];
+            }
+            if(i > 0) {
+              parent = cubes[i-1][j/2][k/2][l/2];
+              if(parent == NULL) {
+                CALLOC(parent, 1, cube, ON, AMSC);
+                cubes[i-1][j/2][k/2][l/2] = parent;
+              }
+              nextc->parent = parent;
+            }
+          }
+        }
       }
     }
   }
@@ -526,8 +528,7 @@ int i, j, k, l, side;
 /*
 Set the position coordinates of the cubes.
 */
-setPosition(sys)
-ssystem *sys;
+void setPosition(ssystem *sys)
 {
 int i, j, k, l;
 int side = sys->side;
@@ -538,18 +539,18 @@ cube *nextc;
   for(i=sys->depth; i >= 0; i--, side /= 2, length *= 2.0) {
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
-	  nextc = sys->cubes[i][j][k][l];
-	  if(nextc != NULL) {
-	    nextc->x = length * ((double) j + 0.5) + sys->minx;
-	    nextc->y = length * ((double) k + 0.5) + sys->miny;
-	    nextc->z = length * ((double) l + 0.5) + sys->minz;
-	    nextc->level = i;
-	    nextc->j = j;
-	    nextc->k = k;
-	    nextc->l = l;
-	  }
-	}
+        for(l=0; l < side; l++) {
+          nextc = sys->cubes[i][j][k][l];
+          if(nextc != NULL) {
+            nextc->x = length * ((double) j + 0.5) + sys->minx;
+            nextc->y = length * ((double) k + 0.5) + sys->miny;
+            nextc->z = length * ((double) l + 0.5) + sys->minz;
+            nextc->level = i;
+            nextc->j = j;
+            nextc->k = k;
+            nextc->l = l;
+          }
+        }
       }
     }
   }
@@ -563,10 +564,7 @@ psuedo-adaptive scheme.  Also get the pointer to the appropriate section
 of the charge and potential vector.  Uses the eval vector for the potential
 coeffs at the lowest level.  Also index the lowest level cubes.
 */
-static indexkid(sys, dad, pqindex, pcindex)
-ssystem *sys;
-cube *dad;
-int *pqindex, *pcindex;
+static void indexkid(ssystem *sys, cube *dad, int *pqindex, int *pcindex)
 {
   int i;
   
@@ -580,12 +578,12 @@ int *pqindex, *pcindex;
       dad->is_dielec = &(sys->is_dielec[*pqindex]);
       dad->index = (*pcindex)++;
       for(i=0; i < dad->upnumeles[0]; i++) {
-	(dad->chgs[i])->index = (*pqindex)++;
+        (dad->chgs[i])->index = (*pqindex)++;
       }
     }
     else {
       for(i=0; i < dad->numkids; i++) {
-	indexkid(sys, dad->kids[i], pqindex, pcindex);
+        indexkid(sys, dad->kids[i], pqindex, pcindex);
       }
     }
   }
@@ -601,9 +599,7 @@ potential vector.  Otherwise, the number of nonzero kids is counted
 and put in upnumvects as usual.  
 */
 /* added 30Mar91: provisions for loc_exact and mul_exact */
-setExact(sys, numterms)
-ssystem *sys;
-int numterms;
+void setExact(ssystem *sys, int numterms)
 {
 int i, j, k, l, m, n;
 int side = sys->side;
@@ -615,98 +611,98 @@ int all_mul_exact, all_loc_exact, p, num_real_panels;
   for(i=depth; i > 0; i--, side /= 2) {
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
+        for(l=0; l < side; l++) {
           nc = cubes[i][j][k][l];
-	  if(nc != NULL) {
-	    if(i == depth) {
-	      ASSERT(nc->upnumvects != 0);
-	      /* count the number of true panels in this cube */
-	      num_real_panels = 0;
-	      for(p = 0; p < nc->upnumeles[0]; p++) {
-		if(!nc->chgs[p]->dummy) num_real_panels++;
-	      }
-	      if(num_real_panels <= numterms) {
-		nc->mul_exact = TRUE;
-		nc->multisize = nc->upnumeles[0];
-	      }
-	      else {
-		nc->mul_exact = FALSE;
-		nc->multisize = multerms(sys->order);
-	      }
-	      if(nc->upnumeles[0] <= numterms) {
-		nc->loc_exact = TRUE;
-		nc->localsize = nc->upnumeles[0];
-	      }
-	      else {
-		nc->loc_exact = FALSE;
-		nc->localsize = multerms(sys->order); 
-	      }
-	    }
-	    else {  
-	      /* Count the number of charges and nonempty kids. */
-	      all_loc_exact = all_mul_exact = TRUE;
-	      num_eval_pnts = numchgs = nc->upnumvects = 0;
-	      for(m = 0; m < nc->numkids; m++) {
-		nkid = nc->kids[m];
-		if(nkid != NULL) {
-		  nc->upnumvects += 1;
-		  if(nkid->mul_exact == FALSE) all_mul_exact = FALSE;
-		  else {
-		    num_eval_pnts += nkid->upnumeles[0];
-		    for(p = 0; p < nkid->upnumeles[0]; p++) {
-		      if(!nkid->chgs[p]->dummy) numchgs++;
-		    }
-		  }
-		  if(nkid->loc_exact == FALSE) all_loc_exact = FALSE;
-		}
-	      }
-	      /* If all nonempty kids exact, # chgs <= # terms, mark exact, 
-		 copy chgs, and promote pointers to charge and potential.  
-		 Note EXPLOITS special ordering of the pot and charge vectors.
-		 */
-	      if(!all_mul_exact || (numchgs > numterms)) { /* multi req'd */
-		nc->mul_exact = FALSE;
-		nc->multisize = multerms(sys->order);
-	      }
-	      else if(all_mul_exact && (numchgs <= numterms)) { 
-		nc->mul_exact = TRUE;
-		nc->upnumvects = 1;
-		CALLOC(nc->upvects, 1, double*, ON, AMSC);
-		CALLOC(nc->upnumeles, 1, int, ON, AMSC);
-		nc->upnumeles[0] = num_eval_pnts; /* was numchgs 30Mar91 */
-		nc->multisize = num_eval_pnts; /* was numchgs */
-		CALLOC(nc->chgs, num_eval_pnts, charge*, ON, AMSC);
-		num_eval_pnts = 0;
-		for(m=0, first=TRUE; m < nc->numkids; m++) {
-		  nkid = nc->kids[m]; 
-		  if(nkid != NULL) {
-		    if(first == TRUE) {
-		      nc->upvects[0] = nkid->upvects[0];
-		      if(nc->nbr_is_dummy == NULL)
-			  CALLOC(nc->nbr_is_dummy, 1, int*, ON, AMSC);
-		      nc->nbr_is_dummy[0] = nkid->nbr_is_dummy[0];
-		      first = FALSE;
-		    }
-		    for(n=0; n < nkid->upnumeles[0]; n++) {
-		      nc->chgs[num_eval_pnts++] = nkid->chgs[n];
-		    }
-		  }
-		}
-	      }
+          if(nc != NULL) {
+            if(i == depth) {
+              ASSERT(nc->upnumvects != 0);
+              /* count the number of true panels in this cube */
+              num_real_panels = 0;
+              for(p = 0; p < nc->upnumeles[0]; p++) {
+                if(!nc->chgs[p]->dummy) num_real_panels++;
+              }
+              if(num_real_panels <= numterms) {
+                nc->mul_exact = TRUE;
+                nc->multisize = nc->upnumeles[0];
+              }
+              else {
+                nc->mul_exact = FALSE;
+                nc->multisize = multerms(sys->order);
+              }
+              if(nc->upnumeles[0] <= numterms) {
+                nc->loc_exact = TRUE;
+                nc->localsize = nc->upnumeles[0];
+              }
+              else {
+                nc->loc_exact = FALSE;
+                nc->localsize = multerms(sys->order); 
+              }
+            }
+            else {  
+              /* Count the number of charges and nonempty kids. */
+              all_loc_exact = all_mul_exact = TRUE;
+              num_eval_pnts = numchgs = nc->upnumvects = 0;
+              for(m = 0; m < nc->numkids; m++) {
+                nkid = nc->kids[m];
+                if(nkid != NULL) {
+                  nc->upnumvects += 1;
+                  if(nkid->mul_exact == FALSE) all_mul_exact = FALSE;
+                  else {
+                    num_eval_pnts += nkid->upnumeles[0];
+                    for(p = 0; p < nkid->upnumeles[0]; p++) {
+                      if(!nkid->chgs[p]->dummy) numchgs++;
+                    }
+                  }
+                  if(nkid->loc_exact == FALSE) all_loc_exact = FALSE;
+                }
+              }
+              /* If all nonempty kids exact, # chgs <= # terms, mark exact, 
+                 copy chgs, and promote pointers to charge and potential.  
+                 Note EXPLOITS special ordering of the pot and charge vectors.
+                 */
+              if(!all_mul_exact || (numchgs > numterms)) { /* multi req'd */
+                nc->mul_exact = FALSE;
+                nc->multisize = multerms(sys->order);
+              }
+              else if(all_mul_exact && (numchgs <= numterms)) { 
+                nc->mul_exact = TRUE;
+                nc->upnumvects = 1;
+                CALLOC(nc->upvects, 1, double*, ON, AMSC);
+                CALLOC(nc->upnumeles, 1, int, ON, AMSC);
+                nc->upnumeles[0] = num_eval_pnts; /* was numchgs 30Mar91 */
+                nc->multisize = num_eval_pnts; /* was numchgs */
+                CALLOC(nc->chgs, num_eval_pnts, charge*, ON, AMSC);
+                num_eval_pnts = 0;
+                for(m=0, first=TRUE; m < nc->numkids; m++) {
+                  nkid = nc->kids[m]; 
+                  if(nkid != NULL) {
+                    if(first == TRUE) {
+                      nc->upvects[0] = nkid->upvects[0];
+                      if(nc->nbr_is_dummy == NULL)
+                          CALLOC(nc->nbr_is_dummy, 1, int*, ON, AMSC);
+                      nc->nbr_is_dummy[0] = nkid->nbr_is_dummy[0];
+                      first = FALSE;
+                    }
+                    for(n=0; n < nkid->upnumeles[0]; n++) {
+                      nc->chgs[num_eval_pnts++] = nkid->chgs[n];
+                    }
+                  }
+                }
+              }
 
-	      /* do the same for local expansion */
-	      /* if local exact, must be multi exact => no promotion reqd */
-	      if(!all_loc_exact || (num_eval_pnts > numterms)) { /* le req'd */
-		nc->loc_exact = FALSE;
-		nc->localsize = multerms(sys->order);
-	      }
-	      else if(all_loc_exact && (num_eval_pnts <= numterms)) { 
-		nc->loc_exact = TRUE;
-		nc->localsize = num_eval_pnts;
-	      }
-	    }
-	  }
-	}
+              /* do the same for local expansion */
+              /* if local exact, must be multi exact => no promotion reqd */
+              if(!all_loc_exact || (num_eval_pnts > numterms)) { /* le req'd */
+                nc->loc_exact = FALSE;
+                nc->localsize = multerms(sys->order);
+              }
+              else if(all_loc_exact && (num_eval_pnts <= numterms)) { 
+                nc->loc_exact = TRUE;
+                nc->localsize = num_eval_pnts;
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -717,8 +713,7 @@ int all_mul_exact, all_loc_exact, p, num_real_panels;
 Find all the nearest neighbors.
 At the bottom level, get neighbors due to a parents being exact.
 */
-static getnbrs(sys)
-ssystem *sys;
+static void getnbrs(ssystem *sys)
 {
 cube *nc, *np, *****cubes = sys->cubes;
 int depth = sys->depth;
@@ -736,35 +731,35 @@ being exact.
   for(i = 1, side = 2; i <= depth; i++, side *= 2) {
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
-	  nc = cubes[i][j][k][l];
-	  if(nc != NULL) {
-	    /* Find sidelength of exact cube. */
-	    for(es=1, np=nc->parent; np->loc_exact==TRUE; 
-		np = np->parent, es *= 2); /* exact -> loc_exact 1Apr91 */
-	  
-	    /* Stack up the nearest nbrs plus nbrs in exact cube. */
-	    numnbrs = 0;
-	    for(m = MIN((j-NNBRS), es * (j/es));
-		m < MAX((j+NNBRS+1), es * (1 + (j / es))); m++) {
-	      for(n = MIN((k-NNBRS), es * (k/es));
-		  n < MAX((k+NNBRS+1), es * (1 + (k/es))); n++) {
-		for(p = MIN((l-NNBRS), es * (l/es));
-		    p < MAX((l+NNBRS+1), es * (1+(l/es))); p++) {
-		  if( (m >= 0) && (n >= 0) && (p >= 0)
-		     && (m < side) && (n < side) && (p < side)
-		     && ((m != j) || (n != k) || (p != l))
-		     && (cubes[i][m][n][p] != NULL)) {
-		    cstack[numnbrs++] = cubes[i][m][n][p];
-		  }
-		}
-	      }
-	    }
-	    nc->numnbrs = numnbrs;
-	    if(nc->numnbrs > 0) CALLOC(nc->nbrs, numnbrs, cube*, ON, AMSC);
-	    for(m=numnbrs-1; m >= 0; m--) nc->nbrs[m] = cstack[m];
-	  }
-	}
+        for(l=0; l < side; l++) {
+          nc = cubes[i][j][k][l];
+          if(nc != NULL) {
+            /* Find sidelength of exact cube. */
+            for(es=1, np=nc->parent; np->loc_exact==TRUE; 
+                np = np->parent, es *= 2); /* exact -> loc_exact 1Apr91 */
+          
+            /* Stack up the nearest nbrs plus nbrs in exact cube. */
+            numnbrs = 0;
+            for(m = MIN((j-NNBRS), es * (j/es));
+                m < MAX((j+NNBRS+1), es * (1 + (j / es))); m++) {
+              for(n = MIN((k-NNBRS), es * (k/es));
+                  n < MAX((k+NNBRS+1), es * (1 + (k/es))); n++) {
+                for(p = MIN((l-NNBRS), es * (l/es));
+                    p < MAX((l+NNBRS+1), es * (1+(l/es))); p++) {
+                  if( (m >= 0) && (n >= 0) && (p >= 0)
+                     && (m < side) && (n < side) && (p < side)
+                     && ((m != j) || (n != k) || (p != l))
+                     && (cubes[i][m][n][p] != NULL)) {
+                    cstack[numnbrs++] = cubes[i][m][n][p];
+                  }
+                }
+              }
+            }
+            nc->numnbrs = numnbrs;
+            if(nc->numnbrs > 0) CALLOC(nc->nbrs, numnbrs, cube*, ON, AMSC);
+            for(m=numnbrs-1; m >= 0; m--) nc->nbrs[m] = cstack[m];
+          }
+        }
       }
     }
   }
@@ -773,9 +768,7 @@ being exact.
 /*
   returns the number of charges in the lowest level cubes contained in "cp"
 */
-int cntDwnwdChg(cp, depth)
-int depth;			/* number of lowest level */
-cube *cp;
+int cntDwnwdChg(cube *cp, int depth)
 {
   int i;
   int cnt;
@@ -793,8 +786,7 @@ for the cubes requiring local expansion work, one for the cubes requiring
 direct methods and one for cubes with potential evaluation points. 
 Note, upnumvects and exact must be set!!!
 */
-static linkcubes(sys)
-ssystem *sys;
+static void linkcubes(ssystem *sys)
 {
   cube *nc, **plnc, **pdnc, **pmnc, *****cubes = sys->cubes;
   int i, j, k, l, cnt = 0;
@@ -810,36 +802,36 @@ ssystem *sys;
     plnc = &(sys->locallist[i]);
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
-	  nc = cubes[i][j][k][l];
-	  if(nc != NULL) {
-	    /* Do the multi expansion if the cube is not treated exactly. */
-	    if(i > 1) {		/* no multis over the root cube and its kids */
-	      if(nc->mul_exact == FALSE) { /* exact -> mul_exact 1Apr91 */
-		CALLOC(nc->multi, numterms, double, ON, AMSC);
-		*pmnc = nc;
-		pmnc = &(nc->mnext);
-	      }
-	    }
-	    
-	    /* Do the local expansion on a cube if it has chgs inside, and it's
-	     not exact and not the root (lev 0) nor one of its kids (lev 1). */
-	    if(i > 1) {		/* no locals with level 0 or 1 */
-	      if(nc->loc_exact == FALSE) { /* exact -> loc_exact 1Apr91 */
-		*plnc = nc;
-		plnc = &(nc->lnext);
-		CALLOC(nc->local, numterms, double, ON, AMSC);
-	      }
-	    }
+        for(l=0; l < side; l++) {
+          nc = cubes[i][j][k][l];
+          if(nc != NULL) {
+            /* Do the multi expansion if the cube is not treated exactly. */
+            if(i > 1) {         /* no multis over the root cube and its kids */
+              if(nc->mul_exact == FALSE) { /* exact -> mul_exact 1Apr91 */
+                CALLOC(nc->multi, numterms, double, ON, AMSC);
+                *pmnc = nc;
+                pmnc = &(nc->mnext);
+              }
+            }
+            
+            /* Do the local expansion on a cube if it has chgs inside, and it's
+             not exact and not the root (lev 0) nor one of its kids (lev 1). */
+            if(i > 1) {         /* no locals with level 0 or 1 */
+              if(nc->loc_exact == FALSE) { /* exact -> loc_exact 1Apr91 */
+                *plnc = nc;
+                plnc = &(nc->lnext);
+                CALLOC(nc->local, numterms, double, ON, AMSC);
+              }
+            }
 
-	    /* Add to direct list if at bot level and not empty. */
-	    if(i == depth) { 
-	      *pdnc = nc;  /* For the direct piece, note an index. */
-	      pdnc = &(nc->dnext);
-	      nc->dindex = dindex++;
-	    }
-	  }
-	}
+            /* Add to direct list if at bot level and not empty. */
+            if(i == depth) { 
+              *pdnc = nc;  /* For the direct piece, note an index. */
+              pdnc = &(nc->dnext);
+              nc->dindex = dindex++;
+            }
+          }
+        }
       }
     }
   }
@@ -848,8 +840,7 @@ ssystem *sys;
 /*
 Determine maximum number of chgs contained in a single cube.
 */
-static setMaxq(sys)
-ssystem *sys;
+static void setMaxq(ssystem *sys)
 {
   int i, j, k, l, side, p, kids_are_exact, all_null, depth = sys->depth;
   int mul_maxq, mul_maxlq, loc_maxq, loc_maxlq, num_chgs, real_panel_cnt;
@@ -859,58 +850,58 @@ ssystem *sys;
   for(i = 1, side = 2; i <= depth; i++, side *= 2) {
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
-	  nc = cubes[i][j][k][l];
-	  if(nc != NULL) {
-	    if(nc->mul_exact == TRUE) {
-	      num_chgs = 0;
-	      for(p = 0; p < nc->upnumeles[0]; p++) {
-		if(!nc->nbr_is_dummy[0][p]) num_chgs++;
-	      }
-	      mul_maxq = MAX(mul_maxq, num_chgs);
-	      if(i == depth) mul_maxlq = MAX(mul_maxlq, num_chgs); 
-	    }
-	    if(nc->loc_exact == TRUE) {
-	      loc_maxq = MAX(loc_maxq, nc->upnumeles[0]);
-	      if(i == depth) loc_maxlq = MAX(loc_maxlq,nc->upnumeles[0]); 
-	    }
-	  }
-	}
+        for(l=0; l < side; l++) {
+          nc = cubes[i][j][k][l];
+          if(nc != NULL) {
+            if(nc->mul_exact == TRUE) {
+              num_chgs = 0;
+              for(p = 0; p < nc->upnumeles[0]; p++) {
+                if(!nc->nbr_is_dummy[0][p]) num_chgs++;
+              }
+              mul_maxq = MAX(mul_maxq, num_chgs);
+              if(i == depth) mul_maxlq = MAX(mul_maxlq, num_chgs); 
+            }
+            if(nc->loc_exact == TRUE) {
+              loc_maxq = MAX(loc_maxq, nc->upnumeles[0]);
+              if(i == depth) loc_maxlq = MAX(loc_maxlq,nc->upnumeles[0]); 
+            }
+          }
+        }
       }
     }
   }
-  sys->loc_maxq = loc_maxq;	/* max evaluation points, over all loc_exact */
-  sys->loc_maxlq = loc_maxlq;	/* max evaluation pnts, over lowest level */
-  sys->mul_maxq = mul_maxq;	/* max panels, over all mul_exact cubes */
-  sys->mul_maxlq = mul_maxlq;	/* max panels, over lowest level cubes */
+  sys->loc_maxq = loc_maxq;     /* max evaluation points, over all loc_exact */
+  sys->loc_maxlq = loc_maxlq;   /* max evaluation pnts, over lowest level */
+  sys->mul_maxq = mul_maxq;     /* max panels, over all mul_exact cubes */
+  sys->mul_maxlq = mul_maxlq;   /* max panels, over lowest level cubes */
 
   /* find the maximum #panels in all non-exact cubes w/exact (or no) kids */
   sys->max_panel = 0;
   for(j = 2; j <= depth; j++) {
     for(nc = sys->multilist[j]; nc != NULL; nc = nc->mnext) {
       if(nc->level == depth) {
-	real_panel_cnt = 0;
-	for(i = 0; i < nc->upnumeles[0]; i++) {
-	  if(!nc->nbr_is_dummy[0][i]) real_panel_cnt++;
-	}
-	sys->max_panel = MAX(sys->max_panel, real_panel_cnt);
+        real_panel_cnt = 0;
+        for(i = 0; i < nc->upnumeles[0]; i++) {
+          if(!nc->nbr_is_dummy[0][i]) real_panel_cnt++;
+        }
+        sys->max_panel = MAX(sys->max_panel, real_panel_cnt);
       }
       else {
-	kids_are_exact = all_null = TRUE;
-	real_panel_cnt = 0;
-	for(i = 0; i < nc->numkids && kids_are_exact; i++) {
-	  if(nc->kids[i] == NULL) continue;
-	  all_null = FALSE;
-	  if(!nc->kids[i]->mul_exact) kids_are_exact = FALSE;
-	  else {		/* count real panels */
-	    for(l = 0; l < nc->kids[i]->upnumeles[0]; l++) {
-	      if(!((nc->kids[i]->nbr_is_dummy[0])[l])) real_panel_cnt++;
-	    }
-	  }
-	}
-	if(kids_are_exact && !all_null) {
-	  sys->max_panel = MAX(sys->max_panel, real_panel_cnt);
-	}
+        kids_are_exact = all_null = TRUE;
+        real_panel_cnt = 0;
+        for(i = 0; i < nc->numkids && kids_are_exact; i++) {
+          if(nc->kids[i] == NULL) continue;
+          all_null = FALSE;
+          if(!nc->kids[i]->mul_exact) kids_are_exact = FALSE;
+          else {                /* count real panels */
+            for(l = 0; l < nc->kids[i]->upnumeles[0]; l++) {
+              if(!((nc->kids[i]->nbr_is_dummy[0])[l])) real_panel_cnt++;
+            }
+          }
+        }
+        if(kids_are_exact && !all_null) {
+          sys->max_panel = MAX(sys->max_panel, real_panel_cnt);
+        }
       }
     }
   }
@@ -920,20 +911,20 @@ ssystem *sys;
   for(j = 2; j <= depth; j++) {
     for(nc = sys->locallist[j]; nc != NULL; nc = nc->lnext) {
       if(nc->level == depth) {
-	sys->max_eval_pnt = MAX(sys->max_eval_pnt, nc->upnumeles[0]);
+        sys->max_eval_pnt = MAX(sys->max_eval_pnt, nc->upnumeles[0]);
       }
       else {
-	kids_are_exact = all_null = TRUE;
-	real_panel_cnt = 0;
-	for(i = 0; i < nc->numkids && kids_are_exact; i++) {
-	  if(nc->kids[i] == NULL) continue;
-	  all_null = FALSE;
-	  if(!nc->kids[i]->loc_exact) kids_are_exact = FALSE;
-	  else real_panel_cnt += nc->kids[i]->upnumeles[0];
-	}
+        kids_are_exact = all_null = TRUE;
+        real_panel_cnt = 0;
+        for(i = 0; i < nc->numkids && kids_are_exact; i++) {
+          if(nc->kids[i] == NULL) continue;
+          all_null = FALSE;
+          if(!nc->kids[i]->loc_exact) kids_are_exact = FALSE;
+          else real_panel_cnt += nc->kids[i]->upnumeles[0];
+        }
       }
       if(kids_are_exact && !all_null)
-	  sys->max_eval_pnt = MAX(sys->max_eval_pnt, real_panel_cnt);
+          sys->max_eval_pnt = MAX(sys->max_eval_pnt, real_panel_cnt);
     }
   }
 }
@@ -941,9 +932,7 @@ ssystem *sys;
 /* 
   markup sets the flag to "flag" in the child and its nearest nbrs
 */
-static markUp(child, flag)
-cube *child;
-int flag;
+static void markUp(cube *child, int flag)
 {
   int i,j;
   cube *nc, *np;
@@ -959,13 +948,12 @@ int flag;
    for cube "child", excluding only empty cubes
   -interaction list pointer is saved in the interList cube struct field
 */
-static getInter(child)
-cube *child;
+static int getInter(cube *child)
 {
   int i, j, vects, usekids, lc, jc, kc, ln, jn, kn;
   int numnbr = (child->parent)->numnbrs; /* number of neighbors */
   cube **nbrc = (child->parent)->nbrs; /* list of neighbor pointers */
-  cube *sib;			/* pointer to sibling (same level as child) */
+  cube *sib;                    /* pointer to sibling (same level as child) */
   cube **pstack = &(cstack[0]); /* temporary storage pointer */
 
   /* mark the child cube and all its neighbors */
@@ -982,7 +970,7 @@ cube *child;
     /* ...and it's really not a 1st nrst nbr of the parent 
        - this stops parent-sized cubes from getting into the ilist
          when they have empty child-sized cubes that are 2nd or 1st
-	 nrst nbrs of the child cube 
+         nrst nbrs of the child cube 
        - should work with NNBRS = 1 (never allows parent-sized in list)
          and NNBRS > 2 (but cannot allow greater than parent-sized)
        (29May90) */
@@ -1000,17 +988,17 @@ cube *child;
       *pstack = nbrc[i];
       pstack++;
     }
-#else				/* USE THIS PART FOR TESTING ONLY */
+#else                           /* USE THIS PART FOR TESTING ONLY */
     if(RADINTER && (usekids == FALSE)) { /* PRODUCES INCORRECT ILISTS!!! */
       *pstack = nbrc[i];
       pstack++;
     }
 #endif
     else for(j = 0; j < nbrc[i]->numkids; j++) { /* use nbr's kids. */
-      sib = (nbrc[i]->kids)[j];	/* get sib of child cube of interest */
+      sib = (nbrc[i]->kids)[j]; /* get sib of child cube of interest */
       if((sib != NULL) && (sib->flag == FALSE)) { 
-	*pstack = sib;
-	pstack++;
+        *pstack = sib;
+        pstack++;
       }
     }
   }
@@ -1023,24 +1011,23 @@ cube *child;
   if(vects > 0) CALLOC(child->interList, vects, cube*, ON, AMSC);
   for(j = 0; j < vects; j++) child->interList[j] = cstack[j];
 
-  return(vects);		/* return number of interaction elements */
+  return(vects);                /* return number of interaction elements */
 }
 
 /*
   generates explicit, true interaction lists for all non-empty cubes w/lev > 1
 */
-static getAllInter(sys)
-ssystem *sys;
+static void getAllInter(ssystem *sys)
 {
   int i, j, k, l, side, depth = sys->depth;
   cube *nc, *****cubes = sys->cubes;
   for(i = 2, side = 4; i <= depth; i++, side *= 2) {
-    for(j=0; j < side; j++) {	/* loop through all cubes at levels > 1 */
+    for(j=0; j < side; j++) {   /* loop through all cubes at levels > 1 */
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
-	  nc = cubes[i][j][k][l];
-	  if(nc != NULL) getInter(nc);
-	}
+        for(l=0; l < side; l++) {
+          nc = cubes[i][j][k][l];
+          if(nc != NULL) getInter(nc);
+        }
       }
     }
   }
@@ -1051,8 +1038,7 @@ ssystem *sys;
   - mask vectors are redundant (could read flags in charge struct) 
   - done for speed in potential eval loop
 */
-static set_vector_masks(sys)
-ssystem *sys;
+static void set_vector_masks(ssystem *sys)
 {
   int i;
   cube *cp;
@@ -1060,9 +1046,9 @@ ssystem *sys;
   for(cp = sys->directlist; cp != NULL; cp = cp->dnext) {
     for(i = 0; i < cp->upnumeles[0]; i++) {
       if(!(cp->nbr_is_dummy[0][i] = cp->chgs[i]->dummy))
-	  cp->is_dielec[i] = 
-	      (cp->chgs[i]->surf->type == DIELEC 
-	       || cp->chgs[i]->surf->type == BOTH);
+          cp->is_dielec[i] = 
+              (cp->chgs[i]->surf->type == DIELEC 
+               || cp->chgs[i]->surf->type == BOTH);
     }
   }
 

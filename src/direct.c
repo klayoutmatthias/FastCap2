@@ -389,9 +389,7 @@ int size, *is_dummy, exp_rows, comp_size;
 Checks to see if the matrix has the M-matrix sign pattern and if
 it is diagonally dominant. 
 */
-matcheck(mat, rows, size)
-double **mat;
-int rows, size;
+void matcheck(double **mat, int rows, int size)
 {
   double rowsum;
   int i, j;
@@ -414,10 +412,7 @@ int rows, size;
 }
 
 
-matlabDump(mat, size, name)
-double **mat;
-int size;
-char *name;
+void matlabDump(double **mat, int size, char *name)
 {
 FILE *foo;
 int i,j;

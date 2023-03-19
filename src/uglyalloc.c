@@ -96,14 +96,13 @@ static unsigned int sizeofHDR = sizeof(HEADER);
   asks operating system for more memory which is added to the top block
   - memory not zeroed out
 */
-static HEADER *mocore(nu)
-unsigned int nu;
+static HEADER *mocore(unsigned int nu)
 {
   char *sbrk();
   char *cp;
 
   cp = sbrk(nu*sizeofHDR);
-  if((int)cp == -1) return(NULL);
+  if(cp == (void *)-1) return(NULL);
   return((HEADER *)cp);
 }
 
@@ -114,8 +113,7 @@ unsigned int nu;
   - ultimately uses mocore(), since no frees are done (sbrk() zeros added
     memory) this allocator performs like calloc() w/no explicit assigns to 0
 */
-char *ualloc(nbytes)
-unsigned int nbytes;
+char *ualloc(unsigned int nbytes)
 {
   HEADER *mocore();
   HEADER *p, *q;
@@ -268,8 +266,7 @@ void ualloc_verify()
         memory lost in each header struct (a problem with many small things)
   - if base == NULL (not using ugly allocator), final break value is printed
 */
-void uallocEfcy(memcount)
-long memcount;
+void uallocEfcy(long memcount)
 {
 #if UGDEBG == 2
   HEADER *p;

@@ -305,7 +305,7 @@ set up and that the potential vector has been zeroed.  ARBITRARY
 VECTORS CAN NOT BE USED!
 */
 /* ultimately should not need to pass in chglist after E field rtn is fixed */
-oldcomputePsi(sys, chglist)
+void oldcomputePsi(sys, chglist)
 ssystem *sys;
 charge *chglist;
 {
@@ -641,7 +641,7 @@ charge and potential have already been set up and that the potential
 vector has been zeroed.  ARBITRARY VECTORS CAN NOT BE USED.
 */
 
-computePsi(sys, q, p, size, chglist)
+void computePsi(sys, q, p, size, chglist)
 ssystem *sys;
 double *q, *p;
 int size;

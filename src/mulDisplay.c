@@ -36,22 +36,23 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
 
-disExtrasimpcube(pc)
-cube *pc;
+void dismat(double **mat, int rows, int cols);
+void dischg(charge *pq);
+void disfchg(charge *pq);
+
+void disExtrasimpcube(cube *pc)
 {
   printf("cubes[%d][%d][%d][%d]\n", pc->level, pc->j, pc->k, pc->l);
 }
 
-disExParsimpcube(pc)
-cube *pc;
+void disExParsimpcube(cube *pc)
 {
   cube *pa = pc->parent;
   printf("cubes[%d][%d][%d][%d], ", pc->level, pc->j, pc->k, pc->l);
   printf("parent = cubes[%d][%d][%d][%d]\n", pa->level, pa->j, pa->k, pa->l);
 }
 
-dissimpcube(pc)
-cube *pc;
+void dissimpcube(cube *pc)
 {
 int i;
   printf("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
@@ -62,8 +63,7 @@ int i;
 	 pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
 }
 
-discube(pc)
-cube *pc;
+void discube(cube *pc)
 {
 int i;
   printf("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
@@ -90,15 +90,13 @@ int i;
   }
 }
 
-disupcube(pc)
-cube *pc;
+void disupcube(cube *pc)
 {
 
 
 }
 
-disdirectcube(pc)
-cube *pc;
+void disdirectcube(cube *pc)
 {
 int i;
   for(i=0; i < pc->directnumvects; i++) {
@@ -112,8 +110,7 @@ int i;
 }
 
 
-dissys(sys)
-ssystem *sys;
+void dissys(ssystem *sys)
 {
 int i, j, k, l, side;
   printf("side=%d depth=%d order=%d\n",
@@ -136,9 +133,7 @@ int i, j, k, l, side;
 
 
 
-dismat(mat, rows, cols)
-double **mat;
-int rows, cols;
+void dismat(double **mat, int rows, int cols)
 {
 int i,j;
   if(cols != 0) {
@@ -154,9 +149,7 @@ int i,j;
 }
 
 
-disvect(v, size)
-double *v;
-int size;
+void disvect(double *v, int size)
 {
 int i;
   for(i=0; i < size; i++) {
@@ -166,21 +159,18 @@ int i;
   printf("\n");
 }
 
-dischg(pq)
-charge *pq;
+void dischg(charge *pq)
 {
   printf("cond=%d index=%d\n", pq->cond, pq->index);
 }
 
-disallchg(pq) 
-charge *pq;
+void disallchg(charge *pq) 
 {
 charge *nq;
   for(nq = pq; nq != NULL; nq = nq->next) disfchg(pq);
 }
 
-disfchg(pq) 
-charge *pq;
+void disfchg(charge *pq) 
 {
 /*
   printf("Cond=%d Corners\n", pq->cond);
@@ -214,10 +204,7 @@ double **mat;
 /*
   dumps a rows x cols matrix of doubles; assumes indices from zero 
 */
-void dumpCorners(fp, mat, rows, cols)
-int rows, cols;
-double **mat;
-FILE *fp;
+void dumpCorners(FILE *fp, double **mat, int rows, int cols)
 {
   int i, j;
   for(i = 0; i < rows; i++) {
@@ -628,9 +615,7 @@ int listtype;			/* DIRECT, LOCAL or EVAL */
 /*
   dump the contents of a face struct
 */
-void dump_face(fp, fac)
-face *fac;
-FILE *fp;
+void dump_face(FILE *fp, face *fac)
 {
   int i, j;
   face **behind = fac->behind;
@@ -673,9 +658,7 @@ char *str;
 /*
   core display rtn used below
 */
-dumpSynCore2(str, depth, cnt)
-int depth, *cnt;
-char *str;
+void dumpSynCore2(char *str, int depth, int *cnt)
 {
   int i;
 
