@@ -34,14 +34,20 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "capsolve.h"
+#include "input.h"
+#include "zbufInOut.h"
+#include "zbuf2fastcap.h"
+#include "mulDo.h"
+#include "electric.h"
+
+int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist);
+void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist);
 
 /* This routine takes the cube data struct and computes capacitances. */
-int capsolve(capmat, sys, chglist, size, real_size, numconds, name_list)
-double ***capmat;		/* pointer to capacitance matrix */
-ssystem *sys;
-charge *chglist;
-Name *name_list;
-int size, numconds, real_size;	/* real_size = total #panels, incl dummies */
+int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, int numconds, Name *name_list)
+/* double ***capmat;		/* pointer to capacitance matrix */
+/* int size, numconds, real_size;	/* real_size = total #panels, incl dummies */
 {
   int i, cond, iter, maxiter = MAXITER, ttliter = 0;
   charge *nq;
@@ -98,7 +104,7 @@ int size, numconds, real_size;	/* real_size = total #panels, incl dummies */
     
     /* skip conductors in the -rs and the -ri kill list */
     if(want_this_iter(kill_num_list, cond)
-       || want_this_iter(kinp_num_list)) continue;
+       || want_this_iter(kinp_num_list, cond)) continue;
 
     fprintf(stdout, "\nStarting on column %d (%s)\n", cond, 
 	    getConductorName(cond, &name_list));
@@ -191,15 +197,12 @@ int size, numconds, real_size;	/* real_size = total #panels, incl dummies */
 }
 
 
+#if 1 == 0
+
 /* 
 Unpreconditioned Generalized Conjugate Residuals.
 */
-int oldgcr(sys, q, p, r, ap, bp, bap, size, real_size, maxiter, tol, chglist)
-ssystem *sys;
-double *q, *p, *ap, *r, tol;
-double **bp, **bap;
-charge *chglist;
-int size, maxiter, real_size;
+int oldgcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double norm, beta, alpha, maxnorm;
@@ -305,9 +308,7 @@ set up and that the potential vector has been zeroed.  ARBITRARY
 VECTORS CAN NOT BE USED!
 */
 /* ultimately should not need to pass in chglist after E field rtn is fixed */
-void oldcomputePsi(sys, chglist)
-ssystem *sys;
-charge *chglist;
+void oldcomputePsi(ssystem *sys, charge *chglist)
 {
   extern double dirtime, uptime, downtime, evaltime;
 
@@ -361,17 +362,12 @@ charge *chglist;
 #endif
 }
 
-
+#endif
 
 /* 
 Preconditioned(possibly) Generalized Conjugate Residuals.
 */
-int gcr(sys, q, p, r, ap, bp, bap, size, maxiter, tol, chglist)
-ssystem *sys;
-double *q, *p, *ap, *r, tol;
-double **bp, **bap;
-int size, maxiter;
-charge *chglist;
+int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double norm, beta, alpha, maxnorm;
@@ -469,12 +465,7 @@ charge *chglist;
 /* 
   Preconditioned(possibly) Generalized Minimum Residual. 
   */
-int gmres(sys, q, p, r, ap, bv, bh, size, maxiter, tol, chglist)
-ssystem *sys;
-double *q, *p, *ap, *r, tol;
-double **bv, **bh;
-int size, maxiter;
-charge *chglist;
+int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double rnorm, norm, maxnorm=10.0;
@@ -641,11 +632,7 @@ charge and potential have already been set up and that the potential
 vector has been zeroed.  ARBITRARY VECTORS CAN NOT BE USED.
 */
 
-void computePsi(sys, q, p, size, chglist)
-ssystem *sys;
-double *q, *p;
-int size;
-charge *chglist;
+void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist)
 {
   extern double dirtime, uptime, downtime, evaltime, prectime;
   extern int real_size;

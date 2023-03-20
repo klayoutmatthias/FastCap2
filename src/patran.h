@@ -33,6 +33,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  
 */
 
+#if !defined(patran_H)
+#define patran_H
+
 /***************************************************************************
 
   This is the header file for patran.c.  
@@ -96,3 +99,5 @@ struct ITER {
   struct ITER *next;
 };
 typedef struct ITER ITER;
+
+#endif

@@ -34,7 +34,12 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "mulDisplay.h"
 #include "zbufGlobal.h"
+#include "input.h"
+#include "calcp.h"
+
+#include <stdio.h>
 
 /*
   reads an input file list file (a list of dielectric i/f and conductor 
@@ -99,10 +104,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 	be renamed; this is helpful when idenifying conductors to omit
 	from capacitance calculations using the -k option
 */
-void read_list_file(surf_list, num_surf, list_file, read_from_stdin)
-int *num_surf, read_from_stdin;
-char *list_file;
-surface **surf_list;
+void read_list_file(surface **surf_list, int *num_surf, char *list_file, int read_from_stdin)
 {
   int linecnt, end_of_chain, ref_pnt_is_inside, group_cnt;
   FILE *fp, *fopen();
@@ -322,7 +324,6 @@ surface *surf;
 charge *panel_list;
 {
   int i, flip_normal;
-  char *hack_path();
   charge *nc;
   double ctr_minus_n[3], ctr_plus_n[3], norm_minus, norm_plus, norm, norm_sq;
   double x, y, z, *normal, *direction, *tempd;
@@ -411,8 +412,7 @@ charge *panel_list;
   add dummy panel structs to the panel list for electric field evaluation
   - assumes its handed a list of DIELEC or BOTH type panels
 */
-void add_dummy_panels(panel_list)
-charge *panel_list;
+void add_dummy_panels(charge *panel_list)
 {
   double h;
   charge *dummy_list = NULL;
@@ -465,8 +465,7 @@ charge *panel_list;
 }
 
 /* returns a pointer to a file name w/o the path (if present) */
-char *hack_path(str)
-char *str;
+char *hack_path(char *str)
 {
   int i;
   int last_slash;
@@ -486,13 +485,10 @@ char *str;
   - dummy panels are skipped
   - dielectric panels, with conductor number 0, are also skipped
 */
-void reassign_cond_numbers(panel_list, name_list, surf_name)
-char *surf_name;
-NAME *name_list;
-charge *panel_list;
+void reassign_cond_numbers(charge *panel_list, NAME *name_list, char *surf_name)
 {
   int i, j, cond_nums[MAXCON], num_cond, cond_num_found, temp;
-  char str[BUFSIZ], *hack_path();
+  char str[BUFSIZ];
   charge *cur_panel;
   NAME *cur_name;
 
@@ -561,9 +557,7 @@ charge *panel_list;
   negates all the conductor numbers - used to make a panel list's conds unique
     just before renumbering
 */
-void negate_cond_numbers(panel_list, name_list)
-NAME *name_list;
-charge *panel_list;
+void negate_cond_numbers(charge *panel_list, NAME *name_list)
 {
   charge *cur_panel;
   NAME *cur_name;
@@ -632,9 +626,7 @@ int iter_num;
 /*
   checks if a particular iter is in the list; returns TRUE if it is
 */
-int want_this_iter(iter_list, iter_num)
-ITER *iter_list;
-int iter_num;
+int want_this_iter(ITER *iter_list, int iter_num)
 {
   ITER *cur_iter;
 
@@ -649,12 +641,10 @@ int iter_num;
 /*
   sets up the ps file base string
 */
-void get_ps_file_base(argv, argc)
-char *argv[];
-int argc;
+void get_ps_file_base(char *argv[], int argc)
 {
   int i, j;
-  char temp[BUFSIZ], *hack_path();
+  char temp[BUFSIZ];
   extern char *ps_file_base;
 
   /* - if no list file, use input file; otherwise use list file */
@@ -695,10 +685,7 @@ int argc;
   align the normals of all the panels in each surface so they point
     towards the same side as where the ref point is (dielectric files only)
 */
-charge *read_panels(surf_list, name_list, num_cond)
-Name **name_list;
-int *num_cond;
-surface *surf_list;
+charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
   charge *panel_list = NULL, *cur_panel, *patfront(), *panel_group, *c_panel;
@@ -707,7 +694,7 @@ surface *surf_list;
   extern char *title;
   NAME *name_group;
   FILE *fp, *fopen();
-  char surf_name[BUFSIZ], *hack_path();
+  char surf_name[BUFSIZ];
   int patran_file_read;
 
   /*title[0] = '\0';*/
@@ -830,9 +817,7 @@ surface *surf_list;
   NOTFND => neither name by itself nor with group name is not in list
   - any unique leading part of the name%group_name string may be specified 
 */
-int getUniqueCondNum(name, name_list)
-char *name;
-Name *name_list;
+int getUniqueCondNum(char *name, Name *name_list)
 {
   int nlen, cond;
   char name_frag[BUFSIZ], *last_alias(), *cur_alias;
@@ -874,9 +859,7 @@ Name *name_list;
   - conductor names can't have any %'s
   - redundant names are detected as errors
 */
-ITER *get_kill_num_list(name_list, kill_name_list)
-char *kill_name_list;
-Name *name_list;
+ITER *get_kill_num_list(Name *name_list, char *kill_name_list)
 {
   int i, j, start_token, end_token, end_name, cond;
   char name[BUFSIZ], group_name[BUFSIZ];
@@ -936,11 +919,8 @@ Name *name_list;
 /*
   command line parsing routine
 */
-void parse_command_line(argv, argc, autmom, autlev, relperm, numMom, numLev, 
-			input_file, surf_list_file, read_from_stdin)
-int argc, *autmom, *autlev, *numMom, *numLev, *read_from_stdin;
-double *relperm;
-char *argv[], **input_file, **surf_list_file;
+void parse_command_line(char *argv[], int argc, int *autmom, int *autlev, double *relperm, int *numMom, int *numLev,
+                        char **input_file, char **surf_list_file, int *read_from_stdin)
 {
   int cmderr, i;
   char **chkp, *chk;
@@ -1137,7 +1117,7 @@ char *argv[], **input_file, **surf_list_file;
 	else if(!strcmp(&(argv[i][2]), "z") || !strcmp(&(argv[i][2]), "Z"))
 	    up_axis = ZI;
 	else {
-	  fprintf(stderr, "%s: bad up axis type `%s' -- use x, y or z\n");
+	  fprintf(stderr, "%s: bad up axis type `%s' -- use x, y or z\n", argv[0], &(argv[i][2]));
           cmderr = TRUE;
           break;
         }
@@ -1169,7 +1149,7 @@ char *argv[], **input_file, **surf_list_file;
 	    "  distance = %g (0 => 1 object radius away from center)\n", 
 	    DEFDST);
     fprintf(stderr, "  scale = %g\n  linewidth = %g\n",
-	    DEFDST, DEFSCL, DEFWID);
+            DEFSCL, DEFWID);
     if(DEFUAX == XI) fprintf(stderr, "  upaxis = x\n");
     else if(DEFUAX == YI) fprintf(stderr, "  upaxis = y\n");
     else if(DEFUAX == ZI) fprintf(stderr, "  upaxis = z\n");
@@ -1218,11 +1198,8 @@ char *argv[], **input_file, **surf_list_file;
 /*
   surface information input routine - panels are read by read_panels()
 */
-surface *read_all_surfaces(input_file, surf_list_file, read_from_stdin, infile,
-			   relperm)
-int read_from_stdin;
-char *input_file, *surf_list_file, *infile;
-double relperm;
+surface *read_all_surfaces(char *input_file, char *surf_list_file, int read_from_stdin, char *infile,
+                           double relperm)
 {
   int num_surf, i;
   char group_name[BUFSIZ];
@@ -1297,11 +1274,8 @@ double relperm;
   - inputs surfaces (ie file names whose panels are read in read_panels)
   - sets parameters accordingly
 */
-surface *input_surfaces(argv, argc, autmom, autlev, relperm, 
-			numMom, numLev, infile)
-int argc, *autmom, *autlev, *numMom, *numLev;
-double *relperm;
-char *argv[], *infile;
+surface *input_surfaces(char *argv[], int argc, int *autmom, int *autlev, double *relperm,
+                        int *numMom, int *numLev, char *infile)
 {
   int read_from_stdin, num_surf;
   surface *read_all_surfaces();
@@ -1321,11 +1295,9 @@ char *argv[], *infile;
 /*
   dump the data associated with the input surfaces
 */
-void dumpSurfDat(surf_list)
-surface *surf_list;
+void dumpSurfDat(surface *surf_list)
 {
   surface *cur_surf;
-  char *hack_path();
 
   fprintf(stdout, "  Input surfaces:\n");
   for(cur_surf = surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
@@ -1372,9 +1344,7 @@ surface *surf_list;
 /*
   replaces name (and all aliases) corresponding to "num" with unique string
 */
-void remove_name(name_list, num)
-int num;
-Name **name_list;
+void remove_name(Name **name_list, int num)
 {
   static char str[] = "%`_^#$REMOVED";
   Name *cur_name, *cur_alias;
@@ -1408,10 +1378,7 @@ Name **name_list;
 /*
   removes (unlinks from linked list) panels that are on conductors to delete
 */
-void remove_conds(panels, num_list, name_list)
-charge **panels;
-ITER *num_list;
-Name **name_list;
+void remove_conds(charge **panels, ITER *num_list, Name **name_list)
 {
   ITER *cur_num;
   charge *cur_panel, *prev_panel;
@@ -1447,9 +1414,7 @@ Name **name_list;
   -rc list: no restrictions
   -ri/-rs: can't exhaust all conductors with combination of these lists
 */
-void resolve_kill_lists(rs_num_list, q_num_list, ri_num_list, num_cond)
-ITER *rs_num_list, *q_num_list, *ri_num_list;
-int num_cond;
+void resolve_kill_lists(ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list, int num_cond)
 {
   int i, lists_exhaustive;
   ITER *cur_num;
@@ -1494,12 +1459,8 @@ int num_cond;
 /*
   main input routine, returns a list of panels in the problem
 */
-charge *input_problem(argv, argc, autmom, autlev, relperm, 
-		      numMom, numLev, name_list, num_cond)
-int argc, *autmom, *autlev, *numMom, *numLev, *num_cond;
-double *relperm;
-char *argv[];
-Name **name_list;
+charge *input_problem(char *argv[], int argc, int *autmom, int *autlev, double *relperm,
+                      int *numMom, int *numLev, Name **name_list, int *num_cond)
 {
   surface *surf_list, *input_surfaces();
   char infile[BUFSIZ], *ctime(), hostname[BUFSIZ];

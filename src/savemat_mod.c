@@ -59,6 +59,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include <stdio.h>
 #include <string.h>
 
+#include "savemat_mod.h"
+
 typedef struct {
      long type;   /* type */
      long mrows;  /* row dimension */

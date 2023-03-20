@@ -34,6 +34,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "mulMulti.h"
+#include "calcp.h"
+#include "input.h"
 
 void Cross_Product(double vector1[], double vector2[], double result_vector[]);
 int flip_normal(charge *panel);

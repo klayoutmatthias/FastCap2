@@ -34,6 +34,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "mulMats.h"
+#include "mulMulti.h"
+#include "direct.h"
 
 double **Q2P(), **Q2PDiag();
 double **mulMulti2P(), **mulQ2Multi(), **mulMulti2Multi();

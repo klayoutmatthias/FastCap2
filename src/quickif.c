@@ -39,9 +39,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 /*
   tells if any conductor name alias matches a string
 */
-int alias_match(cur_name, name)
-char *name;
-Name *cur_name;
+int alias_match(Name *cur_name, char *name)
 {
   Name *cur_alias;
 
@@ -55,9 +53,7 @@ Name *cur_name;
 /*
   tells if any conductor name alias matches a string only up to length(name)
 */
-int alias_match_name(cur_name, name)
-char *name;
-Name *cur_name;
+int alias_match_name(Name *cur_name, char *name)
 {
   Name *cur_alias;
   char name_frag[BUFSIZ];
@@ -77,9 +73,7 @@ Name *cur_name;
 /*
   adds an alias 
 */
-void add_to_alias(cur_name, new_name)
-Name *cur_name;
-char *new_name;
+void add_to_alias(Name *cur_name, char *new_name)
 {
   Name *last_alias = NULL, *cur_alias;
 
@@ -103,8 +97,7 @@ char *new_name;
 /*
   return pointer to last alias string (= current name for conductor)
 */
-char *last_alias(cur_name)
-Name *cur_name;
+char *last_alias(Name *cur_name)
 {
   Name *cur_alias, *last_alias;
 
@@ -271,13 +264,10 @@ int renameConductor(char *old_name, char *new_name, Name **name_list, int *num_c
   N <cond name string> <Rename string>
   * <Comment string>
 */
-charge *quickif(fp, line, title, surf_type, trans, num_cond, name_list,
-		name_suffix)
-int surf_type, *num_cond;
-char *line, *title, *name_suffix; /* suffix for all cond names read */
-double *trans;
-Name *name_list;		/* name list pointer */
-FILE *fp;
+charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans, int *num_cond, Name **name_list,
+                char *name_suffix)
+/* char *line, *title, *name_suffix; /* suffix for all cond names read */
+/* Name **name_list;		/* name list pointer */
 {
   int linecnt = 2, i, cond;
   char *delcr(), temp[BUFSIZ], temp2[BUFSIZ], line1[BUFSIZ], *cp, *strtok();
@@ -321,7 +311,7 @@ FILE *fp;
       
       /* load quad struct */
       if(surf_type == CONDTR || surf_type == BOTH)
-	  curquad->cond = getConductorNum(condstr, name_list, num_cond);
+          curquad->cond = getConductorNum(condstr, name_list, num_cond);
       else curquad->cond = 0;
       curquad->x1 = x1 + trans[0];
       curquad->x2 = x2 + trans[0];
@@ -362,7 +352,7 @@ FILE *fp;
       
       /* load tri struct */
       if(surf_type == CONDTR || surf_type == BOTH)
-	  curtri->cond = getConductorNum(condstr, name_list, num_cond);
+          curtri->cond = getConductorNum(condstr, name_list, num_cond);
       else curquad->cond = 0;
       curtri->x1 = x1 + trans[0];
       curtri->x2 = x2 + trans[0];
@@ -391,7 +381,7 @@ FILE *fp;
 	strcat(condstr, name_suffix);
 	strcat(temp2, name_suffix);
 
-	if(renameConductor(condstr, temp2, name_list, num_cond) == FALSE) 
+	if(renameConductor(condstr, temp2, name_list, num_cond) == FALSE)
 	    exit(0);
       }
 

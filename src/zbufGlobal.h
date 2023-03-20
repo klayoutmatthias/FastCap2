@@ -33,6 +33,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  
 */
 
+#if !defined(zbufGlobal_H)
+#define zbufGlobal_H
 
 /* #include <stdio.h> */
 
@@ -136,3 +138,4 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #define DEFAXE 1.0		/* default axes length (-x) */
 #define DEFUAX ZI		/* default upward-pointing axis (-u) */
 
+#endif

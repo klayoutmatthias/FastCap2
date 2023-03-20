@@ -34,11 +34,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "direct.h"
 
-double **Q2PDiag(chgs, numchgs, is_dummy, calc)
-charge **chgs;
-int numchgs, *is_dummy;
-int calc;
+double **Q2PDiag(charge **chgs, int numchgs, int *is_dummy, int calc)
 {
   double **mat;
   int i, j;
@@ -77,11 +75,7 @@ int calc;
   return(mat);
 }
 
-double **Q2P(qchgs, numqchgs, is_dummy, pchgs, numpchgs, calc)
-charge **qchgs, **pchgs;
-int numqchgs, numpchgs;
-int *is_dummy;
-int calc;
+double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int numpchgs, int calc)
 {
   double **mat;
   int i, j;
@@ -119,9 +113,7 @@ int calc;
   used only in conjunction with DMPMAT == ON  and DIRSOL == ON
   to make 1st directlist mat = full P mat
 */
-double **Q2Pfull(directlist, numchgs)
-int numchgs;
-cube *directlist;
+double **Q2Pfull(cube *directlist, int numchgs)
 {
   int i, j, fromp, fromq, top, toq;
   double **mat, calcp();
@@ -159,10 +151,7 @@ cube *directlist;
   - returned matrix has L below the diagonal, U above (GVL1 pg 58)
   - if allocate == TRUE ends up storing P and LU (could be a lot)
 */
-double **ludecomp(matin, size, allocate)
-double **matin;
-int size;
-int allocate;
+double **ludecomp(double **matin, int size, int allocate)
 {
   extern int fulldirops;
   double factor, **mat;
@@ -198,9 +187,7 @@ int allocate;
 /*
   For direct solution of Pq = psi, used if DIRSOL == ON or if preconditioning.
 */
-void solve(mat, x, b, size)
-double **mat, *x, *b;
-int size;
+void solve(double **mat, double *x, double *b, int size)
 {
   extern int fulldirops;
   int i, j;
@@ -231,9 +218,7 @@ int size;
   In-place inverts a matrix using guass-jordan.
   - is_dummy[i] = 0 => ignore row/col i
 */
-void invert(mat, size, reorder)
-double **mat;
-int size, *reorder;
+void invert(double **mat, int size, int *reorder)
 {
   int i, j, k, best;
   double normal, multiplier, bestval, nextbest;
@@ -307,9 +292,7 @@ int size, *reorder;
    comp_rows = BOTH => remove both rows and columns
    returns number of rows/cols in compressed matrix
 */
-int compressMat(mat, size, is_dummy, comp_rows)
-double **mat;
-int size, *is_dummy, comp_rows;
+int compressMat(double **mat, int size, int *is_dummy, int comp_rows)
 {
   static int *cur_order;
   static int cur_order_array_size = 0;
@@ -351,9 +334,7 @@ int size, *is_dummy, comp_rows;
    exp_rows = FALSE => add cols corresponding to ones in is_dummy[]
    exp_rows = BOTH => add rows and columns
 */
-void expandMat(mat, size, comp_size, is_dummy, exp_rows)
-double **mat;
-int size, *is_dummy, exp_rows, comp_size;
+void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_rows)
 {
   int i, j, k, next_rc;
 
@@ -429,11 +410,5 @@ char fname[100];
   }
   fprintf(foo, "]\n");
 }
-
-
-
-
-
-
 
 

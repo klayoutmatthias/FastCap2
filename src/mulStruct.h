@@ -33,6 +33,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  
 */
 
+#if !defined(mulStruct_H)
+#define mulStruct_H
+
 #include "patran.h"		/* for neutral file interface */
 
 struct surface {                /* a surface file and its permittivities */
@@ -194,13 +197,5 @@ struct ssystem {
 };
 typedef struct ssystem ssystem;
 
-
-
-
-
-
-
-
-
-
+#endif
 

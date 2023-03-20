@@ -33,6 +33,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  
 */
 
+#include "mulGlobal.h"
+
 /* 
  memory allocator for fastcap
  - almost identical to Kerigan & Ritchie sec 8.7
@@ -85,8 +87,6 @@ typedef union header HEADER;
   - an alternative to mocore() but should only be used if sbrk() doesnt zero
 */
 #define MORECORE(SIZE) (HEADER *)calloc(1, SIZE*sizeof(HEADER))
-char *calloc();
-char *malloc();
 
 static HEADER *base = NULL;    	/* base of allocated block list */
 static HEADER *allocp = NULL;	/* last allocated block */
@@ -98,7 +98,6 @@ static unsigned int sizeofHDR = sizeof(HEADER);
 */
 static HEADER *mocore(unsigned int nu)
 {
-  char *sbrk();
   char *cp;
 
   cp = sbrk(nu*sizeofHDR);
@@ -275,11 +274,10 @@ void uallocEfcy(long memcount)
   int first = 1;
 #endif
   int total;
-  char *sbrk();
 
-  total = (int)(sbrk(0) - (char *)base);
+  total = (int)((char *)sbrk(0) - (char *)base);
 
-  if(base == NULL) fprintf(stdout, "(top of memory = 0x%x", sbrk(0));
+  if(base == NULL) fprintf(stdout, "(top of memory = %p", sbrk(0));
   else fprintf(stdout, "(%.3g%% efficiency",
 	       100*((double)memcount)/((double)total));
 

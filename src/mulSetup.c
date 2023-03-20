@@ -34,19 +34,21 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "mulSetup.h"
+#include "mulMulti.h"
 
 cube *cstack[1024];             /* Stack used in several routines. */
 
 static void getAllInter(ssystem *sys);
 static void set_vector_masks(ssystem *sys);
-static int placeq(int flag, ssystem *sys, char *charges);
+static int placeq(int flag, ssystem *sys, charge *charges);
 static void setMaxq(ssystem *sys);
 static void indexkid(ssystem *sys, cube *dad, int *pqindex, int *pcindex);
 static void linkcubes(ssystem *sys);
 static void getnbrs(ssystem *sys);
-void getrelations(ssystem *sys);
-void setPosition(ssystem *sys);
-void setExact(ssystem *sys, int numterms);
+static void getrelations(ssystem *sys);
+static void setPosition(ssystem *sys);
+static void setExact(ssystem *sys, int numterms);
 
 /*
   sets up the partitioning of space and room for charges and expansions
@@ -105,7 +107,7 @@ ssystem *mulInit(int autom, int depth, int order, charge *charges)
   - this routine is still called to set automatic levels if ADAPT is OFF,
      ie even when the calculation is not adaptive, so results can be compared
 */
-static int placeq(int flag, ssystem *sys, char *charges)
+static int placeq(int flag, ssystem *sys, charge *charges)
 {
   int i, j, k, l, side, totalq, isexact, multerms(), depth;
   int xindex, yindex, zindex, limit = multerms(sys->order), compflag;
@@ -390,7 +392,7 @@ static int placeq(int flag, ssystem *sys, char *charges)
 /* 
 Place the charges in the cube structure. 
 */
-static void placeqold(ssystem *sys, char *charges)
+static void placeqold(ssystem *sys, charge *charges)
 {
 double length;
 double minx, maxx, miny, maxy, minz, maxz, tilelength();

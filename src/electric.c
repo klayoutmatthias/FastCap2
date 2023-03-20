@@ -34,6 +34,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "electric.h"
 
 /*
   converts the voltage vector entries corresponding to panels on dielectric
@@ -44,9 +45,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
   also - infinitesimally thin conductors on a dielectric i/f (surface type 
      BOTH) are not supported
 */
-void compute_electric_fields(sys, chglist)
-ssystem *sys;
-charge *chglist;
+void compute_electric_fields(ssystem *sys, charge *chglist)
 {
   charge *cp, *dummy;
   double h, flux_density, *panel_voltages, *panel_charges;

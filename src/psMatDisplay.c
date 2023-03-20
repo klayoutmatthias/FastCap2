@@ -34,6 +34,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "zbufInOut.h"
 
 /*
   for writting sparsity pattern ps file in Aldus Freehand format
@@ -86,10 +87,7 @@ char **aliased_matrix;	/* the aliased matrix */
 /*
   dump Aldus Freehand readable header
 */
-void dump_aldus_hdr(fp, lowx, lowy, upx, upy, dump_text_hdr)
-double lowx, lowy, upx, upy;
-int dump_text_hdr;
-FILE *fp;
+void dump_aldus_hdr(FILE *fp, double lowx, double lowy, double upx, double upy, int dump_text_hdr)
 {
   /* print the lines before the bounding box */
   fprintf(fp, "%%!PS-Adobe-2.0 EPSF-1.2\n");
@@ -133,10 +131,7 @@ FILE *fp;
 /*
   dump Aldus Freehand readable trailer
 */
-void dump_aldus_foot(fp, insert_showpage, argv, argc, print_cmd_line, aux_str)
-int insert_showpage, print_cmd_line, argc;
-char *argv[], *aux_str;
-FILE *fp;
+void dump_aldus_foot(FILE *fp, int insert_showpage, char *argv[], int argc, int print_cmd_line, char *aux_str)
 {
   int f;
   char line[BUFSIZ];
@@ -166,9 +161,7 @@ FILE *fp;
   dumps a black filled block xwid wide by ywid tall, 
     with lower left corner (xstart, ystart)
 */
-void dump_block(fp, xstart, ystart, xwid, ywid)
-FILE *fp;
-double xstart, ystart, xwid, ywid;
+void dump_block(FILE *fp, double xstart, double ystart, double xwid, double ywid)
 {
   fprintf(fp, "newpath\n");
   fprintf(fp, "%g %g moveto\n", xstart, ystart);
@@ -183,9 +176,7 @@ double xstart, ystart, xwid, ywid;
   dumps a line of length len with left center (xstart, ystart)
   assumes line width, grey level and line ends set up before
 */
-void dump_line(fp, xstart, ystart, len)
-FILE *fp;
-double xstart, ystart, len;
+void dump_line(FILE *fp, double xstart, double ystart, double len)
 {
   /*fprintf(fp, "%g %g moveto ", xstart, ystart);
   fprintf(fp, "%g %g lineto stroke\n", xstart+len, ystart);*/
@@ -199,9 +190,7 @@ double xstart, ystart, len;
   - call first with type = OPEN, then on each calcp with type = UPDATE,
     finally with type = CLOSE
 */
-void dump_ps_mat(filename, row, col, num_row, num_col, argv, argc, type)
-char *filename, *argv[];
-int row, col, num_row, num_col, type, argc;
+void dump_ps_mat(char *filename, int row, int col, int num_row, int num_col, char *argv[], int argc, int type)
 {
   static FILE *fp = NULL;
   double widx, widy;

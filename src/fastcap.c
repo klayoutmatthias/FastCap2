@@ -34,12 +34,20 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "input.h"
+#include "zbuf2fastcap.h"
+#include "mulMulti.h"
+#include "mulMats.h"
+#include "mulSetup.h"
+#include "mulDisplay.h"
+#include "calcp.h"
+#include "capsolve.h"
 
 int main(int argc, char *argv[])
 {
   int ttliter, i, j, num_cond;
-  charge *chglist, *nq, *input_problem();
-  ssystem *sys, *mulInit();
+  charge *chglist, *nq;
+  ssystem *sys;
   double **capmat, dirtimesav, mulsetup, initalltime, ttlsetup, ttlsolve;
   double relperm;
   int autmom, autlev, numMom, numLev;
@@ -211,7 +219,7 @@ int main(int argc, char *argv[])
 #endif
 
 #endif				/* DIRSOL == OFF */
-  dumpnums(ON, eval_size, up_size); /* save num/type of pot. coeff calcs */
+  dumpnums(ON, eval_size);      /* save num/type of pot. coeff calcs */
 
   dirtimesav = dirtime;		/* save direct matrix setup time */
   dirtime = 0.0;		/* make way for direct solve time */
@@ -244,7 +252,7 @@ int main(int argc, char *argv[])
   stoptimer;
   mulsetup = dtime;		/* save multipole matrix setup time */
 
-  dumpnums(OFF, eval_size, up_size);	/* dump num/type of pot. coeff calcs */
+  dumpnums(OFF, eval_size);	/* dump num/type of pot. coeff calcs */
 
 #if DUMPPS == ALL
   dump_ps_mat(filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);

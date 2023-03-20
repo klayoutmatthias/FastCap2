@@ -35,6 +35,10 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
+#include "zbuf2fastcap.h"
+#include "zbufProj.h"
+#include "zbufSort.h"
+#include "zbufInOut.h"
 
 #if CAPVEW == ON
 /*
@@ -46,11 +50,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
   - file name used is <ps_file_base><iter>.ps; ps_file_base is either
     the list file base, the input file base or "stdin" (see get_ps_file_info())
 */
-void dump_ps_geometry(chglist, q, cond, use_ttl_chg)
-charge *chglist;
-double *q;
-int cond;
-int use_ttl_chg;
+void dump_ps_geometry(charge *chglist, double *q, int cond, int use_ttl_chg)
 {
   int i, j, k, numlines, numfaces, use_density;
   face **faces, **sfaces, **fastcap2faces(), **depthSortFaces();

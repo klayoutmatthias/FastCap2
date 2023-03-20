@@ -1,18 +1,18 @@
 /*!\page LICENSE LICENSE
- 
+
 Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
+
 License to use, copy, modify, sell and/or distribute this software and
 its documentation for any purpose is hereby granted without royalty,
 subject to the following terms and conditions:
- 
+
 1.  The above copyright notice and this permission notice must
 appear in all copies of the software and related documentation.
- 
+
 2.  The names of the Copyright Owners may not be used in advertising or
 publicity pertaining to distribution of the software without the specific,
 prior written permission of the Copyright Owners.
- 
+
 3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
 REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
 LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
@@ -22,7 +22,7 @@ RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
 WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
 ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
 SERVICE OR SUPPORT.
- 
+
 LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
 their trustees, officers, employees, students and agents against any and all
 claims arising out of the exercise of any rights under this Agreement,
@@ -30,9 +30,11 @@ including, without limiting the generality of the foregoing, against any
 damages, losses or liabilities whatsoever with respect to death or injury to
 person or damage to property arising from or out of the possession, use, or
 operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
+
 */
 
+#if !defined(mulGlobal_H)
+#define mulGlobal_H
 
 /* for NWS-3860 compatability */
 #ifdef NEWS
@@ -52,24 +54,6 @@ extern char *   realloc();
 #include <string.h>
 #include <stdint.h>
 
-/* where is that? */
-void *sbrk(intptr_t increment);
-
-/* fastcap data structures */
-#include "mulStruct.h"
-
-/* execution time macros */
-#include "resusage.h"
-
-/* uglyalloc.c */
-char *ualloc(unsigned int nbytes);
-
-/* mulMulti.c */
-int multerms(int order);
-
-/* quickif.c */
-int getConductorNum(char *name, Name **name_list, int *num_cond);
-
 /* time variables/structs */
 #ifndef _TIME_                  /* if not on a Sun4 */
 #ifndef NEWS                    /* if not on a NWS-38XX */
@@ -77,9 +61,18 @@ int getConductorNum(char *name, Name **name_list, int *num_cond);
 #endif
 #endif
 
+/* fastcap data structures */
+#include "mulStruct.h"
+
+/* execution time macros */
+#include "resusage.h"
+
+/* uglyalloc */
+char *ualloc(unsigned int nbytes);
+
 #define VERSION 2.0
 
-/*********************************************************************** 
+/***********************************************************************
   macros for allocation with checks for NULL pntrs and 0 byte requests
   - also keep an allocated memory count
   - CALLOC() is used when the memory must be zeroed
@@ -121,22 +114,22 @@ extern long memMSC;
 #define DUMPALLOCSIZ                                                   \
 {                                                                      \
   (void)fprintf(stderr,                                                \
-		"Total Memory Allocated: %d kilobytes (brk = 0x%x)\n", \
-		memcount/1024, sbrk(0));                               \
+                "Total Memory Allocated: %ld kilobytes (brk = %p)\n",  \
+                memcount/1024, sbrk(0));                               \
 }
 
 #define CALLOC(PNTR, NUM, TYPE, FLAG, MTYP)                                 \
 {                                                                           \
      if((NUM)*sizeof(TYPE)==0)                                              \
        (void)fprintf(stderr,                                                \
-		     "zero element request in file `%s' at line %d\n",      \
-		     __FILE__, __LINE__);	                            \
+                     "zero element request in file `%s' at line %d\n",      \
+                     __FILE__, __LINE__);	                            \
      else if(((PNTR)=(TYPE*)CALCORE(NUM, TYPE))==NULL) {                    \
        (void)fprintf(stderr,                                                \
-	 "\nfastcap: out of memory in file `%s' at line %d\n",              \
-	       __FILE__, __LINE__);                                         \
-       (void)fprintf(stderr, " (NULL pointer on %d byte request)\n",        \
-		     (NUM)*sizeof(TYPE));                                   \
+         "\nfastcap: out of memory in file `%s' at line %d\n",              \
+               __FILE__, __LINE__);                                         \
+       (void)fprintf(stderr, " (NULL pointer on %ld byte request)\n",       \
+                     (NUM)*sizeof(TYPE));                                   \
        DUMPALLOCSIZ;                                                        \
        DUMPRSS;                                                             \
        (void)fflush(stderr);                                                \
@@ -166,14 +159,14 @@ extern long memMSC;
 {                                                                            \
      if((NUM)*sizeof(TYPE)==0)			                             \
        (void)fprintf(stderr,                                                \
-		     "zero element request in file `%s' at line %d\n",      \
-		     __FILE__, __LINE__);	                            \
+                     "zero element request in file `%s' at line %d\n",      \
+                     __FILE__, __LINE__);	                            \
      else if(((PNTR)=(TYPE*)MALCORE((unsigned)((NUM)*sizeof(TYPE))))==NULL) { \
        (void)fprintf(stderr,                                                 \
-	 "\nfastcap: out of memory in file `%s' at line %d\n",               \
-	       __FILE__, __LINE__);                                          \
-       (void)fprintf(stderr, " (NULL pointer on %d byte request)\n",         \
-		     (NUM)*sizeof(TYPE));                                    \
+         "\nfastcap: out of memory in file `%s' at line %d\n",               \
+               __FILE__, __LINE__);                                          \
+       (void)fprintf(stderr, " (NULL pointer on %ld byte request)\n",        \
+                     (NUM)*sizeof(TYPE));                                    \
        DUMPALLOCSIZ;                                                         \
        DUMPRSS;                                                              \
        (void)fflush(stderr);                                                 \
@@ -208,7 +201,7 @@ misc. global macros
 #define  ABORT()						      \
 {   (void)fflush(stdout);					      \
     (void)fprintf(stderr, "FastCap: panic in file `%s' at line %d.\n",\
-	    __FILE__, __LINE__);				      \
+            __FILE__, __LINE__);				      \
     (void)fflush(stderr);					      \
     abort();							      \
 }
@@ -282,7 +275,7 @@ misc. global macros
 #define NOTFND -2
 
 /***********************************************************************
- 
+
   configuration and debug flags
 
 ***********************************************************************/
@@ -385,3 +378,4 @@ misc. global macros
 /* blkDirect.c related flags - used only when DIRSOL == ON || EXPGCR == ON */
 #define MAXSIZ 0		/* any more tiles than this uses matrix on disk
 				   for DIRSOL == ON or EXPGCR == ON */
+#endif

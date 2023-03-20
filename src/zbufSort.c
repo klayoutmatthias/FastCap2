@@ -34,19 +34,16 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "mulDisplay.h"
 #include "zbufGlobal.h"
-
-/* mulDisplay.c */
-void dump_face(FILE *fp, face *fac);
-void dumpCorners(FILE *fp, double **mat, int rows, int cols);
+#include "zbufSort.h"
 
 int cnt;			/* used in setting up the depth graph */
 
 /*
   returns TRUE if difference of two doubles is within machine precision
 */
-int diff_is_zero(num1, num2, bias)
-double num1, num2, bias;
+int diff_is_zero(double num1, double num2, double bias)
 {
   double margin;
 
@@ -61,8 +58,7 @@ double num1, num2, bias;
   returns TRUE if diff. of two doubles is negative within machine precision
   - note that argument order is relevant
 */
-int diff_is_negative(num1, num2, bias)
-double num1, num2, bias;
+int diff_is_negative(double num1, double num2, double bias)
 {
   double margin;
 
@@ -75,8 +71,7 @@ double num1, num2, bias;
 /*
   returns the dot product
 */
-double dot(vec1, vec2)
-double *vec1, *vec2;
+double dot(double *vec1, double *vec2)
 {
   int i;
   double ret = 0.0;
@@ -88,8 +83,7 @@ double *vec1, *vec2;
 /*
   calculate the cross product out = in1Xin2
 */
-void crossProd(out, in1, in2)
-double *out, *in1, *in2;
+void crossProd(double *out, double *in1, double *in2)
 {
   out[0] = in1[1]*in2[2] - in1[2]*in2[1];
   out[1] = in1[2]*in2[0] - in1[0]*in2[2];
@@ -99,8 +93,7 @@ double *out, *in1, *in2;
 /*
   returns a normal and rhs for a plane given by three points
 */
-double getPlane(normal, p1, p2, p3)
-double *normal, *p1, *p2, *p3;
+double getPlane(double *normal, double *p1, double *p2, double *p3)
 {
   int i;
   double dot(), v12[3], v13[3], norm;
@@ -123,8 +116,7 @@ double *normal, *p1, *p2, *p3;
 /*
   returns POS, NEG or SPLIT for which side face corners are rel to plane
 */
-int whichSide(fac, facplane)
-face *fac, *facplane;
+int whichSide(face *fac, face *facplane)
 {
   int i, neg, pos, zero;
   double value[MAXSIDES];      	/* holds values when subbed in plane equ */
@@ -237,9 +229,7 @@ double *from1, *to1, *from2, *to2, *isect;
   returns TRUE if one panel is completely inside the other
   - does careful checks when vertices on one face are on verts, sides of other
 */
-int face_is_inside(corners1, ccnt1, corners2, ccnt2, com_pnt)
-double **corners1, **corners2, *com_pnt;
-int ccnt1, ccnt2;
+int face_is_inside(double **corners1, int ccnt1, double **corners2, int ccnt2, double *com_pnt)
 {
   int i, j, k, n, ccnt, zeros, pos, neg, ncnt;
   double *sfrom, *sto, margin1, margin2, **refcor, **curcor;
@@ -307,9 +297,7 @@ int ccnt1, ccnt2;
   - checks for intersections between each line of fac and all sides of facref
   - also checks for complete overlap (one face inside the other)
 */
-int is1stFaceDeeper(fac, facref, view)
-face *fac, *facref;
-double *view;
+int is1stFaceDeeper(face *fac, face *facref, double *view)
 {
   int i, j, k, olap[2], is_overlap;
   static double **cproj = NULL;	/* corners of fac in facref's plane */
@@ -507,9 +495,7 @@ double *view;
   - checks for intersections between each line of fac and all sides of facref
   - also checks for complete overlap (one face inside the other)
 */
-int is1stFaceDeeper(fac, facref, view, rhs, normal)
-face *fac, *facref;
-double *view, rhs, *normal;
+int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, double *normal)
 {
   int i, j, k, olap[2], is_overlap, isect_cnt;
   static double ***cproj = NULL;	/* corners of faces in view plane */
@@ -770,9 +756,7 @@ double *view, rhs, *normal;
 /*
   returns TRUE if bounding box of facref and fac (proj to facref's plane) insct
 */
-int isThereBoxOverlap(fac, facref, view)
-face *fac, *facref;
-double *view;
+int isThereBoxOverlap(face *fac, face *facref, double *view)
 {
   int i, j, olap[2];
   double cproj[MAXSIDES][3];	/* corners of fac in facref's plane */
@@ -928,9 +912,7 @@ double *view;
 /*
   recursive guts of below
 */
-int chkCycle(fac, ref, fp)
-face *fac, *ref;
-FILE *fp;
+int chkCycle(face *fac, face *ref, FILE *fp)
 {
   int b, i;
 
@@ -955,10 +937,7 @@ FILE *fp;
 /*
   checks for cycles in the depth graph - BROKEN(?)
 */
-void dumpCycles(faces, numfaces, file)
-face **faces;
-int numfaces;
-FILE *file;
+void dumpCycles(face **faces, int numfaces, FILE *file)
 {
   int i, f, j, b, *cycled, *cyclei, numcycle, cycle = FALSE;
   face *fp;
@@ -985,8 +964,7 @@ FILE *file;
 /*
   recursively sets depths of faces
 */
-void setDepth(fac)
-face *fac;
+void setDepth(face *fac)
 {
   int i;
 
@@ -1014,9 +992,7 @@ face *fac;
   does a topological sorting of the faces using graph setup by getAdjGraph()
   - returns a new set of pointers with deepest (1st to print) face first
 */
-face **depthSortFaces(faces, numfaces)
-face **faces;
-int numfaces;
+face **depthSortFaces(face **faces, int numfaces)
 {
   int f, i, facefound;
   face **rfaces;
@@ -1050,61 +1026,32 @@ int numfaces;
 /*
   sets up adjacency graph pointers in faces: pntr in i to j => face i behind j
 */
-void getAdjGraph(faces, numfaces, view, rhs, normal)
-face **faces;			/* array of face pntrs, faces[0] head of lst */
-int numfaces;
-double *view, rhs, *normal;
+void getAdjGraph(face **faces, int numfaces, double *view, double rhs, double *normal)
+/* face **faces;			/* array of face pntrs, faces[0] head of lst */
 {
   int numbehind, f, i, check;
   face *fpcur, *fpchk, **behind;
-  extern int k_;
 
-  if(TRUE == TRUE) {		/* if memory can be sacrificed for speed */
-    /* set up huge n^2 blocked face pointer arrays for each face */
-    for(f = 0; f < numfaces; f++) {
-      CALLOC(faces[f]->behind, numfaces, face *, ON, AMSC);
-      faces[f]->numbehind = 0;
-    }      
-
-    /* for each face, check through all faces not previously checked */
-    for(fpcur = faces[0], f = 0; fpcur != NULL; fpcur = fpcur->next, f++) {
-      for(fpchk = fpcur->next, numbehind = i = 0; fpchk != NULL; 
-	  fpchk = fpchk->next, i++) {
-	if(fpchk == fpcur) continue;	/* a face can't be behind itself */
-	if((check = is1stFaceDeeper(fpcur, fpchk, view, rhs, normal))==TRUE) { 
-	  fpcur->behind[(fpcur->numbehind)++] = fpchk;
-	}
-	else if(check == REVERSE) fpchk->behind[(fpchk->numbehind)++] = fpcur;
-      }
-      if(f % 20 == 0 && f != 0) {
-	fprintf(stdout, "%d ", f);
-	fflush(stdout);
-      }
-      if(f % 200 == 0 && f != 0) fprintf(stdout, "\n");
-    }
+  /* set up huge n^2 blocked face pointer arrays for each face */
+  for(f = 0; f < numfaces; f++) {
+    CALLOC(faces[f]->behind, numfaces, face *, ON, AMSC);
+    faces[f]->numbehind = 0;
   }
-  else {
-    CALLOC(behind, numfaces, face *, ON, AMSC);
 
-    /* for each face, check through all the other faces */
-    for(fpcur = faces[0], f = 0; fpcur != NULL; fpcur = fpcur->next, f++) {
-      for(fpchk = faces[0], numbehind = i = 0; fpchk != NULL; 
-	  fpchk = fpchk->next, i++) {
-	if(fpchk == fpcur) continue;	/* a face can't be behind itself */
-	if(is1stFaceDeeper(fpcur, fpchk, view) == TRUE) { 
-	  behind[numbehind++] = fpchk;
-	}
+  /* for each face, check through all faces not previously checked */
+  for(fpcur = faces[0], f = 0; fpcur != NULL; fpcur = fpcur->next, f++) {
+    for(fpchk = fpcur->next, numbehind = i = 0; fpchk != NULL;
+        fpchk = fpchk->next, i++) {
+      if(fpchk == fpcur) continue;	/* a face can't be behind itself */
+      if((check = is1stFaceDeeper(fpcur, fpchk, view, rhs, normal))==TRUE) {
+        fpcur->behind[(fpcur->numbehind)++] = fpchk;
       }
-      /* transfer blocked face pointers to face struct */
-      fpcur->numbehind = numbehind;
-      if(numbehind > 0) CALLOC(fpcur->behind, numbehind, face *, ON, AMSC);
-      for(; numbehind > 0; numbehind--)
-          fpcur->behind[numbehind-1] = behind[numbehind-1];
-      if(f % 20 == 0 && f != 0) {
-	fprintf(stdout, "%d ", f);
-	fflush(stdout);
-      }
-      if(f % 200 == 0 && f != 0) fprintf(stdout, "\n");
+      else if(check == REVERSE) fpchk->behind[(fpchk->numbehind)++] = fpcur;
     }
+    if(f % 20 == 0 && f != 0) {
+      fprintf(stdout, "%d ", f);
+      fflush(stdout);
+    }
+    if(f % 200 == 0 && f != 0) fprintf(stdout, "\n");
   }
 }

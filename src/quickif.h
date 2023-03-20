@@ -33,6 +33,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  
 */
 
+#if !defined(quickif_H)
+#define quickif_H
+
 struct quadl {			/* quadralateral element */
   int cond;			/* conductor number */
   struct quadl *next;		/* linked list pntr */
@@ -67,3 +70,7 @@ struct tri {			/* triangular element */
 typedef struct tri tri;
 
 /* #define MAXCON 10000		/* assumes never more conductors than this */
+
+int getConductorNum(char *name, Name **name_list, int *num_cond);
+
+#endif

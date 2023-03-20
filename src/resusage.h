@@ -33,6 +33,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  
 */
 
+#if !defined(resusage_H)
+#define resusage_H
+
 /* header where rusage and time structs are defined */
 
 #ifdef FOUR
@@ -83,3 +86,5 @@ dtime /= HZ
 #define DUMPRSS			/*  */
 
 #endif /* NOTOTHER */
+
+#endif

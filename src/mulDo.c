@@ -34,6 +34,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "direct.h"
+#include "mulDo.h"
 
 #if OPCNT == ON
 static directops=0, upops=0, downops=0, evalops=0;

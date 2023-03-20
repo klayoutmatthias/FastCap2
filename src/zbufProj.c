@@ -35,18 +35,14 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
+#include "zbufProj.h"
 
 /*
   takes a list of 3d lines and returns a list of 3d lines mapped onto a plane
   given by a normal when projected back to the given view point
 */
-void image(faces, numfaces, lines, numlines, normal, rhs, view)
-face **faces;
-line **lines;
-int numfaces, numlines;
-double *normal;
-double rhs;			/* rhs of the plane's equation */
-double *view;
+void image(face **faces, int numfaces, line **lines, int numlines, double *normal, double rhs, double *view)
+/* double rhs;			/* rhs of the plane's equation */
 {
   int i, j, k;
   double alpha, dot(), temp[3];
@@ -130,10 +126,7 @@ double *view;
 /*
   makes sure normals point toward view point for all faces
 */
-void initFaces(faces, numfaces, view)
-face **faces;
-int numfaces;
-double *view;
+void initFaces(face **faces, int numfaces, double *view)
 {
   int f, i;
   double dot();
@@ -154,13 +147,8 @@ double *view;
   a 2d coordinate system in the plane 
   - sets up y axis in plane || to 1st line rotated according to rotation arg
 */
-void flatten(faces, numfaces, lines, numlines, rhs, rotation, normal, view)
-face **faces;
-line **lines;
-int numfaces, numlines;
-double *view, *normal;
-double rhs;
-double rotation;		/* rotation of image y axis rel to 1st line */
+void flatten(face **faces, int numfaces, line **lines, int numlines, double rhs, double rotation, double *normal, double *view)
+/* double rotation;		/* rotation of image y axis rel to 1st line */
 {
   int i, j, k;
   double dot(), temp, tvec[3], tvec1[3], crot, srot, alpha;
@@ -266,10 +254,7 @@ double rotation;		/* rotation of image y axis rel to 1st line */
 /*
   translates a list of 2d faces, lines to make all the coordinates positive
 */
-void makePos(faces, numfaces, lines, numlines)
-face **faces;
-line **lines;
-int numfaces, numlines;
+void makePos(face **faces, int numfaces, line **lines, int numlines)
 {
   int i,j;
   double minx, miny, trans[2];
@@ -342,11 +327,7 @@ int numfaces, numlines;
   - the global defines OFFSETX/Y set the offset
   - assumes smallest x and y coordinates are zero (called after makePos())
 */
-void scale2d(faces, numfaces, lines, numlines, scale, offset)
-face **faces;
-line **lines;
-int numfaces, numlines;
-double scale, *offset;
+void scale2d(face **faces, int numfaces, line **lines, int numlines, double scale, double *offset)
 {
   int i, j;
   double ymax, xmax, xscale, yscale, master;
@@ -417,11 +398,8 @@ double scale, *offset;
 /*
   returns the center of a rectangular prism contianing all the face corners
 */
-double *getAvg(faces, numfaces, lines, numlines, flag)
-face **faces;
-line **lines;
-int numfaces, numlines;
-int flag;			/* ON => include axes */
+double *getAvg(face **faces, int numfaces, line **lines, int numlines, int flag)
+/* int flag;			/* ON => include axes */
 {
   double *avg, max[3], min[3];
   int i, j, k;
@@ -483,11 +461,7 @@ int flag;			/* ON => include axes */
   returns the radius of the smallest sphere with center at avg that
   encloses all the faces given in faces, all lines and axes, if required
 */
-double getSphere(avg, faces, numfaces, lines, numlines)
-face **faces;
-line **lines;
-double *avg;
-int numfaces, numlines;
+double getSphere(double *avg, face **faces, int numfaces, line **lines, int numlines)
 {
   double radius = 0.0, dot(), temp[3];
   int i, j, k, l;
@@ -528,8 +502,7 @@ int numfaces, numlines;
   - also change axes lengths so that they are smaller than view distance
     (ie so they won't cross the view plane)
 */
-double getNormal(normal, radius, avg, view, distance)
-double *normal, radius, *avg, *view, distance;
+double getNormal(double *normal, double radius, double *avg, double *view, double distance)
 {
   int i, k, j, axes_too_big, first;
   double rhs, dot(), norm, anorm, max_anorm;
