@@ -41,5 +41,8 @@ void image(face **faces, int numfaces, line **lines, int numlines, double *norma
 void flatten(face **faces, int numfaces, line **lines, int numlines, double rhs, double rotation, double *normal, double *view);
 void makePos(face **faces, int numfaces, line **lines, int numlines);
 void scale2d(face **faces, int numfaces, line **lines, int numlines, double scale, double *offset);
+double *getAvg(face **faces, int numfaces, line **lines, int numlines, int flag);
+double getSphere(double *avg, face **faces, int numfaces, line **lines, int numlines);
+double getNormal(double *normal, double radius, double *avg, double *view, double distance);
 
 #endif

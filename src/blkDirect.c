@@ -34,6 +34,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "calcp.h"
 
 #include <fcntl.h>
 
@@ -158,7 +159,7 @@ char *getName(int file, char *name)
 */
 void transpose(double *mat, int siz)
 {
-  int i, j, sqrdex();
+  int i, j;
   double temp;
 
   for(i = 0; i < siz; i++) {
@@ -177,9 +178,9 @@ void transpose(double *mat, int siz)
 void wrMat(double *mat, int siz, int file, int type)
 /* int siz, file, type;		/* siz is #rows and cols */
 {
-  int i, j, sqrdex(), ds = sizeof(double), fdis;
+  int i, j, ds = sizeof(double), fdis;
   int realsiz, actsiz;			/* size in chars */
-  char name[3], *getName();			/* name of file */
+  char name[3];	           		/* name of file */
 
   /* figure the real size */
   if(type == TRIMAT) realsiz = ds*siz*(siz+1)/2;
@@ -216,9 +217,9 @@ void wrMat(double *mat, int siz, int file, int type)
 void rdMat(double *mat, int siz, int file, int type)
 /* int siz, file, type;		/* siz is #rows and cols */
 {
-  int i, j, sqrdex(), fdis;
+  int i, j, fdis;
   int realsiz;			/* size in chars */
-  char name[3], *getName();   	/* name of file */
+  char name[3];           	/* name of file */
 
   /* figure the real size */
   if(type == TRIMAT) realsiz = sizeof(double)*siz*(siz+1)/2;
@@ -251,7 +252,7 @@ void rdMat(double *mat, int siz, int file, int type)
 */
 void matXfer(double *matsq, double *matri, int siz, int type)
 {
-  int i, j, uppdex(), sqrdex(), temp;
+  int i, j, temp;
 
   if(type == UP2TR) {		/* mv upper triangular part */
     for(i = 0; i < siz; i++) {	/* from row zero up */
@@ -280,7 +281,7 @@ void matXfer(double *matsq, double *matri, int siz, int type)
 */
 void blkMatsolve(double *matsq, double *matri, int siz, int type)
 {
-  int i, j, k, sqrdex(), lowdex(), uppdex();
+  int i, j, k;
   extern int fulldirops;
 
   if(type == LOWMAT) {
@@ -326,9 +327,9 @@ void blkMatsolve(double *matsq, double *matri, int siz, int type)
 void subInnerProd(double *matsq, double *matri, int siz, int matl, int matu)
 /* int siz, matl, matu;		/* size in doubles; matrices to multiply */
 {
-  int i, j, k, matrisiz, rowlim, rowliml, colimu, fdl, fdu, lowdex(), sqrdex();
+  int i, j, k, matrisiz, rowlim, rowliml, colimu, fdl, fdu;
   int froml, fromu, ds = sizeof(double), readl, readu;
-  char *getName(), name[3];
+  char name[3];
   double *matriu, temp;
   extern int fulldirops;
   extern double lutime;
@@ -406,7 +407,7 @@ void blkLudecomp(double *mat, int size)
 {
   extern int fulldirops;
   double factor;
-  int i, j, k, sqrdex();
+  int i, j, k;
 
   for(k = 0; k < size-1; k++) {	/* loop on rows */
     if(mat[SQDEX(k, k, size)] == 0.0) {
@@ -528,9 +529,8 @@ void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
                 double **triArray, double **sqrArray, int **real_index, int *is_dummy)
 /* double **triArray, **sqrArray;	/* LINEAR arrays: 1 triangular, 1 square mat */
 {
-  int i, j, fromp, fromq, top, toq, matsize, lowdex(), sqrdex(), uppdex(); 
+  int i, j, fromp, fromq, top, toq, matsize;
   int k, l, i_real, j_real;
-  double calcp();
   cube *pq, *pp;
   charge **pchgs, **qchgs, *ppan, *qpan;
   double pos_fact, neg_fact;
@@ -722,7 +722,7 @@ void blkAqprod(double *p, double *q, int size, double *sqmat)
 /* double *p, *q;			/* p = Aq is calculated */
 /* double *sqmat;			/* flat storage space for 1/4 of A */
 {
-  int i, j, k, l, fromp, fromq, sqrdex();
+  int i, j, k, l, fromp, fromq;
   extern int fullPqops;
   extern double dirtime;
 

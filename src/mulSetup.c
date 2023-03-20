@@ -36,6 +36,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "mulSetup.h"
 #include "mulMulti.h"
+#include "input.h"
+#include "calcp.h"
 
 cube *cstack[1024];             /* Stack used in several routines. */
 
@@ -109,14 +111,13 @@ ssystem *mulInit(int autom, int depth, int order, charge *charges)
 */
 static int placeq(int flag, ssystem *sys, charge *charges)
 {
-  int i, j, k, l, side, totalq, isexact, multerms(), depth;
+  int i, j, k, l, side, totalq, isexact, depth;
   int xindex, yindex, zindex, limit = multerms(sys->order), compflag;
   int exact_cubes_this_level, cubes_this_level;
   double length0, length, exact_ratio;
-  double minx, maxx, miny, maxy, minz, maxz, tilelength(), maxTileLength;
+  double minx, maxx, miny, maxy, minz, maxz, maxTileLength;
   charge *nextq, *compq;
   cube *****cubes, *nextc;
-  char *hack_path();
 
   /* Figure out the length of lev 0 cube and total number of charges. */
   nextq = charges;
@@ -395,7 +396,7 @@ Place the charges in the cube structure.
 static void placeqold(ssystem *sys, charge *charges)
 {
 double length;
-double minx, maxx, miny, maxy, minz, maxz, tilelength();
+double minx, maxx, miny, maxy, minz, maxz;
 int depth=sys->depth;
 int j, k, l, xindex, yindex, zindex, side = sys->side;
 int totalq;
@@ -606,7 +607,7 @@ void setExact(ssystem *sys, int numterms)
 int i, j, k, l, m, n;
 int side = sys->side;
 int depth = sys->depth;
-int numchgs, num_eval_pnts, first, multerms();
+int numchgs, num_eval_pnts, first;
 cube *nc, *nkid, *****cubes = sys->cubes;
 int all_mul_exact, all_loc_exact, p, num_real_panels;
 

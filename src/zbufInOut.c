@@ -36,6 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
 #include "zbufInOut.h"
+#include "zbufSort.h"
 #include "input.h"
 
 double black, white;            /* densities corresponding to shades */
@@ -217,7 +218,7 @@ void get_charge_densities(double *q, char *file, int iter)
   int index, linecnt, header_found, type;
   char str1[BUFSIZ], str2[BUFSIZ], str3[BUFSIZ], linein[BUFSIZ];
   double density;
-  FILE *fp, *fopen();
+  FILE *fp;
 
   if((fp = fopen(file, "r")) == NULL) {
     fprintf(stderr, 
@@ -296,7 +297,7 @@ face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
   int i, j, dummy;
   int autmom, autlev, numMom, numLev;
   char infile[BUFSIZ];
-  double dot(), getPlane(), relperm;
+  double relperm;
   charge *chgp;
   face *head, *tail, **faces;
   extern int x_, k_, q_iter, q_, rc_, rd_, rb_;
@@ -304,7 +305,7 @@ face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
   extern double axeslen;
   extern char *q_file;
   extern double black, white, linewd;
-  surface *surf_list, *input_surfaces();
+  surface *surf_list;
   ssystem *sys;
   int qindex=1, cindex=1;
   double tavg[3], lavg[3];
@@ -415,11 +416,11 @@ void readLines(FILE *fp, line **head, line **tail, int *numlines)
 {
   int flines = 0, falin = 0, fflag = 1, faflag = 1, getlines = 1, i, j;
   int f_;               /* f_ == 1 => ignore face and fill info */
-  char linein[BUFSIZ], **chkp, *chk, *strtok(), *cp;
+  char linein[BUFSIZ], **chkp, *chk, *cp;
   char readfile[BUFSIZ], tempc[BUFSIZ];
   double arrowsize, dotsize;
   int temp, linewd;
-  FILE *fpin, *fopen();
+  FILE *fpin;
 
   f_ = 1;                       /* hardwire to take fill/face info as
                                    equivalent to end of file */
@@ -1244,7 +1245,7 @@ void dumpPs(face **faces, int numfaces, line **lines, int numlines, FILE *fp, ch
   extern double ***axes;
   extern double black, white;
   char linein[BUFSIZ];
-  double dot(), len, temp[2], xc, yc;
+  double len, temp[2], xc, yc;
   double x, y;
   
   /* print the lines before the bounding box */

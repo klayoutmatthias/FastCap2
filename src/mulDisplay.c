@@ -40,6 +40,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulDo.h"
 #include "input.h"
 #include "savemat_mod.h"
+#include "quickif.h"
+#include "calcp.h"
 
 void dismat(double **mat, int rows, int cols);
 void dischg(charge *pq);
@@ -979,8 +981,7 @@ void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list)
   int first_offd;
   double maxdiag = 0.0, minoffd, rowttl, rowdiag, scale = 1.0, **sym_mat;
   double mat_entry;
-  char unit[BUFSIZ], name[BUFSIZ], *padName(), *spaces(), cond_name[BUFSIZ];
-  char *getConductorName();
+  char unit[BUFSIZ], name[BUFSIZ], cond_name[BUFSIZ];
   extern NAME *start_name;	/* NAME structs giving conductor names */
   Name *cname;
   extern ITER *kill_num_list, *kinp_num_list;
@@ -1156,7 +1157,7 @@ void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list)
 */
 void dumpMulSet(ssystem *sy, int numLev, int order)
 {
-  int numcubes, numsides, i, multerms();
+  int numcubes, numsides, i;
 
   for(numcubes = 1, i = 0; i < numLev; numcubes *= 8, i++);
   for(numsides = 1, i = 0; i < numLev; numsides *= 2, i++);
@@ -1204,7 +1205,6 @@ void dump_preconditioner(ssystem *sys, charge *chglist, int type)
   int num_panels, i, j;
   charge *pp, *pi;
   cube *cp;
-  double calcp();
   FILE *fp;
 
   /* find the number of panels */
@@ -1459,7 +1459,6 @@ void chkDummyList(charge **panels, int *is_dummy, int n_chgs)
 void dumpCondNames(FILE *fp, Name *name_list)
 { 
   int i;
-  char *last_alias();
   Name *cur_name;
 
   fprintf(fp, "CONDUCTOR NAMES\n");

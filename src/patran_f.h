@@ -33,15 +33,11 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  
 */
 
-#if !defined(direct_H)
-#define direct_H
+#if !defined(patran_f_H)
+#define patran_f_H
 
-int compressMat(double **mat, int size, int *is_dummy, int comp_rows);
-void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_rows);
-void invert(double **mat, int size, int *reorder);
-void solve(double **mat, double *x, double *b, int size);
-
-double **Q2PDiag(charge **chgs, int numchgs, int *is_dummy, int calc);
-double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int numpchgs, int calc);
+charge *patfront(FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
+                 Name **name_list, int *num_cond, char *name_suffix);
+char *delcr(char *str);
 
 #endif

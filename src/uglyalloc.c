@@ -114,7 +114,6 @@ static HEADER *mocore(unsigned int nu)
 */
 char *ualloc(unsigned int nbytes)
 {
-  HEADER *mocore();
   HEADER *p, *q;
   int nunits;			/* size in number of sizeof(HEADER)'s */
   int brkunits;			/* number to add to heap */

@@ -42,5 +42,7 @@ void copyBody(FILE *fp);
 void dump_line_as_ps(FILE *fp, char *psline, double x_position, double y_position, double font_size);
 void dumpFaceText(face **faces, int numfaces, FILE *fp);
 void dumpPs(face **faces, int numfaces, line **lines, int numlines, FILE *fp, char **argv, int argc, int use_density);
+face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density);
+line **getLines(char *line_file, int *numlines);
 
 #endif

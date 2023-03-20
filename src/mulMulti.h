@@ -40,8 +40,15 @@ void xyz2sphere(double x, double y, double z, double x0, double y0, double z0, d
 void evalLegendre(double cosA, double *vector, int order);
 
 void mulMultiAlloc(int maxchgs, int order, int depth);
+double **mulMulti2P(double x, double y, double z, charge **chgs, int numchgs, int order);
+double **mulQ2Multi(charge **chgs, int *is_dummy, int numchgs, double x, double y, double z, int order);
+double **mulMulti2Multi(double x, double y, double z, double xp, double yp, double zp, int order);
+
 int multerms(int order);
 int costerms(int order);
 int sinterms(int order);
+
+double iPwr(int e);
+double fact(int x);
 
 #endif

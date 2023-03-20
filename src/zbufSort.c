@@ -96,7 +96,7 @@ void crossProd(double *out, double *in1, double *in2)
 double getPlane(double *normal, double *p1, double *p2, double *p3)
 {
   int i;
-  double dot(), v12[3], v13[3], norm;
+  double v12[3], v13[3], norm;
 
   /* set up side vectors */
   for(i = 0; i < 3; i++) {
@@ -120,7 +120,7 @@ int whichSide(face *fac, face *facplane)
 {
   int i, neg, pos, zero;
   double value[MAXSIDES];      	/* holds values when subbed in plane equ */
-  double dot(), margin[MAXSIDES], temp[MAXSIDES];
+  double margin[MAXSIDES], temp[MAXSIDES];
 
   /* if planes are identical, return SAME right away */
   if(fac->rhs < facplane->rhs+MARGIN && fac->rhs > facplane->rhs-MARGIN && 
@@ -765,7 +765,7 @@ int isThereBoxOverlap(face *fac, face *facref, double *view)
   double minref[2], maxref[2];	/* bounding box coordinates */
   double minfac[2], maxfac[2];
   double x[3], y[3];		/* coordinates of x and y in facref plane */
-  double dot(), temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0;
+  double temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0;
 
   /* figure projections of fac's corners back to facref's plane rel to view */
   for(i = 0; i < fac->numsides; i++) {

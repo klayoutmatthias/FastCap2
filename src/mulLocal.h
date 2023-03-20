@@ -37,5 +37,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #define mulLocal_H
 
 void evalFacFra(double **array, int order);
+double **mulLocal2P(double x, double y, double z, charge **chgs, int numchgs, int order);
+double **mulQ2Local(charge **chgs, int numchgs, int *is_dummy, double x, double y, double z, int order);
+double **mulLocal2Local(double x, double y, double z, double xc, double yc, double zc, int order);
+double **mulMulti2Local(double x, double y, double z, double xp, double yp, double zp, int order);
 
 #endif

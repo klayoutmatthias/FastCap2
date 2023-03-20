@@ -43,6 +43,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 **************************************************************************/
 #include "mulGlobal.h"
 #include "quickif.h"
+#include "patran_f.h"
+#include "quickif.h"
 
 void input(FILE *stream, char *line, int surf_type, double *trans_vector);
 void grid_equiv_check();
@@ -61,6 +63,9 @@ void name_data(FILE *stream);
 int if_same_coord(double coord_1[3], double coord_2[3]);
 int if_same_grid(int ID, GRID *grid_ptr);
 void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count);
+char *delcr(char *str);
+charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type, char *name_suffix);
+charge *make_charges_patch(int NELS, int *element_list, int conductor_ID);
 
 #define BIG 35000              /* Size of element and node serach table. */
 #define SMALL_NUMBER 0.005     /* See functions if_same_coord() and 
@@ -86,17 +91,12 @@ int first_grid;			/* note that current_name static is not */
 int first_patch;		/*   reset since the name list must */
 int first_cfeg;			/*   be preserved as new files are read */
 
-charge *patfront(stream, file_is_patran_type, surf_type, trans_vector,
-		 name_list, num_cond, name_suffix)
-  FILE *stream;
-int *file_is_patran_type, surf_type, *num_cond;
-double *trans_vector;
-Name **name_list;
-char *name_suffix;
+charge *patfront(FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
+                 Name **name_list, int *num_cond, char *name_suffix)
 {
   int *patch_patch_table, numq=0;
   static char *line = NULL;
-  charge *make_charges_all_patches(), *firstq, *quickif();
+  charge *firstq;
   double *corner0, *corner1, *corner2, *corner3;
 
   if(line == NULL) CALLOC(line, BUFSIZ, char, ON, AMSC);
@@ -219,7 +219,7 @@ void waste_line(int num_line, FILE *stream)
 
 void file_title(FILE *stream)
 {
-  char line[BUFSIZ], *delcr();
+  char line[BUFSIZ];
   
   fgets(line, sizeof(line), stream);
   if(title[0] == '\0') strcpy(title, delcr(line));
@@ -436,7 +436,7 @@ void CFEG_table(FILE *stream)
 void name_data(FILE *stream)
 {
   int len, iv, i, j, ntype, id, patch_cnt = 0;
-  char line[BUFSIZ], *delcr();
+  char line[BUFSIZ];
   SM_PATCH *current_patch = NULL;
 
   if(start_name == NULL) {	/* if first time on first patfront() call */
@@ -545,8 +545,7 @@ int if_same_coord(double coord_1[3], double coord_2[3])
 /*
   makes 1st \n in a string = \0 and then deletes all trail/leading wh space
 */
-char *delcr(str)
-char *str;
+char *delcr(char *str)
 {
   int i, j, k;
   for(k = 0; str[k] != '\0'; k++) if(str[k] == '\n') { str[k] = '\0'; break; }
@@ -734,7 +733,7 @@ charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type,
   int NELS, LPH_ID,conductor_ID,*element_list;
   char cond_name[BUFSIZ];
   PATCH *patch_ptr;
-  charge *first_pq=0,*current_pq,*make_charges_patch();
+  charge *first_pq=0,*current_pq;
 
   cfeg_ptr = start_cfeg;
   while (cfeg_ptr) {

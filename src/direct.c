@@ -35,12 +35,12 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 #include "direct.h"
+#include "calcp.h"
 
 double **Q2PDiag(charge **chgs, int numchgs, int *is_dummy, int calc)
 {
   double **mat;
   int i, j;
-  double calcp();
 
   /* Allocate storage for the potential coefficients. */
   CALLOC(mat, numchgs, double*, ON, AQ2PD);
@@ -79,7 +79,6 @@ double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int nu
 {
   double **mat;
   int i, j;
-  double calcp();
 
   /* Allocate storage for the potential coefficients. P rows by Q cols. */
   CALLOC(mat, numpchgs, double*, ON, AQ2P);
@@ -116,7 +115,7 @@ double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int nu
 double **Q2Pfull(cube *directlist, int numchgs)
 {
   int i, j, fromp, fromq, top, toq;
-  double **mat, calcp();
+  double **mat;
   cube *pq, *pp;
   charge **pchgs, **qchgs, *eval;
 

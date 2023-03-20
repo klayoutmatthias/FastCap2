@@ -44,6 +44,7 @@ int planarize(charge *pq);
 void centroid(charge *pp, double x2);
 void ComputeMoments(charge *pp);
 void dp(charge *panel);
+double normalize(double vector[3]);
 
 #ifndef FALSE
 #define FALSE 0
@@ -95,7 +96,6 @@ void initcalcp(charge *panel_list)
   charge *pq, *npq;
   double vtemp[3];
   double length, maxlength, minlength, length20, length31, sum, sum2, delta;
-  double normalize();
   int i, j, next;
 
 #if JACDBG == ON
@@ -721,7 +721,7 @@ void ComputeMoments(charge *pp)
   static int maxorder = 0;
   static double CS[16] = { 0.0, 1.0, 1.0, 1.5, 1.5, 3.75, 1.0, 3.0, 
 			   1.5, 7.5, 1.5, 1.5, 3.75, 1.5, 7.5, 3.75 };
-  double *multi, sumc, sums, sign, **createBinom(), **createPmn();
+  double *multi, sumc, sums, sign;
   int m, n, r, halfn, flrm, ceilm, numterms, rterms;
   
   /* Allocate temporary storage and initialize arrays. */
@@ -910,7 +910,7 @@ void fileCorners(charge *pp, FILE *f)
 void calcpm(double *multi, double x, double y, double z, int origorder, int order)
 {
   charge panel, *ppanel;
-  double **mat, **mulMulti2P(), potential;
+  double **mat, potential;
   int i, numterms;
 
   /* Create a temporary panel which has evaluation point as centroid. */

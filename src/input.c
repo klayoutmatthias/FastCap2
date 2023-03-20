@@ -38,6 +38,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "zbufGlobal.h"
 #include "input.h"
 #include "calcp.h"
+#include "patran.h"
+#include "patran_f.h"
+#include "quickif.h"
 
 #include <stdio.h>
 
@@ -107,7 +110,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 void read_list_file(surface **surf_list, int *num_surf, char *list_file, int read_from_stdin)
 {
   int linecnt, end_of_chain, ref_pnt_is_inside, group_cnt;
-  FILE *fp, *fopen();
+  FILE *fp;
   char tline[BUFSIZ], file_name[BUFSIZ], plus[BUFSIZ], group_name[BUFSIZ];
   double outer_perm, inner_perm, tx, ty, tz, rx, ry, rz;
   surface *cur_surf;
@@ -688,12 +691,12 @@ void get_ps_file_base(char *argv[], int argc)
 charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
-  charge *panel_list = NULL, *cur_panel, *patfront(), *panel_group, *c_panel;
+  charge *panel_list = NULL, *cur_panel, *panel_group, *c_panel;
   surface *cur_surf;
   extern NAME *start_name, *start_name_this_time;
   extern char *title;
   NAME *name_group;
-  FILE *fp, *fopen();
+  FILE *fp;
   char surf_name[BUFSIZ];
   int patran_file_read;
 
@@ -820,9 +823,9 @@ charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
 int getUniqueCondNum(char *name, Name *name_list)
 {
   int nlen, cond;
-  char name_frag[BUFSIZ], *last_alias(), *cur_alias;
+  char name_frag[BUFSIZ], *cur_alias;
   Name *cur_name, *prev_name;
-  int i, j, alias_match_name(), times_in_list;
+  int i, j, times_in_list;
 
   nlen = strlen(name);
   times_in_list = 0;
@@ -924,7 +927,6 @@ void parse_command_line(char *argv[], int argc, int *autmom, int *autlev, double
 {
   int cmderr, i;
   char **chkp, *chk;
-  long strtol();
   extern char *kill_name_list, *kinp_name_list;
   extern ITER *kill_num_list, *kinp_num_list;
   extern double iter_tol;
@@ -1278,7 +1280,6 @@ surface *input_surfaces(char *argv[], int argc, int *autmom, int *autlev, double
                         int *numMom, int *numLev, char *infile)
 {
   int read_from_stdin, num_surf;
-  surface *read_all_surfaces();
   char *surf_list_file, *input_file;
 
   /* initialize defaults */
@@ -1462,9 +1463,9 @@ void resolve_kill_lists(ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list, 
 charge *input_problem(char *argv[], int argc, int *autmom, int *autlev, double *relperm,
                       int *numMom, int *numLev, Name **name_list, int *num_cond)
 {
-  surface *surf_list, *input_surfaces();
-  char infile[BUFSIZ], *ctime(), hostname[BUFSIZ];
-  charge *read_panels(), *chglist;
+  surface *surf_list;
+  char infile[BUFSIZ], hostname[BUFSIZ];
+  charge *chglist;
   long clock;
   extern ITER *kill_num_list, *qpic_num_list, *kinp_num_list, *kq_num_list;
   extern char *kill_name_list, *qpic_name_list, *kinp_name_list;

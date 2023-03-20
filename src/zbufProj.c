@@ -36,6 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
 #include "zbufProj.h"
+#include "zbufSort.h"
 
 /*
   takes a list of 3d lines and returns a list of 3d lines mapped onto a plane
@@ -45,7 +46,7 @@ void image(face **faces, int numfaces, line **lines, int numlines, double *norma
 /* double rhs;			/* rhs of the plane's equation */
 {
   int i, j, k;
-  double alpha, dot(), temp[3];
+  double alpha, temp[3];
   extern double ***axes;
   extern int x_;
 
@@ -129,7 +130,6 @@ void image(face **faces, int numfaces, line **lines, int numlines, double *norma
 void initFaces(face **faces, int numfaces, double *view)
 {
   int f, i;
-  double dot();
 
   /* substitue the view point into each face's plane equation
      - if it's negative then normal points twrd object => used negative nrml*/
@@ -151,7 +151,7 @@ void flatten(face **faces, int numfaces, line **lines, int numlines, double rhs,
 /* double rotation;		/* rotation of image y axis rel to 1st line */
 {
   int i, j, k;
-  double dot(), temp, tvec[3], tvec1[3], crot, srot, alpha;
+  double temp, tvec[3], tvec1[3], crot, srot, alpha;
   double y[3], x[3], z[3];		/* unit vectors */
   double origin[3], sinth, costh, theta;
   extern double ***axes;
@@ -463,7 +463,7 @@ double *getAvg(face **faces, int numfaces, line **lines, int numlines, int flag)
 */
 double getSphere(double *avg, face **faces, int numfaces, line **lines, int numlines)
 {
-  double radius = 0.0, dot(), temp[3];
+  double radius = 0.0, temp[3];
   int i, j, k, l;
   extern int x_;
   extern double ***axes;
@@ -505,7 +505,7 @@ double getSphere(double *avg, face **faces, int numfaces, line **lines, int numl
 double getNormal(double *normal, double radius, double *avg, double *view, double distance)
 {
   int i, k, j, axes_too_big, first;
-  double rhs, dot(), norm, anorm, max_anorm;
+  double rhs, norm, anorm, max_anorm;
   extern int x_;
   extern double ***axes;
 

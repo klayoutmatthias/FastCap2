@@ -36,15 +36,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "mulMats.h"
 #include "mulMulti.h"
+#include "mulLocal.h"
 #include "direct.h"
-
-double **Q2P(), **Q2PDiag();
-double **mulMulti2P(), **mulQ2Multi(), **mulMulti2Multi();
-double **mulLocal2Local(), **mulLocal2P(), **mulQ2Local(), **mulMulti2Local();
-
-void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int n_chg, int n_eval, int row_offset,
-                      int col_offset, charge **eval_panels, charge **chg_panels, int *eval_is_dummy, 
-                      int *chg_is_dummy);
 
 int *localcnt, *multicnt, *evalcnt;     /* counts of builds done by level */
 

@@ -35,6 +35,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 #include "quickif.h"
+#include "patran_f.h"
 
 /*
   tells if any conductor name alias matches a string
@@ -117,7 +118,7 @@ char *last_alias(Name *cur_name)
 int getConductorNum(char *name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *prev_name;
-  int i, alias_match();
+  int i;
 
   /* if this is the very first name, make and load struct on *name_list */
   if(*num_cond == 0) {
@@ -156,7 +157,7 @@ int getConductorNum(char *name, Name **name_list, int *num_cond)
 int getConductorNumNoAdd(char *name, Name *name_list)
 {
   Name *cur_name, *prev_name;
-  int i, alias_match();
+  int i;
 
   /* check to see if name is present */
   for(cur_name = name_list, i = 1; cur_name != NULL;
@@ -234,7 +235,6 @@ int oldrenameConductor(char *old_name, char *new_name, Name **name_list, int *nu
 int renameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *cur_name2, *prev_name;
-  int alias_match();
   int i, j;
 
   /* check to see if old name is present in names or their aliases */
@@ -270,7 +270,7 @@ charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans,
 /* Name **name_list;		/* name list pointer */
 {
   int linecnt = 2, i, cond;
-  char *delcr(), temp[BUFSIZ], temp2[BUFSIZ], line1[BUFSIZ], *cp, *strtok();
+  char temp[BUFSIZ], temp2[BUFSIZ], line1[BUFSIZ], *cp;
   char condstr[BUFSIZ];
   double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
   quadl *fstquad = NULL, *curquad;

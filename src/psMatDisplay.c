@@ -196,7 +196,6 @@ void dump_ps_mat(char *filename, int row, int col, int num_row, int num_col, cha
   double widx, widy;
   double blk_size_x, blk_size_y;
   static double blk_size;
-  FILE *fopen();
 
   static int alias_size_r, alias_size_c, alias_size;
   static int num_alias_r, num_alias_c;
