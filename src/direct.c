@@ -112,7 +112,7 @@ double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int nu
   used only in conjunction with DMPMAT == ON  and DIRSOL == ON
   to make 1st directlist mat = full P mat
 */
-double **Q2Pfull(cube *directlist, int numchgs)
+static double **Q2Pfull(cube *directlist, int numchgs)
 {
   int i, j, fromp, fromq, top, toq;
   double **mat;
@@ -369,7 +369,7 @@ void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_row
 Checks to see if the matrix has the M-matrix sign pattern and if
 it is diagonally dominant. 
 */
-void matcheck(double **mat, int rows, int size)
+static void matcheck(double **mat, int rows, int size)
 {
   double rowsum;
   int i, j;
@@ -392,7 +392,7 @@ void matcheck(double **mat, int rows, int size)
 }
 
 
-void matlabDump(double **mat, int size, char *name)
+static void matlabDump(double **mat, int size, char *name)
 {
 FILE *foo;
 int i,j;

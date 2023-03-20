@@ -771,7 +771,7 @@ being exact.
 /*
   returns the number of charges in the lowest level cubes contained in "cp"
 */
-int cntDwnwdChg(cube *cp, int depth)
+static int cntDwnwdChg(cube *cp, int depth)
 {
   int i;
   int cnt;

@@ -44,7 +44,7 @@ double black, white;            /* densities corresponding to shades */
 /*
   loads axes' lines
 */
-void setupLine(double ***axi, int index, double x1, double y1, double z1, double x2, double y2, double z2)
+static void setupLine(double ***axi, int index, double x1, double y1, double z1, double x2, double y2, double z2)
 {
   axi[index][0][0] = x1;
   axi[index][0][1] = y1;
@@ -134,7 +134,7 @@ charge *make_charges_from_patches()
   - levels are scaled to match the range of densities present
   - sets the values of the extremal densities (`black' and `white')
 */
-void figure_grey_levels(face **face_list, double *chgs, charge *chglist, int use_density)
+static void figure_grey_levels(face **face_list, double *chgs, charge *chglist, int use_density)
 {
   int first, i;
   double dif;
@@ -213,7 +213,7 @@ void figure_grey_levels(face **face_list, double *chgs, charge *chglist, int use
   CHARGE DENSITIES ARE NOW READ DIRECTLY FROM VECTORS IN SYSTEM STRUCTS
   THIS FUNCTION IS NOT USED
 */
-void get_charge_densities(double *q, char *file, int iter)
+static void get_charge_densities(double *q, char *file, int iter)
 {
   int index, linecnt, header_found, type;
   char str1[BUFSIZ], str2[BUFSIZ], str3[BUFSIZ], linein[BUFSIZ];
@@ -276,7 +276,7 @@ void get_charge_densities(double *q, char *file, int iter)
 /*
   figures the corner coordinates in absolute coordinates
 */
-void getAbsCoord(double *vec, charge *panel, int num)
+static void getAbsCoord(double *vec, charge *panel, int num)
 {
   double *cor = panel->corner[num];
   double *x = panel->X, *y = panel->Y, *z = panel->Z;
@@ -412,7 +412,7 @@ face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
               dot size 2.0
   to get just a dot, put in tiny length line and arrow size
 */
-void readLines(FILE *fp, line **head, line **tail, int *numlines)
+static void readLines(FILE *fp, line **head, line **tail, int *numlines)
 {
   int flines = 0, falin = 0, fflag = 1, faflag = 1, getlines = 1, i, j;
   int f_;               /* f_ == 1 => ignore face and fill info */
@@ -558,7 +558,7 @@ line **getLines(char *line_file, int *numlines)
 /*
   figure the bounding box and write ps file line
 */
-void getBndingBox(face **faces, int numfaces, line **lines, int numlines, int *lowx, int *lowy, FILE *fp, double ***axes)
+static void getBndingBox(face **faces, int numfaces, line **lines, int numlines, int *lowx, int *lowy, FILE *fp, double ***axes)
 {
   int upx, upy;
   double xmax, ymax, minx, miny;
@@ -622,7 +622,7 @@ void getBndingBox(face **faces, int numfaces, line **lines, int numlines, int *l
 /*
   dump axes to ps file
 */
-void dumpAxes(double ***axi, FILE *fp)
+static void dumpAxes(double ***axi, FILE *fp)
 {
   int i;
 
@@ -883,7 +883,7 @@ fprintf(fp, "%s%s%s%s%s", str, str2, str3, str4, str5);
 /*
   numbers the faces for checking 
 */
-void numberFaces(face **faces, int numfaces, FILE *fp)
+static void numberFaces(face **faces, int numfaces, FILE *fp)
 {
   int i, j, mid[2];
   double cent[2];
@@ -910,7 +910,7 @@ void numberFaces(face **faces, int numfaces, FILE *fp)
 /*
   number a face for checking - used to cover up obscured faces' numbers
 */
-void numberFace(face *fac, FILE *fp)
+static void numberFace(face *fac, FILE *fp)
 {
   int j, mid[2];
   double cent[2];
@@ -935,7 +935,7 @@ void numberFace(face *fac, FILE *fp)
 /*
   dumps adjacency graph as a ps file - uses both input order and graph order
 */
-void dumpAdjGraph(face **faces, int numfaces, FILE *fp)
+static void dumpAdjGraph(face **faces, int numfaces, FILE *fp)
 {
   int f, i;
   double x, y;                  /* current point in plot */
@@ -1058,7 +1058,7 @@ void dump_line_as_ps(FILE *fp, char *psline, double x_position, double y_positio
 /*
   dump nblocks blocks with shades between white and black, labeled with density
 */
-void dump_shading_key(FILE *fp, int nblocks, int precision, double font_size, int use_density)
+static void dump_shading_key(FILE *fp, int nblocks, int precision, double font_size, int use_density)
 {
   int i;
   double x_right, y_top, block_hgt, block_x, block_y, string_x, diddle_x;
@@ -1138,7 +1138,7 @@ void dump_shading_key(FILE *fp, int nblocks, int precision, double font_size, in
 /*
   numbers the lines for checking 
 */
-void numberLines(line **lines, int numlines, FILE *fp)
+static void numberLines(line **lines, int numlines, FILE *fp)
 {
   int i, mid[2];
 
@@ -1160,7 +1160,7 @@ void numberLines(line **lines, int numlines, FILE *fp)
 /*
   lobotomized version of dumpPs in orthoPs.c - dumps lines/arrows
 */
-void dumpLines(FILE *fp, line **lines, int numlines)
+static void dumpLines(FILE *fp, line **lines, int numlines)
 {
   int i, j, w_;
   double temp[3], temp1[3], x, y;

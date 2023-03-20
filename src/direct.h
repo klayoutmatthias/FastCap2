@@ -40,6 +40,7 @@ int compressMat(double **mat, int size, int *is_dummy, int comp_rows);
 void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_rows);
 void invert(double **mat, int size, int *reorder);
 void solve(double **mat, double *x, double *b, int size);
+double **ludecomp(double **matin, int size, int allocate);
 
 double **Q2PDiag(charge **chgs, int numchgs, int *is_dummy, int calc);
 double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int numpchgs, int calc);

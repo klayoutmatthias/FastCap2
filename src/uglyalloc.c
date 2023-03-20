@@ -221,7 +221,7 @@ char *ualloc(unsigned int nbytes)
   - checks if length corresponds to pointers (UGDEBG == 1 or 2)
   - prints information about list of allocated blocks (UGDEBG == 2)
 */
-void ualloc_verify()
+static void ualloc_verify()
 {
   HEADER *p;
   int cnt = 1;
@@ -264,7 +264,7 @@ void ualloc_verify()
         memory lost in each header struct (a problem with many small things)
   - if base == NULL (not using ugly allocator), final break value is printed
 */
-void uallocEfcy(long memcount)
+static void uallocEfcy(long memcount)
 {
 #if UGDEBG == 2
   HEADER *p;

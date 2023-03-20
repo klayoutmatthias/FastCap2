@@ -43,7 +43,7 @@ int cnt;			/* used in setting up the depth graph */
 /*
   returns TRUE if difference of two doubles is within machine precision
 */
-int diff_is_zero(double num1, double num2, double bias)
+static int diff_is_zero(double num1, double num2, double bias)
 {
   double margin;
 
@@ -58,7 +58,7 @@ int diff_is_zero(double num1, double num2, double bias)
   returns TRUE if diff. of two doubles is negative within machine precision
   - note that argument order is relevant
 */
-int diff_is_negative(double num1, double num2, double bias)
+static int diff_is_negative(double num1, double num2, double bias)
 {
   double margin;
 
@@ -116,7 +116,7 @@ double getPlane(double *normal, double *p1, double *p2, double *p3)
 /*
   returns POS, NEG or SPLIT for which side face corners are rel to plane
 */
-int whichSide(face *fac, face *facplane)
+static int whichSide(face *fac, face *facplane)
 {
   int i, neg, pos, zero;
   double value[MAXSIDES];      	/* holds values when subbed in plane equ */
@@ -169,8 +169,7 @@ int whichSide(face *fac, face *facplane)
   - if lines are parallel up to MARGIN, FALSE is returned
   - lines than hit at segment endpoints up to MARGIN return FALSE
 */
-int doLinesIntersect(isect, from1, to1, from2, to2)
-double *from1, *to1, *from2, *to2, *isect;
+static int doLinesIntersect(double *isect, double *from1, double *to1, double *from2, double *to2)
 {
   double A[2][2], b[2];
   double det, margin, temp1, temp2, margin1, margin2;
@@ -229,7 +228,7 @@ double *from1, *to1, *from2, *to2, *isect;
   returns TRUE if one panel is completely inside the other
   - does careful checks when vertices on one face are on verts, sides of other
 */
-int face_is_inside(double **corners1, int ccnt1, double **corners2, int ccnt2, double *com_pnt)
+static int face_is_inside(double **corners1, int ccnt1, double **corners2, int ccnt2, double *com_pnt)
 {
   int i, j, k, n, ccnt, zeros, pos, neg, ncnt;
   double *sfrom, *sto, margin1, margin2, **refcor, **curcor;
@@ -495,7 +494,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
   - checks for intersections between each line of fac and all sides of facref
   - also checks for complete overlap (one face inside the other)
 */
-int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, double *normal)
+static int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, double *normal)
 {
   int i, j, k, olap[2], is_overlap, isect_cnt;
   static double ***cproj = NULL;	/* corners of faces in view plane */
@@ -756,7 +755,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, double *n
 /*
   returns TRUE if bounding box of facref and fac (proj to facref's plane) insct
 */
-int isThereBoxOverlap(face *fac, face *facref, double *view)
+static int isThereBoxOverlap(face *fac, face *facref, double *view)
 {
   int i, j, olap[2];
   double cproj[MAXSIDES][3];	/* corners of fac in facref's plane */
@@ -912,7 +911,7 @@ double *view;
 /*
   recursive guts of below
 */
-int chkCycle(face *fac, face *ref, FILE *fp)
+static int chkCycle(face *fac, face *ref, FILE *fp)
 {
   int b, i;
 
@@ -964,7 +963,7 @@ void dumpCycles(face **faces, int numfaces, FILE *file)
 /*
   recursively sets depths of faces
 */
-void setDepth(face *fac)
+static void setDepth(face *fac)
 {
   int i;
 

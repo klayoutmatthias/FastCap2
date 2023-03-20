@@ -241,7 +241,7 @@ void initcalcp(charge *panel_list)
 /*
   determine if normal needs to be flipped to get dielectric bdry cond right
 */
-int oldflip_normal(charge *panel)
+static int oldflip_normal(charge *panel)
 {
   int i;
   double x, y, z;
@@ -468,7 +468,7 @@ double normalize(double vector[3])
 }
 
 /* Assumes the vectors are normalized. */
-int If_Equal(double vector1[3], double vector2[3])
+static int If_Equal(double vector1[3], double vector2[3])
 {
   int i;
 
@@ -870,7 +870,7 @@ void dp(charge *panel)
 #define DIS 2
 #define SCALE 5
 
-void testCalcp(charge *pp)
+static void testCalcp(charge *pp)
 {
 
   double offx, offy, offz, x, y, z, mult;
@@ -897,7 +897,7 @@ void testCalcp(charge *pp)
 }
 
 
-void fileCorners(charge *pp, FILE *f)
+static void fileCorners(charge *pp, FILE *f)
 {
   int i;
 
@@ -907,7 +907,7 @@ void fileCorners(charge *pp, FILE *f)
 
 
 /* Test the moment code. */
-void calcpm(double *multi, double x, double y, double z, int origorder, int order)
+static void calcpm(double *multi, double x, double y, double z, int origorder, int order)
 {
   charge panel, *ppanel;
   double **mat, potential;

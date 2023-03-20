@@ -55,7 +55,6 @@ void mulMatDirect(ssystem *sys)
   extern double lutime, dirtime;
 
 #if DIRSOL == ON || EXPGCR == ON
-  double **ludecomp();
   extern double *trimat, *sqrmat; /* flattened triangular, square matrices */
   extern int up_size, eval_size;
   extern int *real_index;       /* for map btwn condensed/expanded vectors */
@@ -173,13 +172,13 @@ void mulMatDirect(ssystem *sys)
 /*
 MulMatPrecond creates the preconditioner matrix
 */
-void bdmulMatPrecond(ssystem *sys)
+static void bdmulMatPrecond(ssystem *sys)
 {
   cube *nc, *kid, *kidnbr;
   double **mat, **nbrmat;
   int i, j, k, l, kidi;
   int kidsize, nbrsize, size, row, col, first, offset;
-  double **ludecomp(), factor;
+  double factor;
   charge *pc;
   surface *surf;
 

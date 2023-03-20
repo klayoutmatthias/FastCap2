@@ -70,10 +70,10 @@ typedef struct {
 } Fmatrix;
 
 #ifdef __STDC__
-void savemat(FILE *fp, int type, char *pname, int mrows, int ncols, 
-             int imagf, double *preal, double *pimag)
+static void savemat(FILE *fp, int type, char *pname, int mrows, int ncols,
+                    int imagf, double *preal, double *pimag)
 #else
-void savemat(fp, type, pname, mrows, ncols, imagf, preal, pimag)
+static void savemat(fp, type, pname, mrows, ncols, imagf, preal, pimag)
 FILE *fp;       /* File pointer */
 int type;       /* Type flag: Normally 0 for PC, 1000 for Sun, Mac, */
 		/* Apollo, and other Motorola format, */

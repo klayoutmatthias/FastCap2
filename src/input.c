@@ -107,7 +107,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 	be renamed; this is helpful when idenifying conductors to omit
 	from capacitance calculations using the -k option
 */
-void read_list_file(surface **surf_list, int *num_surf, char *list_file, int read_from_stdin)
+static void read_list_file(surface **surf_list, int *num_surf, char *list_file, int read_from_stdin)
 {
   int linecnt, end_of_chain, ref_pnt_is_inside, group_cnt;
   FILE *fp;
@@ -415,7 +415,7 @@ charge *panel_list;
   add dummy panel structs to the panel list for electric field evaluation
   - assumes its handed a list of DIELEC or BOTH type panels
 */
-void add_dummy_panels(charge *panel_list)
+static void add_dummy_panels(charge *panel_list)
 {
   double h;
   charge *dummy_list = NULL;
@@ -488,7 +488,7 @@ char *hack_path(char *str)
   - dummy panels are skipped
   - dielectric panels, with conductor number 0, are also skipped
 */
-void reassign_cond_numbers(charge *panel_list, NAME *name_list, char *surf_name)
+static void reassign_cond_numbers(charge *panel_list, NAME *name_list, char *surf_name)
 {
   int i, j, cond_nums[MAXCON], num_cond, cond_num_found, temp;
   char str[BUFSIZ];
@@ -560,7 +560,7 @@ void reassign_cond_numbers(charge *panel_list, NAME *name_list, char *surf_name)
   negates all the conductor numbers - used to make a panel list's conds unique
     just before renumbering
 */
-void negate_cond_numbers(charge *panel_list, NAME *name_list)
+static void negate_cond_numbers(charge *panel_list, NAME *name_list)
 {
   charge *cur_panel;
   NAME *cur_name;
@@ -579,7 +579,7 @@ void negate_cond_numbers(charge *panel_list, NAME *name_list)
 /*
   for debug - dumps the iter list
 */
-int dump_ilist()
+static int dump_ilist()
 {
   ITER *cur_iter;
   extern ITER *qpic_num_list;
@@ -688,7 +688,7 @@ void get_ps_file_base(char *argv[], int argc)
   align the normals of all the panels in each surface so they point
     towards the same side as where the ref point is (dielectric files only)
 */
-charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
+static charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
   charge *panel_list = NULL, *cur_panel, *panel_group, *c_panel;
@@ -820,7 +820,7 @@ charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
   NOTFND => neither name by itself nor with group name is not in list
   - any unique leading part of the name%group_name string may be specified 
 */
-int getUniqueCondNum(char *name, Name *name_list)
+static int getUniqueCondNum(char *name, Name *name_list)
 {
   int nlen, cond;
   char name_frag[BUFSIZ], *cur_alias;
@@ -862,7 +862,7 @@ int getUniqueCondNum(char *name, Name *name_list)
   - conductor names can't have any %'s
   - redundant names are detected as errors
 */
-ITER *get_kill_num_list(Name *name_list, char *kill_name_list)
+static ITER *get_kill_num_list(Name *name_list, char *kill_name_list)
 {
   int i, j, start_token, end_token, end_name, cond;
   char name[BUFSIZ], group_name[BUFSIZ];
@@ -922,8 +922,8 @@ ITER *get_kill_num_list(Name *name_list, char *kill_name_list)
 /*
   command line parsing routine
 */
-void parse_command_line(char *argv[], int argc, int *autmom, int *autlev, double *relperm, int *numMom, int *numLev,
-                        char **input_file, char **surf_list_file, int *read_from_stdin)
+static void parse_command_line(char *argv[], int argc, int *autmom, int *autlev, double *relperm, int *numMom, int *numLev,
+                               char **input_file, char **surf_list_file, int *read_from_stdin)
 {
   int cmderr, i;
   char **chkp, *chk;
@@ -1200,8 +1200,8 @@ void parse_command_line(char *argv[], int argc, int *autmom, int *autlev, double
 /*
   surface information input routine - panels are read by read_panels()
 */
-surface *read_all_surfaces(char *input_file, char *surf_list_file, int read_from_stdin, char *infile,
-                           double relperm)
+static surface *read_all_surfaces(char *input_file, char *surf_list_file, int read_from_stdin, char *infile,
+                                  double relperm)
 {
   int num_surf, i;
   char group_name[BUFSIZ];
@@ -1276,8 +1276,8 @@ surface *read_all_surfaces(char *input_file, char *surf_list_file, int read_from
   - inputs surfaces (ie file names whose panels are read in read_panels)
   - sets parameters accordingly
 */
-surface *input_surfaces(char *argv[], int argc, int *autmom, int *autlev, double *relperm,
-                        int *numMom, int *numLev, char *infile)
+static surface *input_surfaces(char *argv[], int argc, int *autmom, int *autlev, double *relperm,
+                               int *numMom, int *numLev, char *infile)
 {
   int read_from_stdin, num_surf;
   char *surf_list_file, *input_file;
@@ -1296,7 +1296,7 @@ surface *input_surfaces(char *argv[], int argc, int *autmom, int *autlev, double
 /*
   dump the data associated with the input surfaces
 */
-void dumpSurfDat(surface *surf_list)
+static void dumpSurfDat(surface *surf_list)
 {
   surface *cur_surf;
 
@@ -1345,7 +1345,7 @@ void dumpSurfDat(surface *surf_list)
 /*
   replaces name (and all aliases) corresponding to "num" with unique string
 */
-void remove_name(Name **name_list, int num)
+static void remove_name(Name **name_list, int num)
 {
   static char str[] = "%`_^#$REMOVED";
   Name *cur_name, *cur_alias;
@@ -1379,7 +1379,7 @@ void remove_name(Name **name_list, int num)
 /*
   removes (unlinks from linked list) panels that are on conductors to delete
 */
-void remove_conds(charge **panels, ITER *num_list, Name **name_list)
+static void remove_conds(charge **panels, ITER *num_list, Name **name_list)
 {
   ITER *cur_num;
   charge *cur_panel, *prev_panel;
@@ -1415,7 +1415,7 @@ void remove_conds(charge **panels, ITER *num_list, Name **name_list)
   -rc list: no restrictions
   -ri/-rs: can't exhaust all conductors with combination of these lists
 */
-void resolve_kill_lists(ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list, int num_cond)
+static void resolve_kill_lists(ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list, int num_cond)
 {
   int i, lists_exhaustive;
   ITER *cur_num;

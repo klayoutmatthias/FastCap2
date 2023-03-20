@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(FastCap2 LANGUAGES C)
 
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -22,6 +23,7 @@ add_executable(FastCap2
 )
 
 target_link_libraries(FastCap2 m)
+target_compile_options(FastCap2 PRIVATE -Wmissing-prototypes)
 
 install(TARGETS FastCap2
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

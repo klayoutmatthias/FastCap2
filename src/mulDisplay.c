@@ -43,18 +43,18 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "quickif.h"
 #include "calcp.h"
 
-void dismat(double **mat, int rows, int cols);
-void dischg(charge *pq);
-void disfchg(charge *pq);
-void dissimpcube(cube *pc);
-void dumpChgsWDummy(charge **chgs, int numchgs, int *is_dummy, double x, double y, double z);
+static void dismat(double **mat, int rows, int cols);
+static void dischg(charge *pq);
+static void disfchg(charge *pq);
+static void dissimpcube(cube *pc);
+static void dumpChgsWDummy(charge **chgs, int numchgs, int *is_dummy, double x, double y, double z);
 
-void disExtrasimpcube(cube *pc)
+static void disExtrasimpcube(cube *pc)
 {
   printf("cubes[%d][%d][%d][%d]\n", pc->level, pc->j, pc->k, pc->l);
 }
 
-void disExParsimpcube(cube *pc)
+static void disExParsimpcube(cube *pc)
 {
   cube *pa = pc->parent;
   printf("cubes[%d][%d][%d][%d], ", pc->level, pc->j, pc->k, pc->l);
@@ -72,7 +72,7 @@ int i;
 	 pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
 }
 
-void discube(cube *pc)
+static void discube(cube *pc)
 {
 int i;
   printf("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
@@ -99,13 +99,13 @@ int i;
   }
 }
 
-void disupcube(cube *pc)
+static void disupcube(cube *pc)
 {
 
 
 }
 
-void disdirectcube(cube *pc)
+static void disdirectcube(cube *pc)
 {
 int i;
   for(i=0; i < pc->directnumvects; i++) {
@@ -119,7 +119,7 @@ int i;
 }
 
 
-void dissys(ssystem *sys)
+static void dissys(ssystem *sys)
 {
 int i, j, k, l, side;
   printf("side=%d depth=%d order=%d\n",
@@ -142,7 +142,7 @@ int i, j, k, l, side;
 
 
 
-void dismat(double **mat, int rows, int cols)
+static void dismat(double **mat, int rows, int cols)
 {
 int i,j;
   if(cols != 0) {
@@ -158,7 +158,7 @@ int i,j;
 }
 
 
-void disvect(double *v, int size)
+static void disvect(double *v, int size)
 {
 int i;
   for(i=0; i < size; i++) {
@@ -168,12 +168,12 @@ int i;
   printf("\n");
 }
 
-void dischg(charge *pq)
+static void dischg(charge *pq)
 {
   printf("cond=%d index=%d\n", pq->cond, pq->index);
 }
 
-void disallchg(charge *pq) 
+static void disallchg(charge *pq)
 {
 charge *nq;
   for(nq = pq; nq != NULL; nq = nq->next) disfchg(pq);
@@ -195,7 +195,7 @@ void disfchg(charge *pq)
 /*
   dumps a rows x cols matrix of doubles; assumes indices from zero 
 */
-void dumpMat(double **mat, int rows, int cols)
+static void dumpMat(double **mat, int rows, int cols)
 {
   int i, j;
   for(i = 0; i < rows; i++) {
@@ -227,7 +227,7 @@ void dumpCorners(FILE *fp, double **mat, int rows, int cols)
 /*
   dumps a vector of itegers along side a vector of doubles, index from zero
 */
-void dumpVecs(double *dblvec, int *intvec, int size)
+static void dumpVecs(double *dblvec, int *intvec, int size)
 {
   int i;
 
@@ -239,7 +239,7 @@ void dumpVecs(double *dblvec, int *intvec, int size)
 /*
   dumps the relative coordinates of an array of charges or evaluation pnts
 */
-void dumpChgs(charge **chgs, int numchgs, double x, double y, double z)
+static void dumpChgs(charge **chgs, int numchgs, double x, double y, double z)
 {
   int i;
   double rho, cosA, beta;
@@ -293,7 +293,7 @@ void dumpChgsWDummy(charge **chgs, int numchgs, int *is_dummy, double x, double 
 /*
   display the matrix built for a given charge to multipole transformation
 */
-void dispQ2M(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order)
+static void dispQ2M(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order)
 {
   fprintf(stdout, "\nQ2M MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(mat, multerms(order), numchgs);
@@ -305,7 +305,7 @@ void dispQ2M(double **mat, charge **chgs, int numchgs, double x, double y, doubl
 /*
   display the matrix built for a given multipole to local transformation
 */
-void dispM2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
+static void dispM2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
 {
   fprintf(stdout, 
    "\nM2L MATRIX: multi at (%.5e %.5e %.5e) -> local at (%.5e %.5e %.5e)\n",
@@ -316,7 +316,7 @@ void dispM2L(double **mat, double x, double y, double z, double xp, double yp, d
 /*
   display the matrix built for a given charge to local transformation
 */
-void dispQ2L(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order)
+static void dispQ2L(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order)
 {
   fprintf(stdout, "\nQ2L MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(mat, multerms(order), numchgs);
@@ -328,7 +328,7 @@ void dispQ2L(double **mat, charge **chgs, int numchgs, double x, double y, doubl
 /*
   display the matrix built for a given charge to potential transformation
 */
-void dispQ2P(double **mat, charge **chgs, int numchgs, int *is_dummy, charge **pchgs, int numpchgs)
+static void dispQ2P(double **mat, charge **chgs, int numchgs, int *is_dummy, charge **pchgs, int numpchgs)
 {
   fprintf(stdout, "\nQ2P MATRIX:\n");
   dumpMat(mat, numpchgs, numchgs);
@@ -343,7 +343,7 @@ void dispQ2P(double **mat, charge **chgs, int numchgs, int *is_dummy, charge **p
 /*
   display the matrix built for a given charge to potential transformation
 */
-void dispQ2PDiag(double **mat, charge **chgs, int numchgs, int *is_dummy)
+static void dispQ2PDiag(double **mat, charge **chgs, int numchgs, int *is_dummy)
 {
   fprintf(stdout, "\nQ2PDiag MATRIX:\n");
   dumpMat(mat, numchgs, numchgs);
@@ -355,7 +355,7 @@ void dispQ2PDiag(double **mat, charge **chgs, int numchgs, int *is_dummy)
 /*
   display the matrix built for a given multipole to multipole transformation
 */
-void dispM2M(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
+static void dispM2M(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
 {
   fprintf(stdout, 
       "\nM2M MATRIX: cube at (%.5e %.5e %.5e) shifted to (%.5e %.5e %.5e)\n", 
@@ -366,7 +366,7 @@ void dispM2M(double **mat, double x, double y, double z, double xp, double yp, d
 /*
   display the matrix built for a given local to local transformation
 */
-void dispL2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
+static void dispL2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
 {
   fprintf(stdout, 
       "\nL2L MATRIX: cube at (%.5e %.5e %.5e) shifted to (%.5e %.5e %.5e)\n", 
@@ -377,7 +377,7 @@ void dispL2L(double **mat, double x, double y, double z, double xp, double yp, d
 /*
   display the matrix built for a given multipole to potential transformation
 */
-void dispM2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order)
+static void dispM2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order)
 {
   fprintf(stdout, "\nM2P MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(mat, numchgs, multerms(order));
@@ -389,7 +389,7 @@ void dispM2P(double **mat, double x, double y, double z, charge **chgs, int numc
 /*
   display the matrix built for a given local to potential transformation
 */
-void dispL2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order)
+static void dispL2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order)
 {
   fprintf(stdout, "\nL2P MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(mat, numchgs, multerms(order));
@@ -401,7 +401,7 @@ void dispL2P(double **mat, double x, double y, double z, charge **chgs, int numc
 /*
   displays upward pass and moment vectors associated with a cube - debug only
 */
-void dumpUpVecs(cube *pc)
+static void dumpUpVecs(cube *pc)
 {
   int i, j;
   fprintf(stdout, 
@@ -427,7 +427,7 @@ void dumpUpVecs(cube *pc)
 /*
   displays the upward pass vectors for the eight level 1 cubes - debug only
 */
-void dumpLevOneUpVecs(ssystem *sys)
+static void dumpLevOneUpVecs(ssystem *sys)
 {
   int i, j, k;
   cube *****cubes = sys->cubes;
@@ -444,7 +444,7 @@ void dumpLevOneUpVecs(ssystem *sys)
   checks a cube (direct, local or eval) list for bad cube structs - debug only
   -- doesn't quite do this - always uses direct list for one thing
 */
-void chkList(ssystem *sys, int listtype)
+static void chkList(ssystem *sys, int listtype)
 /* int listtype;			/* DIRECT, LOCAL or EVAL */
 {
   int cnt[BUFSIZ];		/* # of cubes processed by level */
@@ -513,7 +513,7 @@ void chkList(ssystem *sys, int listtype)
 /*
   chks a cube for bad cube struct (direct, local or eval) entries - debug only
 */
-void chkCube(ssystem *sys, cube *nc, int listtype)
+static void chkCube(ssystem *sys, cube *nc, int listtype)
 /* int listtype;			/* DIRECT, LOCAL or EVAL */
 {
   int depth = sys->depth;
@@ -560,7 +560,7 @@ void chkCube(ssystem *sys, cube *nc, int listtype)
 /*
   checks the lowest level cubes for trouble using chkCube - debug only
 */
-void chkLowLev(ssystem *sys, int listtype)
+static void chkLowLev(ssystem *sys, int listtype)
 /* int listtype;			/* DIRECT, LOCAL or EVAL */
 {
   int i, j, k, l, side, depth = sys->depth, cnt = 0;
@@ -607,7 +607,7 @@ void dump_face(FILE *fp, face *fac)
 /*
   core display routine used below
 */
-void dumpSynCore1(char *str, int depth, int *fcnt, int *excnt, int *emcnt, int *tcnt)
+static void dumpSynCore1(char *str, int depth, int *fcnt, int *excnt, int *emcnt, int *tcnt)
 {
   int i;
   fprintf(stdout, "%-13s", str);
@@ -625,7 +625,7 @@ void dumpSynCore1(char *str, int depth, int *fcnt, int *excnt, int *emcnt, int *
 /*
   core display rtn used below
 */
-void dumpSynCore2(char *str, int depth, int *cnt)
+static void dumpSynCore2(char *str, int depth, int *cnt)
 {
   int i;
 
@@ -646,7 +646,7 @@ void dumpSynCore2(char *str, int depth, int *cnt)
   displays number of exact, full, empty and total cubes per level in
   all cubes, and eval, direct, multi and local lists
 */
-void dumpSynop(ssystem *sys)
+static void dumpSynop(ssystem *sys)
 {
   int i, j, k, l, side, depth = sys->depth, lev;
   int excnt[BUFSIZ], fcnt[BUFSIZ], emcnt[BUFSIZ], tcnt[BUFSIZ];
@@ -741,7 +741,7 @@ void dumpSynop(ssystem *sys)
 /*
   dumps the Gaussian unit (statcoulombs/meter^2) charge densities on panels
 */
-void dumpChgDen(FILE *fp, double *q, charge *chglist)
+static void dumpChgDen(FILE *fp, double *q, charge *chglist)
 {
   charge *panel;
 
@@ -761,7 +761,7 @@ void dumpChgDen(FILE *fp, double *q, charge *chglist)
 /*
   like dumpMat but different formating and row labels (for dumpMatBldCnts)
 */
-void dumpMatCnts(int **mat, int depth, char *type)
+static void dumpMatCnts(int **mat, int depth, char *type)
 {
   int i, j;
   char str[BUFSIZ];
@@ -794,7 +794,7 @@ void dumpMatCnts(int **mat, int depth, char *type)
 /*
   display matrix build count totals
 */
-void dumpMatBldCnts(ssystem *sys)
+static void dumpMatBldCnts(ssystem *sys)
 {
   int i;
   char type[BUFSIZ];
@@ -944,7 +944,7 @@ void dumpConfig(FILE *fp, char *name)
 /*
   pads a string on the right up to a given length, truncates if too long
 */
-char *padName(char *tostr, char *frstr, int len)
+static char *padName(char *tostr, char *frstr, int len)
 {
   int i;
 
@@ -960,7 +960,7 @@ char *padName(char *tostr, char *frstr, int len)
 /*
   returns a string of spaces (doesn't stdio have this somewhere?)
 */
-char *spaces(char *str, int num)
+static char *spaces(char *str, int num)
 {
   int i;
 
@@ -1155,7 +1155,7 @@ void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list)
 /*
   dumps brief information about multipole set up
 */
-void dumpMulSet(ssystem *sy, int numLev, int order)
+static void dumpMulSet(ssystem *sy, int numLev, int order)
 {
   int numcubes, numsides, i;
 
@@ -1199,7 +1199,7 @@ void dumpMulSet(ssystem *sy, int numLev, int order)
   - figures the unpreconditioned matrix (using calcp) and dumps it to "P"
   - type determines which of the matrices to dump
 */
-void dump_preconditioner(ssystem *sys, charge *chglist, int type)
+static void dump_preconditioner(ssystem *sys, charge *chglist, int type)
 /* int type;			/* 1=>dump P and C; 2=>P only; 3=>C only */
 {
   int num_panels, i, j;
@@ -1274,7 +1274,7 @@ void dump_preconditioner(ssystem *sys, charge *chglist, int type)
   do an n^2/2 check to see if any panels have the same center points
   (debug only)
 */
-int has_duplicate_panels(FILE *fp, charge *chglst)
+static int has_duplicate_panels(FILE *fp, charge *chglst)
 {
   int no_duplicates;
   charge *cp, *cpinner;
@@ -1416,7 +1416,7 @@ struct exception *exc;
 /*
   debug only - check a vector to make sure it has zeros in dummy entries
 */
-int chkDummy(double *vector, int *is_dummy, int size)
+static int chkDummy(double *vector, int *is_dummy, int size)
 {
   int i, first = TRUE;
 
@@ -1435,7 +1435,7 @@ int chkDummy(double *vector, int *is_dummy, int size)
 /*
   debug only - print message if dummy list doesn't match panel list
 */
-void chkDummyList(charge **panels, int *is_dummy, int n_chgs)
+static void chkDummyList(charge **panels, int *is_dummy, int n_chgs)
 {
   int i;
   int first = TRUE;
@@ -1456,7 +1456,7 @@ void chkDummyList(charge **panels, int *is_dummy, int n_chgs)
 /*
   print the conductor names to a file
 */
-void dumpCondNames(FILE *fp, Name *name_list)
+static void dumpCondNames(FILE *fp, Name *name_list)
 { 
   int i;
   Name *cur_name;
@@ -1471,7 +1471,7 @@ void dumpCondNames(FILE *fp, Name *name_list)
 /*
   debug only: dump state of internal conductor name list
 */
-int dumpNameList(Name *name_list)
+static int dumpNameList(Name *name_list)
 {
   Name *cur_name, *cur_alias;
 

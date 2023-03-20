@@ -65,7 +65,7 @@ int *real_index;		/* real_index[i] = index in full array
 /*
   index into a square siz x siz matrix stored linearly
 */
-int sqrdex(int i, int j, int siz)
+static int sqrdex(int i, int j, int siz)
 /* int i, j, siz;			/* row, column and size */
 {
   return(i*siz + j);
@@ -74,7 +74,7 @@ int sqrdex(int i, int j, int siz)
 /*
   index into a lower triangular (w/diagonal) siz x siz matrix stored linearly
 */
-int lowdex(int i, int j, int siz)
+static int lowdex(int i, int j, int siz)
 /* int i, j, siz;			/* row, column and size */
 {
   int ret;
@@ -90,7 +90,7 @@ int lowdex(int i, int j, int siz)
 /*
   index into an upper triangular (w/diagonal) siz x siz matrix stored linearly
 */
-int uppdex(int i, int j, int siz)
+static int uppdex(int i, int j, int siz)
 /* int i, j, siz;			/* row, column and size */
 {
   int ret;
@@ -107,7 +107,7 @@ int uppdex(int i, int j, int siz)
 /*
   for debug only - dumps upper left corner of a matrix
 */
-void dumpMatCor(double **mat, double *vec, int fsize)
+static void dumpMatCor(double **mat, double *vec, int fsize)
 /* int fsize;			/* full matrix size for flat storage */
 /* double **mat, *vec;		/* does first one that's not null */
 {
@@ -137,7 +137,7 @@ void dumpMatCor(double **mat, double *vec, int fsize)
 /*
   gets the file name from the flag
 */
-char *getName(int file, char *name)
+static char *getName(int file, char *name)
 {
   if(file == L11 || file == L21 || file == LTIL) name[0] = 'L';
   else name[0] = 'U';
@@ -157,7 +157,7 @@ char *getName(int file, char *name)
 /*
   converts a square matrix to its transpose (used to write columnwise)
 */
-void transpose(double *mat, int siz)
+static void transpose(double *mat, int siz)
 {
   int i, j;
   double temp;
@@ -175,7 +175,7 @@ void transpose(double *mat, int siz)
 /*
   writes full or triangular matrices 
 */
-void wrMat(double *mat, int siz, int file, int type)
+static void wrMat(double *mat, int siz, int file, int type)
 /* int siz, file, type;		/* siz is #rows and cols */
 {
   int i, j, ds = sizeof(double), fdis;
@@ -214,7 +214,7 @@ void wrMat(double *mat, int siz, int file, int type)
 /*
   reads full or triangular matrices 
 */
-void rdMat(double *mat, int siz, int file, int type)
+static void rdMat(double *mat, int siz, int file, int type)
 /* int siz, file, type;		/* siz is #rows and cols */
 {
   int i, j, fdis;
@@ -250,7 +250,7 @@ void rdMat(double *mat, int siz, int file, int type)
 /*
   transfer part of the square matrix to the triangular matrix
 */
-void matXfer(double *matsq, double *matri, int siz, int type)
+static void matXfer(double *matsq, double *matri, int siz, int type)
 {
   int i, j, temp;
 
@@ -279,7 +279,7 @@ void matXfer(double *matsq, double *matri, int siz, int type)
 /*
   does many rhs, triangular problem to get L21 and U12 for blk factorization
 */
-void blkMatsolve(double *matsq, double *matri, int siz, int type)
+static void blkMatsolve(double *matsq, double *matri, int siz, int type)
 {
   int i, j, k;
   extern int fulldirops;
@@ -324,7 +324,7 @@ void blkMatsolve(double *matsq, double *matri, int siz, int type)
 /*
   figures the difference A11-(L21)(U12) - part of block factorization
 */
-void subInnerProd(double *matsq, double *matri, int siz, int matl, int matu)
+static void subInnerProd(double *matsq, double *matri, int siz, int matl, int matu)
 /* int siz, matl, matu;		/* size in doubles; matrices to multiply */
 {
   int i, j, k, matrisiz, rowlim, rowliml, colimu, fdl, fdu;
@@ -403,7 +403,7 @@ void subInnerProd(double *matsq, double *matri, int siz, int matl, int matu)
   - returned matrix has L below the diagonal, U above (GVL1 pg 58)
   - meant to be used with 2x2 block matrix factorization
 */
-void blkLudecomp(double *mat, int size)
+static void blkLudecomp(double *mat, int size)
 {
   extern int fulldirops;
   double factor;
@@ -430,7 +430,7 @@ void blkLudecomp(double *mat, int size)
 /*
   solves using factored matrix on disc
 */
-void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
+static void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
 /* double *x, *b, *matri, *matsq;			/* solution, rhs */
 {
   int i, j, k;
@@ -525,7 +525,7 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   - only 3/8 of the entire matrix is in core at any given time, rest on disc
     in L11, U11, U12, L21, Ltil and Util
 */
-void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
+static void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
                 double **triArray, double **sqrArray, int **real_index, int *is_dummy)
 /* double **triArray, **sqrArray;	/* LINEAR arrays: 1 triangular, 1 square mat */
 {
@@ -637,7 +637,7 @@ void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
   using four sections of A stored on disk as 
   A11 = L11, A12 = U12, A21 = L21, A22 = LTI
 */
-void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
+static void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
 /* double *sqrArray, *triArray;	/* previously allocated flattened matrices */
 /* int numchgs;			/* A is numchgsxnumchgs */
 {
@@ -717,7 +717,7 @@ void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
   L11 U12
   L21 LTI
 */
-void blkAqprod(double *p, double *q, int size, double *sqmat)
+static void blkAqprod(double *p, double *q, int size, double *sqmat)
 /* int size;			/* A is size by size */
 /* double *p, *q;			/* p = Aq is calculated */
 /* double *sqmat;			/* flat storage space for 1/4 of A */
@@ -756,7 +756,7 @@ void blkAqprod(double *p, double *q, int size, double *sqmat)
     (all zero columns removed and row ops done for divided differences)
   - should ultimately convert multipole over to condensed form, wont need this
 */
-void blkCompressVector(double *vec, int num_panels, int real_size, int *is_dummy)
+static void blkCompressVector(double *vec, int num_panels, int real_size, int *is_dummy)
 {
   int i, j;
 
@@ -776,7 +776,7 @@ void blkCompressVector(double *vec, int num_panels, int real_size, int *is_dummy
 /*
   the inverse of the above function
 */
-void blkExpandVector(double *vec, int num_panels, int real_size)
+static void blkExpandVector(double *vec, int num_panels, int real_size)
 {
   int i, j, from, to, cur_real;
   extern int *real_index;	/* this index set relies on indexing from 0 */

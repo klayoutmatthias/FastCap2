@@ -367,7 +367,7 @@ void oldcomputePsi(ssystem *sys, charge *chglist)
 /* 
 Preconditioned(possibly) Generalized Conjugate Residuals.
 */
-int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int maxiter, double tol, charge *chglist)
+static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double norm, beta, alpha, maxnorm;

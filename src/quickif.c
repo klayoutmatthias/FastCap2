@@ -40,7 +40,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 /*
   tells if any conductor name alias matches a string
 */
-int alias_match(Name *cur_name, char *name)
+static int alias_match(Name *cur_name, char *name)
 {
   Name *cur_alias;
 
@@ -54,7 +54,7 @@ int alias_match(Name *cur_name, char *name)
 /*
   tells if any conductor name alias matches a string only up to length(name)
 */
-int alias_match_name(Name *cur_name, char *name)
+static int alias_match_name(Name *cur_name, char *name)
 {
   Name *cur_alias;
   char name_frag[BUFSIZ];
@@ -74,7 +74,7 @@ int alias_match_name(Name *cur_name, char *name)
 /*
   adds an alias 
 */
-void add_to_alias(Name *cur_name, char *new_name)
+static void add_to_alias(Name *cur_name, char *new_name)
 {
   Name *last_alias = NULL, *cur_alias;
 
@@ -154,7 +154,7 @@ int getConductorNum(char *name, Name **name_list, int *num_cond)
   - returns NOTFND if name not found
   - name must have group name appended
 */
-int getConductorNumNoAdd(char *name, Name *name_list)
+static int getConductorNumNoAdd(char *name, Name *name_list)
 {
   Name *cur_name, *prev_name;
   int i;
@@ -194,7 +194,7 @@ char *getConductorName(int cond_num, Name **name_list)
 /*
   renames a conductor
 */
-int oldrenameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
+static int oldrenameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *cur_name2, *prev_name;
   int i, j;
@@ -232,7 +232,7 @@ int oldrenameConductor(char *old_name, char *new_name, Name **name_list, int *nu
 /*
   renames a conductor
 */
-int renameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
+static int renameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *cur_name2, *prev_name;
   int i, j;

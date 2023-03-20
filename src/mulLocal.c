@@ -83,7 +83,7 @@ void evalFacFra(double **array, int order)
 /*
   initializes sqrt((m+n)!/(n-m)!) lookup table (for L2L)
 */
-void evalSqrtFac(double **arrayout, double **arrayin, int order)
+static void evalSqrtFac(double **arrayout, double **arrayin, int order)
 {
   int n, m;			/* arrayout[n][m] = sqrt((m+n)!/(n-m)!) */
 
@@ -108,7 +108,7 @@ void evalSqrtFac(double **arrayout, double **arrayin, int order)
 /*
   initializes cos[(m+-k)beta] and sin[(m+-k)beta] lookup tables (M2L and L2L)
 */
-void evalSinCos(int beta, double order)
+static void evalSinCos(int beta, double order)
 {
   int i;
   double temp = beta;
@@ -122,7 +122,7 @@ void evalSinCos(int beta, double order)
 /*
   looks up sin[(m+-k)beta]
 */
-double sinB(int sum)
+static double sinB(int sum)
 {
   if(sum < 0) return(-sinmkB[abs(sum)]);
   else return(sinmkB[sum]);
@@ -131,7 +131,7 @@ double sinB(int sum)
 /*
   looks up cos[(m+-k)beta]
 */
-double cosB(int sum)
+static double cosB(int sum)
 {
   return(cosmkB[abs(sum)]);
 }

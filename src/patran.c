@@ -46,26 +46,25 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "patran_f.h"
 #include "quickif.h"
 
-void input(FILE *stream, char *line, int surf_type, double *trans_vector);
-void grid_equiv_check();
-void fill_patch_patch_table(int *patch_patch_table);
-void assign_conductor(int *patch_patch_table);
-void assign_names();
-void file_title(FILE *stream);
-void summary_data(FILE *stream);
-void node_data(FILE *stream, double *trans_vector);
-void element_data(FILE *stream);
-void grid_data(FILE *stream, double *trans_vector);
-void patch_data(FILE *stream);
-void CFEG_table(FILE *stream);
-void waste_line(int num_line, FILE *stream);
-void name_data(FILE *stream);
-int if_same_coord(double coord_1[3], double coord_2[3]);
-int if_same_grid(int ID, GRID *grid_ptr);
-void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count);
-char *delcr(char *str);
-charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type, char *name_suffix);
-charge *make_charges_patch(int NELS, int *element_list, int conductor_ID);
+static void input(FILE *stream, char *line, int surf_type, double *trans_vector);
+static void grid_equiv_check(void);
+static void fill_patch_patch_table(int *patch_patch_table);
+static void assign_conductor(int *patch_patch_table);
+static void assign_names(void);
+static void file_title(FILE *stream);
+static void summary_data(FILE *stream);
+static void node_data(FILE *stream, double *trans_vector);
+static void element_data(FILE *stream);
+static void grid_data(FILE *stream, double *trans_vector);
+static void patch_data(FILE *stream);
+static void CFEG_table(FILE *stream);
+static void waste_line(int num_line, FILE *stream);
+static void name_data(FILE *stream);
+static int if_same_coord(double coord_1[3], double coord_2[3]);
+static int if_same_grid(int ID, GRID *grid_ptr);
+static void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count);
+static charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type, char *name_suffix);
+static charge *make_charges_patch(int NELS, int *element_list, int conductor_ID);
 
 #define BIG 35000              /* Size of element and node serach table. */
 #define SMALL_NUMBER 0.005     /* See functions if_same_coord() and 
@@ -490,7 +489,7 @@ void name_data(FILE *stream)
    from two grid points are within SMALL_NUMBER, defined in patran.h, then 
    they are equivalent.  */
 
-void grid_equiv_check()
+static void grid_equiv_check(void)
 {
   GRID *grid_ptr_1, *grid_ptr_2;
   int i;
@@ -702,7 +701,7 @@ void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_co
   used with new naming functions---finds the patran name in the patran list
   - this code used to be in mksCapDump()
 */
-char *getPatranName(int cond_num)
+static char *getPatranName(int cond_num)
 {
   NAME *cname;
 
@@ -843,7 +842,7 @@ charge *make_charges_patch(int NELS, int *element_list, int conductor_ID)
   - checks one linked list against another, potentially n^2 => named
     regions should be kept small (as few patches as possible)
 */
-void assign_names()
+static void assign_names(void)
 {
   int quit, current_conductor, cnt = 0;
   PATCH *current_patch;
