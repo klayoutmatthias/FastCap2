@@ -28,17 +28,17 @@ TOP = ..
 OBJS = $(MUL)/mulGlobal.o $(MUL)/mulSetup.o $(MUL)/mulMats.o $(MUL)/mulDo.o \
 $(IO)/mulDisplay.o $(MUL)/mulMulti.o \
 $(MUL)/mulLocal.o $(DIR)/direct.o $(DIR)/calcp.o $(MUL)/fastcap.o \
-$(DIR)/blkDirect.o $(ALC)/uglyalloc.o \
+$(ALC)/uglyalloc.o \
 $(IO)/patran.o $(IO)/quickif.o $(MUL)/electric.o \
-$(IO)/input.o $(IO)/psMatDisplay.o $(MUL)/capsolve.o $(IO)/savemat_mod.o \
+$(IO)/input.o $(IO)/psMatDisplay.o $(MUL)/capsolve.o \
 $(IO)/zbufInOut.o $(IO)/zbuf2fastcap.o $(IO)/zbufProj.o $(IO)/zbufSort.o
 
 SRCS = $(MUL)/mulGlobal.c $(MUL)/mulSetup.c $(MUL)/mulMats.c $(MUL)/mulDo.c \
 $(IO)/mulDisplay.c $(MUL)/mulMulti.c \
 $(MUL)/mulLocal.c $(DIR)/direct.c $(DIR)/calcp.c $(MUL)/fastcap.c \
-$(DIR)/blkDirect.c $(ALC)/uglyalloc.c \
+$(ALC)/uglyalloc.c \
 $(IO)/patran.c $(IO)/quickif.c $(MUL)/electric.c \
-$(IO)/input.c $(IO)/psMatDisplay.c $(MUL)/capsolve.c $(IO)/savemat_mod.c \
+$(IO)/input.c $(IO)/psMatDisplay.c $(MUL)/capsolve.c \
 $(IO)/zbufInOut.c $(IO)/zbuf2fastcap.c $(IO)/zbufProj.c $(IO)/zbufSort.c
 
 OBJSB = $(GEN)/busgen.o $(GEN)/disrect.o $(COM)/epsilon.o

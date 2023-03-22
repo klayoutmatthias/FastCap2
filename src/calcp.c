@@ -38,13 +38,13 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "calcp.h"
 #include "input.h"
 
-void Cross_Product(double vector1[], double vector2[], double result_vector[]);
-int flip_normal(charge *panel);
-int planarize(charge *pq);
-void centroid(charge *pp, double x2);
-void ComputeMoments(charge *pp);
-void dp(charge *panel);
-double normalize(double vector[3]);
+static void Cross_Product(double vector1[], double vector2[], double result_vector[]);
+static int flip_normal(charge *panel);
+static int planarize(charge *pq);
+static void centroid(charge *pp, double x2);
+static void ComputeMoments(charge *pp);
+static void dp(charge *panel);
+static double normalize(double vector[3]);
 
 #ifndef FALSE
 #define FALSE 0
@@ -240,85 +240,6 @@ void initcalcp(charge *panel_list)
 
 /*
   determine if normal needs to be flipped to get dielectric bdry cond right
-*/
-static int oldflip_normal(charge *panel)
-{
-  int i;
-  double x, y, z;
-  double ctr_minus_n[3], ctr_plus_n[3], norm_minus, norm_plus, norm, norm_sq;
-  surface *surf = panel->surf;
-  int ref_inside = surf->ref_inside, flip_normal;
-  double *ref = surf->ref, *normal;
-  char *surf_name = surf->name;
-
-  if(surf->type != DIELEC && surf->type != BOTH) return(FALSE);
-
-  /* get panel corner (relative to reference point) and normal */
-  x = panel->corner[0][0] - ref[0]; 
-  y = panel->corner[0][1] - ref[1]; 
-  z = panel->corner[0][2] - ref[2];
-  norm_sq = x*x + y*y + z*z;
-  norm = sqrt(norm_sq);
-  normal = panel->Z;
-
-  /* add the (scaled) normal and negative normal to the panel corner */
-  /* negative normal result should be closer to ref point if(ref_inside) */
-  ctr_minus_n[0] = x - 0.1*norm*normal[0];
-  ctr_minus_n[1] = y - 0.1*norm*normal[1];
-  ctr_minus_n[2] = z - 0.1*norm*normal[2];
-  ctr_plus_n[0] = x + 0.1*norm*normal[0];
-  ctr_plus_n[1] = y + 0.1*norm*normal[1];
-  ctr_plus_n[2] = z + 0.1*norm*normal[2];
-
-  /* get norms of test points, one inside (minus) other out (plus) */
-  norm_minus = ctr_minus_n[0]*ctr_minus_n[0];
-  norm_plus = ctr_plus_n[0]*ctr_plus_n[0];
-  for(i = 1; i < 3; i++) {
-    norm_minus += ctr_minus_n[i]*ctr_minus_n[i];
-    norm_plus += ctr_plus_n[i]*ctr_plus_n[i];
-  }
-
-  flip_normal = FALSE;
-  if(norm_minus > norm_sq) {
-    if(norm_plus > norm_sq) {
-      fprintf(stderr, 
-	      "flip_normal: both test points on non-reference side\n");
-      fprintf(stderr, "  Surface: %s\n", hack_path(surf_name));
-      fprintf(stderr, "  Translation: (%g %g %g)\n", surf->trans[0],
-	      surf->trans[1], surf->trans[2]);
-      fprintf(stderr, "  Reference point: (%g %g %g)\n",
-	      ref[0], ref[1], ref[2]);
-      fprintf(stderr, "  Panel corner: (%g %g %g)\n",
-	      panel->corner[0][0], panel->corner[0][1], panel->corner[0][2]);
-      fprintf(stderr, "  Normal: (%g %g %g)\n",
-	      normal[0], normal[1], normal[2]);
-      exit(0);
-    }
-    if(ref_inside) flip_normal = TRUE;
-    }
-  else if(norm_plus < norm_sq) {
-    if(norm_minus < norm_sq) {
-      fprintf(stderr, 
-	      "flip_normal: both test points on reference point side\n");
-      fprintf(stderr, "  Surface: %s\n", hack_path(surf_name));
-      fprintf(stderr, "  Translation: (%g %g %g)\n", surf->trans[0],
-	      surf->trans[1], surf->trans[2]);
-      fprintf(stderr, "  Reference point: (%g %g %g)\n",
-	      ref[0], ref[1], ref[2]);
-      fprintf(stderr, "  Panel corner: (%g %g %g)\n",
-	      panel->corner[0][0], panel->corner[0][1], panel->corner[0][2]);
-      fprintf(stderr, "  Normal: (%g %g %g)\n",
-	      normal[0], normal[1], normal[2]);
-      exit(0);
-    }	
-    if(!ref_inside) flip_normal = TRUE;
-  }
-
-  return(flip_normal);
-}
-
-/*
-  determine if normal needs to be flipped to get dielectric bdry cond right
   - this function uses 0.0 as a breakpoint when really machine precision
     weighted checks should be done (really not an issue if ref point far)
 */
@@ -453,7 +374,7 @@ void centroid(charge *pp, double x2)
 
 }
 
-double normalize(double vector[3])
+static double normalize(double vector[3])
 {
   double length;
   int i;
@@ -478,7 +399,7 @@ static int If_Equal(double vector1[3], double vector2[3])
 }
 
 /* Calculates result_vector = vector1 X vector2. */
-void Cross_Product(double vector1[], double vector2[], double result_vector[])
+static void Cross_Product(double vector1[], double vector2[], double result_vector[])
 {
   result_vector[XI] = vector1[YI]*vector2[ZI] - vector1[ZI]*vector2[YI];
   result_vector[YI] = vector1[ZI]*vector2[XI] - vector1[XI]*vector2[ZI];
@@ -711,7 +632,7 @@ local system, array S(15).  First initialize array
 Note that S(2)=S(6)=0 due to transfer above
 */
 
-void ComputeMoments(charge *pp)
+static void ComputeMoments(charge *pp)
 {
   int order=MAXORDER;
   int i, j, nside,  N, M, N1, M1, M2, MN1, MN2;
@@ -824,7 +745,7 @@ void ComputeMoments(charge *pp)
 
 /* Debugging Print Routines follow. */
 
-void dp(charge *panel)
+static void dp(charge *panel)
 {
   int i;
   double c[4][3];

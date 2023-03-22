@@ -39,7 +39,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulMulti.h"
 #include "mulDo.h"
 #include "input.h"
-#include "savemat_mod.h"
 #include "quickif.h"
 #include "calcp.h"
 
@@ -1189,85 +1188,6 @@ static void dumpMulSet(ssystem *sy, int numLev, int order)
   fprintf(stdout, 
    "Maximum number of evaluation points treated exactly = %d (limit = %d)\n",
 	  sy->loc_maxq, multerms(order));
-}
-
-/*
-  dump all the preconditioner matrices in the direct list cubes as one
-  big matrix for matlab read in "Ctil"
-  - figures preconditioner by multiplying it by columns of the inverse
-    and dumping results one column at a time
-  - figures the unpreconditioned matrix (using calcp) and dumps it to "P"
-  - type determines which of the matrices to dump
-*/
-static void dump_preconditioner(ssystem *sys, charge *chglist, int type)
-/* int type;			/* 1=>dump P and C; 2=>P only; 3=>C only */
-{
-  int num_panels, i, j;
-  charge *pp, *pi;
-  cube *cp;
-  FILE *fp;
-
-  /* find the number of panels */
-  for(num_panels = 0, pp = chglist; pp != NULL; pp = pp->next, num_panels++);
-
-  /* open the output file */
-  if((fp = fopen("prec.mat","w")) == NULL) {
-    fprintf(stderr, "dump_preconditioner: can't open `prec.mat'\n");
-    exit(0);
-  }
-  
-  if(type == 1 || type == 3) {
-    fprintf(stdout, "\nDumping preconditioner to `prec.mat' as `Ctil'\n");
-    /* dump the preconditioner one column at a time */
-    /* - savemat arg "type" can be used to make rowwise dumps
-         type = x0xx  =>  columnwise dumps 
-         type = x1xx  =>  rowwise dumps (see matlab manual) */
-    for(j = 1; j < num_panels+1; j++) {
-      /* load I col into q and zero p */
-      for(i = 0; i < num_panels+1; i++) {
-	if(i == j) sys->q[i] = 1.0;
-	else sys->q[i] = 0.0;
-      }
-      /* figure the column of C in p (xfered to q after calculation) */
-      mulPrecond(sys, PRECOND);
-      /* dump the preconditioner column */
-      if(j == 1) savemat_mod(fp, 1000, "Ctil", num_panels, num_panels, 0, 
-			     &(sys->q[1]), (double *)NULL, 0, num_panels);
-      else savemat_mod(fp, 1000, "Ctil", num_panels, num_panels, 0, 
-		       &(sys->q[1]), (double *)NULL, 1, num_panels);
-
-    }
-  }
-
-  if(type == 1 || type == 2) {
-    fprintf(stdout, "\nDumping pot. coeff. mat. to `prec.mat' as `P'\n");
-    /* dump the P matrix - DANGER: does n^2 calcp() calls,
-       but storage is only n */
-    /* are q indices from 1?? */
-    for(j = 1; j < num_panels+1; j++) {
-      /* find the panel with the current index (select column) */
-      for(pp = chglist; pp != NULL; pp = pp->next) {
-	if(pp->index == j) break;
-      }
-      if(pp == NULL) {
-	fprintf(stderr, "dump_preconditioner: no charge with index %d\n", j);
-	exit(0);
-      }
-      for(i = 0; i < num_panels+1; i++) sys->p[i] = 0.0;
-      /* find the column---influence of q_j on potentials at each q_i */
-      for(i = 1, pi = chglist; pi != NULL; i++, pi = pi->next) {
-	sys->p[pi->index] = calcp(pp, pi->x, pi->y, pi->z, NULL);
-      }
-      /* dump the column */
-      if(j == 1) savemat_mod(fp, 1000, "P", num_panels, num_panels, 0, 
-			     &(sys->p[1]), (double *)NULL, 0, num_panels);
-      else savemat_mod(fp, 1000, "P", num_panels, num_panels, 0, 
-		       &(sys->p[1]), (double *)NULL, 1, num_panels);
-
-    }
-  }
-
-  fclose(fp);
 }
 
 /*

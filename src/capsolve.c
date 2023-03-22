@@ -42,8 +42,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "electric.h"
 #include "quickif.h"
 
-int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist);
-void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist);
+static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist);
+static void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist);
 
 /* This routine takes the cube data struct and computes capacitances. */
 int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, int numconds, Name *name_list)
@@ -197,173 +197,6 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 }
 
 
-#if 1 == 0
-
-/* 
-Unpreconditioned Generalized Conjugate Residuals.
-*/
-int oldgcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, int maxiter, double tol, charge *chglist)
-{
-  int iter, i, j;
-  double norm, beta, alpha, maxnorm;
-  extern double conjtime;
-#if EXPGCR == ON
-  extern double *sqrmat;
-#endif
-
-  /* NOTE ON EFFICIENCY: all the loops of length "size" could have */
-  /*   if(sys->is_dummy[i]) continue; as their first line to save some ops */
-  /* currently the entries corresponding to dummy panels are set to zero */
-
-  /* The multipole algorithm takes charges from p and puts them in ap. */
-  /* Here it is more helpful if r is used. */
-  for(i=1; i <= size; i++) {
-    p[i] = r[i];
-  }
-  r = p;
-
-  for(iter = 0; iter < maxiter; iter++) {
-
-    /* allocate the back vectors if they haven't been already (22OCT90) */
-    if(bp[iter] == NULL) {
-      CALLOC(bp[iter], size+1, double, ON, AMSC);
-      CALLOC(bap[iter], size+1, double, ON, AMSC);
-    }
-
-    /* Form the Ar product. */
-    for(i=1; i <= size; i++) ap[i] = 0.0;
-
-#if EXPGCR == ON
-    blkCompressVector(r+1, size, real_size, sys->is_dummy+1);
-    blkAqprod(ap+1, r+1, real_size, sqrmat);	/* offset since index from 1 */
-    blkExpandVector(ap+1, size, real_size);
-    blkExpandVector(r+1, size, real_size);
-#else
-    computePsi(sys, chglist);
-#endif
-
-    starttimer;
-    for(i=1; i <= size; i++) {
-      bp[iter][i] = r[i];
-      bap[iter][i] = ap[i];
-    }
-
-    /* Subtract the backward projections from p and ap. */
-    for(j=0; j < iter; j++) {
-      INNER(beta, ap, bap[j], size);
-      for(i=1; i <= size; i++) {
-	bp[iter][i] -= beta * bp[j][i];
-	bap[iter][i] -= beta * bap[j][i];
-      }
-    }
-
-    /* Normalize the p and ap vectors so that ap*ap = 1. */
-    INNER(norm, bap[iter], bap[iter], size);
-    norm = sqrt(norm);
-    for(i=1; i <= size; i++) {
-      bap[iter][i] /= norm;
-      bp[iter][i] /= norm;
-    }
-
-    /* Compute the projection in the p direction and get the next p. */
-    INNER(alpha, r, bap[iter], size);
-    for(i=1; i <= size; i++) {
-      q[i] += alpha * bp[iter][i];
-      r[i] -= alpha * bap[iter][i];
-    }
-
-#if DMPCHG == ON
-    fprintf(stdout, "\nPanel charges, iteration %d\n", iter+1);
-    dumpChgDen(stdout, q, chglist);
-    fprintf(stdout, "End panel charges\n");
-#endif
-
-    /* Check convergence. */
-    for(maxnorm = 0.0, i=1; i <= size; i++) maxnorm = MAX(ABS(r[i]),maxnorm);
-#if ITRDAT == ON
-    INNER(norm, r, r, size);
-    fprintf(stdout, "max res = %g ||res|| = %g\n", maxnorm, sqrt(norm));
-#else
-    fprintf(stdout, "%d ", iter+1);
-    if((iter+1) % 15 == 0) fprintf(stdout, "\n");
-#endif
-
-    fflush(stdout);
-    stoptimer;
-    conjtime += dtime;
-    if(maxnorm < tol) {      
-      break;
-    }
-  }
-  if(maxnorm >= tol) {
-    fprintf(stdout, "\ngcr: WARNING exiting without converging\n");
-  }
-  return(iter+1);
-}
-
-/*
-ComputePsi computes the potential from the charge vector.  It is 
-assumed that the vectors for the charge and potential have already been 
-set up and that the potential vector has been zeroed.  ARBITRARY
-VECTORS CAN NOT BE USED!
-*/
-/* ultimately should not need to pass in chglist after E field rtn is fixed */
-void oldcomputePsi(ssystem *sys, charge *chglist)
-{
-  extern double dirtime, uptime, downtime, evaltime;
-
-  starttimer;
-  mulDirect(sys);
-  stoptimer;
-  dirtime += dtime;
-
-  starttimer;
-  mulUp(sys);
-  stoptimer;
-  uptime += dtime;
-
-#if DUPVEC == ON
-  dumpLevOneUpVecs(sys);
-#endif
-
-  starttimer;
-#if DNTYPE == NOSHFT
-  mulDown(sys);		/* do downward pass without local exp shifts */
-#endif
-
-#if DNTYPE == GRENGD
-  mulDown(sys);	       	/* do heirarchical local shift dwnwd pass */
-#endif
-  stoptimer;
-  downtime += dtime;
-
-  starttimer;
-#if MULTI == ON
-  mulEval(sys);		/* evaluate either locals or multis or both */
-#endif
-  stoptimer;
-  evaltime += dtime;
-
-#if CHKDUM == ON
-  chkDummy(sys->p, sys->is_dummy, sys->up_size);
-#endif
-
-  /* convert the voltage vec entries on dielectric i/f's into eps1E1-eps2E2 */
-  compute_electric_fields(sys, chglist);
-
-#if CHKDUM == ON
-  chkDummy(sys->p, sys->is_dummy, sys->up_size);
-#endif
-
-#if OPCNT == ON
-  fprintf(stderr, "compile option OPCNT not implemented\n");
-  printops();
-  exit(0);
-#endif
-}
-
-#endif
-
 /* 
 Preconditioned(possibly) Generalized Conjugate Residuals.
 */
@@ -465,7 +298,7 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
 /* 
   Preconditioned(possibly) Generalized Minimum Residual. 
   */
-int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist)
+static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double rnorm, norm, maxnorm=10.0;
@@ -632,7 +465,7 @@ charge and potential have already been set up and that the potential
 vector has been zeroed.  ARBITRARY VECTORS CAN NOT BE USED.
 */
 
-void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist)
+static void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist)
 {
   extern double dirtime, uptime, downtime, evaltime, prectime;
   extern int real_size;

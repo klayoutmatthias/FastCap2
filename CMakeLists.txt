@@ -16,9 +16,9 @@ add_executable(FastCap2
   src/mulSetup.c src/mulMats.c src/mulDo.c
   src/mulDisplay.c src/mulMulti.c
   src/mulLocal.c src/direct.c src/calcp.c src/fastcap.c
-  src/blkDirect.c src/uglyalloc.c
+  src/uglyalloc.c
   src/patran.c src/quickif.c src/electric.c
-  src/input.c src/psMatDisplay.c src/capsolve.c src/savemat_mod.c
+  src/input.c src/psMatDisplay.c src/capsolve.c
   src/zbufInOut.c src/zbuf2fastcap.c src/zbufProj.c src/zbufSort.c
 )
 
