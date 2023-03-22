@@ -38,9 +38,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include <stdio.h>
 
-void savemat_mod(FILE *fp, int type, char *pname, int mrows, int ncols,
+void savemat_mod(FILE *fp, int type, const char *pname, int mrows, int ncols,
                  int imagf, double *preal, double *pimag, int wr_flag, int mn);
-void savemat(FILE *fp, int type, char *pname, int mrows, int ncols,
+void savemat(FILE *fp, int type, const char *pname, int mrows, int ncols,
              int imagf, double *preal, double *pimag);
 
 #endif

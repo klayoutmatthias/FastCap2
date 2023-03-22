@@ -62,7 +62,6 @@ void disExParsimpcube(cube *pc)
 
 void dissimpcube(cube *pc)
 {
-int i;
   printf("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
   printf("index=%d dindex=%d level=%d loc_exact=%d mul_exact=%d numkids=%d\n",
 	 pc->index, pc->dindex, pc->level,
@@ -71,9 +70,9 @@ int i;
 	 pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
 }
 
-static void discube(cube *pc)
+void discube(cube *pc)
 {
-int i;
+  int i;
   printf("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
   printf("index=%d dindex=%d level=%d loc_exact=%d mul_exact=%d numkids=%d\n",
 	 pc->index, pc->dindex, pc->level,
@@ -98,7 +97,7 @@ int i;
   }
 }
 
-static void disdirectcube(cube *pc)
+void disdirectcube(cube *pc)
 {
 int i;
   for(i=0; i < pc->directnumvects; i++) {
@@ -153,7 +152,7 @@ int i,j;
 }
 
 
-static void disvect(double *v, int size)
+void disvect(double *v, int size)
 {
 int i;
   for(i=0; i < size; i++) {
@@ -203,7 +202,7 @@ void dumpCorners(FILE *fp, double **mat, int rows, int cols)
 /*
   dumps a vector of itegers along side a vector of doubles, index from zero
 */
-static void dumpVecs(double *dblvec, int *intvec, int size)
+void dumpVecs(double *dblvec, int *intvec, int size)
 {
   int i;
 
@@ -421,12 +420,12 @@ void dumpLevOneUpVecs(ssystem *sys)
   -- doesn't quite do this - always uses direct list for one thing
 */
 void chkList(ssystem *sys, int listtype)
-/* int listtype;			/* DIRECT, LOCAL or EVAL */
+/* int listtype: DIRECT, LOCAL or EVAL */
 {
   int cnt[BUFSIZ];		/* # of cubes processed by level */
   int depth = sys->depth;
   int lev, nn;
-  int i, j, k;
+  int i, j;
   cube *nc;
   for(i = 0; i <= depth; i++) cnt[i] = 0;
   nc = sys->directlist;
@@ -490,11 +489,11 @@ void chkList(ssystem *sys, int listtype)
   chks a cube for bad cube struct (direct, local or eval) entries - debug only
 */
 static void chkCube(ssystem *sys, cube *nc, int listtype)
-/* int listtype;			/* DIRECT, LOCAL or EVAL */
+/* int listtype: DIRECT, LOCAL or EVAL */
 {
   int depth = sys->depth;
   int lev, nn;
-  int i, j, k;
+  int i;
   if(nc != NULL) {
     /* check number and level of neighbors */
     lev = nc->level;
@@ -537,7 +536,7 @@ static void chkCube(ssystem *sys, cube *nc, int listtype)
   checks the lowest level cubes for trouble using chkCube - debug only
 */
 void chkLowLev(ssystem *sys, int listtype)
-/* int listtype;			/* DIRECT, LOCAL or EVAL */
+/* int listtype: DIRECT, LOCAL or EVAL */
 {
   int i, j, k, l, side, depth = sys->depth, cnt = 0;
   cube *nc, *****cubes = sys->cubes;
@@ -562,7 +561,7 @@ void chkLowLev(ssystem *sys, int listtype)
 */
 void dump_face(FILE *fp, face *fac)
 {
-  int i, j;
+  int i;
   face **behind = fac->behind;
 
   fprintf(fp, "Face %d, %d sides, depth %d, mark %d, greylev %g\n",
@@ -717,7 +716,7 @@ void dumpSynop(ssystem *sys)
 /*
   dumps the Gaussian unit (statcoulombs/meter^2) charge densities on panels
 */
-static void dumpChgDen(FILE *fp, double *q, charge *chglist)
+void dumpChgDen(FILE *fp, double *q, charge *chglist)
 {
   charge *panel;
 
@@ -772,7 +771,6 @@ static void dumpMatCnts(int **mat, int depth, char *type)
 */
 void dumpMatBldCnts(ssystem *sys)
 {
-  int i;
   char type[BUFSIZ];
   extern int **Q2Mcnt, **Q2Lcnt, **Q2Pcnt, **L2Lcnt;
   extern int **M2Mcnt, **M2Lcnt, **M2Pcnt, **L2Pcnt, **Q2PDcnt;
@@ -955,11 +953,9 @@ void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list)
 {
   int i, j, toobig, toosmall, maxlen, sigfig, colwidth, i_killed, j_killed;
   int first_offd;
-  double maxdiag = 0.0, minoffd, rowttl, rowdiag, scale = 1.0, **sym_mat;
+  double maxdiag = 0.0, minoffd, rowttl, scale = 1.0, **sym_mat;
   double mat_entry;
   char unit[BUFSIZ], name[BUFSIZ], cond_name[BUFSIZ];
-  extern NAME *start_name;	/* NAME structs giving conductor names */
-  Name *cname;
   extern ITER *kill_num_list, *kinp_num_list;
   extern double iter_tol;
 
@@ -1073,7 +1069,7 @@ void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list)
   /* get the length of the longest name */
   maxlen = 0;
   for(i = 1; i <= numconds; i++) {
-    maxlen = MAX(strlen(getConductorName(i, name_list)), maxlen);
+    maxlen = MAX(strlen(getConductorName(i, name_list)), (size_t)maxlen);
   }
 
   /* print the matrix */
@@ -1179,7 +1175,6 @@ void dump_preconditioner(ssystem *sys, charge *chglist, int type)
 {
   int num_panels, i, j;
   charge *pp, *pi;
-  cube *cp;
   FILE *fp;
 
   /* find the number of panels */
@@ -1391,7 +1386,7 @@ struct exception *exc;
 /*
   debug only - check a vector to make sure it has zeros in dummy entries
 */
-static void chkDummy(double *vector, int *is_dummy, int size)
+void chkDummy(double *vector, int *is_dummy, int size)
 {
   int i, first = TRUE;
 
@@ -1416,7 +1411,7 @@ void chkDummyList(charge **panels, int *is_dummy, int n_chgs)
   int first = TRUE;
   
   for(i = 0; i < n_chgs; i++) {
-    if(is_dummy[i] && !panels[i]->dummy || !is_dummy[i] && panels[i]->dummy) {
+    if((is_dummy[i] && !panels[i]->dummy) || (!is_dummy[i] && panels[i]->dummy)) {
       if(first) {
 	first = FALSE;
 	fprintf(stderr, "chkDummyList: inconsistent dummy list entries:\n");
@@ -1446,7 +1441,7 @@ void dumpCondNames(FILE *fp, Name *name_list)
 /*
   debug only: dump state of internal conductor name list
 */
-static int dumpNameList(Name *name_list)
+int dumpNameList(Name *name_list)
 {
   Name *cur_name, *cur_alias;
 

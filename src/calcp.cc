@@ -245,9 +245,8 @@ void initcalcp(charge *panel_list)
 */
 int flip_normal(charge *panel)
 {
-  int i;
   double x, y, z;
-  double ctr_minus_n[3], ctr_plus_n[3], norm_minus, norm_plus, norm, norm_sq;
+  double norm, norm_sq;
   surface *surf = panel->surf;
   int ref_inside = surf->ref_inside, flip_normal;
   double *ref = surf->ref, *normal, angle, norm_n;
@@ -386,16 +385,6 @@ static double normalize(double vector[3])
   for (i=0; i<3; i++) vector[i] = vector[i] / length;
 
   return length;
-}
-
-/* Assumes the vectors are normalized. */
-static int If_Equal(double vector1[3], double vector2[3])
-{
-  int i;
-
-  for (i=0; i<3; i++)
-    if (fabs(vector1[i] - vector2[i]) > EQUIV_TOL) return FALSE;   
-  return TRUE;
 }
 
 /* Calculates result_vector = vector1 X vector2. */

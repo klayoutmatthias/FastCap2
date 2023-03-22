@@ -68,7 +68,7 @@ int *real_index;		/* real_index[i] = index in full array
   index into a square siz x siz matrix stored linearly
 */
 static int sqrdex(int i, int j, int siz)
-/* int i, j, siz;			/* row, column and size */
+/* int i, j, siz: row, column and size */
 {
   return(i*siz + j);
 }
@@ -77,7 +77,7 @@ static int sqrdex(int i, int j, int siz)
   index into a lower triangular (w/diagonal) siz x siz matrix stored linearly
 */
 static int lowdex(int i, int j, int siz)
-/* int i, j, siz;			/* row, column and size */
+/* int i, j, siz: row, column and size */
 {
   int ret;
   if(j > i || (ret = i*(i+1)/2 + j) > siz*(1+siz)/2) {
@@ -93,7 +93,7 @@ static int lowdex(int i, int j, int siz)
   index into an upper triangular (w/diagonal) siz x siz matrix stored linearly
 */
 static int uppdex(int i, int j, int siz)
-/* int i, j, siz;			/* row, column and size */
+/* int i, j, siz: row, column and size */
 {
   int ret;
   
@@ -180,7 +180,7 @@ static void transpose(double *mat, int siz)
 static void wrMat(double *mat, int siz, int file, int type)
 /* int siz: siz is #rows and cols */
 {
-  int i, j, ds = sizeof(double), fdis;
+  int ds = sizeof(double), fdis;
   int realsiz, actsiz;			/* size in chars */
   char name[3];	           		/* name of file */
 
@@ -219,7 +219,7 @@ static void wrMat(double *mat, int siz, int file, int type)
 static void rdMat(double *mat, int siz, int file, int type)
 /* int siz: siz is #rows and cols */
 {
-  int i, j, fdis;
+  int fdis;
   int realsiz;			/* size in chars */
   char name[3];           	/* name of file */
 
@@ -329,7 +329,7 @@ static void blkMatsolve(double *matsq, double *matri, int siz, int type)
 static void subInnerProd(double *matsq, double *matri, int siz, int matl, int matu)
 /* int siz, matl, matu: size in doubles; matrices to multiply */
 {
-  int i, j, k, matrisiz, rowlim, rowliml, colimu, fdl, fdu;
+  int i, j, k, rowlim, rowliml, colimu, fdl, fdu;
   int froml, fromu, ds = sizeof(double), readl, readu;
   char name[3];
   double *matriu, temp;
@@ -435,7 +435,7 @@ static void blkLudecomp(double *mat, int size)
 void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
 /* double *x, *b, *matri, *matsq: solution, rhs */
 {
-  int i, j, k;
+  int i, k;
   extern int fulldirops;
   extern double fullsoltime;
 
@@ -531,7 +531,7 @@ void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
                 double **triArray, double **sqrArray, int **real_index, int *is_dummy)
 /* double **triArray, **sqrArray: LINEAR arrays: 1 triangular, 1 square mat */
 {
-  int i, j, fromp, fromq, top, toq, matsize;
+  int i, j, fromp, fromq, matsize;
   int k, l, i_real, j_real;
   cube *pq, *pp;
   charge **pchgs, **qchgs, *ppan, *qpan;
@@ -619,7 +619,7 @@ void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
       /* dump the 1/4 matrix to a file */
       if(k == 0 && l == 0) {
 	wrMat(*sqrArray, numchgs/2, L11, SQRMAT);
-	/* dumpMatCor((double **)NULL, *sqrArray, numchgs/2); /* for debug */
+	/* dumpMatCor((double **)NULL, *sqrArray, numchgs/2); */ /* for debug */
       }
       else if(k == 0 && l == 1) wrMat(*sqrArray, numchgs/2, U12, SQRMAT);
       else if(k == 1 && l == 0) wrMat(*sqrArray, numchgs/2, L21, SQRMAT);
@@ -780,7 +780,7 @@ void blkCompressVector(double *vec, int num_panels, int real_size, int *is_dummy
 */
 void blkExpandVector(double *vec, int num_panels, int real_size)
 {
-  int i, j, from, to, cur_real;
+  int i, j, from;
 
   /* transfer to vector */
   for(i = real_size - 1; i >= 0; i--) {

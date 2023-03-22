@@ -47,7 +47,7 @@ Compute the direct piece.
 void mulDirect(ssystem *sys)
 {
 int i, j, k, dsize, *is_dummy, *is_dielec;
-double pc, *p, *q, *qn, *pn, **mat;
+double *p, *q, *qn, **mat;
 cube *nextc;
 
 /* Assumes the potential vector has been zero'd!!!! */
@@ -96,7 +96,7 @@ Block diagonal or Overlapped Preconditioner.
 void mulPrecond(ssystem *sys, int type)
 {
   int i, j, k, dsize, *is_dummy;
-  double pc, *p, *q, *qn, *pn, **mat;
+  double *p, *q, *qn, **mat;
   cube *nc;
 
   if(type == BD) {

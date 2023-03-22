@@ -44,5 +44,6 @@ double **ludecomp(double **matin, int size, int allocate);
 
 double **Q2PDiag(charge **chgs, int numchgs, int *is_dummy, int calc);
 double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int numpchgs, int calc);
+double **Q2Pfull(cube *directlist, int numchgs);
 
 #endif

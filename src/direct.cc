@@ -113,7 +113,7 @@ double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int nu
   used only in conjunction with DMPMAT == ON  and DIRSOL == ON
   to make 1st directlist mat = full P mat
 */
-static double **Q2Pfull(cube *directlist, int numchgs)
+double **Q2Pfull(cube *directlist, int numchgs)
 {
   int i, j, fromp, fromq, top, toq;
   double **mat;
@@ -336,7 +336,7 @@ int compressMat(double **mat, int size, int *is_dummy, int comp_rows)
 */
 void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_rows)
 {
-  int i, j, k, next_rc;
+  int i, j, next_rc;
 
   if(exp_rows == TRUE || exp_rows == BOTH) {
     next_rc = comp_size - 1;

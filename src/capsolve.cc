@@ -305,8 +305,8 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
 static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
-  double rnorm, norm, maxnorm=10.0;
-  double beta, hi, hip1, length;
+  double rnorm, norm;
+  double hi, hip1, length;
   extern double conjtime, prectime;
 #if EXPGCR == ON
   extern double *sqrmat;

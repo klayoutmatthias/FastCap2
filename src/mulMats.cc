@@ -176,15 +176,12 @@ void mulMatDirect(ssystem *sys)
 /*
 MulMatPrecond creates the preconditioner matrix
 */
-static void bdmulMatPrecond(ssystem *sys)
+void bdmulMatPrecond(ssystem *sys)
 {
   cube *nc, *kid, *kidnbr;
   double **mat, **nbrmat;
   int i, j, k, l, kidi;
-  int kidsize, nbrsize, size, row, col, first, offset;
-  double factor;
-  charge *pc;
-  surface *surf;
+  int kidsize, nbrsize, size, row, col, first;
 
   for(nc=sys->precondlist; nc != NULL; nc = nc->pnext) {
 
@@ -284,12 +281,10 @@ void olmulMatPrecond(ssystem *sys)
   int i, j, k, l, m;
   int maxsize, nsize, nnsize, nnnsize, *reorder;
   int nj, nk, nl, offset, noffset;
-  int dindex, *nc_dummy, *nnbr_dummy, *nnnbr_dummy;
+  int *nc_dummy, *nnbr_dummy, *nnnbr_dummy;
   static int *is_dummy;         /* local dummy flag vector, stays around */
   static int big_mat_size = 0;  /* size of previous mat */
-  charge **nnnbr_pc, **nnbr_pc, **nc_pc, **mpc, *dp;
-  surface *surf;
-  double factor;
+  charge **nnnbr_pc, **nnbr_pc, **nc_pc;
 
 /* Figure out the max number of elements in any set of near cubes. */
   for(maxsize=0, nc=sys->directlist; nc != NULL; nc = nc->dnext) {
@@ -882,7 +877,7 @@ double **multimats[8];
 */
 void mulMatEval(ssystem *sys)
 {
-  int i, j, k, ttlvects, vects;
+  int i, j, ttlvects;
   cube *na, *nc, *nexti;
 
   if(sys->depth < 2) return;    /* ret if upward pass not possible/worth it */

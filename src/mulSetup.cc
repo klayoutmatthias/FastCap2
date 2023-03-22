@@ -390,103 +390,6 @@ static int placeq(int flag, ssystem *sys, charge *charges)
   return(depth);
 }
       
-/* 
-Place the charges in the cube structure. 
-*/
-static void placeqold(ssystem *sys, charge *charges)
-{
-double length;
-double minx, maxx, miny, maxy, minz, maxz;
-int depth=sys->depth;
-int j, k, l, xindex, yindex, zindex, side = sys->side;
-int totalq;
-charge *nextq;
-cube *nextc, *****cubes = sys->cubes;
-
-  nextq = charges;
-  minx = maxx = nextq->x;
-  miny = maxy = nextq->y;
-  minz = maxz = nextq->z;
-
-/* Figure out the length of domain and total number of charges. */
-  for(totalq=1, nextq = nextq->next; nextq != NULL;
-      totalq++, nextq = nextq->next) {
-    maxx = MAX(nextq->x, maxx);
-    minx = MIN(nextq->x, minx);
-    maxy = MAX(nextq->y, maxy);
-    miny = MIN(nextq->y, miny);
-    maxz = MAX(nextq->z, maxz);
-    minz = MIN(nextq->z, minz);
-  }
-
-/* Create the vectors for storing the charges and coefficients. */
-  CALLOC(sys->q, totalq+1, double, ON, AMSC);
-  CALLOC(sys->p, totalq+1, double, ON, AMSC);
-
-/* Determine side lengths. Make sure domain is eps bigger than problem. */
-  length = MAX((maxx - minx), (maxy - miny));
-  length = MAX((maxz - minz), length);
-  length = (1.01 * length) / side;
-  if(length == 0) {
-    fprintf(stderr,"placeq: All the lengths in the problem are zero\n");
-    exit(0);
-  }
-  sys->length = length;
-  sys->minx = minx;
-  sys->miny = miny;
-  sys->minz = minz;
-
-/* Count the number of charges per cube. */
-  for(nextq = charges; nextq != NULL; nextq = nextq->next) {
-    xindex = (nextq->x - minx) / length;
-    yindex = (nextq->y - miny) / length;
-    zindex = (nextq->z - minz) / length;
-    nextc = cubes[depth][xindex][yindex][zindex];
-    if(nextc == NULL) {
-      CALLOC(nextc, 1, cube, ON, AMSC);
-      cubes[depth][xindex][yindex][zindex] = nextc;
-      nextc->upnumvects = 1;
-      CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
-      nextc->upnumeles[0] = 1;
-    }
-    else {
-      nextc->upnumeles[0]++;
-    }
-  }
-
-/* Allocate space for the charges. */
-  for(j=0; j < side; j++) {
-    for(k=0; k < side; k++) {
-      for(l=0; l < side; l++) {
-        nextc = sys->cubes[depth][j][k][l];
-        if(nextc != NULL) {  /* Only fill out nonempty cubes. */
-        /* Allocate for the charge ptrs, and get q vector pointer. */
-          CALLOC(nextc->chgs, nextc->upnumeles[0], charge*, ON, AMSC);
-          CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
-        /* Zero the numchgs to use as index. */
-          nextc->upnumeles[0] = 0;
-        }
-      }
-    }
-  }
-
-/* Put the charges in the cube and check to make sure they are not too big. */
-  for(totalq = 0, nextq = charges; nextq != NULL; nextq = nextq->next) {
-    if(tilelength(nextq) > length) {
-/*
-      printf("WARNING: A Tile is Larger than the cube containing it.\n");
-      printf("Cube length = %g tile length = %g\n", length, tilelength(nextq));
-      disfchg(nextq);
-*/
-    }
-    xindex = (nextq->x - minx) / length;
-    yindex = (nextq->y - miny) / length;
-    zindex = (nextq->z - minz) / length;
-    nextc = cubes[depth][xindex][yindex][zindex];
-    nextc->chgs[nextc->upnumeles[0]++] = nextq;
-  }
-}
-
 /*
 GetRelations allocates parents links the children. 
 */
@@ -775,7 +678,6 @@ static int cntDwnwdChg(cube *cp, int depth)
 {
   int i;
   int cnt;
-  cube *kidc;
 
   if(cp->level == depth) return(cp->upnumeles[0]);
   else for(i = 0; i < cp->numkids; i++) 
@@ -792,7 +694,7 @@ Note, upnumvects and exact must be set!!!
 static void linkcubes(ssystem *sys)
 {
   cube *nc, **plnc, **pdnc, **pmnc, *****cubes = sys->cubes;
-  int i, j, k, l, cnt = 0;
+  int i, j, k, l;
   int dindex, side, depth=sys->depth, numterms=multerms(sys->order);
 
   /* Allocate the vector of heads of cubelists. */
@@ -937,8 +839,7 @@ static void setMaxq(ssystem *sys)
 */
 static void markUp(cube *child, int flag)
 {
-  int i,j;
-  cube *nc, *np;
+  int i;
 
   child->flag = flag;
   for(i = 0; i < child->numnbrs; i++) {

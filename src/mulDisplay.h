@@ -63,8 +63,15 @@ void dispL2L(double **mat, double x, double y, double z, double xp, double yp, d
 void dispM2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order);
 void dispL2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order);
 void dumpLevOneUpVecs(ssystem *sys);
+int dumpNameList(Name *name_list);
+void dumpChgDen(FILE *fp, double *q, charge *chglist);
+void dumpVecs(double *dblvec, int *intvec, int size);
 void chkDummyList(charge **panels, int *is_dummy, int n_chgs);
+void chkDummy(double *vector, int *is_dummy, int size);
 void disExParsimpcube(cube *pc);
 void disExtrasimpcube(cube *pc);
+void discube(cube *pc);
+void disdirectcube(cube *pc);
+void disvect(double *v, int size);
 
 #endif

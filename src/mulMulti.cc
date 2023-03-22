@@ -151,7 +151,7 @@ int n, m, cterms;		/* cterms is costerms(order) */
   returns i = sqrt(-1) to the power of the argument
 */
 double iPwr(int e)
-/* int e;				/* exponent, computes i^e */
+/* int e: exponent, computes i^e */
 {
   if(e == 0) return(1.0);
   if(e % 2 != 0) {
@@ -298,7 +298,7 @@ void mulMultiAlloc(int maxchgs, int order, int depth)
 void evalLegendre(double cosA, double *vector, int order)
 {
   int x;
-  int n, m;			/* as in Pn^m, both <= order */
+  int m;			/* as in Pn^m, both <= order */
   double sinMA;			/* becomes sin^m(alpha) in higher order P's */
   double fact;			/* factorial factor */
 
@@ -347,7 +347,7 @@ double **mulQ2Multi(charge **chgs, int *is_dummy, int numchgs, double x, double 
 {
   double **mat;
   double cosA;			/* cosine of elevation coordinate */
-  int i, j, k, kold, n, m, start;
+  int i, j, k, kold, n, m;
   int cterms = costerms(order), terms = multerms(order);
 
   /* Allocate the matrix. */
@@ -434,7 +434,7 @@ double **mulQ2Multi(charge **chgs, int *is_dummy, int numchgs, double x, double 
 }
 
 double **mulMulti2Multi(double x, double y, double z, double xp, double yp, double zp, int order)
-/* double x, y, z, xp, yp, zp;	/* cube center, parent cube center */
+/* double x, y, z, xp, yp, zp: cube center, parent cube center */
 {
   double **mat, rho, rhoPwr, cosA, beta, mBeta, temp1, temp2; 
   int r, j, k, m, n, c;
@@ -536,12 +536,11 @@ double **mulMulti2Multi(double x, double y, double z, double xp, double yp, doub
   builds multipole evaluation matrix; used only for fake downward pass 
 */
 double **mulMulti2P(double x, double y, double z, charge **chgs, int numchgs, int order)
-/* double x, y, z;			/* multipole expansion origin */
+/* double x, y, z: multipole expansion origin */
 {
   double **mat;
   double cosTh;			/* cosine of elevation coordinate */
-  double factorial;		/* 1/factorial = (n-m)!/(n+m)! */
-  int i, j, k, m, n, kold, start;
+  int i, j, k, m, n, kold;
   int cterms = costerms(order), sterms = sinterms(order);
   int terms = cterms + sterms;
 

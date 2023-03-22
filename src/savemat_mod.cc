@@ -70,7 +70,7 @@ typedef struct {
 } Fmatrix;
 
 #ifdef __STDC__
-void savemat(FILE *fp, int type, char *pname, int mrows, int ncols, 
+void savemat(FILE *fp, int type, const char *pname, int mrows, int ncols,
              int imagf, double *preal, double *pimag)
 #else
 void savemat(fp, type, pname, mrows, ncols, imagf, preal, pimag)
@@ -114,7 +114,7 @@ double *pimag;  /* pointer to imag data */
   wr_flag = 1 => update, print without header
 */
 #ifdef __STDC__
-void savemat_mod(FILE *fp, int type, char *pname, int mrows, int ncols, 
+void savemat_mod(FILE *fp, int type, const char *pname, int mrows, int ncols,
 		 int imagf, double *preal, double *pimag, int wr_flag, int mn)
 #else
 void savemat_mod(fp, type, pname, mrows, ncols, imagf, preal, pimag, 

@@ -49,8 +49,8 @@ double *sinmkB;			/* array used to look up sin[(m+-k)beta] */
   initializes the factorial fraction array used in M2L, L2L matrix calculation
 */
 void evalFacFra(double **array, int order)
-/* int order;			/* array is 2*order+1 x 2*order+1 */
-/* double **array;			/* array[num][den] = num!/den! */
+/* int order: array is 2*order+1 x 2*order+1 */
+/* double **array: array[num][den] = num!/den! */
 {
   int d, i;
   for(i = 0; i <= 2*order; i++) {
@@ -84,7 +84,7 @@ void evalFacFra(double **array, int order)
 /*
   initializes sqrt((m+n)!/(n-m)!) lookup table (for L2L)
 */
-static void evalSqrtFac(double **arrayout, double **arrayin, int order)
+void evalSqrtFac(double **arrayout, double **arrayin, int order)
 {
   int n, m;			/* arrayout[n][m] = sqrt((m+n)!/(n-m)!) */
 
@@ -141,7 +141,7 @@ static double cosB(int sum)
   Used for all but no local downward pass. 
 */
 double **mulMulti2Local(double x, double y, double z, double xp, double yp, double zp, int order)
-/* double x, y, z, xp, yp, zp;	/* multipole and local cube centers */
+/* double x, y, z, xp, yp, zp: multipole and local cube centers */
 {
   int i, j, k, n, m;
   int terms = multerms(order);	/* the number of non-zero moments */
@@ -151,7 +151,7 @@ double **mulMulti2Local(double x, double y, double z, double xp, double yp, doub
   double rhoJ, rhoN;		/* rho^j and (-1)^n*rho^(n+1) in main loop */
   double rhoFac;		/* = rhoJ*rhoN intermediate storage */
   double temp1, temp2, temp3;
-  extern double *tleg, *Ir, *Irn, *phi, *Mphi; /* external temporary storage */
+  extern double *tleg;          /* external temporary storage */
 
   /* allocate the multi to local transformation matrix */
   CALLOC(mat, terms, double*, ON, AM2L);
@@ -228,7 +228,7 @@ double **mulMulti2Local(double x, double y, double z, double xp, double yp, doub
   Used only for true (Greengard) downward pass - similar to Multi2Local
 */
 double **mulLocal2Local(double x, double y, double z, double xc, double yc, double zc, int order)
-/* double x, y, z, xc, yc, zc;	/* parent and child cube centers */
+/* double x, y, z, xc, yc, zc: parent and child cube centers */
 {
   int i, j, k, n, m;
   int terms = multerms(order);	/* the number of non-zero moments */
@@ -238,7 +238,7 @@ double **mulLocal2Local(double x, double y, double z, double xc, double yc, doub
   double rhoJ, rhoN;		/* rho^j and (-1)^n*rho^(n+1) in main loop */
   double rhoFac;		/* = rhoJ*rhoN intermediate storage */
   double temp1, temp2, temp3;
-  extern double *tleg, *Ir, *Irn, *phi, *Mphi; /* external temporary storage */
+  extern double *tleg;          /* external temporary storage */
 
   /* allocate the local to local transformation matrix */
   CALLOC(mat, terms, double*, ON, AL2L);
@@ -329,7 +329,7 @@ double **mulLocal2Local(double x, double y, double z, double xc, double yc, doub
 */
 double **mulQ2Local(charge **chgs, int numchgs, int *is_dummy, double x, double y, double z, int order)
 {
-  int i, j, k, kold, n, m, start;
+  int i, j, n, m;
   int cterms = costerms(order), terms = multerms(order);
   double **mat, temp;
   double cosA;			/* cosine of elevation coordinate */
@@ -431,7 +431,7 @@ double **mulLocal2P(double x, double y, double z, charge **chgs, int numchgs, in
   double **mat;
   double cosTh;			/* cosine of elevation coordinate */
   extern double *Irn, *Mphi, *phi, *Ir;
-  int i, j, k, m, n, kold, start;
+  int i, j, k, m, n, kold;
   int cterms = costerms(order), terms = multerms(order);
 
   CALLOC(mat, numchgs, double*, ON, AL2P);

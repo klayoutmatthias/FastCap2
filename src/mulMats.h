@@ -39,6 +39,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 void mulMatDirect(ssystem *sys);
 void mulMatDirect(ssystem *sys);
 void olmulMatPrecond(ssystem *sys);
+void bdmulMatPrecond(ssystem *sys);
 void mulMatUp(ssystem *sys);
 void mulMatDown(ssystem *sys);
 void mulMatEval(ssystem *sys);
