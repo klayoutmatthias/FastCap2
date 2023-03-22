@@ -41,18 +41,19 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "input.h"
 #include "quickif.h"
 #include "calcp.h"
+#include "savemat_mod.h"
 
 static void dismat(double **mat, int rows, int cols);
 static void dischg(charge *pq);
 static void dissimpcube(cube *pc);
 static void dumpChgsWDummy(charge **chgs, int numchgs, int *is_dummy, double x, double y, double z);
 
-static void disExtrasimpcube(cube *pc)
+void disExtrasimpcube(cube *pc)
 {
   printf("cubes[%d][%d][%d][%d]\n", pc->level, pc->j, pc->k, pc->l);
 }
 
-static void disExParsimpcube(cube *pc)
+void disExParsimpcube(cube *pc)
 {
   cube *pa = pc->parent;
   printf("cubes[%d][%d][%d][%d], ", pc->level, pc->j, pc->k, pc->l);
@@ -111,7 +112,7 @@ int i;
 }
 
 
-static void dissys(ssystem *sys)
+void dissys(ssystem *sys)
 {
 int i, j, k, l, side;
   printf("side=%d depth=%d order=%d\n",
@@ -168,7 +169,7 @@ static void dischg(charge *pq)
 /*
   dumps a rows x cols matrix of doubles; assumes indices from zero 
 */
-static void dumpMat(double **mat, int rows, int cols)
+void dumpMat(double **mat, int rows, int cols)
 {
   int i, j;
   for(i = 0; i < rows; i++) {
@@ -266,7 +267,7 @@ void dumpChgsWDummy(charge **chgs, int numchgs, int *is_dummy, double x, double 
 /*
   display the matrix built for a given charge to multipole transformation
 */
-static void dispQ2M(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order)
+void dispQ2M(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order)
 {
   fprintf(stdout, "\nQ2M MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(mat, multerms(order), numchgs);
@@ -278,7 +279,7 @@ static void dispQ2M(double **mat, charge **chgs, int numchgs, double x, double y
 /*
   display the matrix built for a given multipole to local transformation
 */
-static void dispM2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
+void dispM2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
 {
   fprintf(stdout, 
    "\nM2L MATRIX: multi at (%.5e %.5e %.5e) -> local at (%.5e %.5e %.5e)\n",
@@ -289,7 +290,7 @@ static void dispM2L(double **mat, double x, double y, double z, double xp, doubl
 /*
   display the matrix built for a given charge to local transformation
 */
-static void dispQ2L(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order)
+void dispQ2L(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order)
 {
   fprintf(stdout, "\nQ2L MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(mat, multerms(order), numchgs);
@@ -301,7 +302,7 @@ static void dispQ2L(double **mat, charge **chgs, int numchgs, double x, double y
 /*
   display the matrix built for a given charge to potential transformation
 */
-static void dispQ2P(double **mat, charge **chgs, int numchgs, int *is_dummy, charge **pchgs, int numpchgs)
+void dispQ2P(double **mat, charge **chgs, int numchgs, int *is_dummy, charge **pchgs, int numpchgs)
 {
   fprintf(stdout, "\nQ2P MATRIX:\n");
   dumpMat(mat, numpchgs, numchgs);
@@ -316,7 +317,7 @@ static void dispQ2P(double **mat, charge **chgs, int numchgs, int *is_dummy, cha
 /*
   display the matrix built for a given charge to potential transformation
 */
-static void dispQ2PDiag(double **mat, charge **chgs, int numchgs, int *is_dummy)
+void dispQ2PDiag(double **mat, charge **chgs, int numchgs, int *is_dummy)
 {
   fprintf(stdout, "\nQ2PDiag MATRIX:\n");
   dumpMat(mat, numchgs, numchgs);
@@ -328,7 +329,7 @@ static void dispQ2PDiag(double **mat, charge **chgs, int numchgs, int *is_dummy)
 /*
   display the matrix built for a given multipole to multipole transformation
 */
-static void dispM2M(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
+void dispM2M(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
 {
   fprintf(stdout, 
       "\nM2M MATRIX: cube at (%.5e %.5e %.5e) shifted to (%.5e %.5e %.5e)\n", 
@@ -339,7 +340,7 @@ static void dispM2M(double **mat, double x, double y, double z, double xp, doubl
 /*
   display the matrix built for a given local to local transformation
 */
-static void dispL2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
+void dispL2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order)
 {
   fprintf(stdout, 
       "\nL2L MATRIX: cube at (%.5e %.5e %.5e) shifted to (%.5e %.5e %.5e)\n", 
@@ -350,7 +351,7 @@ static void dispL2L(double **mat, double x, double y, double z, double xp, doubl
 /*
   display the matrix built for a given multipole to potential transformation
 */
-static void dispM2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order)
+void dispM2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order)
 {
   fprintf(stdout, "\nM2P MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(mat, numchgs, multerms(order));
@@ -362,7 +363,7 @@ static void dispM2P(double **mat, double x, double y, double z, charge **chgs, i
 /*
   display the matrix built for a given local to potential transformation
 */
-static void dispL2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order)
+void dispL2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order)
 {
   fprintf(stdout, "\nL2P MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(mat, numchgs, multerms(order));
@@ -400,7 +401,7 @@ static void dumpUpVecs(cube *pc)
 /*
   displays the upward pass vectors for the eight level 1 cubes - debug only
 */
-static void dumpLevOneUpVecs(ssystem *sys)
+void dumpLevOneUpVecs(ssystem *sys)
 {
   int i, j, k;
   cube *****cubes = sys->cubes;
@@ -417,7 +418,7 @@ static void dumpLevOneUpVecs(ssystem *sys)
   checks a cube (direct, local or eval) list for bad cube structs - debug only
   -- doesn't quite do this - always uses direct list for one thing
 */
-static void chkList(ssystem *sys, int listtype)
+void chkList(ssystem *sys, int listtype)
 /* int listtype;			/* DIRECT, LOCAL or EVAL */
 {
   int cnt[BUFSIZ];		/* # of cubes processed by level */
@@ -533,7 +534,7 @@ static void chkCube(ssystem *sys, cube *nc, int listtype)
 /*
   checks the lowest level cubes for trouble using chkCube - debug only
 */
-static void chkLowLev(ssystem *sys, int listtype)
+void chkLowLev(ssystem *sys, int listtype)
 /* int listtype;			/* DIRECT, LOCAL or EVAL */
 {
   int i, j, k, l, side, depth = sys->depth, cnt = 0;
@@ -619,7 +620,7 @@ static void dumpSynCore2(char *str, int depth, int *cnt)
   displays number of exact, full, empty and total cubes per level in
   all cubes, and eval, direct, multi and local lists
 */
-static void dumpSynop(ssystem *sys)
+void dumpSynop(ssystem *sys)
 {
   int i, j, k, l, side, depth = sys->depth, lev;
   int excnt[BUFSIZ], fcnt[BUFSIZ], emcnt[BUFSIZ], tcnt[BUFSIZ];
@@ -767,7 +768,7 @@ static void dumpMatCnts(int **mat, int depth, char *type)
 /*
   display matrix build count totals
 */
-static void dumpMatBldCnts(ssystem *sys)
+void dumpMatBldCnts(ssystem *sys)
 {
   int i;
   char type[BUFSIZ];
@@ -1128,7 +1129,7 @@ void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list)
 /*
   dumps brief information about multipole set up
 */
-static void dumpMulSet(ssystem *sy, int numLev, int order)
+void dumpMulSet(ssystem *sy, int numLev, int order)
 {
   int numcubes, numsides, i;
 
@@ -1163,12 +1164,90 @@ static void dumpMulSet(ssystem *sy, int numLev, int order)
    "Maximum number of evaluation points treated exactly = %d (limit = %d)\n",
 	  sy->loc_maxq, multerms(order));
 }
+/*
+  dump all the preconditioner matrices in the direct list cubes as one
+  big matrix for matlab read in "Ctil"
+  - figures preconditioner by multiplying it by columns of the inverse
+    and dumping results one column at a time
+  - figures the unpreconditioned matrix (using calcp) and dumps it to "P"
+  - type determines which of the matrices to dump
+*/
+void dump_preconditioner(ssystem *sys, charge *chglist, int type)
+/* int type: 1=>dump P and C; 2=>P only; 3=>C only */
+{
+  int num_panels, i, j;
+  charge *pp, *pi;
+  cube *cp;
+  FILE *fp;
+
+  /* find the number of panels */
+  for(num_panels = 0, pp = chglist; pp != NULL; pp = pp->next, num_panels++);
+
+  /* open the output file */
+  if((fp = fopen("prec.mat","w")) == NULL) {
+    fprintf(stderr, "dump_preconditioner: can't open `prec.mat'\n");
+    exit(0);
+  }
+
+  if(type == 1 || type == 3) {
+    fprintf(stdout, "\nDumping preconditioner to `prec.mat' as `Ctil'\n");
+    /* dump the preconditioner one column at a time */
+    /* - savemat arg "type" can be used to make rowwise dumps
+         type = x0xx  =>  columnwise dumps
+         type = x1xx  =>  rowwise dumps (see matlab manual) */
+    for(j = 1; j < num_panels+1; j++) {
+      /* load I col into q and zero p */
+      for(i = 0; i < num_panels+1; i++) {
+        if(i == j) sys->q[i] = 1.0;
+        else sys->q[i] = 0.0;
+      }
+      /* figure the column of C in p (xfered to q after calculation) */
+      mulPrecond(sys, PRECOND);
+      /* dump the preconditioner column */
+      if(j == 1) savemat_mod(fp, 1000, "Ctil", num_panels, num_panels, 0,
+                             &(sys->q[1]), (double *)NULL, 0, num_panels);
+      else savemat_mod(fp, 1000, "Ctil", num_panels, num_panels, 0,
+                       &(sys->q[1]), (double *)NULL, 1, num_panels);
+
+    }
+  }
+
+  if(type == 1 || type == 2) {
+    fprintf(stdout, "\nDumping pot. coeff. mat. to `prec.mat' as `P'\n");
+    /* dump the P matrix - DANGER: does n^2 calcp() calls,
+       but storage is only n */
+    /* are q indices from 1?? */
+    for(j = 1; j < num_panels+1; j++) {
+      /* find the panel with the current index (select column) */
+      for(pp = chglist; pp != NULL; pp = pp->next) {
+        if(pp->index == j) break;
+      }
+      if(pp == NULL) {
+        fprintf(stderr, "dump_preconditioner: no charge with index %d\n", j);
+        exit(0);
+      }
+      for(i = 0; i < num_panels+1; i++) sys->p[i] = 0.0;
+      /* find the column---influence of q_j on potentials at each q_i */
+      for(i = 1, pi = chglist; pi != NULL; i++, pi = pi->next) {
+        sys->p[pi->index] = calcp(pp, pi->x, pi->y, pi->z, NULL);
+      }
+      /* dump the column */
+      if(j == 1) savemat_mod(fp, 1000, "P", num_panels, num_panels, 0,
+                             &(sys->p[1]), (double *)NULL, 0, num_panels);
+      else savemat_mod(fp, 1000, "P", num_panels, num_panels, 0,
+                       &(sys->p[1]), (double *)NULL, 1, num_panels);
+
+    }
+  }
+
+  fclose(fp);
+}
 
 /*
   do an n^2/2 check to see if any panels have the same center points
   (debug only)
 */
-static int has_duplicate_panels(FILE *fp, charge *chglst)
+int has_duplicate_panels(FILE *fp, charge *chglst)
 {
   int no_duplicates;
   charge *cp, *cpinner;
@@ -1212,7 +1291,7 @@ void dumpQ2PDiag(cube *nextc)
   int i, j, ind, pos_d, neg_d;
   double temp[BUFSIZ], temp_mat[100][100], **rmat;
   double pos_fact, neg_fact, panel_fact;
-  FILE *fp, *fopen();
+  FILE *fp;
 
   /* dump the diag matrix to a matlab file along with its dummy vector */
   /*   must complie on sobolev with /usr/local/matlab/loadsave/savemat.o */
@@ -1329,7 +1408,7 @@ static void chkDummy(double *vector, int *is_dummy, int size)
 /*
   debug only - print message if dummy list doesn't match panel list
 */
-static void chkDummyList(charge **panels, int *is_dummy, int n_chgs)
+void chkDummyList(charge **panels, int *is_dummy, int n_chgs)
 {
   int i;
   int first = TRUE;
@@ -1350,7 +1429,7 @@ static void chkDummyList(charge **panels, int *is_dummy, int n_chgs)
 /*
   print the conductor names to a file
 */
-static void dumpCondNames(FILE *fp, Name *name_list)
+void dumpCondNames(FILE *fp, Name *name_list)
 { 
   int i;
   Name *cur_name;

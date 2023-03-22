@@ -68,7 +68,7 @@ extern char *   realloc();
 #include "resusage.h"
 
 /* uglyalloc */
-char *ualloc(unsigned int nbytes);
+#include "uglyalloc.h"
 
 #define VERSION 2.0
 

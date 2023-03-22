@@ -56,11 +56,11 @@ struct tms timestuff;
 /* define macros for time and resident memory usage checks */
 
 static double dtime = 0.0;
-static long stime, utime;
 
 #ifdef NOTOTHER
 
 #ifdef FOUR			/* 4.2,3BSD (tested: Sun4, IBM6000, DEC5000) */
+static long stime, utime;
 #define starttimer getrusage(RUSAGE_SELF, &timestuff); \
 stime = timestuff.ru_utime.tv_sec; \
 utime = timestuff.ru_utime.tv_usec
@@ -71,6 +71,7 @@ dtime = (double)(timestuff.ru_utime.tv_sec - stime) \
 #endif /* FOUR */
 
 #ifdef FIVE			/* for System V (tested: HP300) */
+static long stime, utime;
 #define starttimer times(&timestuff); \
 utime = timestuff.tms_utime
 #define stoptimer times(&timestuff); \

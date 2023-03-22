@@ -69,7 +69,7 @@ struct tri {			/* triangular element */
 };
 typedef struct tri tri;
 
-/* #define MAXCON 10000		/* assumes never more conductors than this */
+/* #define MAXCON 10000		   assumes never more conductors than this */
 
 int getConductorNum(char *name, Name **name_list, int *num_cond);
 char *getConductorName(int cond_num, Name **name_list);

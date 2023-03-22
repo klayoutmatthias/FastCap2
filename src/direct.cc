@@ -34,6 +34,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "mulDisplay.h"
 #include "direct.h"
 #include "calcp.h"
 

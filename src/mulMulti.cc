@@ -36,6 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "mulMulti.h"
 #include "mulLocal.h"
+#include "mulDisplay.h"
 
 /*
   Globals used for temporary storage.

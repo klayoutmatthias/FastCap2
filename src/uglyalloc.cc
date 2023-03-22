@@ -264,7 +264,7 @@ static void ualloc_verify()
         memory lost in each header struct (a problem with many small things)
   - if base == NULL (not using ugly allocator), final break value is printed
 */
-static void uallocEfcy(long memcount)
+void uallocEfcy(long memcount)
 {
 #if UGDEBG == 2
   HEADER *p;

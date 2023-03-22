@@ -33,38 +33,10 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  
 */
 
-#if !defined(mulDisplay_H)
-#define mulDisplay_H
+#if !defined(uglyalloc_H)
+#define uglyalloc_H
 
-#include "zbufStruct.h"
-
-void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list);
-void dumpConfig(FILE *fp, char *name);
-void dump_face(FILE *fp, face *fac);
-void dumpCorners(FILE *fp, double **mat, int rows, int cols);
-void dumpCondNames(FILE *fp, Name *name_list);
-int has_duplicate_panels(FILE *fp, charge *chglst);
-void dumpMulSet(ssystem *sy, int numLev, int order);
-void dump_preconditioner(ssystem *sys, charge *chglist, int type);
-void dissys(ssystem *sys);
-void chkList(ssystem *sys, int listtype);
-void chkLowLev(ssystem *sys, int listtype);
-void dumpSynop(ssystem *sys);
-void dumpMatBldCnts(ssystem *sys);
-void dumpMat(double **mat, int rows, int cols);
-void dumpQ2PDiag(cube *nextc);
-void dispQ2M(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order);
-void dispM2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order);
-void dispQ2L(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order);
-void dispQ2P(double **mat, charge **chgs, int numchgs, int *is_dummy, charge **pchgs, int numpchgs);
-void dispQ2PDiag(double **mat, charge **chgs, int numchgs, int *is_dummy);
-void dispM2M(double **mat, double x, double y, double z, double xp, double yp, double zp, int order);
-void dispL2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order);
-void dispM2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order);
-void dispL2P(double **mat, double x, double y, double z, charge **chgs, int numchgs, int order);
-void dumpLevOneUpVecs(ssystem *sys);
-void chkDummyList(charge **panels, int *is_dummy, int n_chgs);
-void disExParsimpcube(cube *pc);
-void disExtrasimpcube(cube *pc);
+char *ualloc(unsigned int nbytes);
+void uallocEfcy(long memcount);
 
 #endif

@@ -35,6 +35,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 #include "zbufInOut.h"
+#include "psMatDisplay.h"
 
 /*
   for writting sparsity pattern ps file in Aldus Freehand format
@@ -190,7 +191,7 @@ static void dump_line(FILE *fp, double xstart, double ystart, double len)
   - call first with type = OPEN, then on each calcp with type = UPDATE,
     finally with type = CLOSE
 */
-static void dump_ps_mat(char *filename, int row, int col, int num_row, int num_col, char *argv[], int argc, int type)
+void dump_ps_mat(char *filename, int row, int col, int num_row, int num_col, char *argv[], int argc, int type)
 {
   static FILE *fp = NULL;
   double widx, widy;

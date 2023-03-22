@@ -34,23 +34,24 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 
 #include "mulGlobal.h"
+#include "mulDisplay.h"
+#include "mulDo.h"
 #include "capsolve.h"
 #include "input.h"
 #include "zbufInOut.h"
 #include "zbuf2fastcap.h"
-#include "mulDo.h"
 #include "electric.h"
 #include "quickif.h"
 #include "blkDirect.h"
 #include "direct.h"
 
-static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist);
-static void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist);
+static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, int maxiter, double tol, charge *chglist);
+static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, charge *chglist);
 
 /* This routine takes the cube data struct and computes capacitances. */
 int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, int numconds, Name *name_list)
-/* double ***capmat;		/* pointer to capacitance matrix */
-/* int size, numconds, real_size;	/* real_size = total #panels, incl dummies */
+/* double ***capmat: pointer to capacitance matrix */
+/* real_size: real_size = total #panels, incl dummies */
 {
   int i, cond, iter, maxiter = MAXITER, ttliter = 0;
   charge *nq;
@@ -139,13 +140,13 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     /* Do gcr. First allocate space for back vectors. */
     /* allocation moved out of loop 30Apr90 */
 #if ITRTYP == GMRES			       
-    if((iter = gmres(sys,q,p,r,ap,bp,bap,size,maxiter,iter_tol,chglist)) 
+    if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,maxiter,iter_tol,chglist))
        > maxiter) {
       fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
       exit(0);
     }
 #else
-    if((iter = gcr(sys,q,p,r,ap,bp,bap,size,maxiter,iter_tol,chglist)) 
+    if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,maxiter,iter_tol,chglist))
        > maxiter) {
       fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
       exit(0);
@@ -202,7 +203,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 /* 
 Preconditioned(possibly) Generalized Conjugate Residuals.
 */
-static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int maxiter, double tol, charge *chglist)
+static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double norm, beta, alpha, maxnorm;
@@ -227,7 +228,7 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
       bp[iter][i] = p[i] = r[i];
     }
 
-    computePsi(sys, p, ap, size, chglist);
+    computePsi(sys, p, ap, size, real_size, chglist);
     
     starttimer;
     for(i=1; i <= size; i++) {
@@ -300,7 +301,7 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
 /* 
   Preconditioned(possibly) Generalized Minimum Residual. 
   */
-static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist)
+static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double rnorm, norm, maxnorm=10.0;
@@ -354,7 +355,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
     conjtime += dtime;
 
     /* Form Av{iter}. */
-    computePsi(sys, p, ap, size, chglist);
+    computePsi(sys, p, ap, size, real_size, chglist);
 
     starttimer;
     
@@ -467,10 +468,9 @@ charge and potential have already been set up and that the potential
 vector has been zeroed.  ARBITRARY VECTORS CAN NOT BE USED.
 */
 
-static void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist)
+static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, charge *chglist)
 {
   extern double dirtime, uptime, downtime, evaltime, prectime;
-  extern int real_size;
   int i;
 
   ASSERT(p == sys->p);

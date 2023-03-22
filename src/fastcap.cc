@@ -42,6 +42,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulDisplay.h"
 #include "calcp.h"
 #include "capsolve.h"
+#include "psMatDisplay.h"
 
 int main(int argc, char *argv[])
 {
@@ -55,11 +56,10 @@ int main(int argc, char *argv[])
   extern int fulldirops, fullPqops;
   extern int num_dummy_panels, num_dielec_panels; 
   extern int num_both_panels, num_cond_panels, up_size, eval_size;
-  extern char *title, *ps_file_base;
+  extern char *title;
   extern long memcount;
   extern double prectime, conjtime, dirtime, multime, uptime, downtime;
   extern double evaltime, lutime, fullsoltime, prsetime;
-  extern char *kill_name_list;
 
   Name *name_list;
 
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 #if CKDLST == ON
   chkList(sys, DIRECT);
   chkLowLev(sys, DIRECT);
-  chkEvalLstD(sys, DIRECT);
+  //  Not available anywhere: chkEvalLstD(sys, DIRECT);
 #endif
 
   mulMatEval(sys);		/* set up matrices for evaluation pass */
@@ -316,41 +316,41 @@ int main(int argc, char *argv[])
 	    fullPqops, fullPqops/ttliter);
   }
 
-  fprintf(stdout, "Total memory allocated: %d kilobytes ", memcount/1024);
+  fprintf(stdout, "Total memory allocated: %d kilobytes ", int(memcount/1024));
   uallocEfcy(memcount);
 
   fprintf(stdout, "  Q2M  matrix memory allocated: %7.d kilobytes\n",
-	  memQ2M/1024);
+          int(memQ2M/1024));
   memcount = memQ2M;
   fprintf(stdout, "  Q2L  matrix memory allocated: %7.d kilobytes\n",
-	  memQ2L/1024);
+          int(memQ2L/1024));
   memcount += memQ2L;
   fprintf(stdout, "  Q2P  matrix memory allocated: %7.d kilobytes\n",
-	  memQ2P/1024);
+          int(memQ2P/1024));
   memcount += memQ2P;
   fprintf(stdout, "  L2L  matrix memory allocated: %7.d kilobytes\n",
-	  memL2L/1024);
+          int(memL2L/1024));
   memcount += memL2L;
   fprintf(stdout, "  M2M  matrix memory allocated: %7.d kilobytes\n",
-	  memM2M/1024);
+          int(memM2M/1024));
   memcount += memM2M;
   fprintf(stdout, "  M2L  matrix memory allocated: %7.d kilobytes\n",
-	  memM2L/1024);
+          int(memM2L/1024));
   memcount += memM2L;
   fprintf(stdout, "  M2P  matrix memory allocated: %7.d kilobytes\n",
-	  memM2P/1024);
+          int(memM2P/1024));
   memcount += memM2P;
   fprintf(stdout, "  L2P  matrix memory allocated: %7.d kilobytes\n",
-	  memL2P/1024);
+          int(memL2P/1024));
   memcount += memL2P;
   fprintf(stdout, "  Q2PD matrix memory allocated: %7.d kilobytes\n",
-	  memQ2PD/1024);
+          int(memQ2PD/1024));
   memcount += memQ2PD;
   fprintf(stdout, "  Miscellaneous mem. allocated: %7.d kilobytes\n",
-	  memMSC/1024);
+          int(memMSC/1024));
   memcount += memMSC;
   fprintf(stdout, "  Total memory (check w/above): %7.d kilobytes\n",
-	  memcount/1024);
+          int(memcount/1024));
 #endif
 
 }

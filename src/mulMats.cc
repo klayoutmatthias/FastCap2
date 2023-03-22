@@ -37,6 +37,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulMats.h"
 #include "mulMulti.h"
 #include "mulLocal.h"
+#include "mulDisplay.h"
 #include "direct.h"
 #include "calcp.h"
 #include "blkDirect.h"
