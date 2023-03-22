@@ -41,6 +41,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "direct.h"
 #include "calcp.h"
 #include "blkDirect.h"
+#include "resusage.h"
 
 int *localcnt, *multicnt, *evalcnt;     /* counts of builds done by level */
 

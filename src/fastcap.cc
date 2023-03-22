@@ -43,6 +43,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "calcp.h"
 #include "capsolve.h"
 #include "psMatDisplay.h"
+#include "resusage.h"
 
 int main(int argc, char *argv[])
 {

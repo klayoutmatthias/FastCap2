@@ -64,9 +64,6 @@ extern char *   realloc();
 /* fastcap data structures */
 #include "mulStruct.h"
 
-/* execution time macros */
-#include "resusage.h"
-
 /* uglyalloc */
 #include "uglyalloc.h"
 
@@ -131,7 +128,6 @@ extern long memMSC;
        (void)fprintf(stderr, " (NULL pointer on %ld byte request)\n",       \
                      (NUM)*sizeof(TYPE));                                   \
        DUMPALLOCSIZ;                                                        \
-       DUMPRSS;                                                             \
        (void)fflush(stderr);                                                \
        (void)fflush(stdout);                                                \
        if(FLAG == ON) exit(0);                                              \
@@ -168,7 +164,6 @@ extern long memMSC;
        (void)fprintf(stderr, " (NULL pointer on %ld byte request)\n",        \
                      (NUM)*sizeof(TYPE));                                    \
        DUMPALLOCSIZ;                                                         \
-       DUMPRSS;                                                              \
        (void)fflush(stderr);                                                 \
        (void)fflush(stdout);                                                 \
        if(FLAG == ON) exit(0);                                               \

@@ -44,6 +44,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "quickif.h"
 #include "blkDirect.h"
 #include "direct.h"
+#include "resusage.h"
 
 static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, int maxiter, double tol, charge *chglist);
 static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, charge *chglist);

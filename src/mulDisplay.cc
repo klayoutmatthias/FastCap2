@@ -124,9 +124,11 @@ int i, j, k, l, side;
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
 	for(l=0; l < side; l++) {
-	  fprintf(stdout, "\ncubes[%d][%d][%d][%d]\n", i, j, k, l);
-	  dissimpcube(sys->cubes[i][j][k][l]);
-/*	  disdirectcube(&(sys->cubes[i][j][k][l])); */
+	  if (sys->cubes[i][j][k][l]) {
+	    fprintf(stdout, "\ncubes[%d][%d][%d][%d]\n", i, j, k, l);
+	    dissimpcube(sys->cubes[i][j][k][l]);
+/*          disdirectcube(&(sys->cubes[i][j][k][l])); */
+	  }
 	}
       }
     }

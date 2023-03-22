@@ -36,6 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulGlobal.h"
 #include "calcp.h"
 #include "blkDirect.h"
+#include "resusage.h"
 
 #include <fcntl.h>
 
