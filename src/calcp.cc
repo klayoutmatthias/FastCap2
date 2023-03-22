@@ -849,22 +849,3 @@ static void calcpm(double *multi, double x, double y, double z, int origorder, i
   }
 }
 
-
-
-/*
-
-dismat(mat, size)
-double **mat;
-int size;
-{
-  int i, j;
-
-  for(i=0; i <= size; i++) {
-    printf("\nrow i = ");
-    for(j=0; j <= size; j++) {
-      printf("%g  ", mat[i][j]);
-    }
-  }
-  printf("\n");
-}
-*/

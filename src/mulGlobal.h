@@ -322,59 +322,141 @@ misc. global macros
 /* Linear System Solution Configuration */
 #define ITRTYP GMRES		/* type of iterative method */
 #define PRECOND OL		/* NONE=> no preconditioner OL=> use prec. */
+#if !defined(DIRSOL)
 #define DIRSOL OFF		/* ON=> solve Pq=psi by Gaussian elim. */
+#endif
+#if !defined(EXPGCR)
+//  NOTE: this option does not build
 #define EXPGCR OFF		/* ON=> do explicit full P*q products */
+#endif
 #define ABSTOL 0.01		/* iterations until ||res||inf < ABSTOL */
 #define MAXITER size		/* max num iterations ('size' => # panels) */
 #define EXRTSH 0.9		/* exact/ttl>EXRTSH for lev => make last lev */
 /* (add any new configuration flags to dumpConfig() in mulDisplay.c) */
 
 /* Output Format Configuration */
+#if !defined(MKSDAT)
 #define MKSDAT ON		/* ON=> dump symmetrized, MKS units cap mat */
+#endif
+#if !defined(CMDDAT)
 #define CMDDAT ON		/* ON=> dump command line info to output */
+#endif
+#if !defined(RAWDAT)
 #define RAWDAT OFF		/* ON=> dump unsymm, Gaussian units cap mat */
+#endif
+#if !defined(ITRDAT)
 #define ITRDAT OFF		/* ON=> dump residuals for every iteration */
+#endif
+#if !defined(TIMDAT)
 #define TIMDAT OFF		/* ON=> dump time and memory usage numbers */
+#endif
+#if !defined(CFGDAT)
 #define CFGDAT OFF		/* ON=> dump configuration flags to output */
+#endif
+#if !defined(MULDAT)
 #define MULDAT OFF		/* ON=> dump brief multipole setup info */
+#endif
+#if !defined(DISSYN)
 #define DISSYN OFF		/* ON=> display synopsis of cubes in lists */
+#endif
+#if !defined(DMTCNT)
 #define DMTCNT OFF		/* ON=> display xform matrix counts by level */
+#endif
+#if !defined(DISSRF)
 #define DISSRF ON		/* ON=> display input surface information */
+#endif
+#if !defined(NAMDAT)
 #define NAMDAT OFF		/* ON=> dump conductor names */
+#endif
+#if !defined(CAPVEW)
 #define CAPVEW ON		/* ON=> enable ps file dumps of geometry */
-
+#endif
 /* display of transformation matrices */
+#if !defined(DISQ2M)
 #define DISQ2M OFF		/* ON=> display Q2M matrices when built */
+#endif
+#if !defined(DISM2M)
 #define DISM2M OFF		/* ON=> display M2M matrices when built */
+#endif
+#if !defined(DISM2P)
 #define DISM2P OFF		/* ON=> display M2P matrices when built */
+#endif
+#if !defined(DISL2P)
 #define DISL2P OFF		/* ON=> display L2P matrices when built */
+#endif
+#if !defined(DISQ2P)
 #define DISQ2P OFF		/* ON=> display Q2P matrices when built */
+#endif
+#if !defined(DSQ2PD)
 #define DSQ2PD OFF		/* ON=> display Q2PDiag matrices > build */
+#endif
+#if !defined(DISQ2L)
 #define DISQ2L OFF		/* ON=> display Q2L matrices when built */
+#endif
+#if !defined(DISM2L)
 #define DISM2L OFF		/* ON=> display M2L matrices when built */
+#endif
+#if !defined(DISL2L)
 #define DISL2L OFF		/* ON=> display L2L matrices when built */
+#endif
+#if !defined(DALQ2M)
 #define DALQ2M OFF		/* ON=> display all Q2M matrix build steps */
+#endif
+#if !defined(DALM2P)
 #define DALM2P OFF		/* ON=> display all M2P matrix build steps */
+#endif
+#if !defined(DALL2P)
 #define DALL2P OFF		/* ON=> display all L2P matrix build steps */
+#endif
+#if !defined(DALQ2L)
 #define DALQ2L OFF		/* ON=> display all Q2L matrix build steps */
+#endif
 /* display of other intermediate results */
+#if !defined(DUPVEC)
 #define DUPVEC OFF		/* ON=> display lev 1 upward pass vectors */
+#endif
+#if !defined(DISFAC)
 #define DISFAC OFF		/* ON=> display factorial fractions in M2L */
+#endif
+#if !defined(DPSYSD)
 #define DPSYSD OFF		/* ON=> display system after direct build */
+#endif
+#if !defined(DILIST)
 #define DILIST OFF		/* ON=> display interaction lists */
+#endif
+#if !defined(DMPELE)
 #define DMPELE OFF		/* ON=> display electric flux densities */
+#endif
+#if !defined(DMPCHG)
 #define DMPCHG OFF		/* ON=> display all charge vector iterates
 				   LAST=> display final charge vector */
+#endif
 /* misc debug */
+#if !defined(CKDLST)
 #define CKDLST OFF		/* ON=> check direct list, prnt msg if bad */
+#endif
+#if !defined(DMPREC)
 #define DMPREC OFF		/* ON=> dump P and Ctil to matlab file */
+#endif
+#if !defined(CKCLST)
 #define CKCLST OFF		/* ON=> check charge list, prnt msg if bad */
+#endif
+#if !defined(DUMPPS)
 #define DUMPPS OFF		/* ON=> dump ps file w/mulMatDirect calcp's
 				   ALL=> dump adaptive alg calcp's as well */
+#endif
+#if !defined(DPCOMP)
 #define DPCOMP OFF		/* ON=> dump prec pts before&aft compression */
+#endif
+#if !defined(DPDDIF)
 #define DPDDIF OFF		/* ON=> dump divided difference components */
+#endif
+#if !defined(CHKDUM)
 #define CHKDUM OFF		/* ON=> print msg if dummy list inconsistent */
+#endif
+#if !defined(JACDBG)
 #define JACDBG OFF		/* ON=> print random Jacob debug messages */
+#endif
 /* blkDirect.c related flags - used only when DIRSOL == ON || EXPGCR == ON */
 #define MAXSIZ 0		/* any more tiles than this uses matrix on disk
 				   for DIRSOL == ON or EXPGCR == ON */

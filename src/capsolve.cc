@@ -41,6 +41,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulDo.h"
 #include "electric.h"
 #include "quickif.h"
+#include "blkDirect.h"
+#include "direct.h"
 
 static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int maxiter, double tol, charge *chglist);
 static void computePsi(ssystem *sys, double *q, double *p, int size, charge *chglist);

@@ -502,7 +502,7 @@ static int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, do
   double minref[2], maxref[2];	/* bounding box coordinates */
   double minfac[2], maxfac[2];
   double x[3], y[3];		/* coordinates of x and y in facref plane */
-  double dot(), temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0, temp1;
+  double temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0, temp1;
   double margin1;
   double *cfr, *ctr, *cff, *ctf, avg[3], origin[3];
   double isect_avg[3], isect[3]; /* intersection points */

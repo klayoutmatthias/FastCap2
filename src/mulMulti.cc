@@ -436,7 +436,6 @@ double **mulMulti2Multi(double x, double y, double z, double xp, double yp, doub
 /* double x, y, z, xp, yp, zp;	/* cube center, parent cube center */
 {
   double **mat, rho, rhoPwr, cosA, beta, mBeta, temp1, temp2; 
-  double iPwr(), fact();
   int r, j, k, m, n, c;
   int cterms = costerms(order), sterms = sinterms(order);
   int terms = cterms + sterms;

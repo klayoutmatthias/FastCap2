@@ -44,7 +44,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 static void dismat(double **mat, int rows, int cols);
 static void dischg(charge *pq);
-static void disfchg(charge *pq);
 static void dissimpcube(cube *pc);
 static void dumpChgsWDummy(charge **chgs, int numchgs, int *is_dummy, double x, double y, double z);
 
@@ -96,12 +95,6 @@ int i;
       printf("v%d = %d ", i, pc->downnumeles[i]);
     }
   }
-}
-
-static void disupcube(cube *pc)
-{
-
-
 }
 
 static void disdirectcube(cube *pc)
@@ -170,25 +163,6 @@ int i;
 static void dischg(charge *pq)
 {
   printf("cond=%d index=%d\n", pq->cond, pq->index);
-}
-
-static void disallchg(charge *pq)
-{
-charge *nq;
-  for(nq = pq; nq != NULL; nq = nq->next) disfchg(pq);
-}
-
-void disfchg(charge *pq) 
-{
-/*
-  printf("Cond=%d Corners\n", pq->cond);
-  printf("x0=%g y0=%g z0=%g\n", pq->x0, pq->y0, pq->z0);
-  printf("x1=%g y1=%g z1=%g\n", pq->x1, pq->y1, pq->z1);
-  printf("x2=%g y2=%g z2=%g\n", pq->x2, pq->y2, pq->z2);
-  printf("x3=%g y3=%g z3=%g\n", pq->x3, pq->y3, pq->z3);
-  printf("Center\n");
-  printf("x=%g y=%g z=%g\n", pq->x, pq->y, pq->z);
-*/
 }
 
 /*
@@ -1336,7 +1310,7 @@ struct exception *exc;
 /*
   debug only - check a vector to make sure it has zeros in dummy entries
 */
-static int chkDummy(double *vector, int *is_dummy, int size)
+static void chkDummy(double *vector, int *is_dummy, int size)
 {
   int i, first = TRUE;
 

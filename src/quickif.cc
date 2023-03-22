@@ -176,7 +176,6 @@ static int getConductorNumNoAdd(char *name, Name *name_list)
 char *getConductorName(int cond_num, Name **name_list)
 {
   Name *cur_name;
-  char *last_alias();
   int i;
 
   /* check to see if conductor number is present */

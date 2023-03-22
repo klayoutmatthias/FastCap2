@@ -38,6 +38,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulMulti.h"
 #include "mulLocal.h"
 #include "direct.h"
+#include "calcp.h"
+#include "blkDirect.h"
 
 int *localcnt, *multicnt, *evalcnt;     /* counts of builds done by level */
 
@@ -497,7 +499,7 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
                       int *chg_is_dummy)
 {
   int dindex, j;
-  double factor, calcp();
+  double factor;
   charge *dp;
   surface *surf = eval_panels[eval_row]->surf;
 

@@ -100,7 +100,7 @@ static HEADER *mocore(unsigned int nu)
 {
   char *cp;
 
-  cp = sbrk(nu*sizeofHDR);
+  cp = (char *)sbrk(nu*sizeofHDR);
   if(cp == (void *)-1) return(NULL);
   return((HEADER *)cp);
 }
