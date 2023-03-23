@@ -770,7 +770,7 @@ static charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
     initcalcp(cur_surf->panels);/* get normals, edges, perpendiculars */
     if(cur_surf->type == DIELEC || cur_surf->type == BOTH) {
       /* if(patran_file) align_normals(cur_surf->panels);
-      align_normals(cur_surf->panels, cur_surf); /* now done in calcp */
+      align_normals(cur_surf->panels, cur_surf); */ /* now done in calcp */
       add_dummy_panels(cur_surf->panels); /* add dummy panels for field calc */
     }
 
@@ -1358,7 +1358,7 @@ static void remove_name(Name **name_list, int num)
     if(i == num) {
 
       /* overwrite name */
-      if(strlen(cur_name->name) < slen) {
+      if(strlen(cur_name->name) < (size_t)slen) {
 	CALLOC(cur_name->name, slen+1, char, ON, AMSC);
       }
       strcpy(cur_name->name, str);
@@ -1366,7 +1366,7 @@ static void remove_name(Name **name_list, int num)
       /* overwrite aliases */
       for(cur_alias = cur_name->alias_list; cur_alias != NULL;
 	  cur_alias = cur_alias->next) {
-	if(strlen(cur_alias->name) < slen) {
+	if(strlen(cur_alias->name) < (size_t)slen) {
 	  CALLOC(cur_alias->name, slen+1, char, ON, AMSC);
 	}
 	strcpy(cur_alias->name, str);

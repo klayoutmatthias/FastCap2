@@ -43,7 +43,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
   given by a normal when projected back to the given view point
 */
 void image(face **faces, int numfaces, line **lines, int numlines, double *normal, double rhs, double *view)
-/* double rhs;			/* rhs of the plane's equation */
+/* double rhs: rhs of the plane's equation */
 {
   int i, j, k;
   double alpha, temp[3];
@@ -148,7 +148,7 @@ void initFaces(face **faces, int numfaces, double *view)
   - sets up y axis in plane || to 1st line rotated according to rotation arg
 */
 void flatten(face **faces, int numfaces, line **lines, int numlines, double rhs, double rotation, double *normal, double *view)
-/* double rotation;		/* rotation of image y axis rel to 1st line */
+/* double rotation: rotation of image y axis rel to 1st line */
 {
   int i, j, k;
   double temp, tvec[3], tvec1[3], crot, srot, alpha;
@@ -399,7 +399,7 @@ void scale2d(face **faces, int numfaces, line **lines, int numlines, double scal
   returns the center of a rectangular prism contianing all the face corners
 */
 double *getAvg(face **faces, int numfaces, line **lines, int numlines, int flag)
-/* int flag;			/* ON => include axes */
+/* int flag: ON => include axes */
 {
   double *avg, max[3], min[3];
   int i, j, k;

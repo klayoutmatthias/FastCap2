@@ -292,7 +292,7 @@ static void getAbsCoord(double *vec, charge *panel, int num)
   transfer fastcap panel info to face structs
 */
 face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
-/* int *numfaces, use_density;     /* use_density = TRUE => use q/A not q */
+/* int use_density: use_density = TRUE => use q/A not q */
 {
   int i, j, dummy;
   int autmom, autlev, numMom, numLev;
@@ -979,7 +979,7 @@ static void dumpAdjGraph(face **faces, int numfaces, FILE *fp)
   fprintf(fp, "0 0 32 0 0 (Input Ordering) ts\n}\n");
   fprintf(fp, "[0 0 0 1]\nsts\nvmrs\n"); */
 
-  /* y += (numfaces*stepy + 3*FONT);    /* offset 2nd array */
+  /* y += (numfaces*stepy + 3*FONT);    */ /* offset 2nd array */
 
   /* number each row and fill it in - graph ordering */
   for(f = 0; f < numfaces; f++) {

@@ -231,9 +231,8 @@ static int doLinesIntersect(double *isect, double *from1, double *to1, double *f
 static int face_is_inside(double **corners1, int ccnt1, double **corners2, int ccnt2, double *com_pnt)
 {
   int i, j, k, n, ccnt, zeros, pos, neg, ncnt;
-  double *sfrom, *sto, margin1, margin2, **refcor, **curcor;
+  double margin1, margin2, **refcor, **curcor;
   double innerpnt[2], side[2], pnt[2];
-  double temp;
 
   /* do cross products between sides of one face and vectors to first point
      of the other---must get same sign or zero for all if one inside other 
@@ -510,11 +509,6 @@ static int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, do
   int all_pos, all_neg, intersect, same_normal;
   face *curf;
 
-  if(fac->index == 8 && facref->index == 20
-     || fac->index == 20 && facref->index == 8) {
-    i = i + 0;
-  }
-
   /* allocate for local arrays on first call */
   if(cproj == NULL) {
     CALLOC(cproj, 2, double **, ON, AMSC);
@@ -529,17 +523,6 @@ static int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, do
   /* figure if panels are in the same plane
      - if they are, they cant overlap if this is a legal discretization
        so return false */
-#if 1 == 0
-  temp = temp1 = margin = 0.0;
-  for(i = 0; i < 3; i++) {
-    temp1 = fac->normal[i]-facref->normal[i];
-    temp1 = temp1*temp1;
-    margin = MAX(margin, temp1);
-    temp += temp1;
-  }
-  temp = sqrt(temp);		/* get norm of difference of normals */
-  margin *= (MARGIN*PARMGN);	/* get norm of difference margin */
-#endif
   same_normal = TRUE;
   for(i = 0; i < 3 && same_normal; i++) {
     if(!diff_is_zero(fac->normal[i], facref->normal[i], PARMGN)) 
@@ -970,10 +953,6 @@ static void setDepth(face *fac)
   /* mark so this face won't be renumbered */
   fac->mark = TRUE;
 
-  if(fac->index == 193) {
-    i = i + 0;
-  }
-
   /* do adjacents if needed */
   for(i = 0; i < fac->numbehind; i++) {
     if((fac->behind[i])->mark == FALSE) setDepth(fac->behind[i]);
@@ -1026,7 +1005,7 @@ face **depthSortFaces(face **faces, int numfaces)
   sets up adjacency graph pointers in faces: pntr in i to j => face i behind j
 */
 void getAdjGraph(face **faces, int numfaces, double *view, double rhs, double *normal)
-/* face **faces;			/* array of face pntrs, faces[0] head of lst */
+/* face **faces: array of face pntrs, faces[0] head of lst */
 {
   int numbehind, f, i, check;
   face *fpcur, *fpchk, **behind;

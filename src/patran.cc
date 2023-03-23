@@ -725,8 +725,8 @@ static char *getPatranName(int cond_num)
 ****************************************************************************/
 
 charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type, char *name_suffix)
-/* Name **name_list;		/* master list of conductor names */
-/* int *num_cond;			/* master conductor counter */
+/* Name **name_list: master list of conductor names */
+/* int *num_cond: master conductor counter */
 {
   CFEG *cfeg_ptr;
   int NELS, LPH_ID,conductor_ID,*element_list;

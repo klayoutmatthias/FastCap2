@@ -265,8 +265,8 @@ static int renameConductor(char *old_name, char *new_name, Name **name_list, int
 */
 charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans, int *num_cond, Name **name_list,
                 char *name_suffix)
-/* char *line, *title, *name_suffix; /* suffix for all cond names read */
-/* Name **name_list;		/* name list pointer */
+/* char *name_suffix: suffix for all cond names read */
+/* Name **name_list: name list pointer */
 {
   int linecnt = 2, i, cond;
   char temp[BUFSIZ], temp2[BUFSIZ], line1[BUFSIZ], *cp;
