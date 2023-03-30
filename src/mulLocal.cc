@@ -37,6 +37,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulMulti.h"
 #include "mulLocal.h"
 #include "mulDisplay.h"
+#include <cmath>
 
 /*
   globals used for temporary storage
@@ -140,7 +141,7 @@ static double cosB(int sum)
 /* 
   Used for all but no local downward pass. 
 */
-double **mulMulti2Local(double x, double y, double z, double xp, double yp, double zp, int order)
+double **mulMulti2Local(ssystem *sys, double x, double y, double z, double xp, double yp, double zp, int order)
 /* double x, y, z, xp, yp, zp: multipole and local cube centers */
 {
   int i, j, k, n, m;
@@ -154,9 +155,9 @@ double **mulMulti2Local(double x, double y, double z, double xp, double yp, doub
   extern double *tleg;          /* external temporary storage */
 
   /* allocate the multi to local transformation matrix */
-  CALLOC(mat, terms, double*, ON, AM2L);
+  mat = sys->heap.alloc<double *>(terms, AM2L);
   for(i = 0; i < terms; i++)
-      CALLOC(mat[i], terms, double, ON, AM2L);
+      mat[i] = sys->heap.alloc<double>(terms, AM2L);
 
   /* find relative spherical coordinates */
   xyz2sphere(x, y, z, xp, yp, zp, &rho, &cosA, &beta);
@@ -227,7 +228,7 @@ double **mulMulti2Local(double x, double y, double z, double xp, double yp, doub
 /* 
   Used only for true (Greengard) downward pass - similar to Multi2Local
 */
-double **mulLocal2Local(double x, double y, double z, double xc, double yc, double zc, int order)
+double **mulLocal2Local(ssystem *sys, double x, double y, double z, double xc, double yc, double zc, int order)
 /* double x, y, z, xc, yc, zc: parent and child cube centers */
 {
   int i, j, k, n, m;
@@ -241,9 +242,9 @@ double **mulLocal2Local(double x, double y, double z, double xc, double yc, doub
   extern double *tleg;          /* external temporary storage */
 
   /* allocate the local to local transformation matrix */
-  CALLOC(mat, terms, double*, ON, AL2L);
+  mat = sys->heap.alloc<double *>(terms, AL2L);
   for(i = 0; i < terms; i++)
-      CALLOC(mat[i], terms, double, ON, AL2L);
+      mat[i] = sys->heap.alloc<double>(terms, AL2L);
 
   /* find relative spherical coordinates */
   xyz2sphere(x, y, z, xc, yc, zc, &rho, &cosA, &beta);
@@ -327,7 +328,7 @@ double **mulLocal2Local(double x, double y, double z, double xc, double yc, doub
   form almost identical to mulQ2Multi - follows NB12 pg 32 w/m,n replacing k,j
   OPTIMIZATIONS INVOLVING is_dummy HAVE NOT BEEN COMPLETELY IMPLEMENTED
 */
-double **mulQ2Local(charge **chgs, int numchgs, int *is_dummy, double x, double y, double z, int order)
+double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, double x, double y, double z, int order)
 {
   int i, j, n, m;
   int cterms = costerms(order), terms = multerms(order);
@@ -336,9 +337,9 @@ double **mulQ2Local(charge **chgs, int numchgs, int *is_dummy, double x, double 
   extern double *Rhon, *Rho, *Betam, *Beta, *tleg;
 
   /* Allocate the matrix. */
-  CALLOC(mat, terms, double*, ON, AQ2L);
-  for(i=0; i < terms; i++) 
-      CALLOC(mat[i], numchgs, double, ON, AQ2L);
+  mat = sys->heap.alloc<double *>(terms, AQ2L);
+  for(i = 0; i < terms; i++)
+      mat[i] = sys->heap.alloc<double>(numchgs, AQ2L);
 
   /* get Legendre function evaluations, one set for each charge */
   /*  also get charge coordinates, set up for subsequent evals */
@@ -426,7 +427,7 @@ double **mulQ2Local(charge **chgs, int numchgs, int *is_dummy, double x, double 
   follows NB10 equation marked circle(2A) except roles of j,k and n,m switched
   very similar to mulMulti2P()
 */
-double **mulLocal2P(double x, double y, double z, charge **chgs, int numchgs, int order)
+double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, int numchgs, int order)
 {
   double **mat;
   double cosTh;			/* cosine of elevation coordinate */
@@ -434,9 +435,9 @@ double **mulLocal2P(double x, double y, double z, charge **chgs, int numchgs, in
   int i, j, k, m, n, kold;
   int cterms = costerms(order), terms = multerms(order);
 
-  CALLOC(mat, numchgs, double*, ON, AL2P);
-  for(i = 0; i < numchgs; i++) 
-      CALLOC(mat[i], terms, double, ON, AL2P);
+  mat = sys->heap.alloc<double *>(numchgs, AL2P);
+  for(i = 0; i < numchgs; i++)
+      mat[i] = sys->heap.alloc<double>(terms, AL2P);
 
   /* get Legendre function evaluations, one set for each charge */
   /*   also get charge coordinates to set up rest of matrix */

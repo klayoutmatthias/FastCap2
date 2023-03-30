@@ -36,6 +36,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(quickif_H)
 #define quickif_H
 
+#include "mulStruct.h"
+#include <cstdio>
+
 struct quadl {			/* quadralateral element */
   int cond;			/* conductor number */
   struct quadl *next;		/* linked list pntr */
@@ -71,9 +74,9 @@ typedef struct tri tri;
 
 /* #define MAXCON 10000		   assumes never more conductors than this */
 
-int getConductorNum(char *name, Name **name_list, int *num_cond);
+int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond);
 char *getConductorName(int cond_num, Name **name_list);
 char *last_alias(Name *cur_name);
-charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans, int *num_cond, Name **name_list, char *name_suffix);
+charge *quickif(ssystem *sys, FILE *fp, char *line, char *title, int surf_type, double *trans, int *num_cond, Name **name_list, char *name_suffix);
 
 #endif

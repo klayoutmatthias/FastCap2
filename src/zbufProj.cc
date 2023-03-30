@@ -38,6 +38,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "zbufProj.h"
 #include "zbufSort.h"
 
+#include <cmath>
+
 /*
   takes a list of 3d lines and returns a list of 3d lines mapped onto a plane
   given by a normal when projected back to the given view point
@@ -398,7 +400,7 @@ void scale2d(face **faces, int numfaces, line **lines, int numlines, double scal
 /*
   returns the center of a rectangular prism contianing all the face corners
 */
-double *getAvg(face **faces, int numfaces, line **lines, int numlines, int flag)
+double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, int flag)
 /* int flag: ON => include axes */
 {
   double *avg, max[3], min[3];
@@ -406,7 +408,7 @@ double *getAvg(face **faces, int numfaces, line **lines, int numlines, int flag)
   extern double ***axes;
   extern int x_;
 
-  CALLOC(avg, 3, double, ON, AMSC);
+  avg = sys->heap.alloc<double>(3, AMSC);
 
   /* check the faces' coordinates */
   for(i = 0; i < numfaces; i++) {

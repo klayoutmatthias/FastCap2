@@ -50,7 +50,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
   - file name used is <ps_file_base><iter>.ps; ps_file_base is either
     the list file base, the input file base or "stdin" (see get_ps_file_info())
 */
-void dump_ps_geometry(charge *chglist, double *q, int cond, int use_ttl_chg)
+void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int use_ttl_chg)
 {
   int i, j, k, numlines, numfaces, use_density;
   face **faces, **sfaces;
@@ -73,13 +73,13 @@ void dump_ps_geometry(charge *chglist, double *q, int cond, int use_ttl_chg)
   else use_density = TRUE;
 
   /* convert fastcap structs to zbuf structs - COULD ELIMINATE THIS */
-  faces = fastcap2faces(&numfaces, chglist, q, use_density);
+  faces = fastcap2faces(sys, &numfaces, chglist, q, use_density);
   
   /* get .fig format lines in file specified with -b option */
-  lines = getLines(line_file, &numlines);
+  lines = getLines(sys, line_file, &numlines);
 
   /* figure the cntr of extremal (average) coordinates of all points */
-  avg = getAvg(faces, numfaces, lines, numlines, OFF);
+  avg = getAvg(sys, faces, numfaces, lines, numlines, OFF);
 
   /* get the radius of the smallest sphere enclosing all the lines */
   radius = getSphere(avg, faces, numfaces, lines, numlines);
@@ -109,12 +109,12 @@ void dump_ps_geometry(charge *chglist, double *q, int cond, int use_ttl_chg)
   /* set up the adjacency graph for the depth sort */
   fprintf(stdout, "\nSorting %d faces for %s...", numfaces, str);
   fflush(stdout);
-  getAdjGraph(faces, numfaces, view, rhs, normal);
+  getAdjGraph(sys, faces, numfaces, view, rhs, normal);
   fprintf(stdout, "done.\n");
 
   /* depth sort the faces */
   /*fprintf(stderr, "Starting depth sort...");*/
-  sfaces = depthSortFaces(faces, numfaces);
+  sfaces = depthSortFaces(sys, faces, numfaces);
   /*fprintf(stderr, "done.\n");*/
 
   /* get the 2d figure and dump to ps file */

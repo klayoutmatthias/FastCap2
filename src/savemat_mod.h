@@ -36,7 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(savemat_mod_H)
 #define savemat_mod_H
 
-#include <stdio.h>
+#include <cstdio>
 
 void savemat_mod(FILE *fp, int type, const char *pname, int mrows, int ncols,
                  int imagf, double *preal, double *pimag, int wr_flag, int mn);

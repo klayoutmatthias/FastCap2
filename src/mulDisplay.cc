@@ -42,6 +42,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "quickif.h"
 #include "calcp.h"
 #include "savemat_mod.h"
+#include <cmath>
+#include <cstring>
 
 static void dismat(double **mat, int rows, int cols);
 static void dischg(charge *pq);
@@ -949,7 +951,7 @@ static char *spaces(char *str, int num)
   - some attempt to scale (eg pF, nF, uF etc) is made
   - also checks for M-matrix sign pattern, diag dominance
 */
-void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list)
+void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Name **name_list)
 {
   int i, j, toobig, toosmall, maxlen, sigfig, colwidth, i_killed, j_killed;
   int first_offd;
@@ -964,9 +966,9 @@ void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list)
 				/* - in the 1 cond case, assign is still ok */
 
   /* set up symetrized matrix storage */
-  CALLOC(sym_mat, numconds+1, double*, ON, AMSC);
+  sym_mat = sys->heap.alloc<double*>(numconds+1, AMSC);
   for(i=1; i <= numconds; i++)  {
-    CALLOC(sym_mat[i], numconds+1, double, ON, AMSC);
+    sym_mat[i] = sys->heap.alloc<double>(numconds+1, AMSC);
   }
 
   /* get the smallest and largest (absolute value) symmetrized elements */

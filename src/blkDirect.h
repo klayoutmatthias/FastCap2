@@ -36,7 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(blkDirect_H)
 #define blkDirect_H
 
-void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
+void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
                 double **triArray, double **sqrArray, int **real_index, int *is_dummy);
 void blkCompressVector(double *vec, int num_panels, int real_size, int *is_dummy);
 void blkAqprod(double *p, double *q, int size, double *sqmat);

@@ -36,6 +36,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(mulSetup_H)
 #define mulSetup_H
 
-ssystem *mulInit(int autom, int depth, int order, charge *charges);
+void mulInit(ssystem *sys, int autom, int depth, int order, charge *charges);
 
 #endif

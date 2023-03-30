@@ -37,6 +37,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "quickif.h"
 #include "patran_f.h"
 
+#include <cstring>
+
 /*
   tells if any conductor name alias matches a string
 */
@@ -74,7 +76,7 @@ static int alias_match_name(Name *cur_name, char *name)
 /*
   adds an alias 
 */
-static void add_to_alias(Name *cur_name, char *new_name)
+static void add_to_alias(ssystem *sys, Name *cur_name, char *new_name)
 {
   Name *last_alias = NULL, *cur_alias;
 
@@ -84,13 +86,13 @@ static void add_to_alias(Name *cur_name, char *new_name)
   }
 
   if(last_alias == NULL) {
-    CALLOC(cur_name->alias_list, 1, Name, ON, AMSC);
-    CALLOC(cur_name->alias_list->name, strlen(new_name)+1, char, ON, AMSC);
+    cur_name->alias_list = sys->heap.alloc<Name>(1, AMSC);
+    cur_name->alias_list->name = sys->heap.alloc<char>(strlen(new_name)+1, AMSC);
     strcpy(cur_name->alias_list->name, new_name);
   }
   else {
-    CALLOC(last_alias, 1, Name, ON, AMSC);
-    CALLOC(last_alias->name, strlen(new_name)+1, char, ON, AMSC);
+    last_alias = sys->heap.alloc<Name>(1, AMSC);
+    last_alias->name = sys->heap.alloc<char>(strlen(new_name)+1, AMSC);
     strcpy(last_alias->name, new_name);
   }
 }
@@ -115,15 +117,15 @@ char *last_alias(Name *cur_name)
 /*
   manages the conductor name list
 */
-int getConductorNum(char *name, Name **name_list, int *num_cond)
+int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *prev_name;
   int i;
 
   /* if this is the very first name, make and load struct on *name_list */
   if(*num_cond == 0) {
-    CALLOC(*name_list, 1, Name, ON, AMSC);
-    CALLOC((*name_list)->name, strlen(name)+1, char, ON, AMSC);
+    *name_list = sys->heap.alloc<Name>(1, AMSC);
+    (*name_list)->name = sys->heap.alloc<char>(strlen(name)+1, AMSC);
     strcpy((*name_list)->name, name);
     (*name_list)->next = NULL;
     *num_cond = 1;
@@ -139,8 +141,8 @@ int getConductorNum(char *name, Name **name_list, int *num_cond)
   }
 
   /* add the new name to the list */
-  CALLOC(prev_name->next, 1, Name, ON, AMSC);
-  CALLOC(prev_name->next->name, strlen(name)+1, char, ON, AMSC);
+  prev_name->next = sys->heap.alloc<Name>(1, AMSC);
+  prev_name->next->name = sys->heap.alloc<char>(strlen(name)+1, AMSC);
   strcpy(prev_name->next->name, name);
   prev_name->next->next = NULL;
   *num_cond = i;
@@ -193,7 +195,7 @@ char *getConductorName(int cond_num, Name **name_list)
 /*
   renames a conductor
 */
-static int oldrenameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
+static int oldrenameConductor(ssystem *sys, char *old_name, char *new_name, Name **name_list, int *num_cond)
 {
   Name *cur_name, *cur_name2, *prev_name;
   int i, j;
@@ -216,7 +218,7 @@ static int oldrenameConductor(char *old_name, char *new_name, Name **name_list, 
       }
       /* substitute the new name */
       if(strlen(cur_name->name) < strlen(new_name))
-	  CALLOC(cur_name->name, strlen(new_name)+1, char, ON, AMSC);
+          cur_name->name = sys->heap.alloc<char>(strlen(new_name)+1, AMSC);
       strcpy(cur_name->name, new_name);
       return(TRUE);
     }
@@ -231,9 +233,9 @@ static int oldrenameConductor(char *old_name, char *new_name, Name **name_list, 
 /*
   renames a conductor
 */
-static int renameConductor(char *old_name, char *new_name, Name **name_list, int *num_cond)
+static int renameConductor(ssystem *sys, char *old_name, char *new_name, Name **name_list, int *num_cond)
 {
-  Name *cur_name, *cur_name2, *prev_name;
+  Name *cur_name;
   int i, j;
 
   /* check to see if old name is present in names or their aliases */
@@ -244,7 +246,7 @@ static int renameConductor(char *old_name, char *new_name, Name **name_list, int
       /* old name is cur name or old name is an alias */
       /* if new name isn't in alias list, add it to alias list */
       if(!alias_match(cur_name, new_name)) 
-	  add_to_alias(cur_name, new_name);
+          add_to_alias(sys, cur_name, new_name);
       return(TRUE);
     }
   }
@@ -263,7 +265,7 @@ static int renameConductor(char *old_name, char *new_name, Name **name_list, int
   N <cond name string> <Rename string>
   * <Comment string>
 */
-charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans, int *num_cond, Name **name_list,
+charge *quickif(ssystem *sys, FILE *fp, char *line, char *title, int surf_type, double *trans, int *num_cond, Name **name_list,
                 char *name_suffix)
 /* char *name_suffix: suffix for all cond names read */
 /* Name **name_list: name list pointer */
@@ -300,17 +302,17 @@ charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans,
 
       /* allocate quad struct */
       if(fstquad == NULL) {
-	CALLOC(fstquad, 1, quadl, ON, AMSC);
+        fstquad = sys->heap.alloc<quadl>(1, AMSC);
 	curquad = fstquad;
       }
       else {
-	CALLOC(curquad->next, 1, quadl, ON, AMSC);
+        curquad->next = sys->heap.alloc<quadl>(1, AMSC);
 	curquad = curquad->next;
       }
       
       /* load quad struct */
       if(surf_type == CONDTR || surf_type == BOTH)
-          curquad->cond = getConductorNum(condstr, name_list, num_cond);
+          curquad->cond = getConductorNum(sys, condstr, name_list, num_cond);
       else curquad->cond = 0;
       curquad->x1 = x1 + trans[0];
       curquad->x2 = x2 + trans[0];
@@ -338,11 +340,11 @@ charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans,
 
       /* allocate tri struct */
       if(fsttri == NULL) {
-	CALLOC(fsttri, 1, tri, ON, AMSC);
+        fsttri = sys->heap.alloc<tri>(1, AMSC);
 	curtri = fsttri;
       }
       else {
-	CALLOC(curtri->next, 1, tri, ON, AMSC);
+        curtri->next = sys->heap.alloc<tri>(1, AMSC);
 	curtri = curtri->next;
       }
 
@@ -351,7 +353,7 @@ charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans,
       
       /* load tri struct */
       if(surf_type == CONDTR || surf_type == BOTH)
-          curtri->cond = getConductorNum(condstr, name_list, num_cond);
+          curtri->cond = getConductorNum(sys, condstr, name_list, num_cond);
       else curquad->cond = 0;
       curtri->x1 = x1 + trans[0];
       curtri->x2 = x2 + trans[0];
@@ -380,7 +382,7 @@ charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans,
 	strcat(condstr, name_suffix);
 	strcat(temp2, name_suffix);
 
-	if(renameConductor(condstr, temp2, name_list, num_cond) == FALSE)
+	if(renameConductor(sys, condstr, temp2, name_list, num_cond) == FALSE)
 	    exit(0);
       }
 
@@ -400,11 +402,11 @@ charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans,
 
     /* allocate charge struct to fill in */
     if(chglst == NULL) {
-      CALLOC(chglst, 1, charge, ON, AMSC);
+      chglst = sys->heap.alloc<charge>(1, AMSC);
       nq = chglst;
     }
     else {
-      CALLOC(nq->next, 1, charge, ON, AMSC);
+      nq->next = sys->heap.alloc<charge>(1, AMSC);
       nq = nq->next;
     }
 
@@ -429,11 +431,11 @@ charge *quickif(FILE *fp, char *line, char *title, int surf_type, double *trans,
 
     /* allocate charge struct to fill in */
     if(chglst == NULL) {
-      CALLOC(chglst, 1, charge, ON, AMSC);
+      chglst = sys->heap.alloc<charge>(1, AMSC);
       nq = chglst;
     }
     else {
-      CALLOC(nq->next, 1, charge, ON, AMSC);
+      nq->next = sys->heap.alloc<charge>(1, AMSC);
       nq = nq->next;
     }
 

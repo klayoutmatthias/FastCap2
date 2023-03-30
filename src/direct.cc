@@ -38,14 +38,15 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "direct.h"
 #include "calcp.h"
 
-double **Q2PDiag(charge **chgs, int numchgs, int *is_dummy, int calc)
+double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int calc)
 {
   double **mat;
   int i, j;
 
   /* Allocate storage for the potential coefficients. */
-  CALLOC(mat, numchgs, double*, ON, AQ2PD);
-  for(i=0; i < numchgs; i++) CALLOC(mat[i], numchgs, double, ON, AQ2PD);
+  mat = sys->heap.alloc<double *>(numchgs, AQ2PD);
+  for(i=0; i < numchgs; i++)
+    mat[i] = sys->heap.alloc<double>(numchgs, AQ2PD);
 
   if(calc) {
     /* Compute the potential coeffs. */
@@ -70,21 +71,21 @@ double **Q2PDiag(charge **chgs, int numchgs, int *is_dummy, int calc)
   }
 
 #if DSQ2PD == ON
-  dispQ2PDiag(mat, chgs, numchgs, is_dummy);
+  dispQ2PDiag(sys, mat, chgs, numchgs, is_dummy);
 #endif
 
   return(mat);
 }
 
-double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int numpchgs, int calc)
+double **Q2P(ssystem *sys, charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int numpchgs, int calc)
 {
   double **mat;
   int i, j;
 
   /* Allocate storage for the potential coefficients. P rows by Q cols. */
-  CALLOC(mat, numpchgs, double*, ON, AQ2P);
+  mat = sys->heap.alloc<double *>(numpchgs, AQ2P);
   for(i=0; i < numpchgs; i++) {
-    CALLOC(mat[i], numqchgs, double, ON, AQ2P);
+    mat[i] = sys->heap.alloc<double>(numqchgs, AQ2P);
     if(calc) {
       /* exclude:
          - dummy panels in the charge list
@@ -113,7 +114,7 @@ double **Q2P(charge **qchgs, int numqchgs, int *is_dummy, charge **pchgs, int nu
   used only in conjunction with DMPMAT == ON  and DIRSOL == ON
   to make 1st directlist mat = full P mat
 */
-double **Q2Pfull(cube *directlist, int numchgs)
+double **Q2Pfull(ssystem *sys, cube *directlist, int numchgs)
 {
   int i, j, fromp, fromq, top, toq;
   double **mat;
@@ -121,8 +122,9 @@ double **Q2Pfull(cube *directlist, int numchgs)
   charge **pchgs, **qchgs, *eval;
 
   /* allocate room for full P matrix */
-  MALLOC(mat, numchgs, double*, ON, AQ2P);
-  for(i = 0; i < numchgs; i++) MALLOC(mat[i], numchgs, double, ON, AQ2P);
+  mat = sys->heap.alloc<double *>(numchgs, AQ2P);
+  for(i=0; i < numchgs; i++)
+    mat[i] = sys->heap.alloc<double>(numchgs, AQ2P);
 
   /* load the matrix in the style of Q2P() - no attempt to exploit symmetry */
   /* calculate interaction between every direct list entry and entire dlist */
@@ -151,7 +153,7 @@ double **Q2Pfull(cube *directlist, int numchgs)
   - returned matrix has L below the diagonal, U above (GVL1 pg 58)
   - if allocate == TRUE ends up storing P and LU (could be a lot)
 */
-double **ludecomp(double **matin, int size, int allocate)
+double **ludecomp(ssystem *sys, double **matin, int size, int allocate)
 {
   extern int fulldirops;
   double factor, **mat;
@@ -159,9 +161,9 @@ double **ludecomp(double **matin, int size, int allocate)
 
   if(allocate == TRUE) {
     /* allocate for LU matrix and copy A */
-    MALLOC(mat, size, double*, ON, AMSC);
+    mat = sys->heap.alloc<double *>(size, AMSC);
     for(i = 0; i < size; i++) {
-      MALLOC(mat[i], size, double, ON, AMSC);
+      mat[i] = sys->heap.alloc<double>(size, AMSC);
       for(j = 0; j < size; j++) mat[i][j] = matin[i][j];
     }
   }
@@ -292,14 +294,14 @@ void invert(double **mat, int size, int *reorder)
    comp_rows = BOTH => remove both rows and columns
    returns number of rows/cols in compressed matrix
 */
-int compressMat(double **mat, int size, int *is_dummy, int comp_rows)
+int compressMat(ssystem *sys, double **mat, int size, int *is_dummy, int comp_rows)
 {
   static int *cur_order;
   static int cur_order_array_size = 0;
   int cur_order_size, i, j, k;
   
   if(cur_order_array_size < size) {
-    CALLOC(cur_order, size, int, ON, AMSC);
+    cur_order = sys->heap.alloc<int>(size, AMSC);
   }
   
   /* figure the new order vector (cur_order[i] = index of ith row/col) */

@@ -38,6 +38,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "zbufGlobal.h"
 #include "zbufSort.h"
 
+#include <cmath>
+
 int cnt;			/* used in setting up the depth graph */
 
 /*
@@ -493,7 +495,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
   - checks for intersections between each line of fac and all sides of facref
   - also checks for complete overlap (one face inside the other)
 */
-static int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, double *normal)
+static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, double rhs, double *normal)
 {
   int i, j, k, olap[2], is_overlap, isect_cnt;
   static double ***cproj = NULL;	/* corners of faces in view plane */
@@ -511,11 +513,11 @@ static int is1stFaceDeeper(face *fac, face *facref, double *view, double rhs, do
 
   /* allocate for local arrays on first call */
   if(cproj == NULL) {
-    CALLOC(cproj, 2, double **, ON, AMSC);
+    cproj = sys->heap.alloc<double **>(2, AMSC);
     for(k = 0; k < 2; k++) {
-      CALLOC(cproj[k], MAXSIDES, double *, ON, AMSC);
+      cproj[k] = sys->heap.alloc<double *>(MAXSIDES, AMSC);
       for(i = 0; i < MAXSIDES; i++) {
-	CALLOC(cproj[k][i], 3, double, ON, AMSC);
+        cproj[k][i] = sys->heap.alloc<double>(3, AMSC);
       }
     }
   }
@@ -970,7 +972,7 @@ static void setDepth(face *fac)
   does a topological sorting of the faces using graph setup by getAdjGraph()
   - returns a new set of pointers with deepest (1st to print) face first
 */
-face **depthSortFaces(face **faces, int numfaces)
+face **depthSortFaces(ssystem *sys, face **faces, int numfaces)
 {
   int f, i, facefound;
   face **rfaces;
@@ -984,7 +986,7 @@ face **depthSortFaces(face **faces, int numfaces)
   }
 
   /* make the new set of pointers */
-  CALLOC(rfaces, numfaces, face *, ON, AMSC);
+  rfaces = sys->heap.alloc<face *>(numfaces, AMSC);
   for(f = 0; f < numfaces; f++) {
     for(i = 0, facefound = FALSE; i < numfaces; i++) {
       if(faces[i]->depth == f) {
@@ -1004,7 +1006,7 @@ face **depthSortFaces(face **faces, int numfaces)
 /*
   sets up adjacency graph pointers in faces: pntr in i to j => face i behind j
 */
-void getAdjGraph(face **faces, int numfaces, double *view, double rhs, double *normal)
+void getAdjGraph(ssystem *sys, face **faces, int numfaces, double *view, double rhs, double *normal)
 /* face **faces: array of face pntrs, faces[0] head of lst */
 {
   int numbehind, f, i, check;
@@ -1012,7 +1014,7 @@ void getAdjGraph(face **faces, int numfaces, double *view, double rhs, double *n
 
   /* set up huge n^2 blocked face pointer arrays for each face */
   for(f = 0; f < numfaces; f++) {
-    CALLOC(faces[f]->behind, numfaces, face *, ON, AMSC);
+    faces[f]->behind = sys->heap.alloc<face *>(numfaces, AMSC);
     faces[f]->numbehind = 0;
   }
 
@@ -1021,7 +1023,7 @@ void getAdjGraph(face **faces, int numfaces, double *view, double rhs, double *n
     for(fpchk = fpcur->next, numbehind = i = 0; fpchk != NULL;
         fpchk = fpchk->next, i++) {
       if(fpchk == fpcur) continue;	/* a face can't be behind itself */
-      if((check = is1stFaceDeeper(fpcur, fpchk, view, rhs, normal))==TRUE) {
+      if((check = is1stFaceDeeper(sys, fpcur, fpchk, view, rhs, normal))==TRUE) {
         fpcur->behind[(fpcur->numbehind)++] = fpchk;
       }
       else if(check == REVERSE) fpchk->behind[(fpchk->numbehind)++] = fpcur;

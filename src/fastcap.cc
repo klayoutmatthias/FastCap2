@@ -44,12 +44,13 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "capsolve.h"
 #include "psMatDisplay.h"
 #include "resusage.h"
+#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
   int ttliter, i, j, num_cond;
   charge *chglist, *nq;
-  ssystem *sys;
+  ssystem sys;
   double **capmat, dirtimesav, mulsetup, initalltime, ttlsetup, ttlsolve;
   double relperm;
   int autmom, autlev, numMom, numLev;
@@ -79,45 +80,45 @@ int main(int argc, char *argv[])
   prectime = conjtime = dirtime = multime = uptime = downtime = 0.0;
   evaltime = lutime = fullsoltime = mulsetup = 0.0;
   memcount = 0;
-  CALLOC(title, BUFSIZ, char, ON, AMSC);
+  title = sys.heap.alloc<char> (BUFSIZ, AMSC);
 
   /* initialize defaults, etc */
   autmom = autlev = ON;
   relperm = 1.0;
   argvals = argv;
   argcnt = argc;
-  CALLOC(axes, 10, double **, ON, AMSC);
+  axes = sys.heap.alloc<double **>(10, AMSC);
   for(i = 0; i < 10; i++) {
-    CALLOC(axes[i], 2, double *, ON, AMSC);
+    axes[i] = sys.heap.alloc<double *>(2, AMSC);
     for(j = 0; j < 2; j++) {
-      CALLOC(axes[i][j], 3, double, ON, AMSC);
+      axes[i][j] = sys.heap.alloc<double>(3, AMSC);
     }
   }
 
   /* get the list of all panels in the problem */
   /* - many command line parameters having to do with the postscript
        file dumping interface are passed back via globals (see mulGlobal.c) */
-  chglist = input_problem(argv, argc, &autmom, &autlev, &relperm, 
+  chglist = input_problem(&sys, argv, argc, &autmom, &autlev, &relperm,
 			  &numMom, &numLev, &name_list, &num_cond);
 
 #if CAPVEW == ON
   /* if no fastcap run is to be done, just dump the psfile */
   if(m_) {
-    if(!q_) get_ps_file_base(argv, argc);
-    dump_ps_geometry(chglist, NULL, 0, dd_);
+    if(!q_) get_ps_file_base(&sys, argv, argc);
+    dump_ps_geometry(&sys, chglist, NULL, 0, dd_);
     exit(0);
   }
 #endif
 
   starttimer;
-  sys = mulInit(autlev, numLev, numMom, chglist);  /* Set up cubes, charges. */
+  mulInit(&sys, autlev, numLev, numMom, chglist);  /* Set up cubes, charges. */
   stoptimer;
   initalltime = dtime;
 
-  numLev = sys->depth;
+  numLev = sys.depth;
 
-  sys->num_cond = num_cond;
-  sys->cond_names = name_list;
+  sys.num_cond = num_cond;
+  sys.cond_names = name_list;
 
   fprintf(stdout, "\nINPUT SUMMARY\n");
 
@@ -180,7 +181,7 @@ int main(int argc, char *argv[])
   fflush(stdout);
 
   starttimer;
-  mulMultiAlloc(MAX(sys->max_eval_pnt, sys->max_panel), numMom, sys->depth);
+  mulMultiAlloc(&sys, MAX(sys.max_eval_pnt, sys.max_panel), numMom, sys.depth);
   stoptimer;
   initalltime += dtime;		/* save initial allocation time */
 
@@ -189,7 +190,7 @@ int main(int argc, char *argv[])
   dump_ps_mat(filename, 0, 0, eval_size, eval_size, argv, argc, OPEN);
 #endif
 
-  mulMatDirect(sys);		/* Compute the direct part matrices. */
+  mulMatDirect(&sys);		/* Compute the direct part matrices. */
 
 #if DIRSOL == OFF		/* with DIRSOL just want to skip to solve */
 
@@ -202,7 +203,7 @@ int main(int argc, char *argv[])
 
 #if PRECOND == OL
   starttimer;
-  olmulMatPrecond(sys);
+  olmulMatPrecond(&sys);
   stoptimer;
   prsetime = dtime;		/* preconditioner set up time */
 #endif
@@ -232,14 +233,14 @@ int main(int argc, char *argv[])
 #endif
 
   starttimer;
-  mulMatUp(sys);		/* Compute the upward pass matrices. */
+  mulMatUp(&sys);		/* Compute the upward pass matrices. */
 
 #if DNTYPE == NOSHFT
   mulMatDown(sys);		/* find matrices for no L2L shift dwnwd pass */
 #endif
 
 #if DNTYPE == GRENGD
-  mulMatDown(sys);		/* find matrices for full Greengard dnwd pass*/
+  mulMatDown(&sys);		/* find matrices for full Greengard dnwd pass*/
 #endif
 
 #if CKDLST == ON
@@ -248,7 +249,7 @@ int main(int argc, char *argv[])
   //  Not available anywhere: chkEvalLstD(sys, DIRECT);
 #endif
 
-  mulMatEval(sys);		/* set up matrices for evaluation pass */
+  mulMatEval(&sys);		/* set up matrices for evaluation pass */
 
   stoptimer;
   mulsetup = dtime;		/* save multipole matrix setup time */
@@ -270,11 +271,11 @@ int main(int argc, char *argv[])
 #endif				/* DIRSOL == ON */
 
   fprintf(stdout, "\nITERATION DATA");
-  ttliter = capsolve(&capmat, sys, chglist, eval_size, up_size, num_cond,
+  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, num_cond,
 		     name_list);
 
 #if MKSDAT == ON		/* dump symmetrized, 4 pi eps scaled matrix */
-  mksCapDump(capmat, num_cond, relperm, &name_list);
+  mksCapDump(&sys, capmat, num_cond, relperm, &name_list);
 #endif
 
 #if TIMDAT == ON 

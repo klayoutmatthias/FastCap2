@@ -37,8 +37,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #define mulDisplay_H
 
 #include "zbufStruct.h"
+#include <cstdio>
 
-void mksCapDump(double **capmat, int numconds, double relperm, Name **name_list);
+void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Name **name_list);
 void dumpConfig(FILE *fp, char *name);
 void dump_face(FILE *fp, face *fac);
 void dumpCorners(FILE *fp, double **mat, int rows, int cols);

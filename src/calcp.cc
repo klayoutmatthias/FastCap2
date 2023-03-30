@@ -38,11 +38,14 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "calcp.h"
 #include "input.h"
 
+#include <cmath>
+#include <cstdio>
+
 static void Cross_Product(double vector1[], double vector2[], double result_vector[]);
 static int flip_normal(charge *panel);
 static int planarize(charge *pq);
 static void centroid(charge *pp, double x2);
-static void ComputeMoments(charge *pp);
+static void ComputeMoments(ssystem *sys, charge *pp);
 static void dp(charge *panel);
 static double normalize(double vector[3]);
 
@@ -91,7 +94,7 @@ static double normalize(double vector[3]);
 static int num2nd=0, num4th=0, numexact=0;
 static int num2ndsav=0, num4thsav=0, numexactsav=0;
 
-void initcalcp(charge *panel_list)
+void initcalcp(ssystem *sys, charge *panel_list)
 {
   charge *pq, *npq;
   double vtemp[3];
@@ -183,7 +186,7 @@ void initcalcp(charge *panel_list)
     /* Project the corner points into the plane defined by edge midpoints. */
     if(planarize(pq) == FALSE) {     
       /* Planarization too drastic, crack into two triangles. */
-      CALLOC(npq, 1, charge, ON, AMSC);
+      npq = sys->heap.alloc<charge>(1, AMSC);
       npq->next = pq->next;
       pq->next = npq;
       npq->shape = 3;
@@ -229,7 +232,7 @@ void initcalcp(charge *panel_list)
 #endif
 
     /* Finally, calculate the moments. */
-    ComputeMoments(pq);
+    ComputeMoments(sys, pq);
 
     /* Iterate for the next panel. */
     pq = pq->next;
@@ -621,7 +624,7 @@ local system, array S(15).  First initialize array
 Note that S(2)=S(6)=0 due to transfer above
 */
 
-static void ComputeMoments(charge *pp)
+static void ComputeMoments(ssystem *sys, charge *pp)
 {
   int order=MAXORDER;
   int i, j, nside,  N, M, N1, M1, M2, MN1, MN2;
@@ -637,12 +640,13 @@ static void ComputeMoments(charge *pp)
   /* Allocate temporary storage and initialize arrays. */
   if(order > maxorder) {
     for(i = 0; i < 4; i++) {
-      CALLOC(XP[i], (order+3), double, ON, AQ2P);
-      CALLOC(YP[i], (order+3), double, ON, AQ2P);
+      XP[i] = sys->heap.alloc<double>(order+3, AQ2P);
+      YP[i] = sys->heap.alloc<double>(order+3, AQ2P);
     }
     /* Allocate the euclidean moments matrix, Imn. */
-    CALLOC(I, (order+1), double*, ON, AQ2P);
-    for(i = 0; i <= order; i++) CALLOC(I[i], (order+1), double, ON, AQ2P);
+    I = sys->heap.alloc<double *>(order+1, AQ2P);
+    for(i = 0; i <= order; i++)
+      I[i] = sys->heap.alloc<double>(order+1, AQ2P);
 
     maxorder = order;
   }
@@ -817,7 +821,7 @@ static void fileCorners(charge *pp, FILE *f)
 
 
 /* Test the moment code. */
-static void calcpm(double *multi, double x, double y, double z, int origorder, int order)
+static void calcpm(ssystem *sys, double *multi, double x, double y, double z, int origorder, int order)
 {
   charge panel, *ppanel;
   double **mat, potential;
@@ -829,7 +833,7 @@ static void calcpm(double *multi, double x, double y, double z, int origorder, i
   panel.z = z;
   ppanel = &panel;
 
-  mat = mulMulti2P(0.0, 0.0, 0.0, &ppanel, 1, origorder);
+  mat = mulMulti2P(sys, 0.0, 0.0, 0.0, &ppanel, 1, origorder);
   numterms = multerms(origorder);
 
   /* Calculate the potential. */

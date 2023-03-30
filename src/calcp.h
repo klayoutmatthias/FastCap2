@@ -39,7 +39,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 void dumpnums(int flag, int size);
 double tilelength(charge *nq);
 
-void initcalcp(charge *panel_list);
+void initcalcp(ssystem *sys, charge *panel_list);
 double calcp(charge *panel, double x, double y, double z, double *pfd);
 
 #endif

@@ -38,7 +38,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "blkDirect.h"
 #include "resusage.h"
 
+#include <cstdio>
 #include <fcntl.h>
+#include <unistd.h>
 
 #define SQRMAT 0		/* for rdMat(), wrMat() */
 #define TRIMAT 1
@@ -527,7 +529,7 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   - only 3/8 of the entire matrix is in core at any given time, rest on disc
     in L11, U11, U12, L21, Ltil and Util
 */
-void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
+void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
                 double **triArray, double **sqrArray, int **real_index, int *is_dummy)
 /* double **triArray, **sqrArray: LINEAR arrays: 1 triangular, 1 square mat */
 {
@@ -542,10 +544,10 @@ void blkQ2Pfull(cube *directlist, int numchgs, int numchgs_wdummy,
   /* allocate for read index array too */
   if(numchgs % 2 == 0) {	/* if numchgs is even */
     matsize = numchgs*numchgs/4;
-    CALLOC(*sqrArray, matsize, double, ON, AMSC);
+    *sqrArray = sys->heap.alloc<double>(matsize, AMSC);
     matsize = ((numchgs/2)*(numchgs/2 + 1))/2;
-    CALLOC(*triArray, matsize, double, ON, AMSC);
-    CALLOC(*real_index, numchgs, int, ON, AMSC);
+    *triArray = sys->heap.alloc<double>(matsize, AMSC);
+    *real_index = sys->heap.alloc<int>(numchgs, AMSC);
   }
   else {
     fprintf(stderr, "blkQ2Pfull: can't handle an odd number of panels\n");

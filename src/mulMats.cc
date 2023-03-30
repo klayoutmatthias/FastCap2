@@ -75,11 +75,11 @@ void mulMatDirect(ssystem *sys)
   /* Allocate space for the vects and mats. */
     nextc->directnumvects = nummats;
     if(nummats > 0) {
-      CALLOC(nextc->directq, nummats, double*, ON, AMSC);
-      CALLOC(temp, nummats, int*, ON, AMSC);
-      CALLOC(nextc->directnumeles, nummats, int, ON, AMSC);
-      CALLOC(nextc->directmats, nummats, double**, ON, AMSC);
-      CALLOC(nextc->precondmats, nummats, double**, ON, AMSC);
+      nextc->directq = sys->heap.alloc<double *>(nummats, AMSC);
+      temp = sys->heap.alloc<int *>(nummats, AMSC);
+      nextc->directnumeles = sys->heap.alloc<int>(nummats, AMSC);
+      nextc->directmats = sys->heap.alloc<double**>(nummats, AMSC);
+      nextc->precondmats = sys->heap.alloc<double**>(nummats, AMSC);
     }
 
     /* initialize the pointer from this cube to its part of dummy vector
@@ -110,14 +110,14 @@ void mulMatDirect(ssystem *sys)
                       &trimat, &sqrmat, &real_index, sys->is_dummy);
     }
     else nextc->directmats[0] 
-        = Q2PDiag(nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
+        = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
                   TRUE);
 #else
     nextc->directmats[0] 
-        = Q2PDiag(nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
+        = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
                   TRUE);
     nextc->precondmats[0] 
-        = Q2PDiag(nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
+        = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
                   FALSE);
     /*dumpMatCor(nextc->directmats[0], (double *)NULL, nextc->upnumeles[0]);*/
 
@@ -153,12 +153,14 @@ void mulMatDirect(ssystem *sys)
       nextc->directq[nummats] = nextnbr->upvects[0];
       nextc->nbr_is_dummy[nummats] = nextnbr->nbr_is_dummy[0];
       nextc->directnumeles[nummats] = nextnbr->upnumeles[0];
-      nextc->directmats[nummats] = Q2P(nextnbr->chgs, 
+      nextc->directmats[nummats] = Q2P(sys,
+                                       nextnbr->chgs,
                                        nextnbr->upnumeles[0], 
                                        nextnbr->nbr_is_dummy[0],
                                        nextc->chgs, nextc->upnumeles[0],
                                        TRUE);
-      nextc->precondmats[nummats++] = Q2P(nextnbr->chgs, 
+      nextc->precondmats[nummats++] = Q2P(sys,
+                                          nextnbr->chgs,
                                           nextnbr->upnumeles[0], 
                                           nextnbr->nbr_is_dummy[0],
                                           nextc->chgs, nextc->upnumeles[0],
@@ -195,9 +197,9 @@ void bdmulMatPrecond(ssystem *sys)
     }
 
     /* allocate and zero a preconditioner matrix. */
-    MALLOC(mat, size, double*, ON, AMSC);
+    mat = sys->heap.alloc<double *>(size, AMSC);
     for(i = 0; i < size; i++) {
-      MALLOC(mat[i], size, double, ON, AMSC);
+      mat[i] = sys->heap.alloc<double>(size, AMSC);
     }
     for(i = 0; i < size; i++) {
       for(j = 0; j < size; j++) {
@@ -252,7 +254,7 @@ void bdmulMatPrecond(ssystem *sys)
     }    
     ASSERT(row == size);
 
-    nc->precond = ludecomp(mat, size, FALSE);
+    nc->precond = ludecomp(sys, mat, size, FALSE);
     nc->presize = size;
   }
 }
@@ -303,10 +305,10 @@ void olmulMatPrecond(ssystem *sys)
 #if JACDBG == ON
   printf("max direct size =%d\n", maxsize);
 #endif
-  MALLOC(reorder, maxsize,int, ON, AMSC);
-  MALLOC(mat, maxsize, double*, ON, AMSC);
+  reorder = sys->heap.alloc<int>(maxsize, AMSC);
+  mat = sys->heap.alloc<double*>(maxsize, AMSC);
   for(i=0; i < maxsize; i++) {
-    MALLOC(mat[i], maxsize, double, ON, AMSC);
+    mat[i] = sys->heap.alloc<double>(maxsize, AMSC);
   }
 
 /* Now go fill-in a matrix. */
@@ -411,7 +413,7 @@ void olmulMatPrecond(ssystem *sys)
     /* set up the local is_dummy vector for the rows/cols of mat */
     /* THIS COULD BE AVOIDED BY USING CUBE is_dummy's INSIDE invert() */
     if(big_mat_size < offset) { /* allocate only if larger array needed */
-      CALLOC(is_dummy, offset, int, ON, AMSC);
+      is_dummy = sys->heap.alloc<int>(offset, AMSC);
     }
     /* dump sections of the dummy vector in order cubes appear in nbr lst */
     /* (use fragment of Jacob's loop above) */
@@ -437,7 +439,7 @@ void olmulMatPrecond(ssystem *sys)
     fprintf(stdout, "Before compression\n");
     dumpMat(mat, offset, offset);
 #endif
-    nnnsize = compressMat(mat, offset, is_dummy, BOTH);
+    nnnsize = compressMat(sys, mat, offset, is_dummy, BOTH);
 #if DPCOMP == ON
     fprintf(stdout, "After compression\n");
     dumpMat(mat, nnnsize, nnnsize);
@@ -717,9 +719,10 @@ double **multimats[8];
 /* Handle the lowest level cubes first (set up Q2M's). */
   for(nextc=sys->multilist[sys->depth]; nextc != NULL; nextc = nextc->mnext) {
     nextc->multisize = numterms;
-    CALLOC(nextc->multi, numterms, double, ON, AMSC);
-    CALLOC(nextc->upmats, 1, double**, ON, AMSC);
-    nextc->upmats[0] = mulQ2Multi(nextc->chgs, nextc->nbr_is_dummy[0],
+    nextc->multi = sys->heap.alloc<double>(numterms, AMSC);
+    nextc->upmats = sys->heap.alloc<double **>(1, AMSC);
+    nextc->upmats[0] = mulQ2Multi(sys,
+                                  nextc->chgs, nextc->nbr_is_dummy[0],
                                   nextc->upnumeles[0],
                                   nextc->x, nextc->y, nextc->z, order);
 
@@ -783,12 +786,12 @@ double **multimats[8];
     /* Save space for upvector sizes, upvect ptrs, and upmats. */
       nextc->multisize = numterms;
       if(numterms > 0) {
-        CALLOC(nextc->multi, numterms, double, ON, AMSC);
+        nextc->multi = sys->heap.alloc<double>(numterms, AMSC);
       }
       if(nextc->upnumvects) {
-        CALLOC(nextc->upnumeles, nextc->upnumvects, int, ON, AMSC);
-        CALLOC(nextc->upvects, nextc->upnumvects, double*, ON, AMSC);
-        CALLOC(nextc->upmats, nextc->upnumvects, double**, ON, AMSC);
+        nextc->upnumeles = sys->heap.alloc<int>(nextc->upnumvects, AMSC);
+        nextc->upvects = sys->heap.alloc<double*>(nextc->upnumvects, AMSC);
+        nextc->upmats = sys->heap.alloc<double**>(nextc->upnumvects, AMSC);
       }
     /* Go through nonempty kids and fill in upvectors and upmats. */
       for(i=0, j=0; j < nextc->numkids; j++) {
@@ -797,7 +800,8 @@ double **multimats[8];
             nextc->upvects[i] = kid->multi;
             nextc->upnumeles[i] = kid->multisize;
             if(multimats[j] == NULL) { /* Build the needed matrix only once. */
-              multimats[j] = mulMulti2Multi(kid->x, kid->y, kid->z, nextc->x, 
+              multimats[j] = mulMulti2Multi(sys,
+                                            kid->x, kid->y, kid->z, nextc->x,
                                             nextc->y, nextc->z, order);
             }
             nextc->upmats[i] = multimats[j];
@@ -810,7 +814,8 @@ double **multimats[8];
           else {                /* if kid is exact, has no multi */
             nextc->upvects[i] = kid->upvects[0];
             nextc->upnumeles[i] = kid->upnumeles[0];
-            nextc->upmats[i] = mulQ2Multi(kid->chgs, kid->nbr_is_dummy[0],
+            nextc->upmats[i] = mulQ2Multi(sys,
+                                          kid->chgs, kid->nbr_is_dummy[0],
                                           kid->upnumeles[0],
                                           nextc->x, nextc->y, nextc->z, order);
 
@@ -900,9 +905,9 @@ void mulMatEval(ssystem *sys)
     }
     nc->evalnumvects = ttlvects; /* save ttl # of transformations to do */
     if(ttlvects > 0) {
-      CALLOC(nc->evalvects, ttlvects, double*, ON, AMSC);
-      CALLOC(nc->evalnumeles, ttlvects, int, ON, AMSC);
-      CALLOC(nc->evalmats, ttlvects, double**, ON, AMSC);
+      nc->evalvects = sys->heap.alloc<double*>(ttlvects, AMSC);
+      nc->evalnumeles = sys->heap.alloc<int>(ttlvects, AMSC);
+      nc->evalmats = sys->heap.alloc<double**>(ttlvects, AMSC);
     }
     
 #if DILIST == ON
@@ -914,7 +919,7 @@ void mulMatEval(ssystem *sys)
     for(j=0, na = nc, ttlvects = 0; na->level > 1; na = na->parent) { 
       if(na->loc_exact == FALSE && DNTYPE != NOLOCL) {  
         /* build matrices for local expansion evaluation */
-        nc->evalmats[j] = mulLocal2P(na->x, na->y, na->z, nc->chgs,
+        nc->evalmats[j] = mulLocal2P(sys, na->x, na->y, na->z, nc->chgs,
                                      nc->upnumeles[0], sys->order);
         nc->evalnumeles[j] = na->localsize;
         nc->evalvects[j] = na->local;
@@ -935,7 +940,7 @@ void mulMatEval(ssystem *sys)
           nexti = na->interList[i];
           if(nexti->mul_exact == TRUE) {
             nc->evalvects[j] = nexti->upvects[0];
-            nc->evalmats[j] = Q2P(nexti->chgs, nexti->upnumeles[0], 
+            nc->evalmats[j] = Q2P(sys, nexti->chgs, nexti->upnumeles[0],
                                   nexti->nbr_is_dummy[0], nc->chgs, 
                                   nc->upnumeles[0], TRUE);
             nc->evalnumeles[j] = nexti->upnumeles[0];
@@ -952,7 +957,8 @@ void mulMatEval(ssystem *sys)
           }
           else {
             nc->evalvects[j] = nexti->multi;
-            nc->evalmats[j] = mulMulti2P(nexti->x, nexti->y, nexti->z, 
+            nc->evalmats[j] = mulMulti2P(sys,
+                                         nexti->x, nexti->y, nexti->z,
                                          nc->chgs, nc->upnumeles[0], 
                                          sys->order);
             nc->evalnumeles[j] = nexti->multisize;
@@ -1001,9 +1007,9 @@ void mulMatDown(ssystem *sys)
       else vects = nc->interSize + 1;
       nc->downnumvects = vects;
       if(vects > 0) {
-        CALLOC(nc->downvects, vects, double*, ON, AMSC);
-        CALLOC(nc->downnumeles, vects, int, ON, AMSC);
-        CALLOC(nc->downmats, vects, double**, ON, AMSC);
+        nc->downvects = sys->heap.alloc<double*>(vects, AMSC);
+        nc->downnumeles = sys->heap.alloc<int>(vects, AMSC);
+        nc->downmats = sys->heap.alloc<double**>(vects, AMSC);
       }
 
       parent = nc->parent;
@@ -1017,7 +1023,7 @@ void mulMatDown(ssystem *sys)
       else { /* Create the mapping matrix for the parent to kid. */
         i = 1;
 
-        nc->downmats[0] = mulLocal2Local(parent->x, parent->y, parent->z,
+        nc->downmats[0] = mulLocal2Local(sys, parent->x, parent->y, parent->z,
                                          nc->x, nc->y, nc->z, sys->order);
         nc->downnumeles[0] = parent->localsize;
         nc->downvects[0] = parent->local;
@@ -1032,7 +1038,7 @@ void mulMatDown(ssystem *sys)
         ni = nc->interList[j];
         if(ni->mul_exact == TRUE) {     /* ex->ex (Q2P) xforms in mulMatEval */
           nc->downvects[i] = ni->upvects[0];
-          nc->downmats[i] = mulQ2Local(ni->chgs, ni->upnumeles[0],
+          nc->downmats[i] = mulQ2Local(sys, ni->chgs, ni->upnumeles[0],
                                        ni->nbr_is_dummy[0],
                                        nc->x, nc->y, nc->z, sys->order);
           nc->downnumeles[i] = ni->upnumeles[0];
@@ -1042,7 +1048,7 @@ void mulMatDown(ssystem *sys)
         }
         else {
           nc->downvects[i] = ni->multi;
-          nc->downmats[i] = mulMulti2Local(ni->x, ni->y, ni->z, nc->x, 
+          nc->downmats[i] = mulMulti2Local(sys, ni->x, ni->y, ni->z, nc->x,
                                            nc->y, nc->z, sys->order);
           nc->downnumeles[i] = ni->multisize;
 #if DMTCNT == ON

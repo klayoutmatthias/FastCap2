@@ -42,7 +42,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "patran_f.h"
 #include "quickif.h"
 
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
+#include <unistd.h>
 
 /*
   reads an input file list file (a list of dielectric i/f and conductor 
@@ -107,7 +109,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 	be renamed; this is helpful when idenifying conductors to omit
 	from capacitance calculations using the -k option
 */
-static void read_list_file(surface **surf_list, int *num_surf, char *list_file, int read_from_stdin)
+static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, char *list_file, int read_from_stdin)
 {
   int linecnt, end_of_chain, ref_pnt_is_inside, group_cnt;
   FILE *fp;
@@ -152,11 +154,11 @@ static void read_list_file(surface **surf_list, int *num_surf, char *list_file, 
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
-	CALLOC(*surf_list, 1, surface, ON, AMSC);
+        *surf_list = sys->heap.alloc<surface>(1, AMSC);
 	cur_surf = *surf_list;
       }
       else {
-	CALLOC(cur_surf->next, 1, surface, ON, AMSC);
+        cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
 	cur_surf->next->prev = cur_surf;
 	cur_surf = cur_surf->next;
       }
@@ -166,12 +168,12 @@ static void read_list_file(surface **surf_list, int *num_surf, char *list_file, 
       cur_surf->trans[1] = ty;
       cur_surf->trans[2] = tz;
       cur_surf->end_of_chain = end_of_chain;
-      CALLOC(cur_surf->name, strlen(file_name)+1, char, ON, AMSC);
+      cur_surf->name = sys->heap.alloc<char>(strlen(file_name)+1, AMSC);
       strcpy(cur_surf->name, file_name);
       cur_surf->outer_perm = outer_perm;
 
       /* set up group name */
-      CALLOC(cur_surf->group_name, strlen(group_name)+1, char, ON, AMSC);
+      cur_surf->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
       strcpy(cur_surf->group_name, group_name);
 
       /* update group name if end of chain */
@@ -208,11 +210,11 @@ static void read_list_file(surface **surf_list, int *num_surf, char *list_file, 
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
-	CALLOC(*surf_list, 1, surface, ON, AMSC);
+        *surf_list = sys->heap.alloc<surface>(1, AMSC);
 	cur_surf = *surf_list;
       }
       else {
-	CALLOC(cur_surf->next, 1, surface, ON, AMSC);
+        cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
 	cur_surf->next->prev = cur_surf;
 	cur_surf = cur_surf->next;
       }
@@ -226,13 +228,13 @@ static void read_list_file(surface **surf_list, int *num_surf, char *list_file, 
       cur_surf->ref[2] = rz;
       cur_surf->ref_inside = ref_pnt_is_inside;
       cur_surf->end_of_chain = end_of_chain;
-      CALLOC(cur_surf->name, strlen(file_name)+1, char, ON, AMSC);
+      cur_surf->name = sys->heap.alloc<char>(strlen(file_name)+1, AMSC);
       strcpy(cur_surf->name, file_name);
       cur_surf->outer_perm = outer_perm;
       cur_surf->inner_perm = inner_perm;
 
       /* set up group name */
-      CALLOC(cur_surf->group_name, strlen(group_name)+1, char, ON, AMSC);
+      cur_surf->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
       strcpy(cur_surf->group_name, group_name);
 
       /* update group name if end of chain */
@@ -263,11 +265,11 @@ static void read_list_file(surface **surf_list, int *num_surf, char *list_file, 
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
-	CALLOC(*surf_list, 1, surface, ON, AMSC);
+        *surf_list = sys->heap.alloc<surface>(1, AMSC);
 	cur_surf = *surf_list;
       }
       else {
-	CALLOC(cur_surf->next, 1, surface, ON, AMSC);
+        cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
 	cur_surf->next->prev = cur_surf;
 	cur_surf = cur_surf->next;
       }
@@ -281,13 +283,13 @@ static void read_list_file(surface **surf_list, int *num_surf, char *list_file, 
       cur_surf->ref[2] = rz;
       cur_surf->ref_inside = ref_pnt_is_inside;
       cur_surf->end_of_chain = TRUE;
-      CALLOC(cur_surf->name, strlen(file_name)+1, char, ON, AMSC);
+      cur_surf->name = sys->heap.alloc<char>(strlen(file_name)+1, AMSC);
       strcpy(cur_surf->name, file_name);
       cur_surf->outer_perm = outer_perm;
       cur_surf->inner_perm = inner_perm;
 
       /* set up group name */
-      CALLOC(cur_surf->group_name, strlen(group_name)+1, char, ON, AMSC);
+      cur_surf->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
       strcpy(cur_surf->group_name, group_name);
 
       /* update group name (DIELEC surface is always end of chain) */
@@ -415,7 +417,7 @@ charge *panel_list;
   add dummy panel structs to the panel list for electric field evaluation
   - assumes its handed a list of DIELEC or BOTH type panels
 */
-static void add_dummy_panels(charge *panel_list)
+static void add_dummy_panels(ssystem *sys, charge *panel_list)
 {
   double h;
   charge *dummy_list = NULL;
@@ -427,11 +429,11 @@ static void add_dummy_panels(charge *panel_list)
     /* make 2 dummy panels for evaluation points needed to do div difference */
     /* make the first */
     if(dummy_list == NULL) {
-      CALLOC(dummy_list, 1, charge, ON, AMSC);
+      dummy_list = sys->heap.alloc<charge>(1, AMSC);
       cur_dummy = dummy_list;
     }
     else {
-      CALLOC(cur_dummy->next, 1, charge, ON, AMSC);
+      cur_dummy->next = sys->heap.alloc<charge>(1, AMSC);
       cur_dummy = cur_dummy->next;
     }
 
@@ -446,7 +448,7 @@ static void add_dummy_panels(charge *panel_list)
     cur_panel->pos_dummy = cur_dummy; /* link dummy to its real panel */
 
     /* make the second dummy struct */
-    CALLOC(cur_dummy->next, 1, charge, ON, AMSC);
+    cur_dummy->next = sys->heap.alloc<charge>(1, AMSC);
     cur_dummy = cur_dummy->next;
 
     cur_dummy->dummy = TRUE;
@@ -644,7 +646,7 @@ int want_this_iter(ITER *iter_list, int iter_num)
 /*
   sets up the ps file base string
 */
-void get_ps_file_base(char *argv[], int argc)
+void get_ps_file_base(ssystem *sys, char *argv[], int argc)
 {
   int i, j;
   char temp[BUFSIZ];
@@ -661,7 +663,7 @@ void get_ps_file_base(char *argv[], int argc)
       for(; temp[j] != '.' && j >= 0; j--);
       if(temp[j] == '.') temp[j] = '\0';
       /* save list file base */
-      CALLOC(ps_file_base, strlen(temp)+1, char, ON, AMSC);
+      ps_file_base = sys->heap.alloc<char>(strlen(temp)+1, AMSC);
       strcpy(ps_file_base, hack_path(temp));
       break;
     }
@@ -670,14 +672,14 @@ void get_ps_file_base(char *argv[], int argc)
       for(j = 0; temp[j] != '\0' && temp[j] != '.'; j++);
       temp[j] = '\0';
       /* save list file base */
-      CALLOC(ps_file_base, strlen(temp)+1, char, ON, AMSC);
+      ps_file_base = sys->heap.alloc<char>(strlen(temp)+1, AMSC);
       strcpy(ps_file_base, hack_path(temp));
       break;
     }
   }
 
   if(ps_file_base == NULL) {	/* input must be stdin */
-    CALLOC(ps_file_base, strlen("stdin")+1, char, ON, AMSC);
+    ps_file_base = sys->heap.alloc<char>(strlen("stdin")+1, AMSC);
     strcpy(ps_file_base, "stdin");
   }
 }
@@ -688,7 +690,7 @@ void get_ps_file_base(char *argv[], int argc)
   align the normals of all the panels in each surface so they point
     towards the same side as where the ref point is (dielectric files only)
 */
-static charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
+static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
   charge *panel_list = NULL, *cur_panel, *panel_group, *c_panel;
@@ -724,7 +726,7 @@ static charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
       /* group names are set up in read_list_file() */
       sprintf(surf_name, "%%%s", cur_surf->group_name);
       panel_list = cur_panel 
-	  = patfront(fp, &patran_file, cur_surf->type, cur_surf->trans,
+          = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
 		     name_list, num_cond, surf_name);
       patran_file_read = patran_file;
       panel_group = cur_panel;
@@ -736,7 +738,7 @@ static charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
 	patran_file_read = FALSE;
       }
       cur_panel->next 
-	  = patfront(fp, &patran_file, cur_surf->type, cur_surf->trans,
+          = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
 		     name_list, num_cond, surf_name);
       if(!patran_file && patran_file_read) {
 	fprintf(stderr, "read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
@@ -755,7 +757,7 @@ static charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
     cur_surf->panels = cur_panel;
 
     /* save the surface file's title */
-    CALLOC(cur_surf->title, strlen(title)+1, char, ON, AMSC);
+    cur_surf->title = sys->heap.alloc<char>(strlen(title)+1, AMSC);
     strcpy(cur_surf->title, title);
     title[0] = '\0';		/* not sure if needed */
 
@@ -767,11 +769,11 @@ static charge *read_panels(surface *surf_list, Name **name_list, int *num_cond)
     }
     
     /* align the normals and add dummy structs if dielec i/f */
-    initcalcp(cur_surf->panels);/* get normals, edges, perpendiculars */
+    initcalcp(sys, cur_surf->panels);/* get normals, edges, perpendiculars */
     if(cur_surf->type == DIELEC || cur_surf->type == BOTH) {
       /* if(patran_file) align_normals(cur_surf->panels);
       align_normals(cur_surf->panels, cur_surf); */ /* now done in calcp */
-      add_dummy_panels(cur_surf->panels); /* add dummy panels for field calc */
+      add_dummy_panels(sys, cur_surf->panels); /* add dummy panels for field calc */
     }
 
     /* make cur_panel = last panel in list, count panels */
@@ -862,7 +864,7 @@ static int getUniqueCondNum(char *name, Name *name_list)
   - conductor names can't have any %'s
   - redundant names are detected as errors
 */
-static ITER *get_kill_num_list(Name *name_list, char *kill_name_list)
+static ITER *get_kill_num_list(ssystem *sys, Name *name_list, char *kill_name_list)
 {
   int i, j, start_token, end_token, end_name, cond;
   char name[BUFSIZ], group_name[BUFSIZ];
@@ -904,11 +906,11 @@ static ITER *get_kill_num_list(Name *name_list, char *kill_name_list)
 
     /* add conductor name to list of conductors to omit */
     if(kill_num_list == NULL) {
-      CALLOC(kill_num_list, 1, ITER, ON, AMSC);
+      kill_num_list = sys->heap.alloc<ITER>(1, AMSC);
       cur_cond = kill_num_list;
     }
     else {
-      CALLOC(cur_cond->next, 1, ITER, ON, AMSC);
+      cur_cond->next = sys->heap.alloc<ITER>(1, AMSC);
       cur_cond = cur_cond->next;
     }
     cur_cond->iter = cond;
@@ -922,7 +924,7 @@ static ITER *get_kill_num_list(Name *name_list, char *kill_name_list)
 /*
   command line parsing routine
 */
-static void parse_command_line(char *argv[], int argc, int *autmom, int *autlev, double *relperm, int *numMom, int *numLev,
+static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom, int *autlev, double *relperm, int *numMom, int *numLev,
                                char **input_file, char **surf_list_file, int *read_from_stdin)
 {
   int cmderr, i;
@@ -1107,7 +1109,7 @@ static void parse_command_line(char *argv[], int argc, int *autmom, int *autlev,
       else if(argv[i][1] == 'c') c_ = TRUE;
       else if(argv[i][1] == 'm') m_ = TRUE;
       else if(argv[i][1] == 'q') {
-	get_ps_file_base(argv, argc); /* set up the output file base */
+        get_ps_file_base(sys, argv, argc); /* set up the output file base */
 	qpic_name_list = &(argv[i][2]);
 	q_ = TRUE;
       }
@@ -1200,7 +1202,7 @@ static void parse_command_line(char *argv[], int argc, int *autmom, int *autlev,
 /*
   surface information input routine - panels are read by read_panels()
 */
-static surface *read_all_surfaces(char *input_file, char *surf_list_file, int read_from_stdin, char *infile,
+static surface *read_all_surfaces(ssystem *sys, char *input_file, char *surf_list_file, int read_from_stdin, char *infile,
                                   double relperm)
 {
   int num_surf, i;
@@ -1215,15 +1217,15 @@ static surface *read_all_surfaces(char *input_file, char *surf_list_file, int re
   surf_list = NULL;
   strcpy(group_name, "GROUP1");
   if(read_from_stdin || (input_file == NULL && surf_list_file == NULL)) {
-    CALLOC(surf_list, 1, surface, ON, AMSC);
+    surf_list = sys->heap.alloc<surface>(1, AMSC);
     surf_list->type = CONDTR;	/* only conductors can come in stdin */
-    CALLOC(surf_list->name, strlen("stdin")+1, char, ON, AMSC);
+    surf_list->name = sys->heap.alloc<char>(strlen("stdin")+1, AMSC);
     strcpy(surf_list->name, "stdin");
     surf_list->outer_perm = relperm;
     surf_list->end_of_chain = TRUE;
 
     /* set up group name */
-    CALLOC(surf_list->group_name, strlen(group_name)+1, char, ON, AMSC);
+    surf_list->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
     strcpy(surf_list->group_name, group_name);
     strcpy(group_name, "GROUP2");
 
@@ -1236,21 +1238,21 @@ static surface *read_all_surfaces(char *input_file, char *surf_list_file, int re
   /* set up to read from command line file, if necessary */
   if(input_file != NULL) {
     if(surf_list == NULL) {
-      CALLOC(surf_list, 1, surface, ON, AMSC);
+      surf_list = sys->heap.alloc<surface>(1, AMSC);
       cur_surf = surf_list;
     }
     else {
-      CALLOC(cur_surf->next, 1, surface, ON, AMSC);
+      cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
       cur_surf = cur_surf->next;
     }
     cur_surf->type = CONDTR;
-    CALLOC(cur_surf->name, strlen(input_file)+1, char, ON, AMSC);
+    cur_surf->name = sys->heap.alloc<char>(strlen(input_file)+1, AMSC);
     strcpy(cur_surf->name, input_file);
     cur_surf->outer_perm = relperm;
     cur_surf->end_of_chain = TRUE;
 
     /* set up group name */
-    CALLOC(cur_surf->group_name, strlen(group_name)+1, char, ON, AMSC);
+    cur_surf->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
     strcpy(cur_surf->group_name, group_name);
 
     for(i = 0; infile[i] != '\0'; i++);
@@ -1262,7 +1264,7 @@ static surface *read_all_surfaces(char *input_file, char *surf_list_file, int re
 
   /* read list file if present */
   if(surf_list_file != NULL) {
-    read_list_file(&surf_list, &num_surf, surf_list_file, read_from_stdin);
+    read_list_file(sys, &surf_list, &num_surf, surf_list_file, read_from_stdin);
     for(i = 0; infile[i] != '\0'; i++);
     if(infile[0] != '\0') sprintf(&(infile[i]), ", %s", surf_list_file);
     else sprintf(&(infile[i]), "%s", surf_list_file);
@@ -1276,7 +1278,7 @@ static surface *read_all_surfaces(char *input_file, char *surf_list_file, int re
   - inputs surfaces (ie file names whose panels are read in read_panels)
   - sets parameters accordingly
 */
-static surface *input_surfaces(char *argv[], int argc, int *autmom, int *autlev, double *relperm,
+static surface *input_surfaces(ssystem *sys, char *argv[], int argc, int *autmom, int *autlev, double *relperm,
                                int *numMom, int *numLev, char *infile)
 {
   int read_from_stdin, num_surf;
@@ -1286,10 +1288,10 @@ static surface *input_surfaces(char *argv[], int argc, int *autmom, int *autlev,
   surf_list_file = input_file = NULL;
   read_from_stdin = FALSE;
 
-  parse_command_line(argv, argc, autmom, autlev, relperm, numMom, numLev, 
+  parse_command_line(sys, argv, argc, autmom, autlev, relperm, numMom, numLev,
 		     &input_file, &surf_list_file, &read_from_stdin);
 
-  return(read_all_surfaces(input_file, surf_list_file, 
+  return(read_all_surfaces(sys, input_file, surf_list_file,
 			   read_from_stdin, infile, *relperm));
 }
 
@@ -1345,7 +1347,7 @@ static void dumpSurfDat(surface *surf_list)
 /*
   replaces name (and all aliases) corresponding to "num" with unique string
 */
-static void remove_name(Name **name_list, int num)
+static void remove_name(ssystem *sys, Name **name_list, int num)
 {
   static char str[] = "%`_^#$REMOVED";
   Name *cur_name, *cur_alias;
@@ -1359,7 +1361,7 @@ static void remove_name(Name **name_list, int num)
 
       /* overwrite name */
       if(strlen(cur_name->name) < (size_t)slen) {
-	CALLOC(cur_name->name, slen+1, char, ON, AMSC);
+        cur_name->name = sys->heap.alloc<char>(slen+1, AMSC);
       }
       strcpy(cur_name->name, str);
 
@@ -1367,7 +1369,7 @@ static void remove_name(Name **name_list, int num)
       for(cur_alias = cur_name->alias_list; cur_alias != NULL;
 	  cur_alias = cur_alias->next) {
 	if(strlen(cur_alias->name) < (size_t)slen) {
-	  CALLOC(cur_alias->name, slen+1, char, ON, AMSC);
+	  cur_alias->name = sys->heap.alloc<char>(slen+1, AMSC);
 	}
 	strcpy(cur_alias->name, str);
       }
@@ -1379,7 +1381,7 @@ static void remove_name(Name **name_list, int num)
 /*
   removes (unlinks from linked list) panels that are on conductors to delete
 */
-static void remove_conds(charge **panels, ITER *num_list, Name **name_list)
+static void remove_conds(ssystem *sys, charge **panels, ITER *num_list, Name **name_list)
 {
   ITER *cur_num;
   charge *cur_panel, *prev_panel;
@@ -1404,7 +1406,7 @@ static void remove_conds(charge **panels, ITER *num_list, Name **name_list)
      - actually, name and all its aliases are replaced by ugly string
        (not the cleanest thing) */
   for(cur_num = num_list; cur_num != NULL; cur_num = cur_num->next) {
-    remove_name(name_list, cur_num->iter);
+    remove_name(sys, name_list, cur_num->iter);
   }
 }
 
@@ -1460,7 +1462,7 @@ static void resolve_kill_lists(ITER *rs_num_list, ITER *q_num_list, ITER *ri_num
 /*
   main input routine, returns a list of panels in the problem
 */
-charge *input_problem(char *argv[], int argc, int *autmom, int *autlev, double *relperm,
+charge *input_problem(ssystem *sys, char *argv[], int argc, int *autmom, int *autlev, double *relperm,
                       int *numMom, int *numLev, Name **name_list, int *num_cond)
 {
   surface *surf_list;
@@ -1472,7 +1474,7 @@ charge *input_problem(char *argv[], int argc, int *autmom, int *autlev, double *
   extern char *kq_name_list;
 
   /* read the conductor and dielectric interface surface files, parse cmds */
-  surf_list = input_surfaces(argv, argc, autmom, autlev, relperm, 
+  surf_list = input_surfaces(sys, argv, argc, autmom, autlev, relperm,
 			     numMom, numLev, infile);
 
   if(*autmom == ON) *numMom = DEFORD;
@@ -1490,20 +1492,20 @@ charge *input_problem(char *argv[], int argc, int *autmom, int *autlev, double *
 
   /* input the panels from the surface files */
   *num_cond = 0;		/* initialize conductor count */
-  chglist = read_panels(surf_list, name_list, num_cond);
+  chglist = read_panels(sys, surf_list, name_list, num_cond);
 
   /* set up the lists of conductors to remove from solve list */
-  kill_num_list = get_kill_num_list(*name_list, kill_name_list);
+  kill_num_list = get_kill_num_list(sys, *name_list, kill_name_list);
 
   /* remove the panels on specified conductors from input list */
-  kinp_num_list = get_kill_num_list(*name_list, kinp_name_list);
-  remove_conds(&chglist, kinp_num_list, name_list);
+  kinp_num_list = get_kill_num_list(sys, *name_list, kinp_name_list);
+  remove_conds(sys, &chglist, kinp_num_list, name_list);
 
   /* set up the lists of conductors to dump shaded plots for */
-  qpic_num_list = get_kill_num_list(*name_list, qpic_name_list);
+  qpic_num_list = get_kill_num_list(sys, *name_list, qpic_name_list);
 
   /* set up the lists of conductors to eliminate from shaded plots */
-  kq_num_list = get_kill_num_list(*name_list, kq_name_list);
+  kq_num_list = get_kill_num_list(sys, *name_list, kq_name_list);
 
   /* check for inconsistencies in kill lists */
   resolve_kill_lists(kill_num_list, qpic_num_list, kinp_num_list, *num_cond);

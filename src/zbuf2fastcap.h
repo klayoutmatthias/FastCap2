@@ -36,6 +36,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(zbuf2fastcap_H)
 #define zbuf2fastcap_H
 
-void dump_ps_geometry(charge *chglist, double *q, int cond, int use_ttl_chg);
+void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int use_ttl_chg);
 
 #endif

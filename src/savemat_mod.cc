@@ -56,8 +56,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
  * Author J.N. Little 11-3-86
  * Revised 7-23-91 to support ANSI-C
  */
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 #include "savemat_mod.h"
 

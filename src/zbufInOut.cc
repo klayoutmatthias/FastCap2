@@ -39,6 +39,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "zbufSort.h"
 #include "input.h"
 
+#include <cstring>
+#include <cmath>
+
 double black, white;            /* densities corresponding to shades */
 
 /*
@@ -291,7 +294,7 @@ static void getAbsCoord(double *vec, charge *panel, int num)
 /*
   transfer fastcap panel info to face structs
 */
-face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
+face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, int use_density)
 /* int use_density: use_density = TRUE => use q/A not q */
 {
   int i, j, dummy;
@@ -306,7 +309,6 @@ face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
   extern char *q_file;
   extern double black, white, linewd;
   surface *surf_list;
-  ssystem *sys;
   int qindex=1, cindex=1;
   double tavg[3], lavg[3];
   extern ITER *kq_num_list;
@@ -339,18 +341,18 @@ face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
 
     /* create and link in a new face */
     if(head == NULL) {
-      CALLOC(head, 1, face, ON, AMSC);
+      head = sys->heap.alloc<face>(1, AMSC);
       tail = head;
     }
     else {
-      CALLOC(tail->next, 1, face, ON, AMSC);
+      tail->next = sys->heap.alloc<face>(1, AMSC);
       tail = tail->next;
     }
     tail->numsides = chgp->shape;
     /* allocate for corner coordinates */
-    CALLOC(tail->c, tail->numsides, double *, ON, AMSC);
+    tail->c = sys->heap.alloc<double *>(tail->numsides, AMSC);
     for(i = 0; i < tail->numsides; i++)
-        CALLOC(tail->c[i], 3, double, ON, AMSC);
+      tail->c[i] = sys->heap.alloc<double>(3, AMSC);
     /* xfer corner coordinates */
     for(i = 0; i < tail->numsides; i++) {
       getAbsCoord(tail->c[i], chgp, i);
@@ -366,7 +368,7 @@ face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
   }
 
   /* extract an array of pointers to the faces */
-  CALLOC(faces, *numfaces, face *, ON, AMSC);
+  faces = sys->heap.alloc<face *>(*numfaces, AMSC);
   for(tail = head, i = 0; tail != NULL; tail = tail->next, i++) 
       faces[i] = tail;
 
@@ -412,7 +414,7 @@ face **fastcap2faces(int *numfaces, charge *chglist, double *q, int use_density)
               dot size 2.0
   to get just a dot, put in tiny length line and arrow size
 */
-static void readLines(FILE *fp, line **head, line **tail, int *numlines)
+static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *numlines)
 {
   int flines = 0, falin = 0, fflag = 1, faflag = 1, getlines = 1, i, j;
   int f_;               /* f_ == 1 => ignore face and fill info */
@@ -441,7 +443,7 @@ static void readLines(FILE *fp, line **head, line **tail, int *numlines)
                 readfile);
         exit(0);
       }
-      readLines(fpin, head, tail, numlines);
+      readLines(sys, fpin, head, tail, numlines);
       fclose(fpin);
       continue;
     }
@@ -470,12 +472,12 @@ static void readLines(FILE *fp, line **head, line **tail, int *numlines)
     /* input lines of line information */
     if(fflag == 1) {            /* allocate a line struct; input a from line */
       if(*numlines == 0) {
-        CALLOC((*tail), 1, line, ON, AMSC);
+        *tail = sys->heap.alloc<line>(1, AMSC);
         (*head) = (*tail);
         (*tail)->prev = NULL;
       }
       else {
-        CALLOC((*tail)->next, 1, line, ON, AMSC); /* link forward */
+        (*tail)->next = sys->heap.alloc<line>(1, AMSC);
         ((*tail)->next)->prev = (*tail); /* link back */
         (*tail) = (*tail)->next;
       }
@@ -527,7 +529,7 @@ static void readLines(FILE *fp, line **head, line **tail, int *numlines)
 /*
   opens a .fig file and reads only lines from it - closes if faces/fills found
 */
-line **getLines(char *line_file, int *numlines)
+line **getLines(ssystem *sys, char *line_file, int *numlines)
 {
   int i;
   FILE *fp;
@@ -543,11 +545,11 @@ line **getLines(char *line_file, int *numlines)
     exit(0);
   }
 
-  readLines(fp, &head, &tail, numlines);
+  readLines(sys, fp, &head, &tail, numlines);
   fclose(fp);
 
   /* extract array of pointers to line structs */
-  CALLOC(linesout, (*numlines), line *, ON, AMSC);
+  linesout = sys->heap.alloc<line *>(*numlines, AMSC);
   for(i = 0; i < *numlines; i++) {
     linesout[i] = head;
     head = head->next;

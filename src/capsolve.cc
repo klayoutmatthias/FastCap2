@@ -46,6 +46,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "direct.h"
 #include "resusage.h"
 
+#include <cmath>
+
 static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, int maxiter, double tol, charge *chglist);
 static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, charge *chglist);
 
@@ -74,21 +76,21 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 #endif
 
   /* Allocate space for the capacitance matrix. */
-  CALLOC((*capmat), numconds+1, double*, ON, AMSC);
+  *capmat = sys->heap.alloc<double *>(numconds+1, AMSC);
   for(i=1; i <= numconds; i++)  {
-    CALLOC((*capmat)[i], numconds+1, double, ON, AMSC);
+    (*capmat)[i] = sys->heap.alloc<double>(numconds+1, AMSC);
   }
 
   /* Allocate space for cg vectors , r=residual and p=projection, ap = Ap. */
-  CALLOC(q, size+1, double, ON, AMSC);
-  CALLOC(r, size+1, double, ON, AMSC);
+  q = sys->heap.alloc<double>(size+1, AMSC);
+  r = sys->heap.alloc<double>(size+1, AMSC);
 
 #if DIRSOL != ON		/* too much to allocate if not used */
   /* allocate for gcr accumulated basis vectors (moved out of loop 30Apr90) */
   fflush(stdout);		/* so header will be saved if crash occurs */
 
-  CALLOC(bp, maxiter+1, double*, ON, AMSC);
-  CALLOC(bap, maxiter+1, double*, ON, AMSC);
+  bp = sys->heap.alloc<double *>(maxiter+1, AMSC);
+  bap = sys->heap.alloc<double *>(maxiter+1, AMSC);
 
   /* moved inside of gcr to save memory 22OCT90
   for(i=0; i <= maxiter; i++) {
@@ -166,7 +168,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     /* dump shaded geometry file if only if this column picture wanted */
     /* (variable names are messed up - iter list now is list of columns) */
     if(want_this_iter(qpic_num_list, cond) || (q_ && qpic_num_list == NULL)) {
-      dump_ps_geometry(chglist, q, cond, dd_);    
+      dump_ps_geometry(sys, chglist, q, cond, dd_);
     }
 #endif
 
@@ -221,8 +223,8 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
 
     /* allocate the back vectors if they haven't been already (22OCT90) */
     if(bp[iter] == NULL) {
-      CALLOC(bp[iter], size+1, double, ON, AMSC);
-      CALLOC(bap[iter], size+1, double, ON, AMSC);
+      bp[iter] = sys->heap.alloc<double>(size+1, AMSC);
+      bap[iter] = sys->heap.alloc<double>(size+1, AMSC);
     }
 
     for(i=1; i <= size; i++) {
@@ -318,10 +320,10 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
 
   /* Allocation first time through. */
   if(c == NULL) {
-    CALLOC(c, size+1, double, ON, AMSC);
-    CALLOC(s, size+1, double, ON, AMSC);
-    CALLOC(g, size+1, double, ON, AMSC);
-    CALLOC(y, size+1, double, ON, AMSC);
+    c = sys->heap.alloc<double>(size+1, AMSC);
+    s = sys->heap.alloc<double>(size+1, AMSC);
+    g = sys->heap.alloc<double>(size+1, AMSC);
+    y = sys->heap.alloc<double>(size+1, AMSC);
   }
   
   /* Set up v^1 and g^0. */
@@ -345,8 +347,8 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
     starttimer;
     /* allocate the back vectors if they haven't been already */
     if(bv[iter] == NULL) {
-      CALLOC(bv[iter], size+1, double, ON, AMSC);
-      CALLOC(bh[iter], iter+2, double, ON, AMSC);
+      bv[iter] = sys->heap.alloc<double>(size+1, AMSC);
+      bh[iter] = sys->heap.alloc<double>(size+2, AMSC);
     }
     
     /* Save p as the v{iter}. */

@@ -36,6 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(mulStruct_H)
 #define mulStruct_H
 
+#include "heap.h"
 #include "patran.h"		/* for neutral file interface */
 
 struct surface {                /* a surface file and its permittivities */
@@ -57,7 +58,6 @@ struct surface {                /* a surface file and its permittivities */
   struct surface *next;         /* linked list pointers */
   struct surface *prev;
 };
-typedef struct surface surface;
 
 struct charge {			/* point charge */
   struct charge *next;		/* Next charge in linked list. */
@@ -80,7 +80,6 @@ struct charge {			/* point charge */
   struct charge *pos_dummy;     /* eval pnt w/pos displacement from x,y,z */
   struct charge *neg_dummy;     /* eval pnt w/neg displacement from x,y,z */
 };
-typedef struct charge charge;
 
 struct cube {		
 /* Definition variables. */
@@ -160,9 +159,7 @@ struct cube {
   struct cube **kids;     /* Array of children ptrs. */
   int numkids;            /* Number of kids. */
   struct cube *parent;    /* Ptr to parent cube. */
-
 };
-typedef struct cube cube;
 
 struct ssystem {
   int side;                     /* # cubes per side on lowest level. */
@@ -193,9 +190,9 @@ struct ssystem {
   cube *precondlist;		/* head of linked lst of precond blks. */
   cube *revprecondlist;		/* reversed linked lst of precond blks. */
   int *is_dummy;                /* is_dummy[i] = TRUE => panel i is a dummy */
-  int *is_dielec;		/* is_dielec[i] = TRUE => panel i on dielec */
+  int *is_dielec;		//  is_dielec[i] = TRUE => panel i on dielec */
+  Heap heap;                    //  allocation heap
 };
-typedef struct ssystem ssystem;
 
 #endif
 

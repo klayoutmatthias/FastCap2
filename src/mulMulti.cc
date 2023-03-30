@@ -37,6 +37,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulMulti.h"
 #include "mulLocal.h"
 #include "mulDisplay.h"
+#include <cmath>
 
 /*
   Globals used for temporary storage.
@@ -214,7 +215,7 @@ void evalFactFac(double **array, int order)
 /*
   Allocates space for temporary vectors.
 */
-void mulMultiAlloc(int maxchgs, int order, int depth)
+void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
 {
   int x;
 
@@ -228,20 +229,20 @@ void mulMultiAlloc(int maxchgs, int order, int depth)
   extern double *sinmkB, *cosmkB, **facFrA;
 
   if(maxchgs > 0) {
-    CALLOC(Rho, maxchgs, double, ON, AMSC); /* rho array */
-    CALLOC(Rhon, maxchgs, double, ON, AMSC); /* rho^n array */
-    CALLOC(Beta, maxchgs, double, ON, AMSC); /* beta array */
-    CALLOC(Betam, maxchgs, double, ON, AMSC); /* beta*m array */
-    CALLOC(Irn, maxchgs, double, ON, AMSC);	/* (1/r)^n+1 vector */
-    CALLOC(Ir, maxchgs, double, ON, AMSC); /* 1/r vector */
-    CALLOC(Mphi, maxchgs, double, ON, AMSC); /* m*phi vector */
-    CALLOC(phi, maxchgs, double, ON, AMSC); /* phi vector */
+    Rho = sys->heap.alloc<double>(maxchgs, AMSC); /* rho array */
+    Rhon = sys->heap.alloc<double>(maxchgs, AMSC); /* rho^n array */
+    Beta = sys->heap.alloc<double>(maxchgs, AMSC); /* beta array */
+    Betam = sys->heap.alloc<double>(maxchgs, AMSC); /* beta*m array */
+    Irn = sys->heap.alloc<double>(maxchgs, AMSC); /* (1/r)^n+1 vector */
+    Ir = sys->heap.alloc<double>(maxchgs, AMSC); /* 1/r vector */
+    Mphi = sys->heap.alloc<double>(maxchgs, AMSC); /* m*phi vector */
+    phi = sys->heap.alloc<double>(maxchgs, AMSC); /* phi vector */
   }
-  CALLOC(tleg, costerms(2*order), double, ON, AMSC);
+  tleg = sys->heap.alloc<double>(costerms(2*order), AMSC);
 	       	/* temp legendre storage (2*order needed for local exp) */
-  CALLOC(factFac, order+1, double*, ON, AMSC);
+  factFac = sys->heap.alloc<double *>(order+1, AMSC);
   for(x = 0; x < order+1; x++) {
-    CALLOC(factFac[x], order+1, double, ON, AMSC);
+    factFac[x] = sys->heap.alloc<double>(order+1, AMSC);
   }
   evalFactFac(factFac, order);	/* get factorial factors for mulMulti2P */
 
@@ -277,14 +278,14 @@ void mulMultiAlloc(int maxchgs, int order, int depth)
 #endif
 
   /* from here down could be switched out when the fake dwnwd pass is used */
-  CALLOC(facFrA, 2*order+1, double*, ON, AMSC);
+  facFrA = sys->heap.alloc<double *>(2*order+1, AMSC);
   for(x = 0; x < 2*order+1; x++) {
-    CALLOC(facFrA[x], 2*order+1, double, ON, AMSC);
+    facFrA[x] = sys->heap.alloc<double>(2*order+1, AMSC);
   }
   /* generate table of factorial fraction evaluations (for M2L and L2L) */
   evalFacFra(facFrA, order);
-  CALLOC(sinmkB, 2*order+1, double, ON, AMSC); /* sin[(m+-k)beta] */
-  CALLOC(cosmkB, 2*order+1, double, ON, AMSC); /* cos[(m+-k)beta] */
+  sinmkB = sys->heap.alloc<double>(2*order+1, AMSC);
+  cosmkB = sys->heap.alloc<double>(2*order+1, AMSC);
   cosmkB[0] = 1.0;		/* look up arrays used for local exp */
   /* generate array of sqrt((n+m)!(n-m)!)'s for L2L
   evalSqrtFac(sqrtFac, factFac, order); */
@@ -343,7 +344,7 @@ void evalLegendre(double cosA, double *vector, int order)
   Returns a matrix which gives a cube's multipole expansion when *'d by chg vec
   OPTIMIZATIONS USING is_dummy HAVE NOT BEEN COMPLETELY IMPLEMENTED
 */
-double **mulQ2Multi(charge **chgs, int *is_dummy, int numchgs, double x, double y, double z, int order)
+double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, double x, double y, double z, int order)
 {
   double **mat;
   double cosA;			/* cosine of elevation coordinate */
@@ -351,9 +352,9 @@ double **mulQ2Multi(charge **chgs, int *is_dummy, int numchgs, double x, double 
   int cterms = costerms(order), terms = multerms(order);
 
   /* Allocate the matrix. */
-  CALLOC(mat, terms, double*, ON, AQ2M);
+  mat = sys->heap.alloc<double*>(terms, AQ2M);
   for(i=0; i < terms; i++) 
-      CALLOC(mat[i], numchgs, double, ON, AQ2M);
+    mat[i] = sys->heap.alloc<double>(numchgs, AQ2M);
 
   /* get Legendre function evaluations, one set for each charge */
   /*  also get charge coordinates, set up for subsequent evals */
@@ -433,7 +434,7 @@ double **mulQ2Multi(charge **chgs, int *is_dummy, int numchgs, double x, double 
   return(mat);
 }
 
-double **mulMulti2Multi(double x, double y, double z, double xp, double yp, double zp, int order)
+double **mulMulti2Multi(ssystem *sys, double x, double y, double z, double xp, double yp, double zp, int order)
 /* double x, y, z, xp, yp, zp: cube center, parent cube center */
 {
   double **mat, rho, rhoPwr, cosA, beta, mBeta, temp1, temp2; 
@@ -442,8 +443,9 @@ double **mulMulti2Multi(double x, double y, double z, double xp, double yp, doub
   int terms = cterms + sterms;
 
   /* Allocate the matrix (terms x terms ) */
-  CALLOC(mat, terms, double*, ON, AM2M);
-  for(r=0; r < terms; r++) CALLOC(mat[r], terms, double, ON, AM2M);
+  mat = sys->heap.alloc<double*>(terms, AM2M);
+  for(r=0; r < terms; r++)
+    mat[r] = sys->heap.alloc<double>(terms, AM2M);
   for(r = 0; r < terms; r++)
       for(c = 0; c < terms; c++) mat[r][c] = 0.0;
 
@@ -535,7 +537,7 @@ double **mulMulti2Multi(double x, double y, double z, double xp, double yp, doub
 /* 
   builds multipole evaluation matrix; used only for fake downward pass 
 */
-double **mulMulti2P(double x, double y, double z, charge **chgs, int numchgs, int order)
+double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, int numchgs, int order)
 /* double x, y, z: multipole expansion origin */
 {
   double **mat;
@@ -544,9 +546,9 @@ double **mulMulti2P(double x, double y, double z, charge **chgs, int numchgs, in
   int cterms = costerms(order), sterms = sinterms(order);
   int terms = cterms + sterms;
 
-  CALLOC(mat, numchgs, double*, ON, AM2P);
-  for(i=0; i < numchgs; i++) 
-      CALLOC(mat[i], terms, double, ON, AM2P);
+  mat = sys->heap.alloc<double *>(numchgs, AM2P);
+  for(i=0; i < numchgs; i++)
+    mat[i] = sys->heap.alloc<double>(terms, AM2P);
 
   /* get Legendre function evaluations, one set for each charge */
   /*   also get charge coordinates to set up rest of matrix */

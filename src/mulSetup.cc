@@ -38,6 +38,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulMulti.h"
 #include "input.h"
 #include "calcp.h"
+#include <cstdio>
+#include <cstdlib>
 
 cube *cstack[1024];             /* Stack used in several routines. */
 
@@ -55,12 +57,10 @@ static void setExact(ssystem *sys, int numterms);
 /*
   sets up the partitioning of space and room for charges and expansions
 */
-ssystem *mulInit(int autom, int depth, int order, charge *charges)
+void mulInit(ssystem *sys, int autom, int depth, int order, charge *charges)
 {
-  ssystem *sys;
   int qindex=1, cindex=1;
 
-  CALLOC(sys, 1, ssystem, ON, AMSC);
   sys->depth = depth;           /* overwritten below if autom = ON */
   sys->order = order;
   
@@ -90,8 +90,6 @@ ssystem *mulInit(int autom, int depth, int order, charge *charges)
   setMaxq(sys);                 /* Calculates the max # chgs in cubes treated
                                    exactly, and over lowest level cubes. */
   getAllInter(sys);             /* Get the interaction lists at all levels. */
-
-  return(sys);
 }
 
 /*
@@ -164,26 +162,26 @@ static int placeq(int flag, ssystem *sys, charge *charges)
   length0 = MAX((maxz - minz), length0);
 
   /* Create the vectors for storing the charges and coefficients. */
-  CALLOC(sys->q, totalq+1, double, ON, AMSC);
-  CALLOC(sys->p, totalq+1, double, ON, AMSC);
+  sys->q = sys->heap.alloc<double>(totalq + 1, AMSC);
+  sys->p = sys->heap.alloc<double>(totalq + 1, AMSC);
 
   /* set up mask vector: is_dummy[i] = TRUE => panel i is a dummy */
-  CALLOC(sys->is_dummy, totalq+1, int, ON, AMSC);
+  sys->is_dummy = sys->heap.alloc<int>(totalq + 1, AMSC);
 
   /* set up mask vector: is_dielec[i] = TRUE => panel i is on DIELEC or BOTH */
-  CALLOC(sys->is_dielec, totalq+1, int, ON, AMSC);
+  sys->is_dielec = sys->heap.alloc<int>(totalq + 1, AMSC);
 
   if(flag == ON) {              /* set depth of partitions automatically */
     /* alloc spine of cube pntr array - leave enough room for depth = MAXDEP */
-    CALLOC(cubes, MAXDEP+1, cube****, ON, AMSC); 
+    cubes = sys->heap.alloc<cube****>(MAXDEP + 1, AMSC);
 
     /* allocate for levels 0, 1, and 2 (always used) */
     for(side = 1, i=0; i <= 2; side *= 2, i++) {
-      CALLOC(cubes[i], side, cube***, ON, AMSC);
+      cubes[i] = sys->heap.alloc<cube***>(side, AMSC);
       for(j=0; j < side; j++) {
-        CALLOC(cubes[i][j], side, cube**, ON, AMSC);
+        cubes[i][j] = sys->heap.alloc<cube**>(side, AMSC);
         for(k=0; k < side; k++) {
-          CALLOC(cubes[i][j][k], side, cube*, ON, AMSC);
+          cubes[i][j][k] = sys->heap.alloc<cube*>(side, AMSC);
         }
       }
     }
@@ -202,23 +200,11 @@ static int placeq(int flag, ssystem *sys, charge *charges)
 
       length = (1.01 * length0)/side;
 
-      CALLOC(cubes[i], side, cube***, OFF, AMSC);
-      if(cubes[i] == NULL) {
-        fprintf(stderr, "placeq: %d levels set up\n", i-1);
-        exit(0);
-      }
+      cubes[i] = sys->heap.alloc<cube***>(side, AMSC);
       for(j=0; j < side; j++) {
-        CALLOC(cubes[i][j], side, cube**, OFF, AMSC);
-        if(cubes[i][j] == NULL) {
-          fprintf(stderr, "placeq: %d levels set up\n", i-1);
-          exit(0);
-        }
+        cubes[i][j] = sys->heap.alloc<cube**>(side, AMSC);
         for(k=0; k < side; k++) {
-          CALLOC(cubes[i][j][k], side, cube*, OFF, AMSC);
-          if(cubes[i][j][k] == NULL) {
-            fprintf(stderr, "placeq: %d levels set up\n", i-1);
-            exit(0);
-          }
+          cubes[i][j][k] = sys->heap.alloc<cube*>(side, AMSC);
         }
       }
 
@@ -229,18 +215,14 @@ static int placeq(int flag, ssystem *sys, charge *charges)
         zindex = (nextq->z - minz) / length;
         nextc = cubes[i][xindex][yindex][zindex];
         if(nextc == NULL) {
-          CALLOC(nextc, 1, cube, OFF, AMSC);
+          nextc = sys->heap.alloc<cube>(1, AMSC);
           if(nextc == NULL) {
             fprintf(stderr, "placeq: %d levels set up\n", i-1);
             exit(0);
           }
           cubes[i][xindex][yindex][zindex] = nextc;
           nextc->upnumvects = 1;
-          CALLOC(nextc->upnumeles, 1, int, OFF, AMSC);
-          if(nextc->upnumeles == NULL) {
-            fprintf(stderr, "placeq: %d levels set up\n", i-1);
-            exit(0);
-          }
+          nextc->upnumeles = sys->heap.alloc<int>(1, AMSC);
           nextc->upnumeles[0] = 1;
         }
         else {
@@ -293,13 +275,13 @@ static int placeq(int flag, ssystem *sys, charge *charges)
   else {                        /* old code - uses sys->depth for depth */
     /* Allocate the cubes, note calloc used because zeros everything. */
     depth = sys->depth;
-    CALLOC(cubes, sys->depth+1, cube****, ON, AMSC);
+    cubes = sys->heap.alloc<cube****>(sys->depth+1, AMSC);
     for(side = 1, i=0; i <= depth; side *= 2, i++) {
-      CALLOC(cubes[i], side, cube***, ON, AMSC);
+      cubes[i] = sys->heap.alloc<cube***>(side, AMSC);
       for(j=0; j < side; j++) {
-        CALLOC(cubes[i][j], side, cube**, ON, AMSC);
+        cubes[i][j] = sys->heap.alloc<cube**>(side, AMSC);
         for(k=0; k < side; k++) {
-          CALLOC(cubes[i][j][k], side, cube*, ON, AMSC);
+          cubes[i][j][k] = sys->heap.alloc<cube*>(side, AMSC);
         }
       }
     }
@@ -313,10 +295,10 @@ static int placeq(int flag, ssystem *sys, charge *charges)
       zindex = (nextq->z - minz) / length;
       nextc = cubes[depth][xindex][yindex][zindex];
       if(nextc == NULL) {
-        CALLOC(nextc, 1, cube, ON, AMSC);
+        nextc = sys->heap.alloc<cube>(1, AMSC);
         cubes[depth][xindex][yindex][zindex] = nextc;
         nextc->upnumvects = 1;
-        CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
+        nextc->upnumeles = sys->heap.alloc<int>(1, AMSC);
         nextc->upnumeles[0] = 1;
       }
       else {
@@ -334,10 +316,10 @@ static int placeq(int flag, ssystem *sys, charge *charges)
       for(l=0; l < side; l++) {
         nextc = sys->cubes[depth][j][k][l];
         if(nextc != NULL) {  /* Only fill out nonempty cubes. */
-        /* Allocate for the charge ptrs, and get q vector pointer. */
-          CALLOC(nextc->chgs, nextc->upnumeles[0], charge*, ON, AMSC);
-          CALLOC(nextc->upnumeles, 1, int, ON, AMSC);
-        /* Zero the numchgs to use as index. */
+          /* Allocate for the charge ptrs, and get q vector pointer. */
+          nextc->chgs = sys->heap.alloc<charge*>(nextc->upnumeles[0], AMSC);
+          nextc->upnumeles = sys->heap.alloc<int>(1, AMSC);
+          /* Zero the numchgs to use as index. */
           nextc->upnumeles[0] = 0;
         }
       }
@@ -406,7 +388,7 @@ int i, j, k, l, side;
         /* Get the parents and children pointers of nonempty cubes. */
             if(i < sys->depth) {
               nextc->numkids = 8; /* all cubes, even empties, are counted */
-              CALLOC(nextc->kids, nextc->numkids, cube*, ON, AMSC);
+              nextc->kids = sys->heap.alloc<cube*>(nextc->numkids, AMSC);
               nextc->kids[0] = cubes[i+1][2*j][2*k][2*l]; /* empties get */
               nextc->kids[1] = cubes[i+1][2*j][2*k][2*l+1]; /* null pointers */
               nextc->kids[2] = cubes[i+1][2*j][2*k+1][2*l];
@@ -419,7 +401,7 @@ int i, j, k, l, side;
             if(i > 0) {
               parent = cubes[i-1][j/2][k/2][l/2];
               if(parent == NULL) {
-                CALLOC(parent, 1, cube, ON, AMSC);
+                parent = sys->heap.alloc<cube>(1, AMSC);
                 cubes[i-1][j/2][k/2][l/2] = parent;
               }
               nextc->parent = parent;
@@ -476,8 +458,8 @@ static void indexkid(ssystem *sys, cube *dad, int *pqindex, int *pcindex)
   
   if(dad != NULL) {
     if((dad->numkids == 0) && (dad->upnumvects > 0)) {
-      CALLOC(dad->upvects, 1, double*, ON, AMSC);
-      CALLOC(dad->nbr_is_dummy, 1, int*, ON, AMSC);
+      dad->upvects = sys->heap.alloc<double*>(1, AMSC);
+      dad->nbr_is_dummy = sys->heap.alloc<int*>(1, AMSC);
       dad->upvects[0] = &(sys->q[*pqindex]);
       dad->eval = &(sys->p[*pqindex]); /* changed from local to eval 17Feb90 */
       dad->nbr_is_dummy[0] = &(sys->is_dummy[*pqindex]);
@@ -573,11 +555,11 @@ int all_mul_exact, all_loc_exact, p, num_real_panels;
               else if(all_mul_exact && (numchgs <= numterms)) { 
                 nc->mul_exact = TRUE;
                 nc->upnumvects = 1;
-                CALLOC(nc->upvects, 1, double*, ON, AMSC);
-                CALLOC(nc->upnumeles, 1, int, ON, AMSC);
+                nc->upvects = sys->heap.alloc<double*>(1, AMSC);
+                nc->upnumeles = sys->heap.alloc<int>(1, AMSC);
                 nc->upnumeles[0] = num_eval_pnts; /* was numchgs 30Mar91 */
                 nc->multisize = num_eval_pnts; /* was numchgs */
-                CALLOC(nc->chgs, num_eval_pnts, charge*, ON, AMSC);
+                nc->chgs = sys->heap.alloc<charge*>(num_eval_pnts, AMSC);
                 num_eval_pnts = 0;
                 for(m=0, first=TRUE; m < nc->numkids; m++) {
                   nkid = nc->kids[m]; 
@@ -585,7 +567,7 @@ int all_mul_exact, all_loc_exact, p, num_real_panels;
                     if(first == TRUE) {
                       nc->upvects[0] = nkid->upvects[0];
                       if(nc->nbr_is_dummy == NULL)
-                          CALLOC(nc->nbr_is_dummy, 1, int*, ON, AMSC);
+                          nc->nbr_is_dummy = sys->heap.alloc<int*>(1, AMSC);
                       nc->nbr_is_dummy[0] = nkid->nbr_is_dummy[0];
                       first = FALSE;
                     }
@@ -662,7 +644,8 @@ being exact.
               }
             }
             nc->numnbrs = numnbrs;
-            if(nc->numnbrs > 0) CALLOC(nc->nbrs, numnbrs, cube*, ON, AMSC);
+            if(nc->numnbrs > 0)
+              nc->nbrs = sys->heap.alloc<cube*>(numnbrs, AMSC);
             for(m=numnbrs-1; m >= 0; m--) nc->nbrs[m] = cstack[m];
           }
         }
@@ -698,8 +681,8 @@ static void linkcubes(ssystem *sys)
   int dindex, side, depth=sys->depth, numterms=multerms(sys->order);
 
   /* Allocate the vector of heads of cubelists. */
-  CALLOC(sys->multilist, sys->depth+1, cube*, ON, AMSC);
-  CALLOC(sys->locallist, sys->depth+1, cube*, ON, AMSC);
+  sys->multilist = sys->heap.alloc<cube*>(sys->depth+1, AMSC);
+  sys->locallist = sys->heap.alloc<cube*>(sys->depth+1, AMSC);
 
   pdnc = &(sys->directlist);
   for(dindex = 1, i=0, side = 1; i <= sys->depth; i++, side *= 2) {
@@ -713,7 +696,7 @@ static void linkcubes(ssystem *sys)
             /* Do the multi expansion if the cube is not treated exactly. */
             if(i > 1) {         /* no multis over the root cube and its kids */
               if(nc->mul_exact == FALSE) { /* exact -> mul_exact 1Apr91 */
-                CALLOC(nc->multi, numterms, double, ON, AMSC);
+                nc->multi = sys->heap.alloc<double>(numterms, AMSC);
                 *pmnc = nc;
                 pmnc = &(nc->mnext);
               }
@@ -725,7 +708,7 @@ static void linkcubes(ssystem *sys)
               if(nc->loc_exact == FALSE) { /* exact -> loc_exact 1Apr91 */
                 *plnc = nc;
                 plnc = &(nc->lnext);
-                CALLOC(nc->local, numterms, double, ON, AMSC);
+                nc->local = sys->heap.alloc<double>(numterms, AMSC);
               }
             }
 
@@ -747,8 +730,8 @@ Determine maximum number of chgs contained in a single cube.
 */
 static void setMaxq(ssystem *sys)
 {
-  int i, j, k, l, side, p, kids_are_exact, all_null, depth = sys->depth;
-  int mul_maxq, mul_maxlq, loc_maxq, loc_maxlq, num_chgs, real_panel_cnt;
+  int i, j, k, l, side, p, kids_are_exact = FALSE, all_null = FALSE, depth = sys->depth;
+  int mul_maxq, mul_maxlq, loc_maxq, loc_maxlq, num_chgs, real_panel_cnt = 0;
   cube *nc, *****cubes = sys->cubes;
 
   mul_maxq = mul_maxlq = loc_maxq = loc_maxlq = 0;
@@ -852,7 +835,7 @@ static void markUp(cube *child, int flag)
    for cube "child", excluding only empty cubes
   -interaction list pointer is saved in the interList cube struct field
 */
-static int getInter(cube *child)
+static int getInter(ssystem *sys, cube *child)
 {
   int i, j, vects, usekids, lc, jc, kc, ln, jn, kn;
   int numnbr = (child->parent)->numnbrs; /* number of neighbors */
@@ -912,7 +895,8 @@ static int getInter(cube *child)
 
   /* allocate and save the interaction list */
   child->interSize = vects = pstack - &(cstack[0]);
-  if(vects > 0) CALLOC(child->interList, vects, cube*, ON, AMSC);
+  if(vects > 0)
+    child->interList = sys->heap.alloc<cube *>(vects, AMSC);
   for(j = 0; j < vects; j++) child->interList[j] = cstack[j];
 
   return(vects);                /* return number of interaction elements */
@@ -930,7 +914,7 @@ static void getAllInter(ssystem *sys)
       for(k=0; k < side; k++) {
         for(l=0; l < side; l++) {
           nc = cubes[i][j][k][l];
-          if(nc != NULL) getInter(nc);
+          if(nc != NULL) getInter(sys, nc);
         }
       }
     }

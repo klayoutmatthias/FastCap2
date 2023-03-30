@@ -37,6 +37,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "zbufInOut.h"
 #include "psMatDisplay.h"
 
+#include <cstring>
+#include <cmath>
+
 /*
   for writting sparsity pattern ps file in Aldus Freehand format
 */
@@ -191,7 +194,7 @@ static void dump_line(FILE *fp, double xstart, double ystart, double len)
   - call first with type = OPEN, then on each calcp with type = UPDATE,
     finally with type = CLOSE
 */
-void dump_ps_mat(char *filename, int row, int col, int num_row, int num_col, char *argv[], int argc, int type)
+void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, int num_col, char *argv[], int argc, int type)
 {
   static FILE *fp = NULL;
   double widx, widy;
@@ -259,9 +262,9 @@ void dump_ps_mat(char *filename, int row, int col, int num_row, int num_col, cha
     }
 
     /* allocate/initialize aliased matrix (may not actually be aliased) */
-    CALLOC(aliased_matrix, num_alias_r, char*, ON, AMSC);
+    aliased_matrix = sys->heap.alloc<char *>(num_alias_r, AMSC);
     for(i = 0; i < num_alias_r; i++) {
-      CALLOC(aliased_matrix[i], num_alias_c, char, ON, AMSC);
+      aliased_matrix[i] = sys->heap.alloc<char>(num_alias_c, AMSC);
       for(j = 0; j < num_alias_c; j++) aliased_matrix[i][j] = ' ';
     }
 

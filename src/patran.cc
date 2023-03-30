@@ -46,25 +46,28 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "patran_f.h"
 #include "quickif.h"
 
-static void input(FILE *stream, char *line, int surf_type, double *trans_vector);
-static void grid_equiv_check(void);
+#include <cstring>
+#include <cmath>
+
+static void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_vector);
+static void grid_equiv_check(ssystem *sys);
 static void fill_patch_patch_table(int *patch_patch_table);
 static void assign_conductor(int *patch_patch_table);
 static void assign_names(void);
 static void file_title(FILE *stream);
-static void summary_data(FILE *stream);
+static void summary_data(ssystem *sys, FILE *stream);
 static void node_data(FILE *stream, double *trans_vector);
 static void element_data(FILE *stream);
-static void grid_data(FILE *stream, double *trans_vector);
-static void patch_data(FILE *stream);
-static void CFEG_table(FILE *stream);
+static void grid_data(ssystem *sys, FILE *stream, double *trans_vector);
+static void patch_data(ssystem *sys, FILE *stream);
+static void CFEG_table(ssystem *sys, FILE *stream);
 static void waste_line(int num_line, FILE *stream);
-static void name_data(FILE *stream);
+static void name_data(ssystem *sys, FILE *stream);
 static int if_same_coord(double coord_1[3], double coord_2[3]);
 static int if_same_grid(int ID, GRID *grid_ptr);
 static void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count);
-static charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type, char *name_suffix);
-static charge *make_charges_patch(int NELS, int *element_list, int conductor_ID);
+static charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, int surf_type, char *name_suffix);
+static charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conductor_ID);
 
 #define BIG 35000              /* Size of element and node serach table. */
 #define SMALL_NUMBER 0.005     /* See functions if_same_coord() and 
@@ -90,7 +93,7 @@ int first_grid;			/* note that current_name static is not */
 int first_patch;		/*   reset since the name list must */
 int first_cfeg;			/*   be preserved as new files are read */
 
-charge *patfront(FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
+charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
                  Name **name_list, int *num_cond, char *name_suffix)
 {
   int *patch_patch_table, numq=0;
@@ -98,7 +101,7 @@ charge *patfront(FILE *stream, int *file_is_patran_type, int surf_type, double *
   charge *firstq;
   double *corner0, *corner1, *corner2, *corner3;
 
-  if(line == NULL) CALLOC(line, BUFSIZ, char, ON, AMSC);
+  if(line == NULL) line = sys->heap.alloc<char>(BUFSIZ, AMSC);
 
   start_name_this_time = NULL;
   first_grid = first_patch = first_cfeg = TRUE;
@@ -108,15 +111,15 @@ charge *patfront(FILE *stream, int *file_is_patran_type, int surf_type, double *
   fgets(line, BUFSIZ, stream);
   if(line[0] == '0') {
     *file_is_patran_type = FALSE;
-    firstq = quickif(stream, line, title, surf_type, trans_vector,
+    firstq = quickif(sys, stream, line, title, surf_type, trans_vector,
 		     num_cond, name_list, name_suffix);
   }
   else {
     *file_is_patran_type = TRUE;
 
-    input(stream, line, surf_type, trans_vector);
+    input(sys, stream, line, surf_type, trans_vector);
 
-    grid_equiv_check();
+    grid_equiv_check(sys);
 
     /*********************************************************************
       This section of patfront is for assigning conductor numbers to patches
@@ -124,7 +127,7 @@ charge *patfront(FILE *stream, int *file_is_patran_type, int surf_type, double *
 
     if(surf_type == CONDTR || surf_type == BOTH) {
 
-      CALLOC(patch_patch_table, number_patches*number_patches, int, ON, AMSC);
+      patch_patch_table = sys->heap.alloc<int>(number_patches*number_patches, AMSC);
 
       fill_patch_patch_table(patch_patch_table);
 
@@ -135,7 +138,7 @@ charge *patfront(FILE *stream, int *file_is_patran_type, int surf_type, double *
       assign_names();
     }
 
-    firstq = make_charges_all_patches(name_list, num_cond, surf_type,
+    firstq = make_charges_all_patches(sys, name_list, num_cond, surf_type,
 				      name_suffix);
   }
 
@@ -149,7 +152,7 @@ charge *patfront(FILE *stream, int *file_is_patran_type, int surf_type, double *
 
 ****************************************************************************/
 
-void input(FILE *stream, char *line, int surf_type, double *trans_vector)
+void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_vector)
 {
   int END=0;
 
@@ -171,7 +174,7 @@ void input(FILE *stream, char *line, int surf_type, double *trans_vector)
       file_title(stream);
       break;
     case 26:
-      summary_data(stream);
+      summary_data(sys, stream);
       break;
     case 1:
       node_data(stream, trans_vector);
@@ -180,16 +183,16 @@ void input(FILE *stream, char *line, int surf_type, double *trans_vector)
       element_data(stream);
       break;
     case 31:
-      grid_data(stream, trans_vector);
+      grid_data(sys, stream, trans_vector);
       break;
     case 33:
-      patch_data(stream);
+      patch_data(sys, stream);
       break;
     case 45:
-      CFEG_table(stream);
+      CFEG_table(sys, stream);
       break;
     case 21:
-      if(surf_type == CONDTR || surf_type == BOTH) name_data(stream);
+      if(surf_type == CONDTR || surf_type == BOTH) name_data(sys, stream);
       else waste_line(KC, stream);
       break;
     case 99:
@@ -229,12 +232,12 @@ void file_title(FILE *stream)
    nodes, this function allocates spaces for nodes and elements, and sets up
    the global pointers to these arrays. */
 
-void summary_data(FILE *stream)
+void summary_data(ssystem *sys, FILE *stream)
 {
   number_nodes = N1; number_elements = N2;
 
-  CALLOC(list_nodes, number_nodes, NODE, ON, AMSC);
-  CALLOC(list_elements, number_elements, ELEMENT, ON, AMSC);
+  list_nodes = sys->heap.alloc<NODE>(number_nodes, AMSC);
+  list_elements = sys->heap.alloc<ELEMENT>(number_elements, AMSC);
 
   current_node = list_nodes;
   current_element = list_elements;
@@ -296,7 +299,7 @@ void element_data(FILE *stream)
    structure.  Start_grid is the global variable that points to the very 
    first GRID structure created.  */
 
-void grid_data(FILE *stream, double *trans_vector)
+void grid_data(ssystem *sys, FILE *stream, double *trans_vector)
 {
   static GRID *prev_grid=0;
   GRID *current_grid;
@@ -308,7 +311,7 @@ void grid_data(FILE *stream, double *trans_vector)
     first_grid = FALSE;
   }
 
-  CALLOC(current_grid, 1, GRID, ON, AMSC);
+  current_grid = sys->heap.alloc<GRID>(1, AMSC);
   if (number_grids==0) start_grid=current_grid;
   current_grid->ID = ID;
   current_grid->prev = prev_grid;
@@ -326,7 +329,7 @@ void grid_data(FILE *stream, double *trans_vector)
    structure.  Start_patch is the global variable that points to the very 
    first PATCH structure created.  */
 
-void patch_data(FILE *stream)
+void patch_data(ssystem *sys, FILE *stream)
 {
   static PATCH *prev_patch=0;
   PATCH *current_patch;
@@ -338,7 +341,7 @@ void patch_data(FILE *stream)
     first_patch = FALSE;
   }
 
-  CALLOC(current_patch, 1, PATCH, ON, AMSC);
+  current_patch = sys->heap.alloc<PATCH>(1, AMSC);
   if (number_patches==0) start_patch=current_patch;
   current_patch->ID = ID;
   current_patch->prev = prev_patch;
@@ -359,7 +362,7 @@ void patch_data(FILE *stream)
    first CFEG structure created.  CFEG table has the result from meshing 
    a patch. */
 
-void CFEG_table(FILE *stream)
+void CFEG_table(ssystem *sys, FILE *stream)
 {
   static CFEG *prev_cfeg=0;
   CFEG *current_cfeg;
@@ -377,7 +380,7 @@ void CFEG_table(FILE *stream)
 
   if (LPH != 3) waste_line(KC-2,stream);
   else {
-    CALLOC(current_cfeg, 1, CFEG, ON, AMSC);
+    current_cfeg = sys->heap.alloc<CFEG>(1, AMSC);
     if (!prev_cfeg) start_cfeg=current_cfeg;
     current_cfeg->ID = ID;
     current_cfeg->NELS = IV; NELS = IV;
@@ -385,7 +388,7 @@ void CFEG_table(FILE *stream)
     if (prev_cfeg) prev_cfeg->next = current_cfeg;
     
     /* This is the list of elements associated with this particular patch. */
-    CALLOC(element_list, NELS, int, ON, AMSC);
+    element_list = sys->heap.alloc<int>(NELS, AMSC);
     current_cfeg->element_list = element_list;
         
     current_cfeg->LPH = LPH;             
@@ -432,18 +435,18 @@ void CFEG_table(FILE *stream)
   - the output routine looks at the first sm_patch struct associated with
     each NAME struct to determine the number of the corresponding cond name
 */
-void name_data(FILE *stream)
+void name_data(ssystem *sys, FILE *stream)
 {
   int len, iv, i, j, ntype, id, patch_cnt = 0;
   char line[BUFSIZ];
   SM_PATCH *current_patch = NULL;
 
   if(start_name == NULL) {	/* if first time on first patfront() call */
-    CALLOC(start_name, 1, NAME, ON, AMSC);
+    start_name = sys->heap.alloc<NAME>(1, AMSC);
     current_name = start_name_this_time = start_name;
   }
   else{ 
-    CALLOC(current_name->next, 1, NAME, ON, AMSC);
+    current_name->next = sys->heap.alloc<NAME>(1, AMSC);
     current_name = current_name->next;
     if(start_name_this_time == NULL) {	/* if 1st time on this patfront call */
       start_name_this_time = current_name;
@@ -454,7 +457,7 @@ void name_data(FILE *stream)
   fgets(line, sizeof(line), stream); /* eat CR */
   fgets(line, sizeof(line), stream);
   len = strlen(line);
-  CALLOC(current_name->name, len+1, char, ON, AMSC);
+  current_name->name = sys->heap.alloc<char>(len+1, AMSC);
   delcr(line);
   strcpy(current_name->name, line);
   
@@ -464,11 +467,11 @@ void name_data(FILE *stream)
       fscanf(stream, "%d %d", &ntype, &id);
       if(ntype == 3) {		/* if its a patch, save ID */
 	if(current_patch == NULL) { /* if 1st patch */
-	  CALLOC(current_name->patch_list, 1, SM_PATCH, ON, AMSC);
+	  current_name->patch_list = sys->heap.alloc<SM_PATCH>(1, AMSC);
 	  current_patch = current_name->patch_list;
 	}
 	else {
-	  CALLOC(current_patch->next, 1, SM_PATCH, ON, AMSC);
+	  current_patch->next = sys->heap.alloc<SM_PATCH>(1, AMSC);
 	  current_patch = current_patch->next;
 	}
 	current_patch->ID = id;
@@ -489,7 +492,7 @@ void name_data(FILE *stream)
    from two grid points are within SMALL_NUMBER, defined in patran.h, then 
    they are equivalent.  */
 
-static void grid_equiv_check(void)
+static void grid_equiv_check(ssystem *sys)
 {
   GRID *grid_ptr_1, *grid_ptr_2;
   int i;
@@ -497,7 +500,7 @@ static void grid_equiv_check(void)
   /* First, allocate spaces for equivalent grid arrays. */
   grid_ptr_1 = start_grid;
   while (grid_ptr_1) {
-    CALLOC(grid_ptr_1->equiv_ID, number_grids, int, ON, AMSC);
+    grid_ptr_1->equiv_ID = sys->heap.alloc<int>(number_grids, AMSC);
     grid_ptr_1->number_equiv_grids = 0;
     grid_ptr_1 = grid_ptr_1->next;
   }
@@ -724,7 +727,7 @@ static char *getPatranName(int cond_num)
 
 ****************************************************************************/
 
-charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type, char *name_suffix)
+charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, int surf_type, char *name_suffix)
 /* Name **name_list: master list of conductor names */
 /* int *num_cond: master conductor counter */
 {
@@ -748,7 +751,7 @@ charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type,
 	  if(surf_type == CONDTR || surf_type == BOTH) {
 	    strcpy(cond_name, getPatranName(patch_ptr->conductor_ID));
 	    strcat(cond_name, name_suffix);
-	    conductor_ID = getConductorNum(cond_name, name_list, num_cond);
+	    conductor_ID = getConductorNum(sys, cond_name, name_list, num_cond);
 	  }
 	  else conductor_ID = 0;
 	  break;
@@ -762,12 +765,12 @@ charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type,
          Make sure all the lists of charges are linked. */
       element_list = cfeg_ptr->element_list;
       if (!first_pq) {
-	first_pq = make_charges_patch(NELS,element_list,conductor_ID);
+        first_pq = make_charges_patch(sys, NELS, element_list, conductor_ID);
 	current_pq = first_pq + NELS - 1;
       }
       else {
 	current_pq->next = 
-	  make_charges_patch(NELS,element_list,conductor_ID);
+	  make_charges_patch(sys, NELS, element_list, conductor_ID);
 	current_pq = (current_pq->next) + NELS - 1;
       }	
     }
@@ -781,14 +784,14 @@ charge *make_charges_all_patches(Name **name_list, int *num_cond, int surf_type,
 
 /* This function creates the linked list of charges for a single patch. */
 
-charge *make_charges_patch(int NELS, int *element_list, int conductor_ID)
+charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conductor_ID)
 {
   charge *pq, *current_pq;
   int i,element_number,*element_corner_ptr;
   ELEMENT *element_ptr;
   NODE *node_ptr;
 
-  CALLOC(pq,NELS,charge, ON, AMSC);
+  pq = sys->heap.alloc<charge>(NELS, AMSC);
 
   /* Make sure that they are linked. */
   current_pq = pq;
