@@ -115,7 +115,7 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, cha
   FILE *fp;
   char tline[BUFSIZ], file_name[BUFSIZ], plus[BUFSIZ], group_name[BUFSIZ];
   double outer_perm, inner_perm, tx, ty, tz, rx, ry, rz;
-  surface *cur_surf;
+  surface *cur_surf = 0;
 
   /* find the end of the current surface list */
   if(*surf_list != NULL) {
@@ -490,10 +490,9 @@ char *hack_path(char *str)
   - dummy panels are skipped
   - dielectric panels, with conductor number 0, are also skipped
 */
-static void reassign_cond_numbers(charge *panel_list, NAME *name_list, char *surf_name)
+static void reassign_cond_numbers(charge *panel_list, NAME *name_list, char * /*surf_name*/)
 {
-  int i, j, cond_nums[MAXCON], num_cond, cond_num_found, temp;
-  char str[BUFSIZ];
+  int i, cond_nums[MAXCON], num_cond, cond_num_found;
   charge *cur_panel;
   NAME *cur_name;
 
@@ -866,8 +865,8 @@ static int getUniqueCondNum(char *name, Name *name_list)
 */
 static ITER *get_kill_num_list(ssystem *sys, Name *name_list, char *kill_name_list)
 {
-  int i, j, start_token, end_token, end_name, cond;
-  char name[BUFSIZ], group_name[BUFSIZ];
+  int i, j, start_token, end_token, cond;
+  char name[BUFSIZ];
   ITER *kill_num_list;
   ITER *cur_cond;
 
@@ -934,7 +933,7 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
   extern double iter_tol;
 
   extern int s_, n_, g_, c_, x_, k_, rc_, rd_, rb_, q_, rk_, m_, f_, dd_;
-  extern double view[], moffset[], rotation, distance, linewd, scale, axeslen;
+  extern double moffset[], rotation, distance, linewd, scale, axeslen;
   extern double elevation, azimuth;
   extern int up_axis;
   extern char *line_file;
@@ -1277,7 +1276,7 @@ static surface *read_all_surfaces(ssystem *sys, char *input_file, char *surf_lis
 static surface *input_surfaces(ssystem *sys, char *argv[], int argc, int *autmom, int *autlev, double *relperm,
                                int *numMom, int *numLev, char *infile)
 {
-  int read_from_stdin, num_surf;
+  int read_from_stdin;
   char *surf_list_file, *input_file;
 
   /* initialize defaults */

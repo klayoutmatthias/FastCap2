@@ -184,7 +184,7 @@ static void wrMat(double *mat, int siz, int file, int type)
 {
   int ds = sizeof(double), fdis;
   int realsiz, actsiz;			/* size in chars */
-  char name[3];	           		/* name of file */
+  char name[4];	           		/* name of file */
 
   /* figure the real size */
   if(type == TRIMAT) realsiz = ds*siz*(siz+1)/2;
@@ -223,7 +223,7 @@ static void rdMat(double *mat, int siz, int file, int type)
 {
   int fdis;
   int realsiz;			/* size in chars */
-  char name[3];           	/* name of file */
+  char name[4];           	/* name of file */
 
   /* figure the real size */
   if(type == TRIMAT) realsiz = sizeof(double)*siz*(siz+1)/2;
@@ -333,7 +333,7 @@ static void subInnerProd(double *matsq, double *matri, int siz, int matl, int ma
 {
   int i, j, k, rowlim, rowliml, colimu, fdl, fdu;
   int froml, fromu, ds = sizeof(double), readl, readu;
-  char name[3];
+  char name[4];
   double *matriu, temp;
   extern int fulldirops;
   extern double lutime;

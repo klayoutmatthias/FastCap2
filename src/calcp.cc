@@ -351,7 +351,7 @@ edge02 as the x-axis.
 void centroid(charge *pp, double x2)
 {
   double vertex1[3], vertex3[3];
-  double sum, dl, x1, y1, x3, y3, xc, yc;
+  double x1, y1, x3, y3, xc, yc;
   int i;
 
   /* Use vertex 0 as the origin. */
@@ -426,7 +426,6 @@ double calcp(charge *panel, double x, double y, double z, double *pfd)
   double s914, s813, s411, s512, s1215;
   double fs, fd, fdsum;
   int okay, i, next;
-  struct edge *edge;
   double *corner;
 
   /* Put the evaluation point into this panel's coordinates. */
@@ -628,15 +627,11 @@ static void ComputeMoments(ssystem *sys, charge *pp)
 {
   int order=MAXORDER;
   int i, j, nside,  N, M, N1, M1, M2, MN1, MN2;
-  double dx, dy, dxdy, dydx, x, y, z, SI, *xp, *yp, *xpn, *ypn;
-  double ypp[3];
+  double dx, dy, dxdy, dydx, SI, *xp, *yp, *xpn, *ypn;
   static double *XP[4], *YP[4], **I;
   static int maxorder = 0;
   static double CS[16] = { 0.0, 1.0, 1.0, 1.5, 1.5, 3.75, 1.0, 3.0, 
 			   1.5, 7.5, 1.5, 1.5, 3.75, 1.5, 7.5, 3.75 };
-  double *multi, sumc, sums, sign;
-  int m, n, r, halfn, flrm, ceilm, numterms, rterms;
-  
   /* Allocate temporary storage and initialize arrays. */
   if(order > maxorder) {
     for(i = 0; i < 4; i++) {

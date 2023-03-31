@@ -119,7 +119,7 @@ char *last_alias(Name *cur_name)
 */
 int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond)
 {
-  Name *cur_name, *prev_name;
+  Name *cur_name = 0, *prev_name = 0;
   int i;
 
   /* if this is the very first name, make and load struct on *name_list */
@@ -158,7 +158,7 @@ int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond)
 */
 static int getConductorNumNoAdd(char *name, Name *name_list)
 {
-  Name *cur_name, *prev_name;
+  Name *cur_name;
   int i;
 
   /* check to see if name is present */
@@ -166,7 +166,6 @@ static int getConductorNumNoAdd(char *name, Name *name_list)
       cur_name = cur_name->next, i++) {
     if(!strcmp(cur_name->name, name) || alias_match(cur_name, name)) 
 	return(i); /* return conductor number */
-    prev_name = cur_name;
   }
 
   return(NOTFND);
@@ -236,7 +235,7 @@ static int oldrenameConductor(ssystem *sys, char *old_name, char *new_name, Name
 static int renameConductor(ssystem *sys, char *old_name, char *new_name, Name **name_list, int *num_cond)
 {
   Name *cur_name;
-  int i, j;
+  int i;
 
   /* check to see if old name is present in names or their aliases */
   /* if it is, add old name to the alias list */
@@ -270,14 +269,13 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, char *title, int surf_type, 
 /* char *name_suffix: suffix for all cond names read */
 /* Name **name_list: name list pointer */
 {
-  int linecnt = 2, i, cond;
-  char temp[BUFSIZ], temp2[BUFSIZ], line1[BUFSIZ], *cp;
+  int linecnt = 2;
+  char temp[BUFSIZ], temp2[BUFSIZ], line1[BUFSIZ];
   char condstr[BUFSIZ];
   double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
-  quadl *fstquad = NULL, *curquad;
-  tri *fsttri = NULL, *curtri;
+  quadl *fstquad = 0, *curquad = 0;
+  tri *fsttri = 0, *curtri = 0;
   charge *chglst, *nq;
-  NAME *cname;
 
   chglst = NULL;
 

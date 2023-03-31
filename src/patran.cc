@@ -96,10 +96,9 @@ int first_cfeg;			/*   be preserved as new files are read */
 charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
                  Name **name_list, int *num_cond, char *name_suffix)
 {
-  int *patch_patch_table, numq=0;
+  int *patch_patch_table;
   static char *line = NULL;
   charge *firstq;
-  double *corner0, *corner1, *corner2, *corner3;
 
   if(line == NULL) line = sys->heap.alloc<char>(BUFSIZ, AMSC);
 
@@ -495,7 +494,6 @@ void name_data(ssystem *sys, FILE *stream)
 static void grid_equiv_check(ssystem *sys)
 {
   GRID *grid_ptr_1, *grid_ptr_2;
-  int i;
 
   /* First, allocate spaces for equivalent grid arrays. */
   grid_ptr_1 = start_grid;
@@ -732,10 +730,10 @@ charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, 
 /* int *num_cond: master conductor counter */
 {
   CFEG *cfeg_ptr;
-  int NELS, LPH_ID,conductor_ID,*element_list;
+  int NELS, LPH_ID, conductor_ID = 0, *element_list;
   char cond_name[BUFSIZ];
   PATCH *patch_ptr;
-  charge *first_pq=0,*current_pq;
+  charge *first_pq = 0, *current_pq = 0;
 
   cfeg_ptr = start_cfeg;
   while (cfeg_ptr) {

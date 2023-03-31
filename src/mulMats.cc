@@ -278,7 +278,7 @@ void olmulMatPrecond(ssystem *sys)
   cube *nc, *nnbr, *nnnbr;
   double **mat, **nmat;
   int i, j, k, l, m;
-  int maxsize, nsize, nnsize, nnnsize, *reorder;
+  int maxsize, nsize, nnsize, nnnsize;
   int nj, nk, nl, offset, noffset;
   int *nc_dummy, *nnbr_dummy, *nnnbr_dummy;
   static int *is_dummy;         /* local dummy flag vector, stays around */
@@ -302,7 +302,6 @@ void olmulMatPrecond(ssystem *sys)
 #if JACDBG == ON
   printf("max direct size =%d\n", maxsize);
 #endif
-  reorder = sys->heap.alloc<int>(maxsize, AMSC);
   mat = sys->heap.alloc<double*>(maxsize, AMSC);
   for(i=0; i < maxsize; i++) {
     mat[i] = sys->heap.alloc<double>(maxsize, AMSC);

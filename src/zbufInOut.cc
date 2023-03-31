@@ -142,7 +142,7 @@ static void figure_grey_levels(face **face_list, double *chgs, charge *chglist, 
   int first, i;
   double dif;
   charge *panel;
-  extern int rc_, rb_, rd_;
+  extern int rd_;
   extern double black, white;
   extern ITER *kq_num_list;
 
