@@ -50,9 +50,12 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 int main(int argc, char *argv[])
 {
+  ssystem sys;
+  sys.argv = (const char **) argv;
+  sys.argc = argc;
+
   int ttliter, i, j, num_cond;
   charge *chglist, *nq;
-  ssystem sys;
   double **capmat, dirtimesav, mulsetup, initalltime, ttlsetup, ttlsolve;
   double relperm;
   int autmom, autlev, numMom, numLev;
@@ -68,8 +71,7 @@ int main(int argc, char *argv[])
 
   char filename[BUFSIZ];
 
-  extern char **argvals;
-  extern int argcnt, m_, q_, dd_;
+  extern int m_, q_, dd_;
   extern double ***axes;
 
   /* initialize memory and time counters, etc. */
@@ -81,8 +83,6 @@ int main(int argc, char *argv[])
   /* initialize defaults, etc */
   autmom = autlev = ON;
   relperm = 1.0;
-  argvals = argv;
-  argcnt = argc;
   axes = sys.heap.alloc<double **>(10, AMSC);
   for(i = 0; i < 10; i++) {
     axes[i] = sys.heap.alloc<double *>(2, AMSC);
@@ -94,12 +94,12 @@ int main(int argc, char *argv[])
   /* get the list of all panels in the problem */
   /* - many command line parameters having to do with the postscript
        file dumping interface are passed back via globals (see mulGlobal.c) */
-  chglist = input_problem(&sys, argv, argc, &autmom, &autlev, &relperm,
+  chglist = input_problem(&sys, &autmom, &autlev, &relperm,
 			  &numMom, &numLev, &name_list, &num_cond);
 
   /* if no fastcap run is to be done, just dump the psfile */
   if(sys.capvew && m_) {
-    if(!q_) get_ps_file_base(&sys, argv, argc);
+    if(!q_) get_ps_file_base(&sys);
     dump_ps_geometry(&sys, chglist, NULL, 0, dd_);
     exit(0);
   }

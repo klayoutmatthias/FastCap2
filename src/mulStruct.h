@@ -173,6 +173,9 @@ struct ssystem
 {
   ssystem();
 
+  const char **argv;            //  program arguments
+  int argc;
+
   FILE *log;                    //  log stream (0 to turn off output)
   bool timdat;                  //  print timing data
   bool mksdat;                  //  dump symmetrized, MKS units cap mat
@@ -188,6 +191,8 @@ struct ssystem
   bool dmtcnt;                  //  display xform matrix counts by level
   bool dissrf;                  //  display input surface information
   bool namdat;                  //  dump conductor names
+
+  char *ps_file_base;           //  pointer to base name for .ps files
 
   int side;                     //  # cubes per side on lowest level.
   int depth;			//  # of levels of cubes.

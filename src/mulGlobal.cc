@@ -57,13 +57,13 @@ int fullPqops;			/* total P*q ops using P on disk - EXPGCR=ON */
 NAME *start_name = NULL;	/* conductor name linked list head */
 NAME *current_name;		/* conductor name linked list tail */
 NAME *start_name_this_time;	/* cond name list for the current surface */
-char *kill_name_list;		/* cond names whose columns are omitted */
+const char *kill_name_list;	/* cond names whose columns are omitted */
 ITER *kill_num_list;		/* cond numbers whose columns are omitted */
-char *kinp_name_list;		/* cond names omitted from input */
+const char *kinp_name_list;	/* cond names omitted from input */
 ITER *kinp_num_list;		/* cond numbers omitted from input */
-char *qpic_name_list;		/* cond column names that get q picture */
+const char *qpic_name_list;	/* cond column names that get q picture */
 ITER *qpic_num_list;		/* cond column names that get q picture */
-char *kq_name_list;		/* cond names removed from q picture */
+const char *kq_name_list;	/* cond names removed from q picture */
 ITER *kq_num_list;		/* cond numbers removed from q picture */
 
 int num_dielec_panels;		/* number of dielectric interface panels */
@@ -77,8 +77,6 @@ double iter_tol;		/* iterative loop tolerence on ||r|| */
 /*
   command line option variables - all have to do with ps file dumping
 */
-char **argvals;			/* copy of argv */
-int argcnt;			/* copy of argc */
 int s_;				/* TRUE => insert showpage in .ps file(s) */
 int n_;				/* TRUE => number faces with input ordering */
 int g_;				/* TRUE => dump depth graph and quit */
@@ -105,4 +103,3 @@ double axeslen;			/* axes lengths in 3D distance */
 double axes[10][2][3];		/* the 2d image of the coordinate axes */
 int up_axis;			/* X,Y or Z => which axis is vertical in pic */
 char *line_file;		/* pointer to .fig superimposed line file */
-char *ps_file_base;		/* pointer to base name for .ps files */

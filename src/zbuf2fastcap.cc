@@ -60,11 +60,9 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   FILE *fp;
   char str[BUFSIZ];
 
-  extern char *ps_file_base;
   extern double view[], moffset[], distance, rotation, scale;
   extern double azimuth, elevation;
-  extern char **argvals;
-  extern int argcnt, g_;
+  extern int g_;
   extern char *line_file;
 
   /* set up use density flag---not too clean; saves changes in called funcs */
@@ -102,8 +100,8 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   initFaces(faces, numfaces, view);
 
   /* set up ps file name */
-  if(q == NULL) sprintf(str, "%s.ps", ps_file_base);
-  else sprintf(str, "%s%d.ps", ps_file_base, cond);
+  if(q == NULL) sprintf(str, "%s.ps", sys->ps_file_base);
+  else sprintf(str, "%s%d.ps", sys->ps_file_base, cond);
 
   /* set up the adjacency graph for the depth sort */
   fprintf(stdout, "\nSorting %d faces for %s...", numfaces, str);
@@ -131,7 +129,7 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
       exit(0);
     }
     fprintf(stdout, "Writing %s...", str);
-    dumpPs(sfaces, numfaces, lines, numlines, fp, argvals, argcnt,use_density);
+    dumpPs(sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density);
     fprintf(stdout, "done.\n");
     fclose(fp);
   }

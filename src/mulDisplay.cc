@@ -809,7 +809,7 @@ void dumpMatBldCnts(ssystem *sys)
 /* 
   dumps state of important compile flags
 */
-void dumpConfig(FILE *fp, char *name)
+void dumpConfig(FILE *fp, const char *name)
 {
   int size = -1;		/* for '#define MAXITER size' case */
 

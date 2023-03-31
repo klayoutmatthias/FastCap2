@@ -216,10 +216,12 @@ static int placeq(int flag, ssystem *sys, charge *charges)
         nextc = cubes[i][xindex][yindex][zindex];
         if(nextc == NULL) {
           nextc = sys->heap.alloc<cube>(1, AMSC);
+          /* TODO: not working any more ...
           if(nextc == NULL) {
             fprintf(stderr, "placeq: %d levels set up\n", i-1);
             exit(0);
           }
+          */
           cubes[i][xindex][yindex][zindex] = nextc;
           nextc->upnumvects = 1;
           nextc->upnumeles = sys->heap.alloc<int>(1, AMSC);

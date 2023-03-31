@@ -109,7 +109,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 	be renamed; this is helpful when idenifying conductors to omit
 	from capacitance calculations using the -k option
 */
-static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, char *list_file, int read_from_stdin)
+static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, const char *list_file, int read_from_stdin)
 {
   int linecnt, end_of_chain, ref_pnt_is_inside, group_cnt;
   FILE *fp;
@@ -645,11 +645,13 @@ int want_this_iter(ITER *iter_list, int iter_num)
 /*
   sets up the ps file base string
 */
-void get_ps_file_base(ssystem *sys, char *argv[], int argc)
+void get_ps_file_base(ssystem *sys)
 {
+  const char **argv = sys->argv;
+  int argc = sys->argc;
+
   int i, j;
   char temp[BUFSIZ];
-  extern char *ps_file_base;
 
   /* - if no list file, use input file; otherwise use list file */
   /* - if neither present, use "stdin" */
@@ -662,8 +664,8 @@ void get_ps_file_base(ssystem *sys, char *argv[], int argc)
       for(; temp[j] != '.' && j >= 0; j--);
       if(temp[j] == '.') temp[j] = '\0';
       /* save list file base */
-      ps_file_base = sys->heap.alloc<char>(strlen(temp)+1, AMSC);
-      strcpy(ps_file_base, hack_path(temp));
+      sys->ps_file_base = sys->heap.alloc<char>(strlen(temp)+1, AMSC);
+      strcpy(sys->ps_file_base, hack_path(temp));
       break;
     }
     else if(argv[i][0] != '-') { /* not an option, must be input file */
@@ -671,15 +673,15 @@ void get_ps_file_base(ssystem *sys, char *argv[], int argc)
       for(j = 0; temp[j] != '\0' && temp[j] != '.'; j++);
       temp[j] = '\0';
       /* save list file base */
-      ps_file_base = sys->heap.alloc<char>(strlen(temp)+1, AMSC);
-      strcpy(ps_file_base, hack_path(temp));
+      sys->ps_file_base = sys->heap.alloc<char>(strlen(temp)+1, AMSC);
+      strcpy(sys->ps_file_base, hack_path(temp));
       break;
     }
   }
 
-  if(ps_file_base == NULL) {	/* input must be stdin */
-    ps_file_base = sys->heap.alloc<char>(strlen("stdin")+1, AMSC);
-    strcpy(ps_file_base, "stdin");
+  if(sys->ps_file_base == NULL) {	/* input must be stdin */
+    sys->ps_file_base = sys->heap.alloc<char>(strlen("stdin")+1, AMSC);
+    strcpy(sys->ps_file_base, "stdin");
   }
 }
 
@@ -863,7 +865,7 @@ static int getUniqueCondNum(char *name, Name *name_list)
   - conductor names can't have any %'s
   - redundant names are detected as errors
 */
-static ITER *get_kill_num_list(ssystem *sys, Name *name_list, char *kill_name_list)
+static ITER *get_kill_num_list(ssystem *sys, Name *name_list, const char *kill_name_list)
 {
   int i, j, start_token, end_token, cond;
   char name[BUFSIZ];
@@ -923,12 +925,15 @@ static ITER *get_kill_num_list(ssystem *sys, Name *name_list, char *kill_name_li
 /*
   command line parsing routine
 */
-static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom, int *autlev, double *relperm, int *numMom, int *numLev,
-                               char **input_file, char **surf_list_file, int *read_from_stdin)
+static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *relperm, int *numMom, int *numLev,
+                               const char **input_file, const char **surf_list_file, int *read_from_stdin)
 {
+  const char **argv = sys->argv;
+  int argc = sys->argc;
+
   int cmderr, i;
   char **chkp, *chk;
-  extern char *kill_name_list, *kinp_name_list;
+  extern const char *kill_name_list, *kinp_name_list;
   extern ITER *kill_num_list, *kinp_num_list;
   extern double iter_tol;
 
@@ -936,12 +941,11 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
   extern double moffset[], rotation, distance, linewd, scale, axeslen;
   extern double elevation, azimuth;
   extern int up_axis;
-  extern char *line_file;
-  extern char *ps_file_base;
+  extern const char *line_file;
   extern ITER *qpic_num_list;
-  extern char *qpic_name_list;
+  extern const char *qpic_name_list;
   extern ITER *kq_num_list;
-  extern char *kq_name_list;
+  extern const char *kq_name_list;
   /* load default parameters */
   azimuth = DEFAZM;             /* azimuth */
   elevation = DEFELE;           /* elevation */
@@ -954,7 +958,6 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
   axeslen = DEFAXE;             /* length of axes lines in 3d */
   up_axis = DEFUAX;             /* upward-pointing axis in 2d image */
   line_file = NULL;             /* file of lines/arrows in .fig format */
-  ps_file_base = NULL;		/* base used to form .ps file names */
   qpic_num_list = NULL;		/* list of cond nums to get shaded plots for */
   qpic_name_list = NULL;	/* list of cond names to get shaded plots */
   kq_num_list = NULL;		/* list of cond nums in shaded plots */
@@ -1105,7 +1108,7 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
       else if(argv[i][1] == 'c') c_ = TRUE;
       else if(argv[i][1] == 'm') m_ = TRUE;
       else if(argv[i][1] == 'q') {
-        get_ps_file_base(sys, argv, argc); /* set up the output file base */
+        get_ps_file_base(sys); /* set up the output file base */
         qpic_name_list = &(argv[i][2]);
         q_ = TRUE;
       }
@@ -1197,7 +1200,7 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
 /*
   surface information input routine - panels are read by read_panels()
 */
-static surface *read_all_surfaces(ssystem *sys, char *input_file, char *surf_list_file, int read_from_stdin, char *infile,
+static surface *read_all_surfaces(ssystem *sys, const char *input_file, const char *surf_list_file, int read_from_stdin, char *infile,
                                   double relperm)
 {
   int num_surf, i;
@@ -1273,17 +1276,17 @@ static surface *read_all_surfaces(ssystem *sys, char *input_file, char *surf_lis
   - inputs surfaces (ie file names whose panels are read in read_panels)
   - sets parameters accordingly
 */
-static surface *input_surfaces(ssystem *sys, char *argv[], int argc, int *autmom, int *autlev, double *relperm,
+static surface *input_surfaces(ssystem *sys, int *autmom, int *autlev, double *relperm,
                                int *numMom, int *numLev, char *infile)
 {
   int read_from_stdin;
-  char *surf_list_file, *input_file;
+  const char *surf_list_file, *input_file;
 
   /* initialize defaults */
   surf_list_file = input_file = NULL;
   read_from_stdin = FALSE;
 
-  parse_command_line(sys, argv, argc, autmom, autlev, relperm, numMom, numLev,
+  parse_command_line(sys, autmom, autlev, relperm, numMom, numLev,
 		     &input_file, &surf_list_file, &read_from_stdin);
 
   return(read_all_surfaces(sys, input_file, surf_list_file,
@@ -1457,7 +1460,7 @@ static void resolve_kill_lists(ITER *rs_num_list, ITER *q_num_list, ITER *ri_num
 /*
   main input routine, returns a list of panels in the problem
 */
-charge *input_problem(ssystem *sys, char *argv[], int argc, int *autmom, int *autlev, double *relperm,
+charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
                       int *numMom, int *numLev, Name **name_list, int *num_cond)
 {
   surface *surf_list;
@@ -1465,11 +1468,11 @@ charge *input_problem(ssystem *sys, char *argv[], int argc, int *autmom, int *au
   charge *chglist;
   long clock;
   extern ITER *kill_num_list, *qpic_num_list, *kinp_num_list, *kq_num_list;
-  extern char *kill_name_list, *qpic_name_list, *kinp_name_list;
-  extern char *kq_name_list;
+  extern const char *kill_name_list, *qpic_name_list, *kinp_name_list;
+  extern const char *kq_name_list;
 
   /* read the conductor and dielectric interface surface files, parse cmds */
-  surf_list = input_surfaces(sys, argv, argc, autmom, autlev, relperm,
+  surf_list = input_surfaces(sys, autmom, autlev, relperm,
 			     numMom, numLev, infile);
 
   if(*autmom == ON) *numMom = DEFORD;
@@ -1481,7 +1484,7 @@ charge *input_problem(ssystem *sys, char *argv[], int argc, int *autmom, int *au
 
   strcpy(hostname, "18Sep92");
   fprintf(stdout, "Running %s %.1f (%s)\n  Input: %s\n", 
-	  argv[0], VERSION, hostname, infile);
+          sys->argv[0], VERSION, hostname, infile);
 
   /* input the panels from the surface files */
   *num_cond = 0;		/* initialize conductor count */
@@ -1514,7 +1517,7 @@ charge *input_problem(ssystem *sys, char *argv[], int argc, int *autmom, int *au
   else fprintf(stdout, "  Host: ? (gethostname() failure)\n");
 
   if (sys->cfgdat) {
-    dumpConfig(stdout, argv[0]);
+    dumpConfig(stdout, sys->argv[0]);
   }
 
   /* return the panels from the surface files */

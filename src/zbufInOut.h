@@ -43,7 +43,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 void copyBody(FILE *fp);
 void dump_line_as_ps(FILE *fp, char *psline, double x_position, double y_position, double font_size);
 void dumpFaceText(face **faces, int numfaces, FILE *fp);
-void dumpPs(face **faces, int numfaces, line **lines, int numlines, FILE *fp, char **argv, int argc, int use_density);
+void dumpPs(face **faces, int numfaces, line **lines, int numlines, FILE *fp, const char **argv, int argc, int use_density);
 face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, int use_density);
 line **getLines(ssystem *sys, char *line_file, int *numlines);
 

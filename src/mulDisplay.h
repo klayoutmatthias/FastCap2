@@ -40,7 +40,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include <cstdio>
 
 void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Name **name_list);
-void dumpConfig(FILE *fp, char *name);
+void dumpConfig(FILE *fp, const char *name);
 void dump_face(FILE *fp, face *fac);
 void dumpCorners(FILE *fp, double **mat, int rows, int cols);
 void dumpCondNames(FILE *fp, Name *name_list);

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cstdlib>
+#include <cstring>
 
 struct HeapPrivate
 {
@@ -9,7 +10,7 @@ struct HeapPrivate
   ~HeapPrivate ()
   {
     for (auto p = ptrs.begin(); p != ptrs.end(); ++p) {
-      delete *p;
+      ::free(*p);
     }
   }
 
@@ -41,6 +42,8 @@ Heap::malloc(size_t n, MemoryType type)
   if (type >= 0 && type < NumTypes) {
     m_memory[type] += type;
   }
+
+  bzero(d, n);
 
   return d;
 }

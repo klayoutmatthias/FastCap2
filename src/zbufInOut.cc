@@ -1240,7 +1240,7 @@ static void dumpLines(FILE *fp, line **lines, int numlines)
 /*
   dump faces in ps Aldus FreeHand format - assumes header body in afhpsheader
 */
-void dumpPs(face **faces, int numfaces, line **lines, int numlines, FILE *fp, char **argv, int argc, int use_density)
+void dumpPs(face **faces, int numfaces, line **lines, int numlines, FILE *fp, const char **argv, int argc, int use_density)
 {
   int i, j, f, lowx, lowy;
   extern int s_, n_, g_, c_, x_, q_, rk_, f_, m_; /* command line flags */
