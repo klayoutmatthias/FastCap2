@@ -1077,7 +1077,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
   /* print the matrix */
   sigfig = 2+log10(1.0/iter_tol);	/* get no. significant figs to prnt */
   colwidth = sigfig+6;		/* field width for cap mat columns */
-  if(ITRDAT == OFF) fprintf(stdout, "\n");
+  if(!sys->itrdat) fprintf(stdout, "\n");
   if(kill_num_list != NULL) 
       fprintf(stdout, "\nPARTIAL CAPACITANCE MATRIX, %sfarads\n", unit);
   else fprintf(stdout, "\nCAPACITANCE MATRIX, %sfarads\n", unit);

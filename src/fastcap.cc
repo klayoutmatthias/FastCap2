@@ -116,11 +116,11 @@ int main(int argc, char *argv[])
 
   fprintf(stdout, "\nINPUT SUMMARY\n");
 
-#if CMDDAT == ON
-  fprintf(stdout, "  Expansion order: %d\n", numMom);
-  fprintf(stdout, "  Number of partitioning levels: %d\n", numLev);
-  fprintf(stdout, "  Overall permittivity factor: %.3g\n", relperm);
-#endif
+  if (sys.cmddat) {
+    fprintf(stdout, "  Expansion order: %d\n", numMom);
+    fprintf(stdout, "  Number of partitioning levels: %d\n", numLev);
+    fprintf(stdout, "  Overall permittivity factor: %.3g\n", relperm);
+  }
 
   /* Figure out number of panels and conductors. */
   eval_size = up_size = num_dummy_panels = num_dielec_panels = 0;

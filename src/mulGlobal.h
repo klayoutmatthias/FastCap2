@@ -187,15 +187,6 @@ misc. global macros
 /* (add any new configuration flags to dumpConfig() in mulDisplay.c) */
 
 /* Output Format Configuration */
-#if !defined(CMDDAT)
-#define CMDDAT ON		/* ON=> dump command line info to output */
-#endif
-#if !defined(RAWDAT)
-#define RAWDAT OFF		/* ON=> dump unsymm, Gaussian units cap mat */
-#endif
-#if !defined(ITRDAT)
-#define ITRDAT OFF		/* ON=> dump residuals for every iteration */
-#endif
 #if !defined(CFGDAT)
 #define CFGDAT OFF		/* ON=> dump configuration flags to output */
 #endif

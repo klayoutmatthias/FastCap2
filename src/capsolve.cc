@@ -180,20 +180,20 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
       (*capmat)[nq->cond][cond] += surf->outer_perm * q[nq->index];
     }
 
-#if RAWDAT == ON
-    if(ITRDAT == OFF) fprintf(stdout, "\n");
-    fprintf(stdout, "cond=%d iters=%d\n", cond, iter);
+    if (sys->rawdat) {
+      if(!sys->itrdat) fprintf(stdout, "\n");
+      fprintf(stdout, "cond=%d iters=%d\n", cond, iter);
 
-    for(i=1; i <= numconds; i++) {
-      fprintf(stdout, "c%d%d=%g  ", i, cond, (*capmat)[i][cond]);
-      if(i % 4 == 0) fprintf(stdout, "\n");
+      for(i=1; i <= numconds; i++) {
+        fprintf(stdout, "c%d%d=%g  ", i, cond, (*capmat)[i][cond]);
+        if(i % 4 == 0) fprintf(stdout, "\n");
+      }
+      fprintf(stdout, "\n\n");
     }
-    fprintf(stdout, "\n\n");
-#endif
 
-#if ITRDAT == ON && RAWDAT == OFF
-    fprintf(stdout, "%d iterations\n", iter);
-#endif
+    if (sys->itrdat && sys->rawdat) {
+      fprintf(stdout, "%d iterations\n", iter);
+    }
 
   }
   fflush(stdout);
@@ -262,23 +262,18 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
 
     /* Check convergence. */
     for(maxnorm = 0.0, i=1; i <= size; i++) maxnorm = MAX(ABS(r[i]),maxnorm);
-#if ITRDAT == ON
-    INNER(norm, r, r, size);
-    fprintf(stdout, "max res = %g ||res|| = %g\n", maxnorm, sqrt(norm));
-#else
-    fprintf(stdout, "%d ", iter+1);
-    if((iter+1) % 15 == 0) fprintf(stdout, "\n");
-#endif
+    if (sys->itrdat) {
+      INNER(norm, r, r, size);
+      fprintf(stdout, "max res = %g ||res|| = %g\n", maxnorm, sqrt(norm));
+    } else {
+      fprintf(stdout, "%d ", iter+1);
+      if((iter+1) % 15 == 0) fprintf(stdout, "\n");
+    }
     fflush(stdout);
     stoptimer;
     conjtime += dtime;
     if(maxnorm < tol) break;
   }
-/*  
-#if ITRDAT == ON
-  printf("Total iterative loop iterations = %d\n", iter); 
-#endif 
-*/
   
 #if PRECOND != NONE
   /* Undo the preconditioning to get the real q. */
@@ -336,9 +331,9 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   stoptimer;
   conjtime += dtime;
 
-#if ITRDAT == ON
-  fprintf(stdout, "||res|| = %g\n", rnorm); /* initial guess residual norm */
-#endif
+  if (sys->itrdat) {
+    fprintf(stdout, "||res|| = %g\n", rnorm); /* initial guess residual norm */
+  }
   
   for(iter = 1; (iter <= maxiter) && (rnorm > tol); iter++) {
     
@@ -403,24 +398,18 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
 
     stoptimer;
     conjtime += dtime;
-    
-#if ITRDAT == ON
-    fprintf(stdout, "||res|| = %g\n", rnorm);
-#else
-    fprintf(stdout, "%d ", iter);
-    if((iter) % 15 == 0 && iter != 0) fprintf(stdout, "\n");
-#endif
+
+    if (sys->itrdat) {
+      fprintf(stdout, "||res|| = %g\n", rnorm);
+    } else {
+      fprintf(stdout, "%d ", iter);
+      if((iter) % 15 == 0 && iter != 0) fprintf(stdout, "\n");
+    }
     fflush(stdout);
   }
   /* Decrement from the last increment. */
   iter--;
 
-/*  
-#if ITRDAT == ON
-  printf("Total iterative loop iterations = %d\n", iter); 
-#endif 
-*/
-  
   starttimer;
   
   /* Compute solution, note, bh is bh[col][row]. */

@@ -179,6 +179,10 @@ struct ssystem
   dumpps_mode dumpps;           //  ON=> dump ps file w/mulMatDirect calcp's
                                 //  ALL=> dump adaptive alg calcp's as well
   bool capvew;                  //  enable ps file dumps of geometry
+  bool cmddat;                  //  dump command line info to output
+  bool rawdat;                  //  dump unsymm, Gaussian units cap mat
+  bool itrdat;                  //  dump residuals for every iteration
+
   int side;                     //  # cubes per side on lowest level.
   int depth;			//  # of levels of cubes.
   int order;			//  # of levels of cubes.
