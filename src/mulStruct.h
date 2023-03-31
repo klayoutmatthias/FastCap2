@@ -182,6 +182,12 @@ struct ssystem
   bool cmddat;                  //  dump command line info to output
   bool rawdat;                  //  dump unsymm, Gaussian units cap mat
   bool itrdat;                  //  dump residuals for every iteration
+  bool cfgdat;                  //  dump configuration flags to output
+  bool muldat;                  //  dump brief multipole setup info
+  bool dissyn;                  //  display synopsis of cubes in lists
+  bool dmtcnt;                  //  display xform matrix counts by level
+  bool dissrf;                  //  display input surface information
+  bool namdat;                  //  dump conductor names
 
   int side;                     //  # cubes per side on lowest level.
   int depth;			//  # of levels of cubes.

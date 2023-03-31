@@ -578,7 +578,7 @@ double calcp(charge *panel, double x, double y, double z, double *pfd)
 }
 
 
-void dumpnums(int flag, int size)
+void dumpnums(ssystem *sys, int flag, int size)
 {
   double total;
 
@@ -589,21 +589,21 @@ void dumpnums(int flag, int size)
   }
   else {
     total = num2ndsav + num4thsav + numexactsav;
-#if MULDAT == ON
-    fprintf(stdout, "Potential coefficient counts\n multipole only:\n");
-    fprintf(stdout, 
-	    "  2nd order: %d %.3g%%; 4th: %d %.3g%%; Integral: %d %.3g%%\n",
-	    num2nd, 100*(num2ndsav/total), num4th, 100*(num4thsav/total), 
-	    numexact, 100*(numexactsav/total));
-#endif
+    if (sys->muldat) {
+      fprintf(stdout, "Potential coefficient counts\n multipole only:\n");
+      fprintf(stdout,
+              "  2nd order: %d %.3g%%; 4th: %d %.3g%%; Integral: %d %.3g%%\n",
+              num2nd, 100*(num2ndsav/total), num4th, 100*(num4thsav/total),
+              numexact, 100*(numexactsav/total));
+    }
     total = num2nd + num4th + numexact;
-#if MULDAT == ON
-    fprintf(stdout, " multipole plus adaptive:\n");
-    fprintf(stdout, 
-	    "  2nd order: %d %.3g%%; 4th: %d %.3g%%; Integral: %d %.3g%%\n",
-	    num2nd, 100*(num2nd/total), num4th, 100*(num4th/total), 
-	    numexact, 100*(numexact/total));
-#endif
+    if (sys->muldat) {
+      fprintf(stdout, " multipole plus adaptive:\n");
+      fprintf(stdout,
+              "  2nd order: %d %.3g%%; 4th: %d %.3g%%; Integral: %d %.3g%%\n",
+              num2nd, 100*(num2nd/total), num4th, 100*(num4th/total),
+              numexact, 100*(numexact/total));
+    }
     fprintf(stdout, "Percentage of multiplies done by multipole: %.3g%%\n",
 	    100*(size*size - total)/(size*size));
     if(size*size == total) 

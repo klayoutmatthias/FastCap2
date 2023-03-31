@@ -186,25 +186,6 @@ misc. global macros
 #define EXRTSH 0.9		/* exact/ttl>EXRTSH for lev => make last lev */
 /* (add any new configuration flags to dumpConfig() in mulDisplay.c) */
 
-/* Output Format Configuration */
-#if !defined(CFGDAT)
-#define CFGDAT OFF		/* ON=> dump configuration flags to output */
-#endif
-#if !defined(MULDAT)
-#define MULDAT OFF		/* ON=> dump brief multipole setup info */
-#endif
-#if !defined(DISSYN)
-#define DISSYN OFF		/* ON=> display synopsis of cubes in lists */
-#endif
-#if !defined(DMTCNT)
-#define DMTCNT OFF		/* ON=> display xform matrix counts by level */
-#endif
-#if !defined(DISSRF)
-#define DISSRF ON		/* ON=> display input surface information */
-#endif
-#if !defined(NAMDAT)
-#define NAMDAT OFF		/* ON=> dump conductor names */
-#endif
 /* display of transformation matrices */
 #if !defined(DISQ2M)
 #define DISQ2M OFF		/* ON=> display Q2M matrices when built */

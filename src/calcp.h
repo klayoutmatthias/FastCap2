@@ -36,7 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(calcp_H)
 #define calcp_H
 
-void dumpnums(int flag, int size);
+void dumpnums(ssystem *sys, int flag, int size);
 double tilelength(charge *nq);
 
 void initcalcp(ssystem *sys, charge *panel_list);

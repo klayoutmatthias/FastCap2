@@ -1506,9 +1506,9 @@ charge *input_problem(ssystem *sys, char *argv[], int argc, int *autmom, int *au
   /* check for inconsistencies in kill lists */
   resolve_kill_lists(kill_num_list, qpic_num_list, kinp_num_list, *num_cond);
 
-#if DISSRF == ON
-  dumpSurfDat(surf_list);
-#endif
+  if (sys->dissrf) {
+    dumpSurfDat(surf_list);
+  }
 
   time(&clock);
   fprintf(stdout, "  Date: %s", ctime(&clock));
@@ -1516,9 +1516,9 @@ charge *input_problem(ssystem *sys, char *argv[], int argc, int *autmom, int *au
       fprintf(stdout, "  Host: %s\n", hostname);
   else fprintf(stdout, "  Host: ? (gethostname() failure)\n");
 
-#if CFGDAT == ON
-  dumpConfig(stdout, argv[0]);
-#endif
+  if (sys->cfgdat) {
+    dumpConfig(stdout, argv[0]);
+  }
 
   /* return the panels from the surface files */
   return(chglist);

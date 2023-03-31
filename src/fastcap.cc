@@ -150,9 +150,9 @@ int main(int argc, char *argv[])
 	  num_dummy_panels);*/
   fprintf(stdout, "  Number of conductors: %d\n", num_cond);
 
-#if NAMDAT == ON
-  dumpCondNames(stdout, name_list);
-#endif
+  if (sys.namdat) {
+    dumpCondNames(stdout, name_list);
+  }
 
   if(num_both_panels > 0) {
     fprintf(stderr, 
@@ -169,9 +169,9 @@ int main(int argc, char *argv[])
   fprintf(stdout, "no duplicates\n");
 #endif
 
-#if MULDAT == ON
-  dumpMulSet(sys, numLev, numMom);
-#endif
+  if (sys.muldat) {
+    dumpMulSet(&sys, numLev, numMom);
+  }
   fflush(stdout);
 
   starttimer;
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 #endif
 
 #endif				/* DIRSOL == OFF */
-  dumpnums(ON, eval_size);      /* save num/type of pot. coeff calcs */
+  dumpnums(&sys, ON, eval_size);    /* save num/type of pot. coeff calcs */
 
   dirtimesav = dirtime;		/* save direct matrix setup time */
   dirtime = 0.0;		/* make way for direct solve time */
@@ -248,19 +248,19 @@ int main(int argc, char *argv[])
   stoptimer;
   mulsetup = dtime;		/* save multipole matrix setup time */
 
-  dumpnums(OFF, eval_size);	/* dump num/type of pot. coeff calcs */
+  dumpnums(&sys, OFF, eval_size);	/* dump num/type of pot. coeff calcs */
 
   if (sys.dumpps == DUMPPS_ALL) {
     dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
   }
 
-#if DISSYN == ON
-  dumpSynop(sys);
-#endif
+  if (sys.dissyn) {
+    dumpSynop(&sys);
+  }
 
-#if DMTCNT == ON
-  dumpMatBldCnts(sys);
-#endif
+  if (sys.dmtcnt) {
+    dumpMatBldCnts(&sys);
+  }
 
 #endif				/* DIRSOL == ON */
 

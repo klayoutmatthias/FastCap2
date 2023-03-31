@@ -129,9 +129,9 @@ void mulMatDirect(ssystem *sys)
     dumpQ2PDiag(nextc);
 #endif
 
-#if DMTCNT == ON
-    Q2PDcnt[nextc->level][nextc->level]++;
-#endif
+    if (sys->dmtcnt) {
+      Q2PDcnt[nextc->level][nextc->level]++;
+    }
 
 #if DIRSOL == ON
     /* transform A into LU */
@@ -165,9 +165,9 @@ void mulMatDirect(ssystem *sys)
                                           nextnbr->nbr_is_dummy[0],
                                           nextc->chgs, nextc->upnumeles[0],
                                           FALSE);
-#if DMTCNT == ON
-      Q2Pcnt[nextc->level][nextnbr->level]++;
-#endif
+      if (sys->dmtcnt) {
+        Q2Pcnt[nextc->level][nextnbr->level]++;
+      }
     }
     stoptimer;
     dirtime += dtime;
@@ -726,13 +726,13 @@ double **multimats[8];
                                   nextc->upnumeles[0],
                                   nextc->x, nextc->y, nextc->z, order);
 
-#if DISSYN == ON
-    multicnt[nextc->level]++;
-#endif
+    if (sys->dissyn) {
+      multicnt[nextc->level]++;
+    }
 
-#if DMTCNT == ON
-    Q2Mcnt[nextc->level][nextc->level]++;
-#endif
+    if (sys->dmtcnt) {
+      Q2Mcnt[nextc->level][nextc->level]++;
+    }
 
   }
 
@@ -779,9 +779,9 @@ double **multimats[8];
   /* M2M mats (for this lev), or if a kid is exact, computing Q2M matrices. */
     for(nextc=sys->multilist[depth]; nextc != NULL; nextc = nextc->mnext) {
       
-#if DISSYN == ON
-      multicnt[nextc->level]++;
-#endif
+      if (sys->dissyn) {
+        multicnt[nextc->level]++;
+      }
 
     /* Save space for upvector sizes, upvect ptrs, and upmats. */
       nextc->multisize = numterms;
@@ -806,9 +806,9 @@ double **multimats[8];
             }
             nextc->upmats[i] = multimats[j];
 
-#if DMTCNT == ON
-            M2Mcnt[kid->level][nextc->level]++; /* cnts usage, ~computation */
-#endif                          /* only at most 8 mats really built/level */
+            if (sys->dmtcnt) {
+              M2Mcnt[kid->level][nextc->level]++; /* cnts usage, ~computation */
+            }
 
           }
           else {                /* if kid is exact, has no multi */
@@ -819,9 +819,9 @@ double **multimats[8];
                                           kid->upnumeles[0],
                                           nextc->x, nextc->y, nextc->z, order);
 
-#if DMTCNT == ON
-            Q2Mcnt[kid->level][nextc->level]++;
-#endif
+            if (sys->dmtcnt) {
+              Q2Mcnt[kid->level][nextc->level]++;
+            }
 
           }
           i++;                  /* only increments if kid is not empty */
@@ -925,9 +925,9 @@ void mulMatEval(ssystem *sys)
         nc->evalvects[j] = na->local;
         j++; 
         
-#if DMTCNT == ON
-        L2Pcnt[na->level][nc->level]++;
-#endif
+        if (sys->dmtcnt) {
+          L2Pcnt[na->level][nc->level]++;
+        }
         
 #if DILIST == ON
         fprintf(stdout, "L2P: ");
@@ -946,9 +946,9 @@ void mulMatEval(ssystem *sys)
             nc->evalnumeles[j] = nexti->upnumeles[0];
             j++;
 
-#if DMTCNT == ON
-            Q2Pcnt[nexti->level][nc->level]++;
-#endif
+            if (sys->dmtcnt) {
+              Q2Pcnt[nexti->level][nc->level]++;
+            }
 
 #if DILIST == ON
             fprintf(stdout, "Q2P: ");
@@ -964,9 +964,9 @@ void mulMatEval(ssystem *sys)
             nc->evalnumeles[j] = nexti->multisize;
             j++;
             
-#if DMTCNT == ON
-            M2Pcnt[nexti->level][nc->level]++;
-#endif
+            if (sys->dmtcnt) {
+              M2Pcnt[nexti->level][nc->level]++;
+            }
 
 #if DILIST == ON
             fprintf(stdout, "M2P: ");
@@ -1015,9 +1015,9 @@ void mulMatDown(ssystem *sys)
       parent = nc->parent;
       ASSERT(parent->loc_exact == FALSE); /* has >= #evals of any of its kids*/
 
-#if DISSYN == ON
-      localcnt[nc->level]++;
-#endif
+      if (sys->dissyn) {
+        localcnt[nc->level]++;
+      }
 
       if((depth <= 2) || (DNTYPE == NOSHFT)) i = 0; /* No parent local. */
       else { /* Create the mapping matrix for the parent to kid. */
@@ -1028,9 +1028,9 @@ void mulMatDown(ssystem *sys)
         nc->downnumeles[0] = parent->localsize;
         nc->downvects[0] = parent->local;
 
-#if DMTCNT == ON
-        L2Lcnt[parent->level][nc->level]++;
-#endif
+        if (sys->dmtcnt) {
+          L2Lcnt[parent->level][nc->level]++;
+        }
       }
 
       /* Go through the interaction list and create mapping matrices. */
@@ -1042,18 +1042,18 @@ void mulMatDown(ssystem *sys)
                                        ni->nbr_is_dummy[0],
                                        nc->x, nc->y, nc->z, sys->order);
           nc->downnumeles[i] = ni->upnumeles[0];
-#if DMTCNT == ON
-          Q2Lcnt[ni->level][nc->level]++;
-#endif
+          if (sys->dmtcnt) {
+            Q2Lcnt[ni->level][nc->level]++;
+          }
         }
         else {
           nc->downvects[i] = ni->multi;
           nc->downmats[i] = mulMulti2Local(sys, ni->x, ni->y, ni->z, nc->x,
                                            nc->y, nc->z, sys->order);
           nc->downnumeles[i] = ni->multisize;
-#if DMTCNT == ON
-          M2Lcnt[ni->level][nc->level]++;
-#endif
+          if (sys->dmtcnt) {
+            M2Lcnt[ni->level][nc->level]++;
+          }
         }
       }
     }

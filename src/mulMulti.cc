@@ -219,13 +219,9 @@ void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
 {
   int x;
 
-#if DISSYN == ON
   extern int *multicnt, *localcnt, *evalcnt;
-#endif
-#if DMTCNT == ON
   extern int **Q2Mcnt, **Q2Lcnt, **Q2Pcnt, **L2Lcnt;
   extern int **M2Mcnt, **M2Lcnt, **M2Pcnt, **L2Pcnt, **Q2PDcnt;
-#endif
   extern double *sinmkB, *cosmkB, **facFrA;
 
   if(maxchgs > 0) {
@@ -246,36 +242,36 @@ void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
   }
   evalFactFac(factFac, order);	/* get factorial factors for mulMulti2P */
 
-#if DISSYN == ON
-  /* for counts of local/multipole expansions and eval mat builds by level */
-  CALLOC(localcnt, depth+1, int, ON, AMSC);
-  CALLOC(multicnt, depth+1, int, ON, AMSC);
-  CALLOC(evalcnt, depth+1, int, ON, AMSC);
-#endif
-
-#if DMTCNT == ON
-  /* for counts of transformation matrices by level  */
-  CALLOC(Q2Mcnt, depth+1, int*, ON, AMSC);
-  CALLOC(Q2Lcnt, depth+1, int*, ON, AMSC);
-  CALLOC(Q2Pcnt, depth+1, int*, ON, AMSC);
-  CALLOC(L2Lcnt, depth+1, int*, ON, AMSC);
-  CALLOC(M2Mcnt, depth+1, int*, ON, AMSC); 
-  CALLOC(M2Lcnt, depth+1, int*, ON, AMSC); 
-  CALLOC(M2Pcnt, depth+1, int*, ON, AMSC); 
-  CALLOC(L2Pcnt, depth+1, int*, ON, AMSC);
-  CALLOC(Q2PDcnt, depth+1, int*, ON, AMSC);
-  for(x = 0; x < depth+1; x++) {
-    CALLOC(Q2Mcnt[x], depth+1, int, ON, AMSC);
-    CALLOC(Q2Lcnt[x], depth+1, int, ON, AMSC);
-    CALLOC(Q2Pcnt[x], depth+1, int, ON, AMSC);
-    CALLOC(L2Lcnt[x], depth+1, int, ON, AMSC);
-    CALLOC(M2Mcnt[x], depth+1, int, ON, AMSC);
-    CALLOC(M2Lcnt[x], depth+1, int, ON, AMSC);
-    CALLOC(M2Pcnt[x], depth+1, int, ON, AMSC);
-    CALLOC(L2Pcnt[x], depth+1, int, ON, AMSC);
-    CALLOC(Q2PDcnt[x], depth+1, int, ON, AMSC);
+  if (sys->dissyn) {
+    /* for counts of local/multipole expansions and eval mat builds by level */
+    localcnt = sys->heap.alloc<int>(depth + 1, AMSC);
+    multicnt = sys->heap.alloc<int>(depth + 1, AMSC);
+    evalcnt = sys->heap.alloc<int>(depth + 1, AMSC);
   }
-#endif
+
+  if (sys->dmtcnt) {
+    /* for counts of transformation matrices by level  */
+    Q2Mcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    Q2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    Q2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    L2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    M2Mcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    M2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    M2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    L2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    Q2PDcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    for(x = 0; x < depth+1; x++) {
+      Q2Mcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      Q2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      Q2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      L2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      M2Mcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      M2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      M2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      L2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      Q2PDcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+    }
+  }
 
   /* from here down could be switched out when the fake dwnwd pass is used */
   facFrA = sys->heap.alloc<double *>(2*order+1, AMSC);
