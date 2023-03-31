@@ -12,7 +12,7 @@ add_executable(FastCap2
   src/quickif.h src/mulLocal.h src/psMatDisplay.h src/savemat_mod.h
   src/heap.h
   src/fastcap.cc
-  src/mulGlobal.cc
+  src/mulGlobal.cc src/mulStruct.cc
   src/mulSetup.cc src/mulMats.cc src/mulDo.cc
   src/mulDisplay.cc src/mulMulti.cc
   src/mulLocal.cc src/direct.cc src/blkDirect.cc src/calcp.cc

@@ -44,7 +44,9 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "capsolve.h"
 #include "psMatDisplay.h"
 #include "resusage.h"
-#include <stdlib.h>
+
+#include <cstdlib>
+#include <cstring>
 
 int main(int argc, char *argv[])
 {
@@ -59,27 +61,21 @@ int main(int argc, char *argv[])
   extern int num_dummy_panels, num_dielec_panels; 
   extern int num_both_panels, num_cond_panels, up_size, eval_size;
   extern char *title;
-  extern long memcount;
   extern double prectime, conjtime, dirtime, multime, uptime, downtime;
   extern double evaltime, lutime, fullsoltime, prsetime;
 
   Name *name_list;
 
-#if DUMPPS == ON || DUMPPS == ALL
   char filename[BUFSIZ];
-#endif
 
-#if CAPVEW == ON
   extern char **argvals;
   extern int argcnt, m_, q_, dd_;
   extern double ***axes;
-#endif
 
   /* initialize memory and time counters, etc. */
   fulldirops = fullPqops = 0;
   prectime = conjtime = dirtime = multime = uptime = downtime = 0.0;
   evaltime = lutime = fullsoltime = mulsetup = 0.0;
-  memcount = 0;
   title = sys.heap.alloc<char> (BUFSIZ, AMSC);
 
   /* initialize defaults, etc */
@@ -101,14 +97,12 @@ int main(int argc, char *argv[])
   chglist = input_problem(&sys, argv, argc, &autmom, &autlev, &relperm,
 			  &numMom, &numLev, &name_list, &num_cond);
 
-#if CAPVEW == ON
   /* if no fastcap run is to be done, just dump the psfile */
-  if(m_) {
+  if(sys.capvew && m_) {
     if(!q_) get_ps_file_base(&sys, argv, argc);
     dump_ps_geometry(&sys, chglist, NULL, 0, dd_);
     exit(0);
   }
-#endif
 
   starttimer;
   mulInit(&sys, autlev, numLev, numMom, chglist);  /* Set up cubes, charges. */
@@ -185,10 +179,10 @@ int main(int argc, char *argv[])
   stoptimer;
   initalltime += dtime;		/* save initial allocation time */
 
-#if DUMPPS == ON || DUMPPS == ALL
-  strcpy(filename, "psmat.ps");
-  dump_ps_mat(filename, 0, 0, eval_size, eval_size, argv, argc, OPEN);
-#endif
+  if (sys.dumpps == DUMPPS_ON || sys.dumpps == DUMPPS_ALL) {
+    strcpy(filename, "psmat.ps");  //  TODO: remove
+    dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, OPEN);
+  }
 
   mulMatDirect(&sys);		/* Compute the direct part matrices. */
 
@@ -228,9 +222,9 @@ int main(int argc, char *argv[])
 
 #if DIRSOL == OFF
 
-#if DUMPPS == ON
-  dump_ps_mat(filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
-#endif
+  if (sys.dumpps == DUMPPS_ON) {
+    dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
+  }
 
   starttimer;
   mulMatUp(&sys);		/* Compute the upward pass matrices. */
@@ -256,9 +250,9 @@ int main(int argc, char *argv[])
 
   dumpnums(OFF, eval_size);	/* dump num/type of pot. coeff calcs */
 
-#if DUMPPS == ALL
-  dump_ps_mat(filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
-#endif
+  if (sys.dumpps == DUMPPS_ALL) {
+    dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
+  }
 
 #if DISSYN == ON
   dumpSynop(sys);
@@ -274,85 +268,67 @@ int main(int argc, char *argv[])
   ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, num_cond,
 		     name_list);
 
-#if MKSDAT == ON		/* dump symmetrized, 4 pi eps scaled matrix */
-  mksCapDump(&sys, capmat, num_cond, relperm, &name_list);
-#endif
-
-#if TIMDAT == ON 
-  ttlsetup = initalltime + dirtimesav + mulsetup;
-  multime = uptime + downtime + evaltime;
-  ttlsolve = dirtime + multime + prectime + conjtime;
-
-  fprintf(stdout, "\nTIME AND MEMORY USAGE SYNOPSIS\n");
-#endif
-
-#ifdef OTHER
-  if(TIMDAT == ON) {
-    fprintf(stdout, 
-	    "Warning: compilation with OTHER flag gives incorrect times\n");
-  }
-#endif
-
-#if TIMDAT == ON
-  fprintf(stdout, "Total time: %g\n", ttlsetup + ttlsolve);
-  fprintf(stdout, "  Total setup time: %g\n", ttlsetup);
-  fprintf(stdout, "    Direct matrix setup time: %g\n", dirtimesav);
-  fprintf(stdout, "    Multipole matrix setup time: %g\n", mulsetup);
-  fprintf(stdout, "    Initial misc. allocation time: %g\n", initalltime);
-  fprintf(stdout, "  Total iterative P*q = psi solve time: %g\n", ttlsolve);
-  fprintf(stdout, "    P*q product time, direct part: %g\n", dirtime);
-  fprintf(stdout, "    Total P*q time, multipole part: %g\n", multime);
-  fprintf(stdout, "      Upward pass time: %g\n", uptime);
-  fprintf(stdout, "      Downward pass time: %g\n", downtime);
-  fprintf(stdout, "      Evaluation pass time: %g\n", evaltime);
-  fprintf(stdout, "    Preconditioner solution time: %g\n", prectime);
-  fprintf(stdout, "    Iterative loop overhead time: %g\n", conjtime);
-
-  if(DIRSOL == ON) {		/* if solution is done by Gaussian elim. */
-    fprintf(stdout,"\nTotal direct, full matrix LU factor time: %g\n",lutime);
-    fprintf(stdout,"Total direct, full matrix solve time: %g\n",fullsoltime);
-    fprintf(stdout, "Total direct operations: %d\n", fulldirops);
-  }
-  else if(EXPGCR == ON) {	/* if solution done iteratively w/o multis */
-    fprintf(stdout,"\nTotal A*q operations: %d (%d/iter)\n", 
-	    fullPqops, fullPqops/ttliter);
+  if (sys.mksdat) {
+    mksCapDump(&sys, capmat, num_cond, relperm, &name_list);
   }
 
-  fprintf(stdout, "Total memory allocated: %d kilobytes ", int(memcount/1024));
-  uallocEfcy(memcount);
+  if (sys.timdat) {
+    ttlsetup = initalltime + dirtimesav + mulsetup;
+    multime = uptime + downtime + evaltime;
+    ttlsolve = dirtime + multime + prectime + conjtime;
 
-  fprintf(stdout, "  Q2M  matrix memory allocated: %7.d kilobytes\n",
-          int(memQ2M/1024));
-  memcount = memQ2M;
-  fprintf(stdout, "  Q2L  matrix memory allocated: %7.d kilobytes\n",
-          int(memQ2L/1024));
-  memcount += memQ2L;
-  fprintf(stdout, "  Q2P  matrix memory allocated: %7.d kilobytes\n",
-          int(memQ2P/1024));
-  memcount += memQ2P;
-  fprintf(stdout, "  L2L  matrix memory allocated: %7.d kilobytes\n",
-          int(memL2L/1024));
-  memcount += memL2L;
-  fprintf(stdout, "  M2M  matrix memory allocated: %7.d kilobytes\n",
-          int(memM2M/1024));
-  memcount += memM2M;
-  fprintf(stdout, "  M2L  matrix memory allocated: %7.d kilobytes\n",
-          int(memM2L/1024));
-  memcount += memM2L;
-  fprintf(stdout, "  M2P  matrix memory allocated: %7.d kilobytes\n",
-          int(memM2P/1024));
-  memcount += memM2P;
-  fprintf(stdout, "  L2P  matrix memory allocated: %7.d kilobytes\n",
-          int(memL2P/1024));
-  memcount += memL2P;
-  fprintf(stdout, "  Q2PD matrix memory allocated: %7.d kilobytes\n",
-          int(memQ2PD/1024));
-  memcount += memQ2PD;
-  fprintf(stdout, "  Miscellaneous mem. allocated: %7.d kilobytes\n",
-          int(memMSC/1024));
-  memcount += memMSC;
-  fprintf(stdout, "  Total memory (check w/above): %7.d kilobytes\n",
-          int(memcount/1024));
-#endif
+    fprintf(stdout, "\nTIME AND MEMORY USAGE SYNOPSIS\n");
+  }
+
+  if (sys.timdat) {
+
+    fprintf(stdout, "Total time: %g\n", ttlsetup + ttlsolve);
+    fprintf(stdout, "  Total setup time: %g\n", ttlsetup);
+    fprintf(stdout, "    Direct matrix setup time: %g\n", dirtimesav);
+    fprintf(stdout, "    Multipole matrix setup time: %g\n", mulsetup);
+    fprintf(stdout, "    Initial misc. allocation time: %g\n", initalltime);
+    fprintf(stdout, "  Total iterative P*q = psi solve time: %g\n", ttlsolve);
+    fprintf(stdout, "    P*q product time, direct part: %g\n", dirtime);
+    fprintf(stdout, "    Total P*q time, multipole part: %g\n", multime);
+    fprintf(stdout, "      Upward pass time: %g\n", uptime);
+    fprintf(stdout, "      Downward pass time: %g\n", downtime);
+    fprintf(stdout, "      Evaluation pass time: %g\n", evaltime);
+    fprintf(stdout, "    Preconditioner solution time: %g\n", prectime);
+    fprintf(stdout, "    Iterative loop overhead time: %g\n", conjtime);
+
+    if(DIRSOL == ON) {		/* if solution is done by Gaussian elim. */
+      fprintf(stdout,"\nTotal direct, full matrix LU factor time: %g\n",lutime);
+      fprintf(stdout,"Total direct, full matrix solve time: %g\n",fullsoltime);
+      fprintf(stdout, "Total direct operations: %d\n", fulldirops);
+    }
+    else if(EXPGCR == ON) {	/* if solution done iteratively w/o multis */
+      fprintf(stdout,"\nTotal A*q operations: %d (%d/iter)\n",
+              fullPqops, fullPqops/ttliter);
+    }
+
+    fprintf(stdout, "Total memory allocated: %d kilobytes ", int(sys.heap.total_memory()/1024));
+
+    fprintf(stdout, "  Q2M  matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AQ2M)/1024));
+    fprintf(stdout, "  Q2L  matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AQ2L)/1024));
+    fprintf(stdout, "  Q2P  matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AQ2P)/1024));
+    fprintf(stdout, "  L2L  matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AL2L)/1024));
+    fprintf(stdout, "  M2M  matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AM2M)/1024));
+    fprintf(stdout, "  M2L  matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AM2L)/1024));
+    fprintf(stdout, "  M2P  matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AM2P)/1024));
+    fprintf(stdout, "  L2P  matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AL2P)/1024));
+    fprintf(stdout, "  Q2PD matrix memory allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AQ2PD)/1024));
+    fprintf(stdout, "  Miscellaneous mem. allocated: %7.d kilobytes\n",
+            int(sys.heap.memory(AMSC)/1024));
+
+  }
 
 }

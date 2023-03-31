@@ -1,7 +1,7 @@
 #include "heap.h"
 
 #include <vector>
-#include <stdlib.h>
+#include <cstdlib>
 
 struct HeapPrivate
 {

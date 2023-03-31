@@ -40,7 +40,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "zbufSort.h"
 #include "zbufInOut.h"
 
-#if CAPVEW == ON
 /*
   main interface between old zbuf code and fastcap
   - replaces functionality of zbuf.c (main())
@@ -137,4 +136,3 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
     fclose(fp);
   }
 }
-#endif

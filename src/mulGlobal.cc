@@ -35,18 +35,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include "mulGlobal.h"
 
-long memcount;	       	/* allocated memory counter */
-long memQ2M;			/* allocated memory counters by function */
-long memQ2L;
-long memQ2P;
-long memL2L;
-long memM2M;
-long memM2L;
-long memM2P;
-long memL2P;
-long memQ2PD;
-long memMSC;
-
 /* 
   global timer and operation count accumulators
 */
@@ -89,7 +77,6 @@ double iter_tol;		/* iterative loop tolerence on ||r|| */
 /*
   command line option variables - all have to do with ps file dumping
 */
-#if CAPVEW == ON		/* eliminate messy globals if not needed */
 char **argvals;			/* copy of argv */
 int argcnt;			/* copy of argc */
 int s_;				/* TRUE => insert showpage in .ps file(s) */
@@ -119,4 +106,3 @@ double axes[10][2][3];		/* the 2d image of the coordinate axes */
 int up_axis;			/* X,Y or Z => which axis is vertical in pic */
 char *line_file;		/* pointer to .fig superimposed line file */
 char *ps_file_base;		/* pointer to base name for .ps files */
-#endif

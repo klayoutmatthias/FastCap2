@@ -65,11 +65,9 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   extern ITER *kill_num_list, *kinp_num_list;
   extern double iter_tol;
 
-#if CAPVEW == ON
   extern ITER *qpic_num_list;
   extern int q_;
   extern int dd_;
-#endif
 
 #if DIRSOL == ON
   extern double *trimat, *sqrmat; /* globals in blkDirect.c */
@@ -164,13 +162,13 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     fprintf(stdout, "End panel charges\n");
 #endif
 
-#if CAPVEW == ON
-    /* dump shaded geometry file if only if this column picture wanted */
-    /* (variable names are messed up - iter list now is list of columns) */
-    if(want_this_iter(qpic_num_list, cond) || (q_ && qpic_num_list == NULL)) {
-      dump_ps_geometry(sys, chglist, q, cond, dd_);
+    if (sys->capvew) {
+      /* dump shaded geometry file if only if this column picture wanted */
+      /* (variable names are messed up - iter list now is list of columns) */
+      if(want_this_iter(qpic_num_list, cond) || (q_ && qpic_num_list == NULL)) {
+        dump_ps_geometry(sys, chglist, q, cond, dd_);
+      }
     }
-#endif
 
     /* Calc cap matrix entries by summing up charges over each conductor. */
     /* use the permittivity ratio to get the real surface charge */

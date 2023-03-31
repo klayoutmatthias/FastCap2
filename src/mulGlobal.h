@@ -37,7 +37,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #define mulGlobal_H
 
 #include <time.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 /* fastcap data structures */
 #include "mulStruct.h"
@@ -187,9 +187,6 @@ misc. global macros
 /* (add any new configuration flags to dumpConfig() in mulDisplay.c) */
 
 /* Output Format Configuration */
-#if !defined(MKSDAT)
-#define MKSDAT ON		/* ON=> dump symmetrized, MKS units cap mat */
-#endif
 #if !defined(CMDDAT)
 #define CMDDAT ON		/* ON=> dump command line info to output */
 #endif
@@ -198,9 +195,6 @@ misc. global macros
 #endif
 #if !defined(ITRDAT)
 #define ITRDAT OFF		/* ON=> dump residuals for every iteration */
-#endif
-#if !defined(TIMDAT)
-#define TIMDAT OFF		/* ON=> dump time and memory usage numbers */
 #endif
 #if !defined(CFGDAT)
 #define CFGDAT OFF		/* ON=> dump configuration flags to output */
@@ -219,9 +213,6 @@ misc. global macros
 #endif
 #if !defined(NAMDAT)
 #define NAMDAT OFF		/* ON=> dump conductor names */
-#endif
-#if !defined(CAPVEW)
-#define CAPVEW ON		/* ON=> enable ps file dumps of geometry */
 #endif
 /* display of transformation matrices */
 #if !defined(DISQ2M)
@@ -292,10 +283,6 @@ misc. global macros
 #endif
 #if !defined(CKCLST)
 #define CKCLST OFF		/* ON=> check charge list, prnt msg if bad */
-#endif
-#if !defined(DUMPPS)
-#define DUMPPS OFF		/* ON=> dump ps file w/mulMatDirect calcp's
-				   ALL=> dump adaptive alg calcp's as well */
 #endif
 #if !defined(DPCOMP)
 #define DPCOMP OFF		/* ON=> dump prec pts before&aft compression */

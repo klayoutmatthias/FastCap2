@@ -933,7 +933,6 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
   extern ITER *kill_num_list, *kinp_num_list;
   extern double iter_tol;
 
-#if CAPVEW == ON
   extern int s_, n_, g_, c_, x_, k_, rc_, rd_, rb_, q_, rk_, m_, f_, dd_;
   extern double view[], moffset[], rotation, distance, linewd, scale, axeslen;
   extern double elevation, azimuth;
@@ -963,7 +962,6 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
   kq_name_list = NULL;		/* list of cond names in shaded plots */
   s_ = n_ = g_ = c_ = x_ = k_ = rc_ = rd_ = rb_ = q_ = rk_ = m_ = f_ = FALSE;
   dd_ = FALSE;
-#endif
 
   iter_tol = ABSTOL;
   kill_num_list = kinp_num_list = NULL;
@@ -1016,92 +1014,91 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
       else if(argv[i][1] == '\0') {
 	*read_from_stdin = TRUE;
       }
-#if CAPVEW == ON
       else if(argv[i][1] == 'f') {
-	f_ = TRUE;
+        f_ = TRUE;
       }
       else if(argv[i][1] == 'b') {
-	line_file = &(argv[i][2]);
+        line_file = &(argv[i][2]);
       }
       else if(argv[i][1] == 'a') {
         if(sscanf(&(argv[i][2]), "%lf", &azimuth) != 1) {
-	  fprintf(stderr, "%s: bad view point azimuth angle '%s'\n", 
-		  argv[0], &argv[i][2]);
-	  cmderr = TRUE;
-	  break;
-	}
+          fprintf(stderr, "%s: bad view point azimuth angle '%s'\n",
+                  argv[0], &argv[i][2]);
+          cmderr = TRUE;
+          break;
+        }
       }
       else if(argv[i][1] == 'e') {
         if(sscanf(&(argv[i][2]), "%lf", &elevation) != 1) {
-	  fprintf(stderr, "%s: bad view point elevation angle '%s'\n", 
-		  argv[0], &argv[i][2]);
-	  cmderr = TRUE;
-	  break;
-	}
+          fprintf(stderr, "%s: bad view point elevation angle '%s'\n",
+                  argv[0], &argv[i][2]);
+          cmderr = TRUE;
+          break;
+        }
       }
       else if(argv[i][1] == 't') {
         if(sscanf(&(argv[i][2]), "%lf", &iter_tol) != 1 || iter_tol <= 0.0) {
-	  fprintf(stderr, "%s: bad iteration tolerence '%s'\n", 
-		  argv[0], &argv[i][2]);
-	  cmderr = TRUE;
-	  break;
-	}
+          fprintf(stderr, "%s: bad iteration tolerence '%s'\n",
+                  argv[0], &argv[i][2]);
+          cmderr = TRUE;
+          break;
+        }
       }
       else if(argv[i][1] == 'r' && argv[i][2] == 'c') {
-	kq_name_list = &(argv[i][3]);
-	rc_ = TRUE;
+        kq_name_list = &(argv[i][3]);
+        rc_ = TRUE;
       }
       else if(!strcmp(&(argv[i][1]), "rd")) rd_ = TRUE;
       /*else if(!strcmp(&(argv[i][1]), "rb")) rb_ = TRUE;*/
       else if(!strcmp(&(argv[i][1]), "rk")) rk_ = TRUE;
       else if(argv[i][1] == 'r') {
         if(sscanf(&(argv[i][2]), "%lf", &rotation) != 1) {
-	  fprintf(stderr, "%s: bad image rotation angle '%s'\n", 
-		  argv[0], &argv[i][2]);
-	  cmderr = TRUE;
-	  break;
-	}
+          fprintf(stderr, "%s: bad image rotation angle '%s'\n",
+                  argv[0], &argv[i][2]);
+          cmderr = TRUE;
+          break;
+        }
       }
       else if(argv[i][1] == 'h') {
         if(sscanf(&(argv[i][2]), "%lf", &distance) != 1) cmderr = TRUE;
-	else if(distance <= 0.0) cmderr = TRUE;
-	if(cmderr) {
-	  fprintf(stderr, "%s: bad view point distance '%s'\n", 
-		  argv[0], &argv[i][2]);
-	  break;
-	}
+        else if(distance <= 0.0) cmderr = TRUE;
+        if(cmderr) {
+          fprintf(stderr, "%s: bad view point distance '%s'\n",
+                  argv[0], &argv[i][2]);
+          break;
+        }
       }
       else if(argv[i][1] == 's') {
         if(sscanf(&(argv[i][2]), "%lf", &scale) != 1) cmderr = TRUE;
-	else if(scale <= 0.0) cmderr = TRUE;
-	if(cmderr) {
-	  fprintf(stderr, "%s: bad image scale factor '%s'\n", 
-		  argv[0], &argv[i][2]);
-	  break;
-	}
+        else if(scale <= 0.0) cmderr = TRUE;
+        if(cmderr) {
+          fprintf(stderr, "%s: bad image scale factor '%s'\n",
+                  argv[0], &argv[i][2]);
+          break;
+        }
       }
       else if(argv[i][1] == 'w') {
         if(sscanf(&(argv[i][2]), "%lf", &linewd) != 1) {
-				/* no check for < 0 so dash (-1) is pos. */
-	  fprintf(stderr, "%s: bad line width '%s'\n", 
-		  argv[0], &argv[i][2]);
-	  cmderr = TRUE;
-	  break;
-	}
+                                /* no check for < 0 so dash (-1) is pos. */
+          fprintf(stderr, "%s: bad line width '%s'\n",
+                  argv[0], &argv[i][2]);
+          cmderr = TRUE;
+          break;
+        }
       }
       /* -x sets up axes of default length, -x<len> uses len as length */
       else if(argv[i][1] == 'x') {
-	if(argv[i][2] == '\0') x_ = TRUE;
-	else {
-	  if(sscanf(&(argv[i][2]), "%lf", &axeslen) != 1) {
-				/* no check for < 0 so axes can flip */
-	    fprintf(stderr, "%s: bad axes length '%s'\n", 
-		    argv[0], &argv[i][2]);
-	    cmderr = TRUE;
-	    break;
-	  }
-	  else x_ = TRUE;
-	}
+        if(argv[i][2] == '\0') x_ = TRUE;
+        else {
+          if(sscanf(&(argv[i][2]), "%lf", &axeslen) != 1) {
+                                /* no check for < 0 so axes can flip */
+            fprintf(stderr, "%s: bad axes length '%s'\n",
+                    argv[0], &argv[i][2]);
+            cmderr = TRUE;
+            break;
+          }
+          else x_ = TRUE;
+        }
       }
       else if(argv[i][1] == 'v') s_ = TRUE;
       else if(argv[i][1] == 'n') n_ = TRUE;
@@ -1110,23 +1107,22 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
       else if(argv[i][1] == 'm') m_ = TRUE;
       else if(argv[i][1] == 'q') {
         get_ps_file_base(sys, argv, argc); /* set up the output file base */
-	qpic_name_list = &(argv[i][2]);
-	q_ = TRUE;
+        qpic_name_list = &(argv[i][2]);
+        q_ = TRUE;
       }
       else if(argv[i][1] == 'u') {
-	if(!strcmp(&(argv[i][2]), "x") || !strcmp(&(argv[i][2]), "X"))
-	    up_axis = XI;
-	else if(!strcmp(&(argv[i][2]), "y") || !strcmp(&(argv[i][2]), "Y"))
-	    up_axis = YI;
-	else if(!strcmp(&(argv[i][2]), "z") || !strcmp(&(argv[i][2]), "Z"))
-	    up_axis = ZI;
-	else {
-	  fprintf(stderr, "%s: bad up axis type `%s' -- use x, y or z\n", argv[0], &(argv[i][2]));
+        if(!strcmp(&(argv[i][2]), "x") || !strcmp(&(argv[i][2]), "X"))
+            up_axis = XI;
+        else if(!strcmp(&(argv[i][2]), "y") || !strcmp(&(argv[i][2]), "Y"))
+            up_axis = YI;
+        else if(!strcmp(&(argv[i][2]), "z") || !strcmp(&(argv[i][2]), "Z"))
+            up_axis = ZI;
+        else {
+          fprintf(stderr, "%s: bad up axis type `%s' -- use x, y or z\n", argv[0], &(argv[i][2]));
           cmderr = TRUE;
           break;
         }
       }
-#endif
       else {
 	fprintf(stderr, "%s: illegal option -- %s\n", argv[0], &(argv[i][1]));
 	cmderr = TRUE;
@@ -1138,61 +1134,61 @@ static void parse_command_line(ssystem *sys, char *argv[], int argc, int *autmom
     }
   }
 
-  if(cmderr == TRUE) {
-#if CAPVEW == ON
-    fprintf(stderr,
-	    "Usage: '%s [-o<expansion order>] [-d<partitioning depth>] [<input file>]\n                [-p<permittivity factor>] [-rs<cond list>] [-ri<cond list>]\n                [-] [-l<list file>] [-t<iter tol>] [-a<azimuth>] [-e<elevation>]\n                [-r<rotation>] [-h<distance>] [-s<scale>] [-w<linewidth>]\n                [-u<upaxis>] [-q<cond list>] [-rc<cond list>] [-x<axeslength>]\n                [-b<.figfile>] [-m] [-rk] [-rd] [-dc] [-c] [-v] [-n] [-f] [-g]\n", argv[0]);
-    fprintf(stderr, "DEFAULT VALUES:\n");
-    fprintf(stderr, "  expansion order = %d\n", DEFORD);
-    fprintf(stderr, "  partitioning depth = set automatically\n");
-    fprintf(stderr, "  permittivity factor = 1.0\n");
-    fprintf(stderr, "  iterative loop ||r|| tolerance = %g\n", ABSTOL);
-    fprintf(stderr, "  azimuth = %g\n  elevation = %g\n  rotation = %g\n",
-	    DEFAZM, DEFELE, DEFROT);
-    fprintf(stderr, 
-	    "  distance = %g (0 => 1 object radius away from center)\n", 
-	    DEFDST);
-    fprintf(stderr, "  scale = %g\n  linewidth = %g\n",
-            DEFSCL, DEFWID);
-    if(DEFUAX == XI) fprintf(stderr, "  upaxis = x\n");
-    else if(DEFUAX == YI) fprintf(stderr, "  upaxis = y\n");
-    else if(DEFUAX == ZI) fprintf(stderr, "  upaxis = z\n");
-    fprintf(stderr, "  axeslength = %g\n", DEFAXE);
-    fprintf(stderr, "OPTIONS:\n");
-    fprintf(stderr, "  -   = force conductor surface file read from stdin\n");
-    fprintf(stderr, "  -rs = remove conductors from solve list\n");
-    fprintf(stderr, "  -ri = remove conductors from input\n");
-    fprintf(stderr, 
-     "  -q  = select conductors for at-1V charge distribution .ps pictures\n");
-    fprintf(stderr, 
-     "  -rc = remove conductors from all charge distribution .ps pictures\n");
-    fprintf(stderr, 
-"  -b  = superimpose lines, arrows and dots in .figfile on all .ps pictures\n");
-    fprintf(stderr, "  -m  = switch to dump-ps-picture-file-only mode\n");
-    fprintf(stderr, 
-      "  -rk = remove key in shaded .ps picture file (use with -q option)\n");
-    fprintf(stderr, 
-      "  -rd = remove DIELEC type surfaces from all .ps picture files\n");
-    fprintf(stderr, 
-"  -dc = display total charges in shaded .ps picture file (use with -q option)\n");
-    fprintf(stderr, "  -c  = print command line in .ps picture file\n");
-    fprintf(stderr, "  -v  = suppress showpage in all .ps picture files\n");
-    fprintf(stderr, "  -n  = number faces with input order numbers\n");
-    fprintf(stderr, "  -f  = do not fill in faces (don't rmv hidden lines)\n");
-    fprintf(stderr, "  -g  = dump depth graph and quit\n");
-#else
-    fprintf(stderr,
-	    "Usage: '%s [-o<expansion order>] [-d<partitioning depth>] [<input file>]\n                [-p<permittivity factor>] [-rs<cond list>] [-ri<cond list>]\n                [-] [-l<list file>] [-t<iter tol>]\n", argv[0]);
-    fprintf(stderr, "DEFAULT VALUES:\n");
-    fprintf(stderr, "  expansion order = %d\n", DEFORD);
-    fprintf(stderr, "  partitioning depth = set automatically\n");
-    fprintf(stderr, "  permittivity factor = 1.0\n");
-    fprintf(stderr, "  iterative loop ||r|| tolerance = %g\n", ABSTOL);
-    fprintf(stderr, "OPTIONS:\n");
-    fprintf(stderr, "  -   = force conductor surface file read from stdin\n");
-    fprintf(stderr, "  -rs = remove conductors from solve list\n");
-    fprintf(stderr, "  -ri = remove conductors from input\n");
-#endif
+  if (cmderr == TRUE) {
+    if (sys->capvew) {
+      fprintf(stderr,
+              "Usage: '%s [-o<expansion order>] [-d<partitioning depth>] [<input file>]\n                [-p<permittivity factor>] [-rs<cond list>] [-ri<cond list>]\n                [-] [-l<list file>] [-t<iter tol>] [-a<azimuth>] [-e<elevation>]\n                [-r<rotation>] [-h<distance>] [-s<scale>] [-w<linewidth>]\n                [-u<upaxis>] [-q<cond list>] [-rc<cond list>] [-x<axeslength>]\n                [-b<.figfile>] [-m] [-rk] [-rd] [-dc] [-c] [-v] [-n] [-f] [-g]\n", argv[0]);
+      fprintf(stderr, "DEFAULT VALUES:\n");
+      fprintf(stderr, "  expansion order = %d\n", DEFORD);
+      fprintf(stderr, "  partitioning depth = set automatically\n");
+      fprintf(stderr, "  permittivity factor = 1.0\n");
+      fprintf(stderr, "  iterative loop ||r|| tolerance = %g\n", ABSTOL);
+      fprintf(stderr, "  azimuth = %g\n  elevation = %g\n  rotation = %g\n",
+              DEFAZM, DEFELE, DEFROT);
+      fprintf(stderr,
+              "  distance = %g (0 => 1 object radius away from center)\n",
+              DEFDST);
+      fprintf(stderr, "  scale = %g\n  linewidth = %g\n",
+              DEFSCL, DEFWID);
+      if(DEFUAX == XI) fprintf(stderr, "  upaxis = x\n");
+      else if(DEFUAX == YI) fprintf(stderr, "  upaxis = y\n");
+      else if(DEFUAX == ZI) fprintf(stderr, "  upaxis = z\n");
+      fprintf(stderr, "  axeslength = %g\n", DEFAXE);
+      fprintf(stderr, "OPTIONS:\n");
+      fprintf(stderr, "  -   = force conductor surface file read from stdin\n");
+      fprintf(stderr, "  -rs = remove conductors from solve list\n");
+      fprintf(stderr, "  -ri = remove conductors from input\n");
+      fprintf(stderr,
+            "  -q  = select conductors for at-1V charge distribution .ps pictures\n");
+      fprintf(stderr,
+            "  -rc = remove conductors from all charge distribution .ps pictures\n");
+      fprintf(stderr,
+            "  -b  = superimpose lines, arrows and dots in .figfile on all .ps pictures\n");
+      fprintf(stderr, "  -m  = switch to dump-ps-picture-file-only mode\n");
+      fprintf(stderr,
+            "  -rk = remove key in shaded .ps picture file (use with -q option)\n");
+      fprintf(stderr,
+            "  -rd = remove DIELEC type surfaces from all .ps picture files\n");
+      fprintf(stderr,
+            "  -dc = display total charges in shaded .ps picture file (use with -q option)\n");
+      fprintf(stderr, "  -c  = print command line in .ps picture file\n");
+      fprintf(stderr, "  -v  = suppress showpage in all .ps picture files\n");
+      fprintf(stderr, "  -n  = number faces with input order numbers\n");
+      fprintf(stderr, "  -f  = do not fill in faces (don't rmv hidden lines)\n");
+      fprintf(stderr, "  -g  = dump depth graph and quit\n");
+    } else {
+      fprintf(stderr,
+            "Usage: '%s [-o<expansion order>] [-d<partitioning depth>] [<input file>]\n                [-p<permittivity factor>] [-rs<cond list>] [-ri<cond list>]\n                [-] [-l<list file>] [-t<iter tol>]\n", argv[0]);
+      fprintf(stderr, "DEFAULT VALUES:\n");
+      fprintf(stderr, "  expansion order = %d\n", DEFORD);
+      fprintf(stderr, "  partitioning depth = set automatically\n");
+      fprintf(stderr, "  permittivity factor = 1.0\n");
+      fprintf(stderr, "  iterative loop ||r|| tolerance = %g\n", ABSTOL);
+      fprintf(stderr, "OPTIONS:\n");
+      fprintf(stderr, "  -   = force conductor surface file read from stdin\n");
+      fprintf(stderr, "  -rs = remove conductors from solve list\n");
+      fprintf(stderr, "  -ri = remove conductors from input\n");
+    }
     fprintf(stderr, "  <cond list> = [<name>],[<name>],...,[<name>]\n");
     dumpConfig(stderr, argv[0]);
     exit(0);

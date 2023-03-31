@@ -39,6 +39,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "heap.h"
 #include "patran.h"		/* for neutral file interface */
 
+#include <cstdio>
+
 struct surface {                /* a surface file and its permittivities */
   int type;                     /* CONDTR, DIELEC or BOTH */
   double trans[3];              /* translation vector applied to surface */
@@ -161,37 +163,54 @@ struct cube {
   struct cube *parent;    /* Ptr to parent cube. */
 };
 
-struct ssystem {
-  int side;                     /* # cubes per side on lowest level. */
-  int depth;			/* # of levels of cubes. */
-  int order;			/* # of levels of cubes. */
-  int num_cond;                 /* number of conductors */
-  Name *cond_names;		/* conductor name list */
-  double perm_factor;           /* overall scale factor for permittivities */
-  double length;		/* Length per cube on lowest level. */
-  double minx, miny, minz;	/* Coordinates of one corner of the domain. */
-  int mul_maxq;                 /* max #panels in mul_exact cube */
-  int mul_maxlq;                /* max #panels in lowest level cube */
-  int max_panel;                /* max #panels in all cubes w/multipole */
-  int up_size;                  /* total #panels in all cubes, incl dummies */
-  int loc_maxq;                 /* max #evaluation points in loc_exact cube */
-  int loc_maxlq;                /* max #eval pnts in lowest level cube. */
-  int max_eval_pnt;             /* max #eval pnts in all cubes w/local exp */
-  int eval_size;                /* total #eval pnts in entire problem */
-  double *q;                    /* The vector of lowest level charges. */
-  double *p;                    /* The vector of lowest level potentials. */
-  charge *panels;               /* linked list of charge panels in problem */
-  cube *****cubes;		/* The array of cube pointers. */
-  cube **multilist;             /* Array of ptrs to first cube in linked list
-				   of cubes to do multi at each level. */
-  cube **locallist;             /* Array of ptrs to first cube in linked list
-				   of cubes to do local at each level. */
-  cube *directlist;		/* head of linked lst of low lev cubes w/chg */
-  cube *precondlist;		/* head of linked lst of precond blks. */
-  cube *revprecondlist;		/* reversed linked lst of precond blks. */
-  int *is_dummy;                /* is_dummy[i] = TRUE => panel i is a dummy */
-  int *is_dielec;		//  is_dielec[i] = TRUE => panel i on dielec */
+enum dumpps_mode {
+  DUMPPS_ON,
+  DUMPPS_OFF,
+  DUMPPS_ALL
+};
+
+struct ssystem
+{
+  ssystem();
+
+  FILE *log;                    //  log stream (0 to turn off output)
+  bool timdat;                  //  print timing data
+  bool mksdat;                  //  dump symmetrized, MKS units cap mat
+  dumpps_mode dumpps;           //  ON=> dump ps file w/mulMatDirect calcp's
+                                //  ALL=> dump adaptive alg calcp's as well
+  bool capvew;                  //  enable ps file dumps of geometry
+  int side;                     //  # cubes per side on lowest level.
+  int depth;			//  # of levels of cubes.
+  int order;			//  # of levels of cubes.
+  int num_cond;                 //  number of conductors
+  Name *cond_names;		//  conductor name list
+  double perm_factor;           //  overall scale factor for permittivities
+  double length;		//  Length per cube on lowest level.
+  double minx, miny, minz;	//  Coordinates of one corner of the domain.
+  int mul_maxq;                 //  max #panels in mul_exact cube
+  int mul_maxlq;                //  max #panels in lowest level cube
+  int max_panel;                //  max #panels in all cubes w/multipole
+  int up_size;                  //  total #panels in all cubes, incl dummies
+  int loc_maxq;                 //  max #evaluation points in loc_exact cube
+  int loc_maxlq;                //  max #eval pnts in lowest level cube.
+  int max_eval_pnt;             //  max #eval pnts in all cubes w/local exp
+  int eval_size;                //  total #eval pnts in entire problem
+  double *q;                    //  The vector of lowest level charges.
+  double *p;                    //  The vector of lowest level potentials.
+  charge *panels;               //  linked list of charge panels in problem
+  cube *****cubes;		//  The array of cube pointers.
+  cube **multilist;             //  Array of ptrs to first cube in linked list
+                                //    of cubes to do multi at each level.
+  cube **locallist;             //  Array of ptrs to first cube in linked list
+                                //    of cubes to do local at each level.
+  cube *directlist;		//  head of linked lst of low lev cubes w/chg
+  cube *precondlist;		//  head of linked lst of precond blks.
+  cube *revprecondlist;		//  reversed linked lst of precond blks.
+  int *is_dummy;                //  is_dummy[i] = TRUE => panel i is a dummy
+  int *is_dielec;		//  is_dielec[i] = TRUE => panel i on dielec
   Heap heap;                    //  allocation heap
+
+  void msg(const char *fmt, ...);
 };
 
 #endif
