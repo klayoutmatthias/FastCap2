@@ -50,6 +50,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, int maxiter, double tol, charge *chglist);
 static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, charge *chglist);
+static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, int maxiter, double tol, charge *chglist);
 
 /* This routine takes the cube data struct and computes capacitances. */
 int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, int numconds, Name *name_list)
@@ -69,9 +70,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   extern int q_;
   extern int dd_;
 
-#if DIRSOL == ON
   extern double *trimat, *sqrmat; /* globals in blkDirect.c */
-#endif
 
   /* Allocate space for the capacitance matrix. */
   *capmat = sys->heap.alloc<double *>(numconds+1, AMSC);
@@ -83,19 +82,15 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   q = sys->heap.alloc<double>(size+1, AMSC);
   r = sys->heap.alloc<double>(size+1, AMSC);
 
-#if DIRSOL != ON		/* too much to allocate if not used */
-  /* allocate for gcr accumulated basis vectors (moved out of loop 30Apr90) */
-  fflush(stdout);		/* so header will be saved if crash occurs */
+  if (DIRSOL != ON) {		/* too much to allocate if not used */
 
-  bp = sys->heap.alloc<double *>(maxiter+1, AMSC);
-  bap = sys->heap.alloc<double *>(maxiter+1, AMSC);
+    /* allocate for gcr accumulated basis vectors (moved out of loop 30Apr90) */
+    fflush(stdout);		/* so header will be saved if crash occurs */
 
-  /* moved inside of gcr to save memory 22OCT90
-  for(i=0; i <= maxiter; i++) {
-    CALLOC(bp[i], size+1, double, ON, AMSC);
-    CALLOC(bap[i], size+1, double, ON, AMSC);
-  } */
-#endif
+    bp = sys->heap.alloc<double *>(maxiter+1, AMSC);
+    bap = sys->heap.alloc<double *>(maxiter+1, AMSC);
+
+  }
 
   /* ualloc_verify(); */
 
@@ -123,38 +118,43 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 	  r[nq->index] = 1.0;
     }
 
-#if DIRSOL == ON
-    /* do a direct forward elimination/back solve for the charge vector */
-    if(size > MAXSIZ) {		/* index from 1 here, from 0 in solvers */
-      blkCompressVector(r+1, size, real_size, sys->is_dummy+1);
-      blkSolve(q+1, r+1, real_size, trimat, sqrmat);
-      blkExpandVector(q+1, size, real_size);
+    if (DIRSOL == ON) {
+
+      /* do a direct forward elimination/back solve for the charge vector */
+      if(size > MAXSIZ) {		/* index from 1 here, from 0 in solvers */
+        blkCompressVector(r+1, size, real_size, sys->is_dummy+1);
+        blkSolve(q+1, r+1, real_size, trimat, sqrmat);
+        blkExpandVector(q+1, size, real_size);
+      }
+      else {
+        starttimer;
+        solve(sys->directlist->directmats[0], q+1, r+1, size);
+        stoptimer;
+        fullsoltime += dtime;
+      }
+      iter = 0;
+
+    } else {
+
+      /* Do gcr. First allocate space for back vectors. */
+      /* allocation moved out of loop 30Apr90 */
+      if (ITRTYP == GMRES) {
+        if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,maxiter,iter_tol,chglist))
+           > maxiter) {
+          fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
+          exit(0);
+        }
+      } else {
+        if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,maxiter,iter_tol,chglist))
+           > maxiter) {
+          fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
+          exit(0);
+        }
+      }
+
+      ttliter += iter;
+
     }
-    else {
-      starttimer;
-      solve(sys->directlist->directmats[0], q+1, r+1, size);
-      stoptimer;
-      fullsoltime += dtime;
-    }
-    iter = 0;
-#else
-    /* Do gcr. First allocate space for back vectors. */
-    /* allocation moved out of loop 30Apr90 */
-#if ITRTYP == GMRES			       
-    if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,maxiter,iter_tol,chglist))
-       > maxiter) {
-      fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
-      exit(0);
-    }
-#else
-    if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,maxiter,iter_tol,chglist))
-       > maxiter) {
-      fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
-      exit(0);
-    }
-#endif				/* ITRTYP == GMRES */
-    ttliter += iter;
-#endif				/* DIRSOL == ON */
 
 #if DMPCHG == LAST
     fprintf(stdout, "\nPanel charges, iteration %d\n", iter);
@@ -209,9 +209,6 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
   int iter, i, j;
   double norm, beta, alpha, maxnorm;
   extern double conjtime;
-#if EXPGCR == ON
-  extern double *sqrmat;
-#endif
 
   /* NOTE ON EFFICIENCY: all the loops of length "size" could have */
   /*   if(sys->is_dummy[i]) continue; as their first line to save some ops */
@@ -275,17 +272,17 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
     if(maxnorm < tol) break;
   }
   
-#if PRECOND != NONE
-  /* Undo the preconditioning to get the real q. */
-  for(i=1; i <= size; i++) {
-    p[i] = q[i];
-    ap[i] = 0.0;
+  if (PRECOND != NONE) {
+    /* Undo the preconditioning to get the real q. */
+    for(i=1; i <= size; i++) {
+      p[i] = q[i];
+      ap[i] = 0.0;
+    }
+    mulPrecond(sys, PRECOND);
+    for(i=1; i <= size; i++) {
+      q[i] = p[i];
+    }
   }
-  mulPrecond(sys, PRECOND);
-  for(i=1; i <= size; i++) {
-    q[i] = p[i];
-  }
-#endif
   
   if(maxnorm >= tol) {
     fprintf(stdout, "\ngcr: WARNING exiting without converging\n");
@@ -303,9 +300,6 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   double rnorm, norm;
   double hi, hip1, length;
   extern double conjtime, prectime;
-#if EXPGCR == ON
-  extern double *sqrmat;
-#endif
 
   static double *c=NULL, *s=NULL, *g=NULL, *y=NULL;
   
@@ -430,20 +424,20 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   stoptimer;
   conjtime += dtime;
   
-#if PRECOND != NONE
-  /* Undo the preconditioning to get the real q. */
-  starttimer;
-  for(i=1; i <= size; i++) {
-    p[i] = q[i];
-    ap[i] = 0.0;
+  if (PRECOND != NONE) {
+    /* Undo the preconditioning to get the real q. */
+    starttimer;
+    for(i=1; i <= size; i++) {
+      p[i] = q[i];
+      ap[i] = 0.0;
+    }
+    mulPrecond(sys, PRECOND);
+    for(i=1; i <= size; i++) {
+      q[i] = p[i];
+    }
+    stoptimer;
+    prectime += dtime;
   }
-  mulPrecond(sys, PRECOND);
-  for(i=1; i <= size; i++) {
-    q[i] = p[i];
-  }
-  stoptimer;
-  prectime += dtime;
-#endif
 
   if(rnorm > tol) {
     fprintf(stdout, "\ngmres: WARNING exiting without converging\n");
@@ -468,62 +462,66 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 
   for(i=1; i <= size; i++) p[i] = 0;
 
-#if PRECOND != NONE
-  starttimer;
-  mulPrecond(sys, PRECOND);
-  stoptimer;
-  prectime += dtime;
-#endif
+  if (PRECOND != NONE) {
+    starttimer;
+    mulPrecond(sys, PRECOND);
+    stoptimer;
+    prectime += dtime;
+  }
 
-#if EXPGCR == ON
-  blkCompressVector(q+1, size, real_size, sys->is_dummy+1);
-  blkAqprod(p+1, q+1, real_size, sqrmat);	/* offset since index from 1 */
-  blkExpandVector(p+1, size, real_size); /* ap changed to p, r chged to q */
-  blkExpandVector(q+1, size, real_size); /*    7 Oct 91 */
-#else
-  starttimer;
-  mulDirect(sys);
-  stoptimer;
-  dirtime += dtime;
+  if (EXPGCR == ON) {
 
-  starttimer;
-  mulUp(sys);
-  stoptimer;
-  uptime += dtime;
+    blkCompressVector(q+1, size, real_size, sys->is_dummy+1);
+    blkAqprod(p+1, q+1, real_size, sqrmat);	/* offset since index from 1 */
+    blkExpandVector(p+1, size, real_size); /* ap changed to p, r chged to q */
+    blkExpandVector(q+1, size, real_size); /*    7 Oct 91 */
+
+  } else {
+
+    starttimer;
+    mulDirect(sys);
+    stoptimer;
+    dirtime += dtime;
+
+    starttimer;
+    mulUp(sys);
+    stoptimer;
+    uptime += dtime;
 
 #if DUPVEC == ON
-  dumpLevOneUpVecs(sys);
+    dumpLevOneUpVecs(sys);
 #endif
 
 #if DNTYPE == NOSHFT
-  mulDown(sys);		/* do downward pass without local exp shifts */
+    mulDown(sys);		/* do downward pass without local exp shifts */
 #endif
 
 #if DNTYPE == GRENGD
-  mulDown(sys);	       	/* do heirarchical local shift dwnwd pass */
+    mulDown(sys);	       	/* do heirarchical local shift dwnwd pass */
 #endif
-  stoptimer;
-  downtime += dtime;
+    stoptimer;
+    downtime += dtime;
 
-  starttimer;
+    starttimer;
 #if MULTI == ON
-  mulEval(sys);		/* evaluate either locals or multis or both */
+    mulEval(sys);		/* evaluate either locals or multis or both */
 #endif
-  stoptimer;
-  evaltime += dtime;
+    stoptimer;
+    evaltime += dtime;
 
 #if DMPCHG == LAST
-  fprintf(stdout, "\nPanel potentials divided by areas\n");
-  dumpChgDen(stdout, p, chglist);
-  fprintf(stdout, "End panel potentials\n");
+    fprintf(stdout, "\nPanel potentials divided by areas\n");
+    dumpChgDen(stdout, p, chglist);
+    fprintf(stdout, "End panel potentials\n");
 #endif
 
-  /* convert the voltage vec entries on dielectric i/f's into eps1E1-eps2E2 */
-  compute_electric_fields(sys, chglist);
+    /* convert the voltage vec entries on dielectric i/f's into eps1E1-eps2E2 */
+    compute_electric_fields(sys, chglist);
 
 #if OPCNT == ON
-  printops();
-  exit(0);
+    printops();
+    exit(0);
 #endif				/* OPCNT == ON */
-#endif				/* EXPGCR == ON */
+
+  }
 }

@@ -186,83 +186,84 @@ int main(int argc, char *argv[])
 
   mulMatDirect(&sys);		/* Compute the direct part matrices. */
 
-#if DIRSOL == OFF		/* with DIRSOL just want to skip to solve */
+  if (DIRSOL == OFF) {		/* with DIRSOL just want to skip to solve */
 
-#if PRECOND == BD
-  starttimer;
-  bdmulMatPrecond(sys);
-  stoptimer;
-  prsetime = dtime;		/* preconditioner set up time */
-#endif
+    if (PRECOND == BD) {
+      starttimer;
+      bdmulMatPrecond(&sys);
+      stoptimer;
+      prsetime = dtime;		/* preconditioner set up time */
+    }
 
-#if PRECOND == OL
-  starttimer;
-  olmulMatPrecond(&sys);
-  stoptimer;
-  prsetime = dtime;		/* preconditioner set up time */
-#endif
+    if (PRECOND == OL) {
+      starttimer;
+      olmulMatPrecond(&sys);
+      stoptimer;
+      prsetime = dtime;		/* preconditioner set up time */
+    }
 
 #if DMPREC == ON
-  dump_preconditioner(sys, chglist, 1);	/* dump prec. and P to matlab file */
+    dump_preconditioner(sys, chglist, 1);	/* dump prec. and P to matlab file */
 #endif
 
 #if DPSYSD == ON
-  dissys(sys);
+    dissys(sys);
 #endif
 
 #if CKDLST == ON
-  chkList(sys, DIRECT);
+    chkList(sys, DIRECT);
 #endif
 
-#endif				/* DIRSOL == OFF */
+  }
+
   dumpnums(&sys, ON, eval_size);    /* save num/type of pot. coeff calcs */
 
   dirtimesav = dirtime;		/* save direct matrix setup time */
   dirtime = 0.0;		/* make way for direct solve time */
 
-#if DIRSOL == OFF
+  if (DIRSOL == OFF) {
 
-  if (sys.dumpps == DUMPPS_ON) {
-    dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
-  }
+    if (sys.dumpps == DUMPPS_ON) {
+      dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
+    }
 
-  starttimer;
-  mulMatUp(&sys);		/* Compute the upward pass matrices. */
+    starttimer;
+    mulMatUp(&sys);		/* Compute the upward pass matrices. */
 
 #if DNTYPE == NOSHFT
-  mulMatDown(sys);		/* find matrices for no L2L shift dwnwd pass */
+    mulMatDown(sys);		/* find matrices for no L2L shift dwnwd pass */
 #endif
 
 #if DNTYPE == GRENGD
-  mulMatDown(&sys);		/* find matrices for full Greengard dnwd pass*/
+    mulMatDown(&sys);		/* find matrices for full Greengard dnwd pass*/
 #endif
 
 #if CKDLST == ON
-  chkList(sys, DIRECT);
-  chkLowLev(sys, DIRECT);
-  //  Not available anywhere: chkEvalLstD(sys, DIRECT);
+    chkList(sys, DIRECT);
+    chkLowLev(sys, DIRECT);
+    //  Not available anywhere: chkEvalLstD(sys, DIRECT);
 #endif
 
-  mulMatEval(&sys);		/* set up matrices for evaluation pass */
+    mulMatEval(&sys);		/* set up matrices for evaluation pass */
 
-  stoptimer;
-  mulsetup = dtime;		/* save multipole matrix setup time */
+    stoptimer;
+    mulsetup = dtime;		/* save multipole matrix setup time */
 
-  dumpnums(&sys, OFF, eval_size);	/* dump num/type of pot. coeff calcs */
+    dumpnums(&sys, OFF, eval_size);	/* dump num/type of pot. coeff calcs */
 
-  if (sys.dumpps == DUMPPS_ALL) {
-    dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
+    if (sys.dumpps == DUMPPS_ALL) {
+      dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
+    }
+
+    if (sys.dissyn) {
+      dumpSynop(&sys);
+    }
+
+    if (sys.dmtcnt) {
+      dumpMatBldCnts(&sys);
+    }
+
   }
-
-  if (sys.dissyn) {
-    dumpSynop(&sys);
-  }
-
-  if (sys.dmtcnt) {
-    dumpMatBldCnts(&sys);
-  }
-
-#endif				/* DIRSOL == ON */
 
   fprintf(stdout, "\nITERATION DATA");
   ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, num_cond,

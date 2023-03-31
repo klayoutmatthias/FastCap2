@@ -58,11 +58,9 @@ void mulMatDirect(ssystem *sys)
   int i, nummats, **temp;
   extern double lutime, dirtime;
 
-#if DIRSOL == ON || EXPGCR == ON
   extern double *trimat, *sqrmat; /* flattened triangular, square matrices */
   extern int up_size, eval_size;
   extern int *real_index;       /* for map btwn condensed/expanded vectors */
-#endif
 
   /* First count the number of matrices to be done directly. */
   for(nextc=sys->directlist; nextc != NULL; nextc = nextc->dnext) {
@@ -94,34 +92,33 @@ void mulMatDirect(ssystem *sys)
     nextc->directnumeles[0] = nextc->upnumeles[0];
 
     starttimer;
-#if DIRSOL == ON || EXPGCR == ON
-    if(nextc == sys->directlist) {
-      if(eval_size < MAXSIZ) {
-        fprintf(stderr, 
-                "mulMatDirect: non-block direct methods not supported\n");
-        exit(0);
-        /* if this is going to work, need a special, condensing Q2P
-           as well as some way to use it in the framework of the GCR loop */
-        nextc->directmats[0] = Q2P(nextc->chgs, eval_size,
-                                   nextc->nbr_is_dummy[0], nextc->chgs, 
-                                   eval_size, TRUE);
+    if (DIRSOL == ON || EXPGCR == ON) {
+      if(nextc == sys->directlist) {
+        if(eval_size < MAXSIZ) {
+          fprintf(stderr,
+                  "mulMatDirect: non-block direct methods not supported\n");
+          exit(0);
+          /* if this is going to work, need a special, condensing Q2P
+             as well as some way to use it in the framework of the GCR loop */
+          nextc->directmats[0] = Q2P(sys, nextc->chgs, eval_size,
+                                     nextc->nbr_is_dummy[0], nextc->chgs,
+                                     eval_size, TRUE);
+        }
+        else blkQ2Pfull(sys, sys->directlist, up_size, eval_size,
+                        &trimat, &sqrmat, &real_index, sys->is_dummy);
       }
-      else blkQ2Pfull(sys->directlist, up_size, eval_size,
-                      &trimat, &sqrmat, &real_index, sys->is_dummy);
+      else nextc->directmats[0]
+          = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
+                    TRUE);
+    } else {
+      nextc->directmats[0]
+          = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
+                    TRUE);
+      nextc->precondmats[0]
+          = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
+                    FALSE);
     }
-    else nextc->directmats[0] 
-        = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
-                  TRUE);
-#else
-    nextc->directmats[0] 
-        = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
-                  TRUE);
-    nextc->precondmats[0] 
-        = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
-                  FALSE);
-    /*dumpMatCor(nextc->directmats[0], (double *)NULL, nextc->upnumeles[0]);*/
 
-#endif
     stoptimer;
     dirtime += dtime;
 
@@ -133,18 +130,18 @@ void mulMatDirect(ssystem *sys)
       Q2PDcnt[nextc->level][nextc->level]++;
     }
 
-#if DIRSOL == ON
-    /* transform A into LU */
-    if(eval_size > MAXSIZ) {
-      blkLUdecomp(sqrmat, trimat, up_size);
+    if (DIRSOL == ON) {
+      /* transform A into LU */
+      if(eval_size > MAXSIZ) {
+        blkLUdecomp(sqrmat, trimat, up_size);
+      }
+      else if(nextc == sys->directlist) {
+        starttimer;
+        nextc->directlu = ludecomp(sys, nextc->directmats[0], eval_size, TRUE);
+        stoptimer;
+        lutime += dtime;
+      }
     }
-    else if(nextc == sys->directlist) {
-      starttimer;
-      nextc->directlu = ludecomp(nextc->directmats[0], eval_size, TRUE);
-      stoptimer;
-      lutime += dtime;
-    }
-#endif
     
     starttimer;
     for(nummats=1, i=0; i < nextc->numnbrs; i++) {

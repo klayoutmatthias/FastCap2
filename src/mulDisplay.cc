@@ -894,7 +894,7 @@ void dumpConfig(FILE *fp, char *name)
   else fprintf(fp, " == %d (not implemented - use BD, OL or NONE)\n", PRECOND);
 
   fprintf(fp, "   DIRSOL");
-  if(DIRSOL == ON) 
+  if (DIRSOL == ON)
       fprintf(fp, " == ON (do the whole calculation directly)\n");
   else fprintf(fp, " == OFF (do the calculation iteratively)\n");
 

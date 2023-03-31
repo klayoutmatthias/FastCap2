@@ -1475,12 +1475,10 @@ charge *input_problem(ssystem *sys, char *argv[], int argc, int *autmom, int *au
 
   if(*autmom == ON) *numMom = DEFORD;
 
-#if DIRSOL == ON || EXPGCR == ON
-  /*fprintf(stderr, "DIRSOL and EXPGCR compile options not implemented\n");
-  exit(0);*/
-  *numLev = 0;	       	/* put all the charges in first cube */
-  *autlev = OFF;
-#endif
+  if (DIRSOL == ON || EXPGCR == ON) {
+    *numLev = 0;	       	/* put all the charges in first cube */
+    *autlev = OFF;
+  }
 
   strcpy(hostname, "18Sep92");
   fprintf(stdout, "Running %s %.1f (%s)\n  Input: %s\n", 
