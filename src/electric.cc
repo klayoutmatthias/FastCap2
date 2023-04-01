@@ -82,12 +82,12 @@ void compute_electric_fields(ssystem *sys, charge *chglist)
       }
 
       if (sys->dmpele && NUMDPT == 3) {
-        fprintf(stdout,
+        sys->msg(
                 "Electric flux density evaluation at (%g %g %g), panel %d\n",
                 cp->x, cp->y, cp->z, cp->index);
-        fprintf(stdout, "  pos_dummy at (%g %g %g), potential = %g\n",
+        sys->msg("  pos_dummy at (%g %g %g), potential = %g\n",
                 dummy->x, dummy->y, dummy->z, panel_voltages[dummy->index]);
-        fprintf(stdout, "  normal deriv on + side = %g(%g - %g)/%g = %g\n",
+        sys->msg("  normal deriv on + side = %g(%g - %g)/%g = %g\n",
                 surf->outer_perm,
                 panel_voltages[dummy->index], panel_voltages[cp->index],
                 dummy->area, flux_density);
@@ -98,9 +98,9 @@ void compute_electric_fields(ssystem *sys, charge *chglist)
       dummy = cp->neg_dummy;
 
       if (sys->dmpele && NUMDPT == 3) {
-        fprintf(stdout, "  neg_dummy at (%g %g %g), potential = %g\n",
+        sys->msg("  neg_dummy at (%g %g %g), potential = %g\n",
                 dummy->x, dummy->y, dummy->z, panel_voltages[dummy->index]);
-        fprintf(stdout, "  normal deriv on - side = %g(%g - %g)/%g = %g\n",
+        sys->msg("  normal deriv on - side = %g(%g - %g)/%g = %g\n",
                 surf->inner_perm,
                 panel_voltages[cp->index], panel_voltages[dummy->index],
                 dummy->area, surf->inner_perm *
@@ -118,7 +118,7 @@ void compute_electric_fields(ssystem *sys, charge *chglist)
       panel_voltages[cp->index] = flux_density;
 
       if (sys->dmpele && NUMDPT == 3) {
-        fprintf(stdout,
+        sys->msg(
                 "  flux density difference (pos side - neg side) = %g\n",
                 flux_density);
       }

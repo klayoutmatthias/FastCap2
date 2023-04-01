@@ -46,7 +46,7 @@ static int flip_normal(ssystem *sys, charge *panel);
 static int planarize(charge *pq);
 static void centroid(charge *pp, double x2);
 static void ComputeMoments(ssystem *sys, charge *pp);
-static void dp(charge *panel);
+static void dp(ssystem *sys, charge *panel);
 static double normalize(double vector[3]);
 
 #ifndef FALSE
@@ -108,7 +108,7 @@ void initcalcp(ssystem *sys, charge *panel_list)
 
   for(i=0, pq = panel_list; pq != NULL; pq = pq->next) i++;
   if (sys->jacdbg) {
-    fprintf(stdout, "Initial number of panels = %d\n", i);
+    sys->msg("Initial number of panels = %d\n", i);
   }
 
   pq = panel_list; 
@@ -278,16 +278,16 @@ int flip_normal(ssystem *sys, charge *panel)
   else if(!ref_inside && angle <= 0.0) flip_normal = FALSE;
   else if(!ref_inside && angle > 0.0) flip_normal = TRUE;
   else {
-    fprintf(stderr, 
+    sys->info(
 	    "flip_normal: inconclusive test for normal flipping\n");
-    fprintf(stderr, "  Surface: %s\n", hack_path(surf_name));
-    fprintf(stderr, "  Translation: (%g %g %g)\n", surf->trans[0],
+    sys->info("  Surface: %s\n", hack_path(surf_name));
+    sys->info("  Translation: (%g %g %g)\n", surf->trans[0],
 	    surf->trans[1], surf->trans[2]);
-    fprintf(stderr, "  Reference point: (%g %g %g)\n",
+    sys->info("  Reference point: (%g %g %g)\n",
 	    ref[0], ref[1], ref[2]);
-    fprintf(stderr, "  Panel corner: (%g %g %g)\n",
+    sys->info("  Panel corner: (%g %g %g)\n",
 	    panel->corner[0][0], panel->corner[0][1], panel->corner[0][2]);
-    fprintf(stderr, "  Normal: (%g %g %g)\n",
+    sys->info("  Normal: (%g %g %g)\n",
 	    normal[0], normal[1], normal[2]);
     sys->error("Internal error - see previous messages for details.");
   }
@@ -414,7 +414,7 @@ the placement of the collocation point
     CASE5: eval pnt proj. on side extension (happens when paneled 
       faces meet at right angles, also possible other ways).
 */
-double calcp(charge *panel, double x, double y, double z, double *pfd)
+double calcp(ssystem *sys, charge *panel, double x, double y, double z, double *pfd)
 {
   double r[4], fe[4], xmxv[4], ymyv[4];
   double xc, yc, zc, zsq, xn, yn, zn, znabs, xsq, ysq, rsq, diagsq, dtol;
@@ -562,12 +562,12 @@ double calcp(charge *panel, double x, double y, double z, double *pfd)
 
 
   if(fs < 0.0) {
-    fprintf(stderr, 
+    sys->info(
 	    "\ncalcp: panel potential coeff. less than zero = %g\n", fs);
-    fprintf(stderr, "Okay = %d Evaluation Point = %g %g %g\n", okay, x, y, z);
-    fprintf(stderr, "Evaluation Point in local coords = %g %g %g\n",xn,yn, zn);
-    fprintf(stderr, "Panel Description Follows\n");
-    dp(panel);
+    sys->info("Okay = %d Evaluation Point = %g %g %g\n", okay, x, y, z);
+    sys->info("Evaluation Point in local coords = %g %g %g\n",xn,yn, zn);
+    sys->info("Panel Description Follows\n");
+    dp(sys, panel);
     /*exit(0);*/
   }
 
@@ -588,24 +588,24 @@ void dumpnums(ssystem *sys, int flag, int size)
   else {
     total = num2ndsav + num4thsav + numexactsav;
     if (sys->muldat) {
-      fprintf(stdout, "Potential coefficient counts\n multipole only:\n");
-      fprintf(stdout,
+      sys->msg("Potential coefficient counts\n multipole only:\n");
+      sys->msg(
               "  2nd order: %d %.3g%%; 4th: %d %.3g%%; Integral: %d %.3g%%\n",
               num2nd, 100*(num2ndsav/total), num4th, 100*(num4thsav/total),
               numexact, 100*(numexactsav/total));
     }
     total = num2nd + num4th + numexact;
     if (sys->muldat) {
-      fprintf(stdout, " multipole plus adaptive:\n");
-      fprintf(stdout,
+      sys->msg(" multipole plus adaptive:\n");
+      sys->msg(
               "  2nd order: %d %.3g%%; 4th: %d %.3g%%; Integral: %d %.3g%%\n",
               num2nd, 100*(num2nd/total), num4th, 100*(num4th/total),
               numexact, 100*(numexact/total));
     }
-    fprintf(stdout, "Percentage of multiplies done by multipole: %.3g%%\n",
+    sys->msg("Percentage of multiplies done by multipole: %.3g%%\n",
 	    100*(size*size - total)/(size*size));
     if(size*size == total) 
-	fprintf(stdout, "Warning: no multipole acceleration\n");
+        sys->msg("Warning: no multipole acceleration\n");
   }
 }
 
@@ -729,7 +729,7 @@ static void ComputeMoments(ssystem *sys, charge *pp)
 
 /* Debugging Print Routines follow. */
 
-static void dp(charge *panel)
+static void dp(ssystem *sys, charge *panel)
 {
   int i;
   double c[4][3];
@@ -738,7 +738,7 @@ static void dp(charge *panel)
 	 panel->shape, 
 	 panel->max_diag, panel->min_diag, panel->area);
 
-  fprintf(stdout, "surface: `%s'\n", panel->surf->name);
+  sys->msg("surface: `%s'\n", panel->surf->name);
 
   printf("x=%g y=%g z=%g\n", panel->x, panel->y, panel->z);
   printf("X= %g %g %g\n", panel->X[0], panel->X[1], panel->X[2]);
@@ -775,7 +775,7 @@ static void dp(charge *panel)
 #define DIS 2
 #define SCALE 5
 
-static void testCalcp(charge *pp)
+static void testCalcp(ssystem *sys, charge *pp)
 {
 
   double offx, offy, offz, x, y, z, mult;
@@ -795,7 +795,7 @@ static void testCalcp(charge *pp)
 	y = offy + j * mult * SCALE;
 	z = offz + k * mult * SCALE;
 	printf("Eval pt = %g %g %g\n", x, y, z);
-        calcp(pp, x, y, z, NULL);
+	calcp(sys, pp, x, y, z, NULL);
       }
     }
   }

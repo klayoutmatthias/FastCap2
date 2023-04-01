@@ -252,7 +252,7 @@ static int placeq(int flag, ssystem *sys, charge *charges)
       exact_ratio = (double)exact_cubes_this_level/(double)cubes_this_level;
       if(exact_ratio > EXRTSH) 
           isexact = TRUE;       /* set up to terminate level build loop */
-      /* fprintf(stdout, "Level %d, %g%% exact\n", i, exact_ratio*100.0); */
+      /* sys->msg("Level %d, %g%% exact\n", i, exact_ratio*100.0); */
 
       /* clean up cube structs if need to go down another level */
       if(isexact == FALSE) {
@@ -329,9 +329,9 @@ static int placeq(int flag, ssystem *sys, charge *charges)
   for(nextq = charges; nextq != NULL; nextq = nextq->next) {
 #if 1 == 0
     if(tilelength(nextq) > length) {
-      fprintf(stderr,
+      sys->info(
               "\nplaceq: Warning, a panel is larger than the cube supposedly containing it\n");
-      fprintf(stderr,"  cube length = %g panel length = %g\n", 
+      sys->info("  cube length = %g panel length = %g\n", 
               length, tilelength(nextq));
       /* disfchg(nextq); */
     }
@@ -346,17 +346,17 @@ static int placeq(int flag, ssystem *sys, charge *charges)
       compq = nextc->chgs[i];
       if((compq->x == nextq->x) &&
          (compq->y == nextq->y) && (compq->z == nextq->z)) {
-        fprintf(stderr, "placeq: Warning, removing identical");
-        if(compq->shape == 3) fprintf(stderr, " triangular");
-        else if(compq->shape == 4) fprintf(stderr, " quadrilateral");
-        else fprintf(stderr, " illegal-shape");
-        fprintf(stderr, " panel\n  rmved ctr = (%g %g %g) surf = `%s'", 
+        sys->info("placeq: Warning, removing identical");
+        if(compq->shape == 3) sys->info(" triangular");
+        else if(compq->shape == 4) sys->info(" quadrilateral");
+        else sys->info(" illegal-shape");
+        sys->info(" panel\n  rmved ctr = (%g %g %g) surf = `%s'", 
                 compq->x, compq->y, compq->z, hack_path(compq->surf->name));
-        fprintf(stderr, " trans = (%g %g %g)\n", compq->surf->trans[0],
+        sys->info(" trans = (%g %g %g)\n", compq->surf->trans[0],
                 compq->surf->trans[1], compq->surf->trans[2]);
-        fprintf(stderr, "  saved ctr = (%g %g %g) surf = `%s'", 
+        sys->info("  saved ctr = (%g %g %g) surf = `%s'", 
                 nextq->x, nextq->y, nextq->z, hack_path(nextq->surf->name));
-        fprintf(stderr, " trans = (%g %g %g)\n", nextq->surf->trans[0],
+        sys->info(" trans = (%g %g %g)\n", nextq->surf->trans[0],
                 nextq->surf->trans[1], nextq->surf->trans[2]);
         /* Remove charge from linked list. */
         for(compq = charges; compq->next != nextq; compq = compq->next) {};

@@ -170,7 +170,7 @@ static int getConductorNumNoAdd(char *name, Name *name_list)
 /*
   gets the name (aliases are ignored) corresponding to a conductor number
 */
-char *getConductorName(int cond_num, Name **name_list)
+char *getConductorName(ssystem *sys, int cond_num, Name **name_list)
 {
   Name *cur_name;
   int i;
@@ -182,7 +182,7 @@ char *getConductorName(int cond_num, Name **name_list)
   }
 
   /* number not found */
-  fprintf(stderr, 
+  sys->info(
 	  "getConductorName: conductor no. %d not defined\n", cond_num);
   return(NULL);
 }
@@ -221,7 +221,7 @@ static int oldrenameConductor(ssystem *sys, char *old_name, char *new_name, Name
   }
 
   /* name not found */
-  fprintf(stderr, "renameConductor: unknown conductor `%s'\n", old_name);
+  sys->info("renameConductor: unknown conductor `%s'\n", old_name);
   return(FALSE);
 }
 
@@ -247,7 +247,7 @@ static int renameConductor(ssystem *sys, char *old_name, char *new_name, Name **
   }
 
   /* old name not found in entire list */
-  fprintf(stderr, "renameConductor: unknown conductor `%s'\n", old_name);
+  sys->info("renameConductor: unknown conductor `%s'\n", old_name);
   return(FALSE);
 
 }

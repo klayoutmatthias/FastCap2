@@ -121,12 +121,12 @@ int main_func(int argc, char *argv[])
   sys.num_cond = num_cond;
   sys.cond_names = name_list;
 
-  fprintf(stdout, "\nINPUT SUMMARY\n");
+  sys.msg("\nINPUT SUMMARY\n");
 
   if (sys.cmddat) {
-    fprintf(stdout, "  Expansion order: %d\n", numMom);
-    fprintf(stdout, "  Number of partitioning levels: %d\n", numLev);
-    fprintf(stdout, "  Overall permittivity factor: %.3g\n", relperm);
+    sys.msg("  Expansion order: %d\n", numMom);
+    sys.msg("  Number of partitioning levels: %d\n", numLev);
+    sys.msg("  Overall permittivity factor: %.3g\n", relperm);
   }
 
   /* Figure out number of panels and conductors. */
@@ -144,18 +144,18 @@ int main_func(int argc, char *argv[])
   eval_size = up_size + num_dummy_panels;
 
   if (! sys.dissrf) {
-    fprintf(stdout, "Title: `%s'\n", sys.title ? sys.title : "");
+    sys.msg("Title: `%s'\n", sys.title ? sys.title : "");
   }
-  fprintf(stdout, "  Total number of panels: %d\n", up_size);
-  fprintf(stdout, "    Number of conductor panels: %d\n", num_cond_panels);
-  fprintf(stdout, "    Number of dielectric interface panels: %d\n", 
+  sys.msg("  Total number of panels: %d\n", up_size);
+  sys.msg("    Number of conductor panels: %d\n", num_cond_panels);
+  sys.msg("    Number of dielectric interface panels: %d\n",
 	  num_dielec_panels);
-  fprintf(stdout, 
+  sys.msg(
 	  "    Number of thin conductor on dielectric interface panels: %d\n", 
 	  num_both_panels);
-  /*fprintf(stdout, "  Number of extra evaluation points: %d\n", 
+  /*sys.msg("  Number of extra evaluation points: %d\n",
 	  num_dummy_panels);*/
-  fprintf(stdout, "  Number of conductors: %d\n", num_cond);
+  sys.msg("  Number of conductors: %d\n", num_cond);
 
   if (sys.namdat) {
     dumpCondNames(stdout, name_list);
@@ -166,11 +166,11 @@ int main_func(int argc, char *argv[])
   }
 
   if (sys.ckclst) {
-    fprintf(stdout, "Checking panels...");
+    sys.msg("Checking panels...");
     if(has_duplicate_panels(stdout, chglist)) {
       sys.error("charge list has duplicates\n");
     }
-    fprintf(stdout, "no duplicates\n");
+    sys.msg("no duplicates\n");
   }
 
   if (sys.muldat) {
@@ -268,7 +268,7 @@ int main_func(int argc, char *argv[])
 
   }
 
-  fprintf(stdout, "\nITERATION DATA");
+  sys.msg("\nITERATION DATA");
   ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, real_index, num_cond,
 		     name_list);
 
@@ -281,56 +281,56 @@ int main_func(int argc, char *argv[])
     counters.multime = counters.uptime + counters.downtime + counters.evaltime;
     ttlsolve = counters.dirtime + counters.multime + counters.prectime + counters.conjtime;
 
-    fprintf(stdout, "\nTIME AND MEMORY USAGE SYNOPSIS\n");
+    sys.msg("\nTIME AND MEMORY USAGE SYNOPSIS\n");
   }
 
   if (sys.timdat) {
 
-    fprintf(stdout, "Total time: %g\n", ttlsetup + ttlsolve);
-    fprintf(stdout, "  Total setup time: %g\n", ttlsetup);
-    fprintf(stdout, "    Direct matrix setup time: %g\n", dirtimesav);
-    fprintf(stdout, "    Multipole matrix setup time: %g\n", mulsetup);
-    fprintf(stdout, "    Initial misc. allocation time: %g\n", initalltime);
-    fprintf(stdout, "  Total iterative P*q = psi solve time: %g\n", ttlsolve);
-    fprintf(stdout, "    P*q product time, direct part: %g\n", counters.dirtime);
-    fprintf(stdout, "    Total P*q time, multipole part: %g\n", counters.multime);
-    fprintf(stdout, "      Upward pass time: %g\n", counters.uptime);
-    fprintf(stdout, "      Downward pass time: %g\n", counters.downtime);
-    fprintf(stdout, "      Evaluation pass time: %g\n", counters.evaltime);
-    fprintf(stdout, "    Preconditioner solution time: %g\n", counters.prectime);
-    fprintf(stdout, "    Iterative loop overhead time: %g\n", counters.conjtime);
+    sys.msg("Total time: %g\n", ttlsetup + ttlsolve);
+    sys.msg("  Total setup time: %g\n", ttlsetup);
+    sys.msg("    Direct matrix setup time: %g\n", dirtimesav);
+    sys.msg("    Multipole matrix setup time: %g\n", mulsetup);
+    sys.msg("    Initial misc. allocation time: %g\n", initalltime);
+    sys.msg("  Total iterative P*q = psi solve time: %g\n", ttlsolve);
+    sys.msg("    P*q product time, direct part: %g\n", counters.dirtime);
+    sys.msg("    Total P*q time, multipole part: %g\n", counters.multime);
+    sys.msg("      Upward pass time: %g\n", counters.uptime);
+    sys.msg("      Downward pass time: %g\n", counters.downtime);
+    sys.msg("      Evaluation pass time: %g\n", counters.evaltime);
+    sys.msg("    Preconditioner solution time: %g\n", counters.prectime);
+    sys.msg("    Iterative loop overhead time: %g\n", counters.conjtime);
 
     if(sys.dirsol) {		/* if solution is done by Gaussian elim. */
-      fprintf(stdout,"\nTotal direct, full matrix LU factor time: %g\n", counters.lutime);
-      fprintf(stdout,"Total direct, full matrix solve time: %g\n", counters.fullsoltime);
-      fprintf(stdout, "Total direct operations: %d\n", counters.fulldirops);
+      sys.msg("\nTotal direct, full matrix LU factor time: %g\n", counters.lutime);
+      sys.msg("Total direct, full matrix solve time: %g\n", counters.fullsoltime);
+      sys.msg("Total direct operations: %d\n", counters.fulldirops);
     }
     else if (sys.expgcr) {	/* if solution done iteratively w/o multis */
-      fprintf(stdout,"\nTotal A*q operations: %d (%d/iter)\n",
+      sys.msg("\nTotal A*q operations: %d (%d/iter)\n",
               counters.fullPqops, counters.fullPqops/ttliter);
     }
 
-    fprintf(stdout, "Total memory allocated: %d kilobytes ", int(sys.heap.total_memory()/1024));
+    sys.msg("Total memory allocated: %d kilobytes ", int(sys.heap.total_memory()/1024));
 
-    fprintf(stdout, "  Q2M  matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  Q2M  matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AQ2M)/1024));
-    fprintf(stdout, "  Q2L  matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  Q2L  matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AQ2L)/1024));
-    fprintf(stdout, "  Q2P  matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  Q2P  matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AQ2P)/1024));
-    fprintf(stdout, "  L2L  matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  L2L  matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AL2L)/1024));
-    fprintf(stdout, "  M2M  matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  M2M  matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AM2M)/1024));
-    fprintf(stdout, "  M2L  matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  M2L  matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AM2L)/1024));
-    fprintf(stdout, "  M2P  matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  M2P  matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AM2P)/1024));
-    fprintf(stdout, "  L2P  matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  L2P  matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AL2P)/1024));
-    fprintf(stdout, "  Q2PD matrix memory allocated: %7.d kilobytes\n",
+    sys.msg("  Q2PD matrix memory allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AQ2PD)/1024));
-    fprintf(stdout, "  Miscellaneous mem. allocated: %7.d kilobytes\n",
+    sys.msg("  Miscellaneous mem. allocated: %7.d kilobytes\n",
             int(sys.heap.memory(AMSC)/1024));
 
   }

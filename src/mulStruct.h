@@ -339,7 +339,7 @@ struct ssystem
   void msg(const char *fmt, ...);
   void info(const char *fmt, ...);
   void warn(const char *fmt, ...);
-  void error(const char *fmt, ...);
+  [[noreturn]] void error(const char *fmt, ...);
 };
 
 #endif

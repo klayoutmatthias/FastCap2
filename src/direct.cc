@@ -63,14 +63,15 @@ double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int ca
           if(chgs[j]->pos_dummy == chgs[i] || chgs[j]->neg_dummy == chgs[i])
               continue;
         }
-	if(!is_dummy[j]) mat[i][j] = calcp(chgs[j], chgs[i]->x, chgs[i]->y, 
+        if(!is_dummy[j]) mat[i][j] = calcp(sys,
+                                           chgs[j], chgs[i]->x, chgs[i]->y,
 					   chgs[i]->z, NULL);
       }
     }
   }
 
   if (sys->dsq2pd) {
-    dispQ2PDiag(mat, chgs, numchgs, is_dummy);
+    dispQ2PDiag(sys, mat, chgs, numchgs, is_dummy);
   }
 
   return(mat);
@@ -95,14 +96,15 @@ double **Q2P(ssystem *sys, charge **qchgs, int numqchgs, int *is_dummy, charge *
       }
       for(j=0; j < numqchgs; j++) { /* only dummy panels in the charge list */
 	if(!is_dummy[j])          /* (not the eval list) are excluded */
-	    mat[i][j] = calcp(qchgs[j], pchgs[i]->x, pchgs[i]->y, 
+	    mat[i][j] = calcp(sys,
+			      qchgs[j], pchgs[i]->x, pchgs[i]->y,
 			      pchgs[i]->z, NULL); /* old: pchgs[i],qchgs[j] */
       }
     }
   }
 
   if (sys->disq2p) {
-    dispQ2P(mat, qchgs, numqchgs, is_dummy, pchgs, numpchgs);
+    dispQ2P(sys, mat, qchgs, numqchgs, is_dummy, pchgs, numpchgs);
   }
 
   return(mat);
@@ -136,7 +138,7 @@ double **Q2Pfull(ssystem *sys, cube *directlist, int numchgs)
       for(i = fromp; i < top; i++) {
 	for(j = fromq; j < toq; j++) { 
 	  eval = qchgs[j-fromq];
-	  mat[i][j] = calcp(pchgs[i-fromp],eval->x, eval->y, eval->z, NULL);
+	  mat[i][j] = calcp(sys, pchgs[i-fromp],eval->x, eval->y, eval->z, NULL);
 	}
       }
 

@@ -704,7 +704,7 @@ static char *getPatranName(ssystem *sys, int cond_num)
     else cname = cname->next;
   }
 
-  fprintf(stdout, "getPatranName: conductor %d has no name\n", cond_num);
+  sys->msg("getPatranName: conductor %d has no name\n", cond_num);
   return(NULL);
 
 }

@@ -92,8 +92,8 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     if(want_this_iter(sys->kill_num_list, cond)
        || want_this_iter(sys->kinp_num_list, cond)) continue;
 
-    fprintf(stdout, "\nStarting on column %d (%s)\n", cond, 
-	    getConductorName(cond, &name_list));
+    sys->msg("\nStarting on column %d (%s)\n", cond,
+            getConductorName(sys, cond, &name_list));
     fflush(stdout);
 
     /* Set up the initial residue vector and charge guess. */
@@ -142,9 +142,9 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     }
 
     if (sys->dmpchg == DMPCHG_LAST) {
-      fprintf(stdout, "\nPanel charges, iteration %d\n", iter);
+      sys->msg("\nPanel charges, iteration %d\n", iter);
       dumpChgDen(stdout, q, chglist);
-      fprintf(stdout, "End panel charges\n");
+      sys->msg("End panel charges\n");
     }
 
     if (sys->capvew) {
@@ -166,18 +166,18 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     }
 
     if (sys->rawdat) {
-      if(!sys->itrdat) fprintf(stdout, "\n");
-      fprintf(stdout, "cond=%d iters=%d\n", cond, iter);
+      if(!sys->itrdat) sys->msg("\n");
+      sys->msg("cond=%d iters=%d\n", cond, iter);
 
       for(i=1; i <= numconds; i++) {
-        fprintf(stdout, "c%d%d=%g  ", i, cond, (*capmat)[i][cond]);
-        if(i % 4 == 0) fprintf(stdout, "\n");
+        sys->msg("c%d%d=%g  ", i, cond, (*capmat)[i][cond]);
+        if(i % 4 == 0) sys->msg("\n");
       }
-      fprintf(stdout, "\n\n");
+      sys->msg("\n\n");
     }
 
     if (sys->itrdat && sys->rawdat) {
-      fprintf(stdout, "%d iterations\n", iter);
+      sys->msg("%d iterations\n", iter);
     }
 
   }
@@ -245,10 +245,10 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
     for(maxnorm = 0.0, i=1; i <= size; i++) maxnorm = MAX(ABS(r[i]),maxnorm);
     if (sys->itrdat) {
       INNER(norm, r, r, size);
-      fprintf(stdout, "max res = %g ||res|| = %g\n", maxnorm, sqrt(norm));
+      sys->msg("max res = %g ||res|| = %g\n", maxnorm, sqrt(norm));
     } else {
-      fprintf(stdout, "%d ", iter+1);
-      if((iter+1) % 15 == 0) fprintf(stdout, "\n");
+      sys->msg("%d ", iter+1);
+      if((iter+1) % 15 == 0) sys->msg("\n");
     }
     fflush(stdout);
     stoptimer;
@@ -269,7 +269,7 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
   }
   
   if(maxnorm >= tol) {
-    fprintf(stdout, "\ngcr: WARNING exiting without converging\n");
+    sys->msg("\ngcr: WARNING exiting without converging\n");
   }
   return(iter+1);
 }
@@ -309,7 +309,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   counters.conjtime += dtime;
 
   if (sys->itrdat) {
-    fprintf(stdout, "||res|| = %g\n", rnorm); /* initial guess residual norm */
+    sys->msg("||res|| = %g\n", rnorm); /* initial guess residual norm */
   }
   
   for(iter = 1; (iter <= maxiter) && (rnorm > tol); iter++) {
@@ -377,10 +377,10 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
     counters.conjtime += dtime;
 
     if (sys->itrdat) {
-      fprintf(stdout, "||res|| = %g\n", rnorm);
+      sys->msg("||res|| = %g\n", rnorm);
     } else {
-      fprintf(stdout, "%d ", iter);
-      if((iter) % 15 == 0 && iter != 0) fprintf(stdout, "\n");
+      sys->msg("%d ", iter);
+      if((iter) % 15 == 0 && iter != 0) sys->msg("\n");
     }
     fflush(stdout);
   }
@@ -423,7 +423,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   }
 
   if(rnorm > tol) {
-    fprintf(stdout, "\ngmres: WARNING exiting without converging\n");
+    sys->msg("\ngmres: WARNING exiting without converging\n");
   }
   return(iter);
 }
@@ -495,9 +495,9 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     counters.evaltime += dtime;
 
     if (sys->dmpchg == DMPCHG_LAST) {
-      fprintf(stdout, "\nPanel potentials divided by areas\n");
+      sys->msg("\nPanel potentials divided by areas\n");
       dumpChgDen(stdout, p, chglist);
-      fprintf(stdout, "End panel potentials\n");
+      sys->msg("End panel potentials\n");
     }
 
     /* convert the voltage vec entries on dielectric i/f's into eps1E1-eps2E2 */

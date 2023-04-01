@@ -523,7 +523,7 @@ static void dumpAxes(double ***axi, FILE *fp)
               AXEWID, LINCAP, LINJIN);
     fprintf(fp, " 0 setgray  stroke\n");
   }
-  /*fprintf(stderr, "Axes inserted\n");*/
+  /*sys->info("Axes inserted\n");*/
 }
 
 
@@ -1232,11 +1232,11 @@ void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines
   if(sys->n_) {
     /* numberFaces(faces, numfaces, fp); */
     numberLines(lines, numlines, fp);
-    /*fprintf(stderr, "Faces and lines numbered\n");*/
+    /*sys->info("Faces and lines numbered\n");*/
   }
 
   /* if fills were not included, say so
-  if(f_) fprintf(stderr, "Face fills not written to ps file\n"); */
+  if(f_) sys->info("Face fills not written to ps file\n"); */
 
   /* print shading key if not disabled and charge density info was inputed */
   if(sys->q_ && !sys->rk_ && !sys->m_)
@@ -1249,13 +1249,13 @@ void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines
       strcat(linein, " ");
     }
     dump_line_as_ps(fp, linein, OFFSETX+2*CMDFONT, IMAGEY-2*CMDFONT, CMDFONT);
-    /*fprintf(stderr, "Command line printed\n");*/
+    /*sys->info("Command line printed\n");*/
   }
    
   fprintf(fp, "vmr\nend  %% FreeHandDict\n");
   if(!sys->s_) {
     fprintf(fp, "showpage\n");
-    /*fprintf(stderr, "Showpage inserted\n");*/
+    /*sys->info("Showpage inserted\n");*/
   }
   fprintf(fp, "%%%%EndDocument: _\n");
 }

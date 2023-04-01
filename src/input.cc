@@ -449,11 +449,11 @@ static int dump_ilist(ssystem *sys)
   ITER *cur_iter;
 
   /* check the list for the iter number passed in */
-  fprintf(stdout, "Iter list:");
+  sys->msg("Iter list:");
   for(cur_iter = sys->qpic_num_list; cur_iter != NULL; cur_iter = cur_iter->next) {
-    fprintf(stdout, "%d ", cur_iter->iter);
+    sys->msg("%d ", cur_iter->iter);
   }
-  fprintf(stdout, "\n");
+  sys->msg("\n");
   return(TRUE);
 }
 
@@ -611,7 +611,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
       if(cur_panel->next == NULL) break;
     }
 
-    /*fprintf(stdout, "Surface %s has %d quads and %d tris\n", 
+    /*sys->msg("Surface %s has %d quads and %d tris\n",
 	    cur_surf->name, num_quads, num_tris);*/
 
     cur_surf->num_panels = num_panels;
@@ -765,7 +765,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       if(argv[i][1] == 'o') {
 	*numMom = (int) strtol(&(argv[i][2]), chkp, 10);
 	if(*chkp == &(argv[i][2]) || *numMom < 0) {
-	  fprintf(stderr, "%s: bad expansion order `%s'\n", 
+	  sys->info("%s: bad expansion order `%s'\n",
 		  argv[0], &argv[i][2]);
 	  cmderr = TRUE;
 	  break;
@@ -778,7 +778,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       else if(argv[i][1] == 'd') {
 	*numLev = (int) strtol(&(argv[i][2]), chkp, 10);
 	if(*chkp == &(argv[i][2]) || *numLev < 0) {
-	  fprintf(stderr, "%s: bad partitioning depth `%s'\n", 
+	  sys->info("%s: bad partitioning depth `%s'\n",
 		  argv[0], &argv[i][2]);
 	  cmderr = TRUE;
 	  break;
@@ -789,7 +789,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
 	if(sscanf(&(argv[i][2]), "%lf", relperm) != 1) cmderr = TRUE;
 	else if(*relperm <= 0.0) cmderr = TRUE;
 	if(cmderr) {
-	  fprintf(stderr, "%s: bad permittivity `%s'\n", argv[0], &argv[i][2]);
+	  sys->info("%s: bad permittivity `%s'\n", argv[0], &argv[i][2]);
 	  break;
 	}
       }
@@ -813,7 +813,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       }
       else if(argv[i][1] == 'a') {
         if(sscanf(&(argv[i][2]), "%lf", &sys->azimuth) != 1) {
-          fprintf(stderr, "%s: bad view point azimuth angle '%s'\n",
+          sys->info("%s: bad view point azimuth angle '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
           break;
@@ -821,7 +821,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       }
       else if(argv[i][1] == 'e') {
         if(sscanf(&(argv[i][2]), "%lf", &sys->elevation) != 1) {
-          fprintf(stderr, "%s: bad view point elevation angle '%s'\n",
+          sys->info("%s: bad view point elevation angle '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
           break;
@@ -829,7 +829,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       }
       else if(argv[i][1] == 't') {
         if(sscanf(&(argv[i][2]), "%lf", &sys->iter_tol) != 1 || sys->iter_tol <= 0.0) {
-          fprintf(stderr, "%s: bad iteration tolerence '%s'\n",
+          sys->info("%s: bad iteration tolerence '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
           break;
@@ -843,7 +843,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       else if(!strcmp(&(argv[i][1]), "rk")) sys->rk_ = true;
       else if(argv[i][1] == 'r') {
         if(sscanf(&(argv[i][2]), "%lf", &sys->rotation) != 1) {
-          fprintf(stderr, "%s: bad image rotation angle '%s'\n",
+          sys->info("%s: bad image rotation angle '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
           break;
@@ -853,7 +853,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         if(sscanf(&(argv[i][2]), "%lf", &sys->distance) != 1) cmderr = TRUE;
         else if(sys->distance <= 0.0) cmderr = TRUE;
         if(cmderr) {
-          fprintf(stderr, "%s: bad view point distance '%s'\n",
+          sys->info("%s: bad view point distance '%s'\n",
                   argv[0], &argv[i][2]);
           break;
         }
@@ -862,7 +862,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         if(sscanf(&(argv[i][2]), "%lf", &sys->scale) != 1) cmderr = TRUE;
         else if(sys->scale <= 0.0) cmderr = TRUE;
         if(cmderr) {
-          fprintf(stderr, "%s: bad image scale factor '%s'\n",
+          sys->info("%s: bad image scale factor '%s'\n",
                   argv[0], &argv[i][2]);
           break;
         }
@@ -870,7 +870,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       else if(argv[i][1] == 'w') {
         if(sscanf(&(argv[i][2]), "%lf", &sys->linewd) != 1) {
                                 /* no check for < 0 so dash (-1) is pos. */
-          fprintf(stderr, "%s: bad line width '%s'\n",
+          sys->info("%s: bad line width '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
           break;
@@ -882,7 +882,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         else {
           if(sscanf(&(argv[i][2]), "%lf", &sys->axeslen) != 1) {
                                 /* no check for < 0 so axes can flip */
-            fprintf(stderr, "%s: bad axes length '%s'\n",
+            sys->info("%s: bad axes length '%s'\n",
                     argv[0], &argv[i][2]);
             cmderr = TRUE;
             break;
@@ -908,13 +908,13 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         else if(!strcmp(&(argv[i][2]), "z") || !strcmp(&(argv[i][2]), "Z"))
             sys->up_axis = ZI;
         else {
-          fprintf(stderr, "%s: bad up axis type `%s' -- use x, y or z\n", argv[0], &(argv[i][2]));
+          sys->info("%s: bad up axis type `%s' -- use x, y or z\n", argv[0], &(argv[i][2]));
           cmderr = TRUE;
           break;
         }
       }
       else {
-	fprintf(stderr, "%s: illegal option -- %s\n", argv[0], &(argv[i][1]));
+        sys->info("%s: illegal option -- %s\n", argv[0], &(argv[i][1]));
 	cmderr = TRUE;
 	break;
       }
@@ -926,60 +926,60 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
 
   if (cmderr == TRUE) {
     if (sys->capvew) {
-      fprintf(stderr,
+      sys->info(
               "Usage: '%s [-o<expansion order>] [-d<partitioning depth>] [<input file>]\n                [-p<permittivity factor>] [-rs<cond list>] [-ri<cond list>]\n                [-] [-l<list file>] [-t<iter tol>] [-a<azimuth>] [-e<elevation>]\n                [-r<rotation>] [-h<distance>] [-s<scale>] [-w<linewidth>]\n                [-u<upaxis>] [-q<cond list>] [-rc<cond list>] [-x<axeslength>]\n                [-b<.figfile>] [-m] [-rk] [-rd] [-dc] [-c] [-v] [-n] [-f] [-g]\n", argv[0]);
-      fprintf(stderr, "DEFAULT VALUES:\n");
-      fprintf(stderr, "  expansion order = %d\n", DEFORD);
-      fprintf(stderr, "  partitioning depth = set automatically\n");
-      fprintf(stderr, "  permittivity factor = 1.0\n");
-      fprintf(stderr, "  iterative loop ||r|| tolerance = %g\n", ABSTOL);
-      fprintf(stderr, "  azimuth = %g\n  elevation = %g\n  rotation = %g\n",
+      sys->info("DEFAULT VALUES:\n");
+      sys->info("  expansion order = %d\n", DEFORD);
+      sys->info("  partitioning depth = set automatically\n");
+      sys->info("  permittivity factor = 1.0\n");
+      sys->info("  iterative loop ||r|| tolerance = %g\n", ABSTOL);
+      sys->info("  azimuth = %g\n  elevation = %g\n  rotation = %g\n",
               DEFAZM, DEFELE, DEFROT);
-      fprintf(stderr,
+      sys->info(
               "  distance = %g (0 => 1 object radius away from center)\n",
               DEFDST);
-      fprintf(stderr, "  scale = %g\n  linewidth = %g\n",
+      sys->info("  scale = %g\n  linewidth = %g\n",
               DEFSCL, DEFWID);
-      if(DEFUAX == XI) fprintf(stderr, "  upaxis = x\n");
-      else if(DEFUAX == YI) fprintf(stderr, "  upaxis = y\n");
-      else if(DEFUAX == ZI) fprintf(stderr, "  upaxis = z\n");
-      fprintf(stderr, "  axeslength = %g\n", DEFAXE);
-      fprintf(stderr, "OPTIONS:\n");
-      fprintf(stderr, "  -   = force conductor surface file read from stdin\n");
-      fprintf(stderr, "  -rs = remove conductors from solve list\n");
-      fprintf(stderr, "  -ri = remove conductors from input\n");
-      fprintf(stderr,
+      if(DEFUAX == XI) sys->info("  upaxis = x\n");
+      else if(DEFUAX == YI) sys->info("  upaxis = y\n");
+      else if(DEFUAX == ZI) sys->info("  upaxis = z\n");
+      sys->info("  axeslength = %g\n", DEFAXE);
+      sys->info("OPTIONS:\n");
+      sys->info("  -   = force conductor surface file read from stdin\n");
+      sys->info("  -rs = remove conductors from solve list\n");
+      sys->info("  -ri = remove conductors from input\n");
+      sys->info(
             "  -q  = select conductors for at-1V charge distribution .ps pictures\n");
-      fprintf(stderr,
+      sys->info(
             "  -rc = remove conductors from all charge distribution .ps pictures\n");
-      fprintf(stderr,
+      sys->info(
             "  -b  = superimpose lines, arrows and dots in .figfile on all .ps pictures\n");
-      fprintf(stderr, "  -m  = switch to dump-ps-picture-file-only mode\n");
-      fprintf(stderr,
+      sys->info("  -m  = switch to dump-ps-picture-file-only mode\n");
+      sys->info(
             "  -rk = remove key in shaded .ps picture file (use with -q option)\n");
-      fprintf(stderr,
+      sys->info(
             "  -rd = remove DIELEC type surfaces from all .ps picture files\n");
-      fprintf(stderr,
+      sys->info(
             "  -dc = display total charges in shaded .ps picture file (use with -q option)\n");
-      fprintf(stderr, "  -c  = print command line in .ps picture file\n");
-      fprintf(stderr, "  -v  = suppress showpage in all .ps picture files\n");
-      fprintf(stderr, "  -n  = number faces with input order numbers\n");
-      fprintf(stderr, "  -f  = do not fill in faces (don't rmv hidden lines)\n");
-      fprintf(stderr, "  -g  = dump depth graph and quit\n");
+      sys->info("  -c  = print command line in .ps picture file\n");
+      sys->info("  -v  = suppress showpage in all .ps picture files\n");
+      sys->info("  -n  = number faces with input order numbers\n");
+      sys->info("  -f  = do not fill in faces (don't rmv hidden lines)\n");
+      sys->info("  -g  = dump depth graph and quit\n");
     } else {
-      fprintf(stderr,
+      sys->info(
             "Usage: '%s [-o<expansion order>] [-d<partitioning depth>] [<input file>]\n                [-p<permittivity factor>] [-rs<cond list>] [-ri<cond list>]\n                [-] [-l<list file>] [-t<iter tol>]\n", argv[0]);
-      fprintf(stderr, "DEFAULT VALUES:\n");
-      fprintf(stderr, "  expansion order = %d\n", DEFORD);
-      fprintf(stderr, "  partitioning depth = set automatically\n");
-      fprintf(stderr, "  permittivity factor = 1.0\n");
-      fprintf(stderr, "  iterative loop ||r|| tolerance = %g\n", ABSTOL);
-      fprintf(stderr, "OPTIONS:\n");
-      fprintf(stderr, "  -   = force conductor surface file read from stdin\n");
-      fprintf(stderr, "  -rs = remove conductors from solve list\n");
-      fprintf(stderr, "  -ri = remove conductors from input\n");
+      sys->info("DEFAULT VALUES:\n");
+      sys->info("  expansion order = %d\n", DEFORD);
+      sys->info("  partitioning depth = set automatically\n");
+      sys->info("  permittivity factor = 1.0\n");
+      sys->info("  iterative loop ||r|| tolerance = %g\n", ABSTOL);
+      sys->info("OPTIONS:\n");
+      sys->info("  -   = force conductor surface file read from stdin\n");
+      sys->info("  -rs = remove conductors from solve list\n");
+      sys->info("  -ri = remove conductors from input\n");
     }
-    fprintf(stderr, "  <cond list> = [<name>],[<name>],...,[<name>]\n");
+    sys->info("  <cond list> = [<name>],[<name>],...,[<name>]\n");
     dumpConfig(sys, stderr, argv[0]);
     sys->error("Command line parsing failed.");
   }
@@ -1084,42 +1084,42 @@ static void dumpSurfDat(ssystem *sys, surface *surf_list)
 {
   surface *cur_surf;
 
-  fprintf(stdout, "  Input surfaces:\n");
+  sys->msg("  Input surfaces:\n");
   for(cur_surf = surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
 
     /* possibly write group name */
-    if(cur_surf == surf_list) fprintf(stdout, "   %s\n", cur_surf->group_name);
+    if(cur_surf == surf_list) sys->msg("   %s\n", cur_surf->group_name);
     else if(cur_surf->prev->end_of_chain)
-	fprintf(stdout, "   %s\n", cur_surf->group_name);
+        sys->msg("   %s\n", cur_surf->group_name);
 
     /* write file name */
-    fprintf(stdout, "    %s", hack_path(cur_surf->name));
+    sys->msg("    %s", hack_path(cur_surf->name));
     if(cur_surf->type == CONDTR) {
-      fprintf(stdout, ", conductor\n");
-      fprintf(stdout, "      title: `%s'\n", cur_surf->title);
-      fprintf(stdout, "      outer permittivity: %g\n", 
+      sys->msg(", conductor\n");
+      sys->msg("      title: `%s'\n", cur_surf->title);
+      sys->msg("      outer permittivity: %g\n",
 	      cur_surf->outer_perm);
     }
     else if(cur_surf->type == DIELEC) {
-      fprintf(stdout, ", dielectric interface\n");
-      fprintf(stdout, "      title: `%s'\n", cur_surf->title);
-      fprintf(stdout, "      permittivities: %g (inner) %g (outer)\n",
+      sys->msg(", dielectric interface\n");
+      sys->msg("      title: `%s'\n", cur_surf->title);
+      sys->msg("      permittivities: %g (inner) %g (outer)\n",
 	      cur_surf->inner_perm, cur_surf->outer_perm);
     }
     else if(cur_surf->type == BOTH) {
-      fprintf(stdout, ", thin conductor on dielectric interface\n");
-      fprintf(stdout, "      title: `%s'\n", cur_surf->title);
-      fprintf(stdout, "      permittivities: %g (inner) %g (outer)\n",
+      sys->msg(", thin conductor on dielectric interface\n");
+      sys->msg("      title: `%s'\n", cur_surf->title);
+      sys->msg("      permittivities: %g (inner) %g (outer)\n",
 	      cur_surf->inner_perm, cur_surf->outer_perm);
     }
     else {
       sys->error("dumpSurfDat: bad surface type\n");
     }
-    fprintf(stdout,"      number of panels: %d\n", 
+    sys->msg("      number of panels: %d\n",
 	    cur_surf->num_panels - cur_surf->num_dummies);
-    fprintf(stdout,"      number of extra evaluation points: %d\n",
+    sys->msg("      number of extra evaluation points: %d\n",
 	    cur_surf->num_dummies);
-    fprintf(stdout,"      translation: (%g %g %g)\n", 
+    sys->msg("      translation: (%g %g %g)\n",
 	    cur_surf->trans[0], cur_surf->trans[1], cur_surf->trans[2]);
 
   }
@@ -1256,7 +1256,7 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
   }
 
   strcpy(hostname, "18Sep92");
-  fprintf(stdout, "Running %s %.1f (%s)\n  Input: %s\n", 
+  sys->msg("Running %s %.1f (%s)\n  Input: %s\n",
           sys->argv[0], VERSION, hostname, infile);
 
   /* input the panels from the surface files */
@@ -1284,10 +1284,10 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
   }
 
   time(&clock);
-  fprintf(stdout, "  Date: %s", ctime(&clock));
+  sys->msg("  Date: %s", ctime(&clock));
   if(gethostname(hostname, BUFSIZ) != -1)
-      fprintf(stdout, "  Host: %s\n", hostname);
-  else fprintf(stdout, "  Host: ? (gethostname() failure)\n");
+      sys->msg("  Host: %s\n", hostname);
+  else sys->msg("  Host: ? (gethostname() failure)\n");
 
   if (sys->cfgdat) {
     dumpConfig(sys, stdout, sys->argv[0]);

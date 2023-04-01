@@ -110,22 +110,22 @@ static void dumpMatCor(ssystem *sys, double **mat, double *vec, int fsize)
   int i, j, size = 5;
 
   if(mat != NULL) {		/* full matrix */
-    fprintf(stdout, "\nUPPER LEFT CORNER - full %dx%d matrix\n", fsize, fsize);
+    sys->msg("\nUPPER LEFT CORNER - full %dx%d matrix\n", fsize, fsize);
     for(i = 0; i < MIN(size, fsize); i++) {
       for(j = 0; j < MIN(size, fsize); j++) {
-	fprintf(stdout, "%.5e ", mat[i][j]);
+        sys->msg("%.5e ", mat[i][j]);
       }
-      fprintf(stdout, "\n");
+      sys->msg("\n");
     }
 
   }
   else if(vec != NULL){			/* flat matrix as in blkDirect.c */
-    fprintf(stdout, "\nUPPER LEFT CORNER - flat %dx%d matrix\n", fsize, fsize);
+    sys->msg("\nUPPER LEFT CORNER - flat %dx%d matrix\n", fsize, fsize);
     for(i = 0; i < MIN(size, fsize); i++) {
       for(j = 0; j < MIN(size, fsize); j++) {
-	fprintf(stdout, "%.5e ", vec[SQDEX(i, j, fsize)]);
+        sys->msg("%.5e ", vec[SQDEX(i, j, fsize)]);
       }
-      fprintf(stdout, "\n");
+      sys->msg("\n");
     }
   }
 }
@@ -225,7 +225,7 @@ static void rdMat(ssystem *sys, double *mat, int siz, int file, int type)
     sys->error("rdMat: can't open '%s'\n", name);
   }
 
-  fprintf(stderr,"Reading %s...", name);
+  sys->info("Reading %s...", name);
 
   /* read the data and close */
   if(realsiz != read(fdis, (char *)mat, realsiz)) {
@@ -233,7 +233,7 @@ static void rdMat(ssystem *sys, double *mat, int siz, int file, int type)
   }
   close(fdis);
 
-  fprintf(stderr, "done.\n");
+  sys->info("done.\n");
 }
 
 /*
@@ -274,7 +274,7 @@ static void blkMatsolve(ssystem *sys, double *matsq, double *matri, int siz, int
   if(type == LOWMAT) {
     /* a row in the result matrix is a linear comb of the previous rows */
     for(i = 1; i < siz; i++) {	/* loop on rows */
-      fprintf(stderr, "%d ", i);
+      sys->info("%d ", i);
       for(j = 0; j < siz; j++) { /* loop on columns */
 	for(k = 0; k < i; k++) {	/* loop on previous rows */
 	  matsq[SQDEX(i, j, siz)]
@@ -283,12 +283,12 @@ static void blkMatsolve(ssystem *sys, double *matsq, double *matri, int siz, int
 	}
       }
     }
-    fprintf(stderr, "\n");
+    sys->info("\n");
   }
   else if(type == UPPMAT) {
     /* a column in the result matrix is a linear comb of the prev columns */
     for(j = 0; j < siz; j++) {	/* loop on columns */
-      fprintf(stderr, "%d ", j);
+      sys->info("%d ", j);
       for(i = 0; i < siz; i++) { /* loop on rows */
 	for(k = 0; k < j; k++) {	/* loop on previous columns */
 	  matsq[SQDEX(i, j, siz)]
@@ -299,7 +299,7 @@ static void blkMatsolve(ssystem *sys, double *matsq, double *matri, int siz, int
 	counters.fulldirops++;
       }
     }
-    fprintf(stderr, "\n");
+    sys->info("\n");
   }
   else {
     sys->error("blkMatsolve: bad type %d\n", type);
@@ -345,7 +345,7 @@ static void subInnerProd(ssystem *sys, double *matsq, double *matri, int siz, in
       sys->error("subInnerProd: can't open '%s'\n", name);
     }
     for(fromu = 0; fromu < siz; fromu += colimu) { /* loop on cols in u part */
-      fprintf(stderr, "%d-%d ", froml, fromu);
+      sys->info("%d-%d ", froml, fromu);
       readu = read(fdu, (char *)matriu, colimu*siz*ds);
       if(readu % (siz*ds) != 0) {	/* must read in col size chunks */
         sys->error("subInnerProd: read error from '%s'\n",
@@ -373,7 +373,7 @@ static void subInnerProd(ssystem *sys, double *matsq, double *matri, int siz, in
     /* close the u file so it can be reread for next set of l rows */
     close(fdu);
   }
-  fprintf(stderr, "\n");
+  sys->info("\n");
   close(fdl);
 }
 
@@ -392,7 +392,7 @@ static void blkLudecomp(ssystem *sys, double *mat, int size)
     if(mat[SQDEX(k, k, size)] == 0.0) {
       sys->error("blkLudecomp: zero piovt\n");
     }
-    fprintf(stderr,"%d ", k);
+    sys->info("%d ", k);
     for(i = k+1; i < size; i++) { /* loop on remaining rows */
       factor = (mat[SQDEX(i, k, size)] /= mat[SQDEX(k, k, size)]);
       counters.fulldirops++;
@@ -402,7 +402,7 @@ static void blkLudecomp(ssystem *sys, double *mat, int size)
       }
     }
   }
-  fprintf(stderr, "\n");
+  sys->info("\n");
 }
 
 /*
@@ -413,7 +413,7 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
 {
   int i, k;
 
-  fprintf(stdout, "blkSolve: fwd elimination...");
+  sys->msg("blkSolve: fwd elimination...");
   fflush(stdout);
 
   /* forward elimination, solve Ly = b (x becomes y) */
@@ -451,7 +451,7 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
   stoptimer;
   counters.fullsoltime += dtime;
 
-  fprintf(stdout, "back substitution...");
+  sys->msg("back substitution...");
   fflush(stdout);
 
   /* back substitute, solve Ux = y (x converted in place from y to x) */
@@ -489,7 +489,7 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
   stoptimer;
   counters.fullsoltime += dtime;
 
-  fprintf(stdout, "done.\n\n");
+  sys->msg("done.\n\n");
   fflush(stdout);
 }
 
@@ -564,7 +564,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
 	  j_real = (*real_index)[fromq+j];
 	  ASSERT(!(qpan = qchgs[j_real])->dummy);
 
-	  (*sqrArray)[SQDEX(i, j, numchgs/2)] = calcp(qpan, ppan->x, ppan->y, 
+	  (*sqrArray)[SQDEX(i, j, numchgs/2)] = calcp(sys, qpan, ppan->x, ppan->y,
 						      ppan->z, NULL);
 	  /* old: qchgs[from+j], pchgs[fromp+i] */
 	  /* older: pchgs[fromp+i], qchgs[fromq+j] */
@@ -577,10 +577,10 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
 
 	    /* effectively do one columns worth of two row ops, get div dif */
 	    (*sqrArray)[SQDEX(i, j, numchgs/2)]
-		= (pos_fact*calcp(qpan, ppan->pos_dummy->x, ppan->pos_dummy->y,
+		= (pos_fact*calcp(sys, qpan, ppan->pos_dummy->x, ppan->pos_dummy->y,
 				  ppan->pos_dummy->z, NULL)
 		   - (pos_fact + neg_fact)*(*sqrArray)[SQDEX(i, j, numchgs/2)]
-		   + neg_fact*calcp(qpan, ppan->neg_dummy->x, 
+		   + neg_fact*calcp(sys, qpan, ppan->neg_dummy->x,
 				    ppan->neg_dummy->y, ppan->neg_dummy->z,
 				    NULL));
 	  }
@@ -597,8 +597,8 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
       else wrMat(sys, *sqrArray, numchgs/2, LTIL, SQRMAT);
     }
   }
-  fprintf(stderr, "Initial dump to disk complete\n\n");
-  fprintf(stdout, "Initial dump to disk complete\n\n");
+  sys->info("Initial dump to disk complete\n\n");
+  sys->msg("Initial dump to disk complete\n\n");
   fflush(stdout);
 
 }
@@ -630,8 +630,8 @@ void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
   matXfer(sys, sqrArray, triArray, numchgs/2, LO2TR); /* lower part to triArr */
   wrMat(sys, triArray, numchgs/2, L11, TRIMAT);
 
-  fprintf(stderr, "A11 factorization complete\n\n");
-  fprintf(stdout, "\nblkLUdecomp: A11 factored...");
+  sys->info("A11 factorization complete\n\n");
+  sys->msg("\nblkLUdecomp: A11 factored...");
   fflush(stdout);
 
   /* load A12 and solve in place for U12 and write (L11 in position alrdy) */
@@ -644,8 +644,8 @@ void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
 
   wrMat(sys, sqrArray, numchgs/2, U12, COLMAT); /* store as columns */
 
-  fprintf(stderr, "A12 factorization complete\n\n");
-  fprintf(stdout, "A12 factored...");
+  sys->info("A12 factorization complete\n\n");
+  sys->msg("A12 factored...");
   fflush(stdout);
 
   /* load A21 and U11, solve in place for L21 and write */
@@ -659,8 +659,8 @@ void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
 
   wrMat(sys, sqrArray, numchgs/2, L21, SQRMAT); /* store as rows */
 
-  fprintf(stderr, "A21 factorization complete\n\n");
-  fprintf(stdout, "A21 factored...");
+  sys->info("A21 factorization complete\n\n");
+  sys->msg("A21 factored...");
   fflush(stdout);
 
   /* load A22 and subtract off (L21)(U12) product 1/4 matrix at a time */
@@ -678,8 +678,8 @@ void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
   matXfer(sys, sqrArray, triArray, numchgs/2, LO2TR); /* lower part to triArr */
   wrMat(sys, triArray, numchgs/2, LTIL, TRIMAT);
 
-  fprintf(stderr, "Block factorization complete\n\n");
-  fprintf(stdout, "done.\n");
+  sys->info("Block factorization complete\n\n");
+  sys->msg("done.\n");
   fflush(stdout);
 }
 

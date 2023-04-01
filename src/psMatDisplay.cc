@@ -149,13 +149,13 @@ static void dump_aldus_foot(FILE *fp, int insert_showpage, char *argv[], int arg
     strcat(line, aux_str);
     dump_line_as_ps(fp, line, OFFSETX+2*CMDFONT, OFFSETY+IMAGEY+CMDFONT/2, 
 		    CMDFONT);
-    /* fprintf(stderr, "Command line printed\n"); */
+    /* sys->info("Command line printed\n"); */
   }
 
   fprintf(fp, "vmr\nend  %% FreeHandDict\n");
   if(insert_showpage) {
     fprintf(fp, "showpage\n");
-    /* fprintf(stderr, "Showpage inserted\n"); */
+    /* sys->info("Showpage inserted\n"); */
   }
   fprintf(fp, "%%%%EndDocument: _\n");
 

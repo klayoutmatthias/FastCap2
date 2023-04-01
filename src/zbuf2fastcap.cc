@@ -83,11 +83,11 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   rhs = getNormal(sys, normal, radius, avg, sys->view, sys->distance);
 
   if (false) {
-    fprintf(stderr, " %d faces read\n", numfaces);
-    fprintf(stderr, " %d lines read\n", numlines);
-    fprintf(stderr, " average obj point: (%g %g %g), radius = %g\n",
+    sys->info(" %d faces read\n", numfaces);
+    sys->info(" %d lines read\n", numlines);
+    sys->info(" average obj point: (%g %g %g), radius = %g\n",
             avg[0], avg[1], avg[2], radius);
-    fprintf(stderr, " absolute view point: (%g %g %g)\n",
+    sys->info(" absolute view point: (%g %g %g)\n",
             sys->view[0],sys->view[1],sys->view[2]);
   }
 
@@ -99,15 +99,15 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   else sprintf(str, "%s%d.ps", sys->ps_file_base, cond);
 
   /* set up the adjacency graph for the depth sort */
-  fprintf(stdout, "\nSorting %d faces for %s...", numfaces, str);
+  sys->msg("\nSorting %d faces for %s...", numfaces, str);
   fflush(stdout);
   getAdjGraph(sys, faces, numfaces, sys->view, rhs, normal);
-  fprintf(stdout, "done.\n");
+  sys->msg("done.\n");
 
   /* depth sort the faces */
-  /*fprintf(stderr, "Starting depth sort...");*/
+  /*sys->info("Starting depth sort...");*/
   sfaces = depthSortFaces(sys, faces, numfaces);
-  /*fprintf(stderr, "done.\n");*/
+  /*sys->info("done.\n");*/
 
   /* get the 2d figure and dump to ps file */
   image(sys, sfaces, numfaces, lines, numlines, normal, rhs, sys->view);
@@ -122,9 +122,9 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
     if((fp = fopen(str, "w")) == NULL) {
       sys->error("dump_ps_geometry: can't open\n `%s'\nto write\n", str);
     }
-    fprintf(stdout, "Writing %s...", str);
+    sys->msg("Writing %s...", str);
     dumpPs(sys, sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density, black, white);
-    fprintf(stdout, "done.\n");
+    sys->msg("done.\n");
     fclose(fp);
   }
 }

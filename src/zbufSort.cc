@@ -175,7 +175,7 @@ static int doLinesIntersect(double *isect, double *from1, double *to1, double *f
   double det, temp1, temp2;
 
 #if DEBUGX == ON
-  fprintf(stdout, "seg1 = (%g %g) (%g %g) seg2 = (%g %g) (%g %g)\n",
+  sys->msg("seg1 = (%g %g) (%g %g) seg2 = (%g %g) (%g %g)\n",
 	  from1[0], from1[1], to1[0], to1[1], from2[0], from2[1], 
 	  to2[0], to2[1]);
 #endif
@@ -349,7 +349,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
     margin = sqrt(dot(tvec, tvec))*MARGIN;
     /* test fails if v-c is perpendicular to n */
     if(temp > -margin && temp < margin) {
-      fprintf(stderr, 
+      sys->info(
 	      "is1stFaceDeeper: Warning, view-corner in view plane (?)\n");
       return(FALSE);
     }
@@ -387,7 +387,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
   /* up to here is identical to isThereBoxOverlap() */
   /* for each side of facref, see if there is an intersect. w/ all fac sides */
 #if DEBUGX == ON
-  fprintf(stdout, "Is face %d behind face %d?\n", fac->index, facref->index);
+  sys->msg("Is face %d behind face %d?\n", fac->index, facref->index);
 #endif
   is_overlap = FALSE;
   for(i = 0; i < facref->numsides && !is_overlap; i++) {
@@ -401,7 +401,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
       if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
 	  is_overlap = TRUE;
 #if DEBUGX == ON
-      fprintf(stdout, "doLinesIntersect returned %d\n", intersect);
+      sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
     }
   }
@@ -424,7 +424,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
 	if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
 	    is_overlap = TRUE;
 #if DEBUGX == ON
-	fprintf(stdout, "doLinesIntersect returned %d\n", intersect);
+	sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
       }
     }
@@ -443,7 +443,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
 	if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
 	    is_overlap = TRUE;
 #if DEBUGX == ON
-	fprintf(stdout, "doLinesIntersect returned %d\n", intersect);
+	sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
       }
     }
@@ -474,7 +474,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
   }
 
   if(all_pos && all_neg) {
-    fprintf(stderr, 
+    sys->info(
 	 "\nis1stFaceDeeper: Warning, all projection coefficients are zero\n");
     return(FALSE);
   }
@@ -547,7 +547,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
   /* live dangerously---no perpendicular check */
   temp = dot(normal, view);
   if(temp == 0.0) {
-    fprintf(stderr, 
+    sys->info(
 	"is1stFaceDeeper: origin-view vector perpendicular to view plane\n");
   }
   /* get projection alpha */
@@ -558,7 +558,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
   for(j = 0; j < 3; j++) tvec[j] = view[j];
   tvec[0] -= 1.0;
   if((temp = dot(normal, tvec)) == 0.0) {
-    fprintf(stderr,
+    sys->info(
 	    "is1stFaceDeeper: x-view vector perpendicular to view plane\n");
   }
   /* get projection alpha */
@@ -598,7 +598,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
 
   /* for each side of facref, see if there is an intersect. w/ all fac sides */
 #if DEBUGX == ON
-  fprintf(stdout, "Is face %d behind face %d?\n", fac->index, facref->index);
+  sys->msg("Is face %d behind face %d?\n", fac->index, facref->index);
 #endif
   is_overlap = FALSE;
   isect_cnt = 0;
@@ -617,7 +617,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
 	is_overlap = TRUE;
       }
 #if DEBUGX == ON
-      fprintf(stdout, "doLinesIntersect returned %d\n", intersect);
+      sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
     }
   }
@@ -640,7 +640,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
 	if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
 	    is_overlap = TRUE;
 #if DEBUGX == ON
-	fprintf(stdout, "doLinesIntersect returned %d\n", intersect);
+	sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
       }
     }
@@ -659,7 +659,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
 	if((intersect = doLinesIntersect(isect, cfr, ctr, cff, ctf)) == TRUE)
 	    is_overlap = TRUE;
 #if DEBUGX == ON
-	fprintf(stdout, "doLinesIntersect returned %d\n", intersect);
+	sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
       }
     }
@@ -710,15 +710,15 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
   if(diff_is_negative(alpha_facref, alpha_fac, 1.0)) return(TRUE);
   else if(diff_is_negative(alpha_fac, alpha_facref, 1.0)) return(REVERSE);
   else {
-    fprintf(stderr, 
+    sys->info(
 	    "\nis1stFaceDeeper: Warning, face ordering test failure\n");
-    fprintf(stderr, "  alpha_fac, face %d = %g alpha_facref, face %d = %g\n", 
+    sys->info("  alpha_fac, face %d = %g alpha_facref, face %d = %g\n",
 	    fac->index, alpha_fac, facref->index, alpha_facref);
     dump_face(stderr, fac);
-    fprintf(stderr, " Projected corners\n");
+    sys->info(" Projected corners\n");
     dumpCorners(stderr, cproj[0], fac->numsides, 3);
     dump_face(stderr, facref);
-    fprintf(stderr, " Projected corners\n");
+    sys->info(" Projected corners\n");
     dumpCorners(stderr, cproj[1], facref->numsides, 3);
 
     return(FALSE);		/* inconclusive test */
@@ -951,9 +951,9 @@ void getAdjGraph(ssystem *sys, face **faces, int numfaces, double *view, double 
       else if(check == REVERSE) fpchk->behind[(fpchk->numbehind)++] = fpcur;
     }
     if(f % 20 == 0 && f != 0) {
-      fprintf(stdout, "%d ", f);
+      sys->msg("%d ", f);
       fflush(stdout);
     }
-    if(f % 200 == 0 && f != 0) fprintf(stdout, "\n");
+    if(f % 200 == 0 && f != 0) sys->msg("\n");
   }
 }

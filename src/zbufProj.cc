@@ -57,14 +57,14 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
       for(k = 0; k < 3; k++) temp[k] = axes[i][j][k]-view[k];
       alpha = (rhs-dot(view, normal))/dot(temp, normal);
       if(alpha <= MARGIN) {
-	fprintf(stderr, 
+	sys->info(
       "image: warning, view point is btwn view plane and axis pt, alpha=%g\n",
 		alpha);
-	/*fprintf(stderr, 
+	/*sys->info(
 		"%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
 		i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
 		view[0],view[1],view[2]);
-	fprintf(stderr, " rhs = %g\n", rhs);
+	sys->info(" rhs = %g\n", rhs);
 	sys->error("See previous messages for details.");
 	*/
       }
@@ -78,14 +78,14 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
       for(k = 0; k < 3; k++) temp[k] = (faces[i]->c)[j][k]-view[k];
       alpha = (rhs-dot(view, normal))/dot(temp, normal);
       if(alpha <= MARGIN) {
-	fprintf(stderr, 
+	sys->info(
 		"image: view point is btwn view plane and object, alpha=%g\n",
 		alpha);
-	fprintf(stderr, 
+	sys->info(
 		"%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
 		i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
 		view[0],view[1],view[2]);
-	fprintf(stderr, " rhs = %g\n", rhs);
+	sys->info(" rhs = %g\n", rhs);
 	sys->error("See previous messages for details.");
       }
       for(k = 0; k < 3; k++) (faces[i]->c)[j][k] = view[k]+alpha*temp[k];
@@ -97,28 +97,28 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
     for(k = 0; k < 3; k++) temp[k] = (lines[i]->from)[k]-view[k];
     alpha = (rhs-dot(view, normal))/dot(temp, normal);
     if(alpha <= MARGIN) {
-      fprintf(stderr, 
+      sys->info(
 	      "image: from point is btwn view plane and object, alpha=%g\n",
 	      alpha);
-      fprintf(stderr, 
+      sys->info(
 	      "%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
 	      i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
 	      view[0],view[1],view[2]);
-      fprintf(stderr, " rhs = %g\n", rhs);
+      sys->info(" rhs = %g\n", rhs);
       sys->error("See previous messages for details.");
     }
     for(k = 0; k < 3; k++) (lines[i]->from)[k] = view[k]+alpha*temp[k];
     for(k = 0; k < 3; k++) temp[k] = (lines[i]->to)[k]-view[k];
     alpha = (rhs-dot(view, normal))/dot(temp, normal);
     if(alpha <= MARGIN) {
-      fprintf(stderr, 
+      sys->info(
 	      "image: to point is btwn view plane and object, alpha=%g\n",
 	      alpha);
-      fprintf(stderr, 
+      sys->info(
 	      "%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
 	      i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
 	      view[0],view[1],view[2]);
-      fprintf(stderr, " rhs = %g\n", rhs);
+      sys->info(" rhs = %g\n", rhs);
       sys->error("See previous messages for details.");
     }
     for(k = 0; k < 3; k++) (lines[i]->to)[k] = view[k]+alpha*temp[k];

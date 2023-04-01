@@ -288,9 +288,9 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   }
 
   if (sys->dalq2m) {
-    fprintf(stdout,
+    sys->msg(
             "\nQ2M MATRIX BUILD:\n    AFTER LEGENDRE FUNCTION EVALUATON\n");
-    dumpMat(mat, terms, numchgs);
+    dumpMat(sys, mat, terms, numchgs);
   }
 
   /* some of this can be avoided using is_dummy to skip unused columns */
@@ -305,8 +305,8 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   }
 
   if (sys->dalq2m) {
-    fprintf(stdout,"    AFTER ADDITION OF RHO^N FACTORS\n");
-    dumpMat(mat, terms, numchgs);
+    sys->msg("    AFTER ADDITION OF RHO^N FACTORS\n");
+    dumpMat(sys, mat, terms, numchgs);
   }
 
   /* copy result to lower (sine) part of matrix */
@@ -319,8 +319,8 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   }
 
   if (sys->dalq2m) {
-    fprintf(stdout,"    AFTER COPYING SINE (LOWER) HALF\n");
-    dumpMat(mat, terms, numchgs);
+    sys->msg("    AFTER COPYING SINE (LOWER) HALF\n");
+    dumpMat(sys, mat, terms, numchgs);
   }
 
   /* add factors of cos(m*beta) and sin(m*beta) to matrix entries */
@@ -344,7 +344,7 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   }
 
   if (sys->disq2m) {
-    dispQ2M(mat, chgs, numchgs, x, y, z, order);
+    dispQ2M(sys, mat, chgs, numchgs, x, y, z, order);
   }
 
   return(mat);
@@ -445,7 +445,7 @@ double **mulMulti2Multi(ssystem *sys, double x, double y, double z, double xp, d
     }
   }
   if (sys->dism2m) {
-    dispM2M(mat, x, y, z, xp, yp, zp, order);
+    dispM2M(sys, mat, x, y, z, xp, yp, zp, order);
   }
   return(mat);
 }
@@ -478,9 +478,9 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dalm2p) {
-    fprintf(stdout,
+    sys->msg(
             "\nM2P MATRIX BUILD:\n    AFTER LEGENDRE FUNCTION EVALUATON\n");
-    dumpMat(mat, numchgs, terms);
+    dumpMat(sys, mat, numchgs, terms);
   }
 
   /* add the (1/r)^n+1 factors to the left (cos(m*phi)) half of the matrix */
@@ -494,9 +494,9 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dalm2p) {
-    fprintf(stdout,
+    sys->msg(
             "    AFTER ADDITION OF (1/R)^N+1 FACTORS\n");
-    dumpMat(mat, numchgs, terms);
+    dumpMat(sys, mat, numchgs, terms);
   }
 
   /* add the factorial fraction factors to the left (cos(m*phi)) part of mat */
@@ -508,9 +508,9 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dalm2p) {
-    fprintf(stdout,
+    sys->msg(
             "    AFTER ADDITION OF FACTORIAL FRACTION FACTORS\n");
-    dumpMat(mat, numchgs, terms);
+    dumpMat(sys, mat, numchgs, terms);
   }
 
   /* copy left half of matrix to right half for sin(m*phi) terms */
@@ -523,9 +523,9 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dalm2p) {
-    fprintf(stdout,
+    sys->msg(
             "    AFTER COPYING SINE (RIGHT) HALF\n");
-    dumpMat(mat, numchgs, terms);
+    dumpMat(sys, mat, numchgs, terms);
   }
 
   /* add factors of cos(m*phi) and sin(m*phi) to left and right halves resp. */
@@ -540,7 +540,7 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dism2p) {
-    dispM2P(mat, x, y, z, chgs, numchgs, order);
+    dispM2P(sys, mat, x, y, z, chgs, numchgs, order);
   }
 
   return(mat);

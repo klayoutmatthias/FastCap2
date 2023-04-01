@@ -52,7 +52,7 @@ misc. global macros
 #define NOT !
 #define  ABORT()						      \
 {   (void)fflush(stdout);					      \
-    (void)fprintf(stderr, "FastCap: panic in file `%s' at line %d.\n",\
+    (void)sys->info("FastCap: panic in file `%s' at line %d.\n",\
             __FILE__, __LINE__);				      \
     (void)fflush(stderr);					      \
     abort();							      \

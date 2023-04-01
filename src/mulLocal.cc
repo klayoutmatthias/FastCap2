@@ -69,8 +69,8 @@ void evalFacFra(ssystem *sys, double **array, int order)
   }
 
   if (sys->disfac) {
-    fprintf(stdout, "FACTORIAL FRACTION ARRAY:\n");
-    dumpMat(array, 2*order+1, 2*order+1);
+    sys->msg("FACTORIAL FRACTION ARRAY:\n");
+    dumpMat(sys, array, 2*order+1, 2*order+1);
   }
 }
 
@@ -93,7 +93,7 @@ void evalSqrtFac(ssystem * /*sys*/, double **arrayout, double **arrayin, int ord
 
   /* TODO: not available as option
   if (sys->dissfa) {
-    fprintf(stdout, "SQUARE ROOT FACTORIAL ARRAY:\n");
+    sys->msg("SQUARE ROOT FACTORIAL ARRAY:\n");
     dumpMat(arrayout, order+1, order+1);
   }
   */
@@ -209,7 +209,7 @@ double **mulMulti2Local(ssystem *sys, double x, double y, double z, double xp, d
   }
 
   if (sys->dism2l) {
-    dispM2L(mat, x, y, z, xp, yp, zp, order);
+    dispM2L(sys, mat, x, y, z, xp, yp, zp, order);
   }
 
   return(mat);
@@ -304,7 +304,7 @@ double **mulLocal2Local(ssystem *sys, double x, double y, double z, double xc, d
   }
 
   if (sys->disl2l) {
-    dispL2L(mat, x, y, z, xc, yc, zc, order);
+    dispL2L(sys, mat, x, y, z, xc, yc, zc, order);
   }
 
   return(mat);
@@ -340,9 +340,9 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   }
 
   if (sys->dalq2l) {
-    fprintf(stdout,
+    sys->msg(
             "\nQ2L MATRIX BUILD:\n    AFTER LEGENDRE FUNCTION EVALUATON\n");
-    dumpMat(mat, terms, numchgs);
+    dumpMat(sys, mat, terms, numchgs);
   }
 
   /* add the rho^n+1 factors to the cos matrix entries. */
@@ -355,8 +355,8 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   }
 
   if (sys->dalq2l) {
-    fprintf(stdout,"    AFTER ADDITION OF (1/RHO)^N+1 FACTORS\n");
-    dumpMat(mat, terms, numchgs);
+    sys->msg("    AFTER ADDITION OF (1/RHO)^N+1 FACTORS\n");
+    dumpMat(sys, mat, terms, numchgs);
   }
 
   /* copy result to lower (sine) part of matrix */
@@ -369,8 +369,8 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   }
 
   if (sys->dalq2l) {
-    fprintf(stdout,"    AFTER COPYING SINE (LOWER) HALF\n");
-    dumpMat(mat, terms, numchgs);
+    sys->msg("    AFTER COPYING SINE (LOWER) HALF\n");
+    dumpMat(sys, mat, terms, numchgs);
   }
 
   /* add factors of cos(m*beta) and sin(m*beta) to matrix entries */
@@ -400,7 +400,7 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   }
 
   if (sys->disq2l) {
-     dispQ2L(mat, chgs, numchgs, x, y, z, order);
+     dispQ2L(sys, mat, chgs, numchgs, x, y, z, order);
   }
 
   return(mat);
@@ -431,9 +431,9 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dall2p) {
-    fprintf(stdout,
+    sys->msg(
             "\nL2P MATRIX BUILD:\n    AFTER LEGENDRE FUNCTION EVALUATON\n");
-    dumpMat(mat, numchgs, terms);
+    dumpMat(sys, mat, numchgs, terms);
   }
 
   /* add the r^n factors to the left (cos(m*phi)) half of the matrix */
@@ -447,9 +447,9 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dall2p) {
-    fprintf(stdout,
+    sys->msg(
             "    AFTER ADDITION OF R^N FACTORS\n");
-    dumpMat(mat, numchgs, terms);
+    dumpMat(sys, mat, numchgs, terms);
   }
 
   /* add the factorial fraction factors to the left (cos(m*phi)) part of mat */
@@ -460,9 +460,9 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dall2p) {
-    fprintf(stdout,
+    sys->msg(
             "    AFTER ADDITION OF FACTORIAL FRACTION FACTORS\n");
-    dumpMat(mat, numchgs, terms);
+    dumpMat(sys, mat, numchgs, terms);
   }
 
   /* copy left half of matrix to right half for sin(m*phi) terms */
@@ -475,9 +475,9 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->dall2p) {
-    fprintf(stdout,
+    sys->msg(
             "    AFTER COPYING SINE (RIGHT) HALF\n");
-    dumpMat(mat, numchgs, terms);
+    dumpMat(sys, mat, numchgs, terms);
   }
 
   /* add factors of cos(m*phi) and sin(m*phi) to left and right halves resp. */
@@ -492,7 +492,7 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   if (sys->disl2p) {
-    dispL2P(mat, x, y, z, chgs, numchgs, order);
+    dispL2P(sys, mat, x, y, z, chgs, numchgs, order);
   }
 
   return(mat);
