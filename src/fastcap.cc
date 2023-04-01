@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
   if(sys.capvew && sys.m_) {
     if(!sys.q_) get_ps_file_base(&sys);
     dump_ps_geometry(&sys, chglist, NULL, 0, sys.dd_);
-    exit(0);
+    return 0;
   }
 
   starttimer;
@@ -146,16 +146,13 @@ int main(int argc, char *argv[])
   }
 
   if(num_both_panels > 0) {
-    fprintf(stderr, 
-	    "Thin cond panels on dielectric interfaces not supported\n");
-    exit(0);
+    sys.error("Thin cond panels on dielectric interfaces not supported\n");
   }
 
   if (sys.ckclst) {
     fprintf(stdout, "Checking panels...");
     if(has_duplicate_panels(stdout, chglist)) {
-      fprintf(stdout, "charge list has duplicates\n");
-      exit(-1);
+      sys.error("charge list has duplicates\n");
     }
     fprintf(stdout, "no duplicates\n");
   }

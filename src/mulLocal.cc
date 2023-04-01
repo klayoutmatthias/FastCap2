@@ -181,7 +181,7 @@ double **mulMulti2Local(ssystem *sys, double x, double y, double z, double xp, d
 	  }
 	  else {
 	    temp1 = sys->mm.tleg[CINDEX(j+n, abs(m-k))]
-		*sys->mm.facFrA[j+n-abs(m-k)][n+m]*iPwr(abs(k-m)-k-m);
+		*sys->mm.facFrA[j+n-abs(m-k)][n+m]*iPwr(sys, abs(k-m)-k-m);
 	    temp2 = sys->mm.tleg[CINDEX(j+n, m+k)]*sys->mm.facFrA[j+n-m-k][n+m];
 	    temp3 = sys->mm.tleg[CINDEX(j+n, k)]*sys->mm.facFrA[j+n-k][n]*2;
 
@@ -265,11 +265,11 @@ double **mulLocal2Local(ssystem *sys, double x, double y, double z, double xc, d
 	  }
 	  else {
 	    if(n-j >= abs(m-k)) temp1 = sys->mm.tleg[CINDEX(n-j, abs(m-k))]
-		*sys->mm.facFrA[0][n-j+abs(m-k)]*iPwr(m-k-abs(m-k))*rhoFac;
+		*sys->mm.facFrA[0][n-j+abs(m-k)]*iPwr(sys, m-k-abs(m-k))*rhoFac;
 	    if(n-j >= m+k) temp2 = sys->mm.tleg[CINDEX(n-j, m+k)]
-		*sys->mm.facFrA[0][n-j+m+k]*iPwr(2*k)*rhoFac;
+		*sys->mm.facFrA[0][n-j+m+k]*iPwr(sys, 2*k)*rhoFac;
 	    if(n-j >= k) temp3 = 2*sys->mm.tleg[CINDEX(n-j, k)]
-		*sys->mm.facFrA[0][n-j+k]*iPwr(2*k)*rhoFac;
+		*sys->mm.facFrA[0][n-j+k]*iPwr(sys, 2*k)*rhoFac;
 
 	    /* generate bar(N)j^k entry */
 	    if(m != 0) {
@@ -377,9 +377,9 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   for(m = 0; m <= order; m++) {	/* lp on m in Mn^m */
     for(n = m; n <= order; n++) { /* loop over rows with same m */
       for(j = 0; j < numchgs; j++) { /* add factors to a row */
-	if(m == 0)  mat[CINDEX(n, m)][j] *= fact(n); /* j! part of bar(N)j^0 */
+        if(m == 0)  mat[CINDEX(n, m)][j] *= fact(sys, n); /* j! part of bar(N)j^0 */
 	else {			/* for Nj^k, k != 0 */
-	  temp = 2.0*fact(n-m);    	/* find the factorial for moment */
+	  temp = 2.0*fact(sys, n-m);    	/* find the factorial for moment */
 	  mat[CINDEX(n, m)][j] *= (temp*cos(sys->mm.Betam[j]));   /* note mul by 2 */
 	  mat[SINDEX(n, m, cterms)][j] *= (temp*sin(sys->mm.Betam[j]));
 	}
@@ -455,7 +455,7 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   /* add the factorial fraction factors to the left (cos(m*phi)) part of mat */
   for(n = 0; n <= order; n++) {
     for(m = 0; m <= n; m++) {
-      for(i = 0; i < numchgs; i++) mat[i][CINDEX(n, m)] /= fact(n+m);
+      for(i = 0; i < numchgs; i++) mat[i][CINDEX(n, m)] /= fact(sys, n+m);
     }
   }
 

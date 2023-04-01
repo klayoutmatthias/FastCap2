@@ -118,7 +118,7 @@ double getPlane(double *normal, double *p1, double *p2, double *p3)
 /*
   returns POS, NEG or SPLIT for which side face corners are rel to plane
 */
-static int whichSide(face *fac, face *facplane)
+static int whichSide(ssystem *sys, face *fac, face *facplane)
 {
   int i, neg, pos, zero;
   double value[MAXSIDES];      	/* holds values when subbed in plane equ */
@@ -149,10 +149,8 @@ static int whichSide(face *fac, face *facplane)
     else if(value[i] > 0.0) pos++;
     else if(value[i] < 0.0) neg++;
     else {
-      fprintf(stderr, 
-	      "\nwhichSide: strange corner, value = %g, rhs = %g, dot = %g\n",
-	      value[i], facplane->rhs, temp[i]);
-      exit(0);
+      sys->error("whichSide: strange corner, value = %g, rhs = %g, dot = %g\n",
+                 value[i], facplane->rhs, temp[i]);
     }
   }
   if(neg > 0 && pos == 0) return(NEG);
@@ -160,10 +158,10 @@ static int whichSide(face *fac, face *facplane)
   else if(pos > 0 && neg > 0) return(SPLIT);
   else if(zero == fac->numsides) return(SAME);
   else {
-    fprintf(stderr,"\nwhichSide: face has %d corners, %d pos %d neg %d zero\n",
+    sys->error("whichSide: face has %d corners, %d pos %d neg %d zero\n",
 	    fac->numsides, pos, neg, zero);
-    exit(0);
   }
+  return SAME;
 }
 
 /*
@@ -451,9 +449,8 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
     }
   }
   else {
-    fprintf(stderr, "isThereProjOverlap: can't handle %d side panel\n",
+    sys->error("isThereProjOverlap: can't handle %d side panel\n",
 	    facref->numsides);
-    exit(0);
   }
 #else
   /* no sides overlap---check if one face completely obscures the other */
@@ -668,9 +665,8 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
     }
   }
   else {
-    fprintf(stderr, "isThereProjOverlap: can't handle %d side panel\n",
+    sys->error("isThereProjOverlap: can't handle %d side panel\n",
 	    facref->numsides);
-    exit(0);
   }
 #else
   /* no sides overlap---check if one face completely obscures the other */
@@ -756,9 +752,8 @@ static int isThereBoxOverlap(face *fac, face *facref, double *view)
     /* get alpha as in c + alpha*(v-c) = c' */
     alpha[i] = (facref->rhs - dot(facref->normal, fac->c[i]))/temp;
     /* if(alpha[i] < -margin || alpha[i] > 1.0+margin) {
-      fprintf(stderr, "\nisThereBoxOverlap: big X failure, alpha = %g\n",
+      sys->error("isThereBoxOverlap: big X failure, alpha = %g\n",
 	      alpha[i]);
-      exit(0);
     } */
     for(j = 0; j < 3; j++)	/* get c' */
 	cproj[i][j] = (1.0-alpha[i])*fac->c[i][j]+alpha[i]*view[j];
@@ -821,71 +816,6 @@ static int isThereBoxOverlap(face *fac, face *facref, double *view)
   if(olap[0] == FALSE || olap[1] == FALSE) return(FALSE);
   else return(TRUE);
 }
-
-#if 1 == 0
-/*
-  returns TRUE if 1st face is deeper than second - uses Don's 3d X method
-  - returns FALSE in don't care situations (1st need not be ordered before 2nd)
-*/
-int is1stFaceDeeper(first, second, view)
-face *first, *second;
-double *view;
-{
-  int fst, snd, ret = SAME;
-
-  /* figure on which side of each face plane lies the other face */
-  fst = whichSide(first, second); /* first relative to plane of second */
-  snd = whichSide(second, first); /* second relative to plane of first */
-
-  /* figure returned value */
-  if((fst == NEG && snd == NEG) || (fst == POS && snd == POS) ||
-      (fst == SAME && snd == SAME))
-      ret = FALSE;		/* order arbitrary */
-  else if((fst == NEG && snd == POS)) ret = TRUE;
-  else if((fst == POS && snd == NEG)) ret = FALSE;
-  else if(fst == NEG && snd == SPLIT) ret = TRUE;
-  else if(fst == POS && snd == SPLIT) ret = FALSE;
-  else if(fst == SPLIT && snd == POS) ret = TRUE;
-  else if(fst == SPLIT && snd == NEG) ret = FALSE;
-  /* next four added 22 Aug 91 w/o really thinking
-     - catches false SAME's ? */
-/*  else if(fst == NEG && snd == SAME) ret = TRUE;
-  else if(fst == POS && snd == SAME) ret = FALSE;
-  else if(fst == SAME && snd == POS) ret = TRUE;
-  else if(fst == SAME && snd == NEG) ret = FALSE; */
-  else if(snd == SPLIT && fst == SPLIT) {
-    return(isThereProjOverlap(first, second, view));
-#if 1 == 0
-    /* if both are split, see if they interact at all */
-    if(isThereProjOverlap(first, second, view) == FALSE) ret = FALSE;
-    else {
-      fprintf(stderr, 
-	      "\nis1stFaceDeeper: unresolvable both faces split case\n");
-      ret = TRUE;		/* don't order--try to order w/other check
-				   sometimes works, sometimes not */
-    }
-#endif
-  }
-  if(ret == SAME) {
-    fprintf(stderr,"\nis1stFaceDeeper: bad fst = %d and snd = %d\n", fst, snd);
-    exit(0);
-  }
-  else if(ret == TRUE) {	/* make sure 2nd could overlap 1st */
-    if(isThereProjOverlap(first, second, view) == FALSE) ret = FALSE;
-  }
-  return(ret);
-}
-/*
-#else
-
-int is1stFaceDeeper(first, second, view)
-face *first, *second;
-double *view;
-{
-  return(isThereProjOverlap(first, second, view));
-}
-*/
-#endif
 
 /*
   recursive guts of below
@@ -989,8 +919,7 @@ face **depthSortFaces(ssystem *sys, face **faces, int numfaces)
       }
     }
     if(facefound == FALSE) {
-      fprintf(stderr, "\ndepthSortFaces: can't find depth %d face\n", f);
-      exit(0);
+      sys->error("depthSortFaces: can't find depth %d face\n", f);
     }
   }
   return(rfaces);

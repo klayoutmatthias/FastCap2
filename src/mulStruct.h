@@ -337,6 +337,9 @@ struct ssystem
   Heap heap;                    //  allocation heap
 
   void msg(const char *fmt, ...);
+  void info(const char *fmt, ...);
+  void warn(const char *fmt, ...);
+  void error(const char *fmt, ...);
 };
 
 #endif

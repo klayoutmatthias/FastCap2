@@ -109,8 +109,8 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 
       /* do a direct forward elimination/back solve for the charge vector */
       if(size > MAXSIZ) {		/* index from 1 here, from 0 in solvers */
-        blkCompressVector(r+1, size, real_size, sys->is_dummy+1);
-        blkSolve(q+1, r+1, real_size, trimat, sqrmat);
+        blkCompressVector(sys, r+1, size, real_size, sys->is_dummy+1);
+        blkSolve(sys, q+1, r+1, real_size, trimat, sqrmat);
         blkExpandVector(q+1, size, real_size, real_index);
       }
       else {
@@ -128,14 +128,12 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
       if (ITRTYP == GMRES) {
         if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,sys->iter_tol,chglist))
            > maxiter) {
-          fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
-          exit(0);
+          sys->error("NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
         }
       } else {
         if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,sys->iter_tol,chglist))
            > maxiter) {
-          fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
-          exit(0);
+          sys->error("NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
         }
       }
 
@@ -455,8 +453,8 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 
   if (sys->expgcr) {
 
-    blkCompressVector(q+1, size, real_size, sys->is_dummy+1);
-    blkAqprod(p+1, q+1, real_size, sqrmat);	/* offset since index from 1 */
+    blkCompressVector(sys, q+1, size, real_size, sys->is_dummy+1);
+    blkAqprod(sys, p+1, q+1, real_size, sqrmat);	/* offset since index from 1 */
     blkExpandVector(p+1, size, real_size, real_index); /* ap changed to p, r chged to q */
     blkExpandVector(q+1, size, real_size, real_index); /*    7 Oct 91 */
 
@@ -507,7 +505,8 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 
     if (OPCNT == ON) {
       printops();
-      exit(0);
+      //  TODO: remove?
+      //  exit(0);
     }
 
   }

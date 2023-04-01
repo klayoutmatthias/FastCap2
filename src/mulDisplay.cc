@@ -442,7 +442,7 @@ void chkList(ssystem *sys, int listtype)
 	fprintf(stderr, " ok cubes ");
 	for(j = 0; j <= depth; j++) fprintf(stderr, "lev%d: %d ", j, cnt[j]);
 	fprintf(stderr, "\n");
-	exit(0);
+	sys->error("List check error - see previous messages for details");
       }
     }
     /* check number of kids */
@@ -451,7 +451,7 @@ void chkList(ssystem *sys, int listtype)
       fprintf(stderr, " ok cubes ");
       for(j = 0; j <= depth; j++) fprintf(stderr, "lev%d: %d ", j, cnt[j]);
       fprintf(stderr, "\n");
-      exit(0);
+      sys->error("List check error - see previous messages for details");
     }
     /* if lowest level, check status of eval and direct vects */
     if(lev == depth) {
@@ -460,14 +460,14 @@ void chkList(ssystem *sys, int listtype)
 	fprintf(stderr, " ok cubes ");
 	for(j = 0; j <= depth; j++) fprintf(stderr, "lev%d: %d ", j, cnt[j]);
 	fprintf(stderr, "\n");
-	exit(0);
+	sys->error("List check error - see previous messages for details");
       }
       if(nc->evalnumvects == 0 && listtype == EVAL) {
 	fprintf(stderr, "chkList: level %d cube has no eval info\n", lev);
 	fprintf(stderr, " ok cubes ");
 	for(j = 0; j <= depth; j++) fprintf(stderr, "lev%d: %d ", j, cnt[j]);
 	fprintf(stderr, "\n");
-	exit(0);
+	sys->error("List check error - see previous messages for details");
       }
     }
     cnt[lev]++;
@@ -475,8 +475,7 @@ void chkList(ssystem *sys, int listtype)
     else if(listtype == LOCAL) nc = nc->lnext;
     else if(listtype == EVAL) nc = nc->enext;
     else {
-      fprintf(stderr, "chkList: bad flag\n");
-      exit(0);
+      sys->error("chkList: bad flag\n");
     }
   }
   if(listtype == DIRECT) fprintf(stdout, "\nDirect ");
@@ -510,22 +509,18 @@ static void chkCube(ssystem *sys, cube *nc, int listtype)
     /* check number of kids */
     if(lev == depth && nc->numkids != 0) {
       fprintf(stdout, "chkCube: level %d cube has children\n", lev);
-/*      exit(0);*/
     }
     /* if lowest level, check status of eval and direct vects */
     if(lev == depth) {
       if(nc->dindex == 0) {
 	fprintf(stdout, "chkCube: level %d cube has zero direct index\n", lev);
-/*	exit(0);*/
       }
       if(nc->directnumeles == NULL) {
 	fprintf(stdout, 
 		"chkCube: level %d cube has NULL directnumeles\n", lev);
-/*	exit(0);*/
       }
       if(nc->evalnumvects == 0 && listtype == EVAL) {
 	fprintf(stdout, "chkCube: level %d cube has no eval info\n", lev);
-/*	exit(0);*/
       }
       if(nc->eval == NULL && listtype == EVAL) {
 	fprintf(stdout, "chkCube: level %d cube has no eval pntr\n", lev);
@@ -1179,8 +1174,7 @@ void dump_preconditioner(ssystem *sys, charge *chglist, int type)
 
   /* open the output file */
   if((fp = fopen("prec.mat","w")) == NULL) {
-    fprintf(stderr, "dump_preconditioner: can't open `prec.mat'\n");
-    exit(0);
+    sys->error("dump_preconditioner: can't open `prec.mat'\n");
   }
 
   if(type == 1 || type == 3) {
@@ -1217,8 +1211,7 @@ void dump_preconditioner(ssystem *sys, charge *chglist, int type)
         if(pp->index == j) break;
       }
       if(pp == NULL) {
-        fprintf(stderr, "dump_preconditioner: no charge with index %d\n", j);
-        exit(0);
+        sys->error("dump_preconditioner: no charge with index %d\n", j);
       }
       for(i = 0; i < num_panels+1; i++) sys->p[i] = 0.0;
       /* find the column---influence of q_j on potentials at each q_i */
@@ -1279,7 +1272,7 @@ int has_duplicate_panels(FILE *fp, charge *chglst)
 /*
   dump the condensed matrix for matlab use
 */
-void dumpQ2PDiag(cube *nextc)
+void dumpQ2PDiag(ssystem *sys, cube *nextc)
 {
   int i, j, ind, pos_d, neg_d;
   double temp[BUFSIZ], temp_mat[100][100], **rmat;
@@ -1289,12 +1282,10 @@ void dumpQ2PDiag(cube *nextc)
   /* dump the diag matrix to a matlab file along with its dummy vector */
   /*   must complie on sobolev with /usr/local/matlab/loadsave/savemat.o */
   if((fp = fopen("Q2PDiag.mat", "w")) == NULL) {
-    fprintf(stderr, "dumpQ2PDiag: can't open `Q2PDiag.mat' to write\n");
-    exit(0);
+    sys->error("dumpQ2PDiag: can't open `Q2PDiag.mat' to write\n");
   }
   if(sizeof(temp) < nextc->upnumeles[0]*nextc->upnumeles[0]) {
-    fprintf(stderr, "dumpQ2PDiag: temporary arrays not big enough\n");
-    exit(0);
+    sys->error("dumpQ2PDiag: temporary arrays not big enough\n");
   }
 
   /* incorporate the electric field evaluation into the matrix */
@@ -1354,28 +1345,6 @@ void dumpQ2PDiag(cube *nextc)
   fclose(fp);
   fprintf(stdout, "Dumped Q2PDiag matrix to `Q2PDiag.mat'\n");
 }
-
-#if 1 == 0
-/*
-  for debug only on SPARC2 -- NaN trap error handler (see man matherr)
-*/
-int matherr(exc)
-struct exception *exc;
-{
-  fprintf(stderr, "matherr: ");
-
-  if(exc->type == DOMAIN) fprintf(stderr, "DOMAIN error in");
-  else if(exc->type == SING) fprintf(stderr, "SING error in");
-  else if(exc->type == OVERFLOW) fprintf(stderr, "OVERFLOW error in");
-  else if(exc->type == UNDERFLOW) fprintf(stderr, "UNDERFLOW error in");
-
-  fprintf(stderr, " %s\n", exc->name);
-
-  fprintf(stderr, " args: %g %g returning: %g\n", exc->arg1, exc->arg2,
-	  exc->retval);
-  exit(0);
-}
-#endif
 
 /*
   debug only - check a vector to make sure it has zeros in dummy entries

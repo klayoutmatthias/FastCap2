@@ -125,9 +125,8 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
   
   /* attempt to open file list file */
   if((fp = fopen(list_file, "r")) == NULL) {
-    fprintf(stderr, "read_list_file: can't open list file\n  `%s'\nto read\n", 
-	    list_file);
-    exit(0);
+    sys->error("read_list_file: can't open list file\n  `%s'\nto read\n",
+               list_file);
   }
 
   /* read file names and permittivities, build linked list */
@@ -139,10 +138,8 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
     if(tline[0] == 'C' || tline[0] == 'c') {
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf", 
 		file_name, &outer_perm, &tx, &ty, &tz) != 5) {
-	fprintf(stderr, 
-	       "read_list_file: bad conductor surface format, tline %d:\n%s\n",
-		linecnt, tline);
-	exit(0);
+	sys->error("read_list_file: bad conductor surface format, tline %d:\n%s\n",
+		   linecnt, tline);
       }
 
       /* check if end of chain of surfaces with same conductor numbers */
@@ -185,10 +182,8 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf", 
 		file_name, &outer_perm, &inner_perm, &tx, &ty, &tz,
 		&rx, &ry, &rz) != 9) {
-	fprintf(stderr, 
-		"read_list_file: bad thin conductor on dielectric interface surface format, line %d:\n%s\n",
-		linecnt, tline);
-	exit(0);
+	sys->error("read_list_file: bad thin conductor on dielectric interface surface format, line %d:\n%s\n",
+		   linecnt, tline);
       }
 
       /* check if end of chain of surfaces with same conductor numbers */
@@ -244,10 +239,8 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf", 
 		file_name, &outer_perm, &inner_perm, &tx, &ty, &tz,
 		&rx, &ry, &rz) != 9) {
-	fprintf(stderr, 
-		"read_list_file: bad dielectric interface surface format, line %d:\n%s\n",
-		linecnt, tline);
-	exit(0);
+	sys->error("read_list_file: bad dielectric interface surface format, line %d:\n%s\n",
+		   linecnt, tline);
       }
 
       /* check to see if reference point is negative side of surface */
@@ -293,119 +286,20 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
     }
     else if(tline[0] == 'G' || tline[0] == 'g') {
       if(sscanf(&(tline[1]), "%s", group_name) != 1) {
-	fprintf(stderr,"read_list_file: bad group name format, line %d:\n%s\n",
-		linecnt, tline);
-	exit(0);
+        sys->error("read_list_file: bad group name format, line %d:\n%s\n",
+                   linecnt, tline);
       }
     }
     else if(tline[0] == '%' || tline[0] == '*' ||
 	    tline[0] == '#'); /* ignore comments */
     else {
-      fprintf(stderr, "read_list_file: bad line format, line %d:\n%s\n", 
-		linecnt, tline);
-      exit(0);
+      sys->error("read_list_file: bad line format, line %d:\n%s\n",
+                 linecnt, tline);
     }
   }
   fclose(fp);
 
 }
-
-#if 1 == 0			/* now done one panel at a time in initcalcp */
-
-/*
-  TEMPORARY: works best for closed surfaces in which case ref should
-    be a point inside with ref_inside = TRUE
-  can also be used with open surfaces: ref = point on - side, ref_inside = TRUE
-  will not work if the surface folds back on itself (and other ways too)
-*/
-void align_normals(panel_list, surf)
-surface *surf;
-charge *panel_list;
-{
-  int i, flip_normal;
-  charge *nc;
-  double ctr_minus_n[3], ctr_plus_n[3], norm_minus, norm_plus, norm, norm_sq;
-  double x, y, z, *normal, *direction, *tempd;
-  int ref_inside = surf->ref_inside;
-  double *ref = surf->ref, temp;
-  char *surf_name = surf->name;
-
-  for(nc = panel_list; nc != NULL; nc = nc->next) {
-
-    /* get panel position (relative to reference point) and normal */
-    x = nc->x - ref[0]; y = nc->y - ref[1]; z = nc->z - ref[2];
-    norm_sq = x*x + y*y + z*z;
-    norm = sqrt(norm_sq);
-    normal = nc->Z;
-
-    /* add the (scaled) normal and negative normal to the panel center */
-    /* negative normal result should be closer to ref point if(ref_inside) */
-    ctr_minus_n[0] = x - 0.1*norm*normal[0];
-    ctr_minus_n[1] = y - 0.1*norm*normal[1];
-    ctr_minus_n[2] = z - 0.1*norm*normal[2];
-    ctr_plus_n[0] = x + 0.1*norm*normal[0];
-    ctr_plus_n[1] = y + 0.1*norm*normal[1];
-    ctr_plus_n[2] = z + 0.1*norm*normal[2];
-
-    /* get norms of test points, one inside (minus) other out (plus) */
-    norm_minus = ctr_minus_n[0]*ctr_minus_n[0];
-    norm_plus = ctr_plus_n[0]*ctr_plus_n[0];
-    for(i = 1; i < 3; i++) {
-      norm_minus += ctr_minus_n[i]*ctr_minus_n[i];
-      norm_plus += ctr_plus_n[i]*ctr_plus_n[i];
-    }
-
-    flip_normal = FALSE;
-    if(norm_minus > norm_sq) {
-      if(norm_plus > norm_sq) {
-	fprintf(stderr, 
-		"align_normals: both test points on non-reference side\n");
-	fprintf(stderr, "  Surface: %s\n", hack_path(surf_name));
-	fprintf(stderr, "  Translation: (%g %g %g)\n", surf->trans[0],
-		surf->trans[1], surf->trans[2]);
-	fprintf(stderr, "  Reference point: (%g %g %g)\n",
-		ref[0], ref[1], ref[2]);
-	fprintf(stderr, "  Panel cntr: (%g %g %g)\n",
-		nc->x, nc->y, nc->z);
-	fprintf(stderr, "  Normal: (%g %g %g)\n",
-		normal[0], normal[1], normal[2]);
-	exit(0);
-      }
-      if(ref_inside) flip_normal = TRUE;
-    }
-    else if(norm_plus < norm_sq) {
-      if(norm_minus < norm_sq) {
-	fprintf(stderr, 
-		"align_normals: both test points on reference point side\n");
-	fprintf(stderr, "  Surface: %s\n", hack_path(surf_name));
-	fprintf(stderr, "  Translation: (%g %g %g)\n", surf->trans[0],
-		surf->trans[1], surf->trans[2]);
-	fprintf(stderr, "  Reference point: (%g %g %g)\n",
-		ref[0], ref[1], ref[2]);
-	fprintf(stderr, "  Panel cntr: (%g %g %g)\n",
-		nc->x, nc->y, nc->z);
-	fprintf(stderr, "  Normal: (%g %g %g)\n",
-		normal[0], normal[1], normal[2]);
-	exit(0);
-      }	
-      if(!ref_inside) flip_normal = TRUE;
-    }
-
-    if(flip_normal) {
-      for(i = 0; i < 3; i++) {
-	normal[i] = -normal[i];	/* flip the normal */
-	nc->X[i] = -(nc->X[i]);	/* flip the x direction */
-	/* interchange points 0 and 2 so that corner order will be
-	   consistent with X flip (note that this is OK for quads and tris) */
-	temp = nc->corner[0][i];
-	nc->corner[0][i] = nc->corner[2][i];
-	nc->corner[2][i] = temp;
-      }
-    }
-  }
-}
-
-#endif
 
 /*
   add dummy panel structs to the panel list for electric field evaluation
@@ -484,7 +378,7 @@ char *hack_path(char *str)
   - dummy panels are skipped
   - dielectric panels, with conductor number 0, are also skipped
 */
-static void reassign_cond_numbers(charge *panel_list, NAME *name_list, char * /*surf_name*/)
+static void reassign_cond_numbers(ssystem *sys, charge *panel_list, NAME *name_list, char * /*surf_name*/)
 {
   int i, cond_nums[MAXCON], num_cond, cond_num_found;
   charge *cur_panel;
@@ -511,9 +405,7 @@ static void reassign_cond_numbers(charge *panel_list, NAME *name_list, char * /*
 
     for(i = 0; i < num_cond && cur_panel->cond != cond_nums[i]; i++);
     if(i == num_cond) {
-      fprintf(stderr, 
-       "reassign_cond_numbers: cant find conductor number that must exist\n");
-      exit(0);
+      sys->error("reassign_cond_numbers: cant find conductor number that must exist\n");
     }
     cur_panel->cond = i+1;
   }
@@ -524,9 +416,7 @@ static void reassign_cond_numbers(charge *panel_list, NAME *name_list, char * /*
 	i < num_cond && cur_name->patch_list->conductor_ID != cond_nums[i]; 
 	i++);
     if(i == num_cond) {
-      fprintf(stderr, 
-	   "reassign_cond_numbers: cant find conductor number in name list\n");
-      exit(0);
+      sys->error("reassign_cond_numbers: cant find conductor number in name list\n");
     }
   }
 }
@@ -642,8 +532,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
   for(cur_surf = surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
     if(!strcmp(cur_surf->name, "stdin")) {
       if(stdin_read) {
-	fprintf(stderr, "read_panels: attempt to read stdin twice\n");
-	exit(0);
+        sys->error("read_panels: attempt to read stdin twice\n");
       }
       else {
 	stdin_read = TRUE;
@@ -651,9 +540,8 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
       }
     }
     else if((fp = fopen(cur_surf->name, "r")) == NULL) {
-      fprintf(stderr, "read_panels: can't open\n  `%s'\nto read\n", 
-	      cur_surf->name);
-      exit(0);
+      sys->error("read_panels: can't open\n  `%s'\nto read\n",
+                 cur_surf->name);
     }
 
     /* input the panel list */
@@ -676,8 +564,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
           = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
 		     name_list, num_cond, surf_name);
       if(!patran_file && patran_file_read) {
-	fprintf(stderr, "read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
-	exit(0);
+        sys->error("read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
       }
       patran_file_read = patran_file;
       cur_panel = cur_panel->next;
@@ -718,9 +605,8 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
       else if(cur_panel->shape == 3) num_tris++;
       else if(cur_panel->shape == 4) num_quads++;
       else {
-	fprintf(stderr, "read_panels: bad panel shape, %d\n",
-		cur_panel->shape);
-	exit(0);
+        sys->error("read_panels: bad panel shape, %d\n",
+                   cur_panel->shape);
       }
       if(cur_panel->next == NULL) break;
     }
@@ -811,16 +697,12 @@ static ITER *get_kill_num_list(ssystem *sys, Name *name_list, const char *kill_n
     /* attempt to get conductor number from name and group_name */
     cond = getUniqueCondNum(name, name_list);
     if(cond == NOTUNI) {
-      fprintf(stderr, 
-   "get_kill_num_list: cannot find unique conductor name starting `%s'\n",
-	      name);
-      exit(0);
+      sys->error("get_kill_num_list: cannot find unique conductor name starting `%s'\n",
+                 name);
     }
     else if(cond == NOTFND) {
-      fprintf(stderr,
-	      "get_kill_num_list: cannot find conductor name starting `%s'\n",
-	      name);
-      exit(0);
+      sys->error("get_kill_num_list: cannot find conductor name starting `%s'\n",
+                 name);
     }
 
     /* add conductor name to list of conductors to omit */
@@ -1099,7 +981,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
     }
     fprintf(stderr, "  <cond list> = [<name>],[<name>],...,[<name>]\n");
     dumpConfig(sys, stderr, argv[0]);
-    exit(0);
+    sys->error("Command line parsing failed.");
   }
 }
 
@@ -1198,7 +1080,7 @@ static surface *input_surfaces(ssystem *sys, int *autmom, int *autlev, double *r
 /*
   dump the data associated with the input surfaces
 */
-static void dumpSurfDat(surface *surf_list)
+static void dumpSurfDat(ssystem *sys, surface *surf_list)
 {
   surface *cur_surf;
 
@@ -1231,8 +1113,7 @@ static void dumpSurfDat(surface *surf_list)
 	      cur_surf->inner_perm, cur_surf->outer_perm);
     }
     else {
-      fprintf(stderr, "dumpSurfDat: bad surface type\n");
-      exit(0);
+      sys->error("dumpSurfDat: bad surface type\n");
     }
     fprintf(stdout,"      number of panels: %d\n", 
 	    cur_surf->num_panels - cur_surf->num_dummies);
@@ -1325,9 +1206,7 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
   /* check for anything in -rs list in -ri list */
   for(cur_num = ri_num_list; cur_num != NULL; cur_num = cur_num->next) {
     if(want_this_iter(rs_num_list, cur_num->iter)) {
-      fprintf(stderr, 
- "resolve_kill_lists: a conductor removed with -ri is in the -rs list\n");
-      exit(0);
+      sys->error("resolve_kill_lists: a conductor removed with -ri is in the -rs list\n");
     }
   }
 
@@ -1337,9 +1216,7 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
   for(cur_num = q_num_list; cur_num != NULL; cur_num = cur_num->next) {
     if(want_this_iter(rs_num_list, cur_num->iter)
        || want_this_iter(ri_num_list, cur_num->iter)) {
-      fprintf(stderr, 
-"resolve_kill_lists: a conductor removed with -ri or -rs is in the -q list\n");
-      exit(0);
+      sys->error("resolve_kill_lists: a conductor removed with -ri or -rs is in the -q list\n");
     }
   }
 
@@ -1352,9 +1229,7 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
     }
   }
   if(lists_exhaustive && !sys->m_) {
-    fprintf(stderr, 
-"resolve_kill_lists: all conductors either in -ri or -rs list\n");
-    exit(0);
+    sys->error("resolve_kill_lists: all conductors either in -ri or -rs list\n");
   }
 }
 
@@ -1405,7 +1280,7 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
   resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list, *num_cond);
 
   if (sys->dissrf) {
-    dumpSurfDat(surf_list);
+    dumpSurfDat(sys, surf_list);
   }
 
   time(&clock);

@@ -473,10 +473,8 @@ void name_data(ssystem *sys, FILE *stream)
     }
   }
   if(patch_cnt == 0) {
-    fprintf(stderr, 
-	    "\nname_data: conductor '%s'\n  has no patch - redo naming so that one is included.\n", 
-	    sys->current_name->name);
-    exit(0);
+    sys->error("name_data: conductor '%s'\n  has no patch - redo naming so that one is included.\n",
+               sys->current_name->name);
   }
 }
 
@@ -844,8 +842,7 @@ static void assign_names(ssystem *sys)
   NAME *cur_name = sys->start_name_this_time;
 
   if(sys->start_name_this_time == NULL) {
-    fprintf(stderr, "\nassign_names: no conductor names specified\n");
-    exit(0);
+    sys->error("assign_names: no conductor names specified\n");
   }
 
   /* for each name struct, find cond no of each patch (can be n^2 loop) */
@@ -862,17 +859,14 @@ static void assign_names(ssystem *sys)
 	    current_conductor = current_patch->conductor_ID;
 	  }
 	  else if(current_conductor != current_patch->conductor_ID) {
-	    fprintf(stderr,
-		    "\nassign_names: alleged conductor '%s'\n  has patches from more than one conductor - rename more carefully\n", cur_name->name);
-	    exit(0);
+	    sys->error("assign_names: alleged conductor '%s'\n  has patches from more than one conductor - rename more carefully\n", cur_name->name);
 	  }
 	  quit = 1;
 	}
 	current_patch = current_patch->next;
       }
       if(quit == 0) {
-	fprintf(stderr, "\nassign_names: in conductor '%s'\n  can't find named patch in master list\n", cur_name->name);
-	exit(0);
+        sys->error("assign_names: in conductor '%s'\n  can't find named patch in master list\n", cur_name->name);
       }
       current_name_patch = current_name_patch->next;
     }
@@ -882,15 +876,12 @@ static void assign_names(ssystem *sys)
 
   /* check to see if all conductors have a name and if too many names */
   if(cnt < conductor_count - 1) {
-    fprintf(stderr, "\nassign_names: %d conductors have no names\n", 
-	    conductor_count - 1 - cnt);
-    exit(0);
+    sys->error("assign_names: %d conductors have no names\n",
+               conductor_count - 1 - cnt);
   }
   if(cnt > conductor_count - 1) {
-    fprintf(stderr, "\nassign_names: %d names given for %d conductors\n", 
-	    cnt, conductor_count - 1);
-    exit(0);
+    sys->error("assign_names: %d names given for %d conductors\n",
+               cnt, conductor_count - 1);
   }
 
-    
 }

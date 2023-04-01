@@ -65,7 +65,8 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
 		i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
 		view[0],view[1],view[2]);
 	fprintf(stderr, " rhs = %g\n", rhs);
-	exit(0);*/
+	sys->error("See previous messages for details.");
+	*/
       }
       for(k = 0; k < 3; k++) axes[i][j][k] = view[k]+alpha*temp[k];
     }
@@ -85,7 +86,7 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
 		i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
 		view[0],view[1],view[2]);
 	fprintf(stderr, " rhs = %g\n", rhs);
-	exit(0);
+	sys->error("See previous messages for details.");
       }
       for(k = 0; k < 3; k++) (faces[i]->c)[j][k] = view[k]+alpha*temp[k];
     }
@@ -104,7 +105,7 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
 	      i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
 	      view[0],view[1],view[2]);
       fprintf(stderr, " rhs = %g\n", rhs);
-      exit(0);
+      sys->error("See previous messages for details.");
     }
     for(k = 0; k < 3; k++) (lines[i]->from)[k] = view[k]+alpha*temp[k];
     for(k = 0; k < 3; k++) temp[k] = (lines[i]->to)[k]-view[k];
@@ -118,7 +119,7 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
 	      i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
 	      view[0],view[1],view[2]);
       fprintf(stderr, " rhs = %g\n", rhs);
-      exit(0);
+      sys->error("See previous messages for details.");
     }
     for(k = 0; k < 3; k++) (lines[i]->to)[k] = view[k]+alpha*temp[k];
   }
@@ -354,9 +355,8 @@ void scale2d(ssystem *sys, face **faces, int numfaces, line **lines, int numline
   }
 
   if(xmax <= MARGIN || ymax <= MARGIN) {
-    fprintf(stderr, "\nscale2d: strange xmax = %g or ymax = %g\n",
+    sys->error("scale2d: strange xmax = %g or ymax = %g\n",
 	    xmax, ymax);
-    exit(0);
   }
 
   /* find the x and y scales that would make those dimensions dead on */

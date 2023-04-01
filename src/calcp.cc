@@ -42,7 +42,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include <cstdio>
 
 static void Cross_Product(double vector1[], double vector2[], double result_vector[]);
-static int flip_normal(charge *panel);
+static int flip_normal(ssystem *sys, charge *panel);
 static int planarize(charge *pq);
 static void centroid(charge *pp, double x2);
 static void ComputeMoments(ssystem *sys, charge *pp);
@@ -155,7 +155,7 @@ void initcalcp(ssystem *sys, charge *panel_list)
     /* Z-axis is normal to two diags. */
     Cross_Product(pq->X, pq->Y, pq->Z);
 /*#if 1 == 0*/
-    if(flip_normal(pq)) {
+    if(flip_normal(sys, pq)) {
       for(i = 0; i < 3; i++) {
 	pq->Z[i] = -(pq->Z[i]);	/* flip the normal */
 	pq->X[i] = -(pq->X[i]);	/* flip the x direction */
@@ -215,8 +215,7 @@ void initcalcp(ssystem *sys, charge *panel_list)
       pq->corner[i][YI] = vtemp[YI];
       pq->corner[i][ZI] = vtemp[ZI];
       if(fabs(pq->corner[i][ZI]) > (EQUIV_TOL * pq->min_diag)) {
-	printf("FATAL PROGRAM ERROR: renormalized z=%g\n", pq->corner[i][ZI]);
-	exit(0);
+        sys->error("FATAL PROGRAM ERROR: renormalized z=%g\n", pq->corner[i][ZI]);
       }
       pq->corner[i][ZI] = 0.0;
     }
@@ -246,7 +245,7 @@ void initcalcp(ssystem *sys, charge *panel_list)
   - this function uses 0.0 as a breakpoint when really machine precision
     weighted checks should be done (really not an issue if ref point far)
 */
-int flip_normal(charge *panel)
+int flip_normal(ssystem *sys, charge *panel)
 {
   double x, y, z;
   double norm, norm_sq;
@@ -290,7 +289,7 @@ int flip_normal(charge *panel)
 	    panel->corner[0][0], panel->corner[0][1], panel->corner[0][2]);
     fprintf(stderr, "  Normal: (%g %g %g)\n",
 	    normal[0], normal[1], normal[2]);
-    exit(0);
+    sys->error("Internal error - see previous messages for details.");
   }
     
   return(flip_normal);

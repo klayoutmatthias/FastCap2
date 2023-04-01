@@ -88,14 +88,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     if (sys->dirsol || sys->expgcr) {
       if(nextc == sys->directlist) {
         if(eval_size < MAXSIZ) {
-          fprintf(stderr,
-                  "mulMatDirect: non-block direct methods not supported\n");
-          exit(0);
-          /* if this is going to work, need a special, condensing Q2P
-             as well as some way to use it in the framework of the GCR loop */
-          nextc->directmats[0] = Q2P(sys, nextc->chgs, eval_size,
-                                     nextc->nbr_is_dummy[0], nextc->chgs,
-                                     eval_size, TRUE);
+          sys->error("mulMatDirect: non-block direct methods not supported\n");
         }
         else blkQ2Pfull(sys, sys->directlist, up_size, eval_size,
                         trimat, sqrmat, real_index, sys->is_dummy);
@@ -116,7 +109,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     counters.dirtime += dtime;
 
     if (sys->dsq2pd) {
-      dumpQ2PDiag(nextc);
+      dumpQ2PDiag(sys, nextc);
     }
 
     if (sys->dmtcnt) {
@@ -126,7 +119,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     if (sys->dirsol) {
       /* transform A into LU */
       if(eval_size > MAXSIZ) {
-        blkLUdecomp(*sqrmat, *trimat, up_size);
+        blkLUdecomp(sys, *sqrmat, *trimat, up_size);
       }
       else if(nextc == sys->directlist) {
         starttimer;

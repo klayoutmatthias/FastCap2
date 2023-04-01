@@ -120,8 +120,7 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   }
   else {
     if((fp = fopen(str, "w")) == NULL) {
-      fprintf(stderr, "dump_ps_geometry: can't open\n `%s'\nto write\n", str);
-      exit(0);
+      sys->error("dump_ps_geometry: can't open\n `%s'\nto write\n", str);
     }
     fprintf(stdout, "Writing %s...", str);
     dumpPs(sys, sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density, black, white);

@@ -90,13 +90,12 @@ void xyz2sphere(double x, double y, double z, double x0, double y0, double z0, d
 /*
   returns i = sqrt(-1) to the power of the argument
 */
-double iPwr(int e)
+double iPwr(ssystem *sys, int e)
 /* int e: exponent, computes i^e */
 {
   if(e == 0) return(1.0);
   if(e % 2 != 0) {
-    fprintf(stderr, "iPwr: odd exponent %d\n", e);
-    exit(0);
+    sys->error("iPwr: odd exponent %d\n", e);
   }
   else {
     e = e/2;			/* get power of negative 1 */
@@ -108,13 +107,12 @@ double iPwr(int e)
 /*
   returns factorial of the argument (x!)
 */
-double fact(int x)
+double fact(ssystem *sys, int x)
 {
   double ret = 1.0;
   if(x == 0 || x == 1) return(1.0);
   else if(x < 0) {
-    fprintf(stderr, "fact: attempt to take factorial of neg no. %d\n", x);
-    exit(0);
+    sys->error("fact: attempt to take factorial of neg no. %d\n", x);
   }
   else {
     while(x > 1) {
@@ -382,8 +380,8 @@ double **mulMulti2Multi(ssystem *sys, double x, double y, double z, double xp, d
 
 	  if(k == 0) {		/* figure terms for Nj^0, ie k = 0 */
 	    if(m <= j-n) {	/* if O moments are nonzero */
-	      temp1 = fact(j)*rhoPwr*iPwr(2*m)*sys->mm.tleg[CINDEX(n, m)];
-	      temp1 /= (fact(j-n+m)*fact(n+m));
+	      temp1 = fact(sys, j)*rhoPwr*iPwr(sys, 2*m)*sys->mm.tleg[CINDEX(n, m)];
+	      temp1 /= (fact(sys, j-n+m)*fact(sys, n+m));
 	      mat[CINDEX(j, k)][CINDEX(j-n, m)] += temp1*cos(mBeta);
 	      if(m != 0) {		/* if sin term is non-zero */
 		mat[CINDEX(j, k)][SINDEX(j-n, m, cterms)] += temp1*sin(mBeta);
@@ -391,9 +389,9 @@ double **mulMulti2Multi(ssystem *sys, double x, double y, double z, double xp, d
 	    }
 	  }
 	  else {		/* figure terms for Nj^k, k != 0 */
-	    temp1 = fact(j+k)*rhoPwr*sys->mm.tleg[CINDEX(n, m)]/fact(n+m);
-	    temp2 = temp1*iPwr(2*m)/fact(j-n+k+m);
-	    temp1 = temp1*iPwr(k-m-abs(k-m))/fact(j-n+abs(k-m));
+	    temp1 = fact(sys, j+k)*rhoPwr*sys->mm.tleg[CINDEX(n, m)]/fact(sys, n+m);
+	    temp2 = temp1*iPwr(sys, 2*m)/fact(sys, j-n+k+m);
+	    temp1 = temp1*iPwr(sys, k-m-abs(k-m))/fact(sys, j-n+abs(k-m));
 
 	    /* write the cos(kPhi) coeff, bar(N)j^k */
 	    if(m != 0) {

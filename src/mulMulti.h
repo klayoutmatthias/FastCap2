@@ -48,7 +48,7 @@ int multerms(int order);
 int costerms(int order);
 int sinterms(int order);
 
-double iPwr(int e);
-double fact(int x);
+double iPwr(ssystem *sys, int e);
+double fact(ssystem *sys, int x);
 
 #endif

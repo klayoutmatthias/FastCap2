@@ -214,8 +214,7 @@ void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, in
     cols = num_col;
 
     if((fp = fopen(filename, "w")) == NULL) {
-      fprintf(stderr, "dump_ps_mat: can't open `%s' to write\n", filename);
-      exit(-1);
+      sys->error("dump_ps_mat: can't open `%s' to write\n", filename);
     }
 
     /* if size of matrix is less than alias limits in both dimensions
@@ -287,8 +286,7 @@ void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, in
   }
   else if(type == UPDATE) {
     if(fp == NULL) {
-      fprintf(stderr, "dump_ps_mat: ps file not open\n");
-      exit(0);
+      sys->error("dump_ps_mat: ps file not open\n");
     }
 
     /* write a block in the (row, col) position
@@ -327,8 +325,7 @@ void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, in
     fclose(fp);
   }
   else {
-    fprintf(stderr, "dump_ps_mat: bad type of call\n");
-    exit(-1);
+    sys->error("dump_ps_mat: bad type of call\n");
   }
   
 }

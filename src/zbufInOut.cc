@@ -136,7 +136,7 @@ static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, cha
   CHARGE DENSITIES ARE NOW READ DIRECTLY FROM VECTORS IN SYSTEM STRUCTS
   THIS FUNCTION IS NOT USED
 */
-static void get_charge_densities(double *q, char *file, int iter)
+static void get_charge_densities(ssystem *sys, double *q, char *file, int iter)
 {
   int index, linecnt, header_found;
   char str1[BUFSIZ], str2[BUFSIZ], str3[BUFSIZ], linein[BUFSIZ];
@@ -144,10 +144,8 @@ static void get_charge_densities(double *q, char *file, int iter)
   FILE *fp;
 
   if((fp = fopen(file, "r")) == NULL) {
-    fprintf(stderr, 
-            "get_charge_densities: can't open charge file\n  `%s'\nto read\n", 
-            file);
-    exit(0);
+    sys->error("get_charge_densities: can't open charge file\n  `%s'\nto read\n",
+               file);
   }
 
   linecnt = 0;
@@ -180,18 +178,14 @@ static void get_charge_densities(double *q, char *file, int iter)
       }
     }
     else {
-      fprintf(stderr, 
-              "get_charge_densities: bad charge file format, line %d:\n%s\n",
-              linecnt, linein);
-      exit(0);
+      sys->error("get_charge_densities: bad charge file format, line %d:\n%s\n",
+                 linecnt, linein);
     }
   }
 
   if(!header_found) {
-    fprintf(stderr, 
-            "get_charge_densities: can't find iteration %d data in\n `%s'\n",
-            iter, file);
-    exit(0);
+    sys->error("get_charge_densities: can't find iteration %d data in\n `%s'\n",
+               iter, file);
   }
 
 }
@@ -341,15 +335,11 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
     if(linein[0] == 'e' || linein[0] == '\0') return;
     if(linein[0] == 'r') {      /* do a recursive read */
       if(sscanf(linein, "%s %s", tempc, readfile) != 2) {
-        fprintf(stderr, 
-                "readLines: bad recursive read line format:\n%s\n", linein);
-        exit(0);
+        sys->error("readLines: bad recursive read line format:\n%s\n", linein);
       }
       if((fpin = fopen(readfile, "r")) == NULL) {
-        fprintf(stderr, 
-                "readLines: can't open recursive read file\n `%s'\nto read\n",
-                readfile);
-        exit(0);
+        sys->error("readLines: can't open recursive read file\n `%s'\nto read\n",
+                   readfile);
       }
       readLines(sys, fpin, head, tail, numlines);
       fclose(fpin);
@@ -357,9 +347,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
     }
     if(linein[0] == 'F') {
       if(f_ == 0) {
-        fprintf(stderr, 
-                "readLines: attempt to input faces with a recursive read\n");
-        exit(0);
+        sys->error("readLines: attempt to input faces with a recursive read\n");
       }
       else {
         return;
@@ -368,9 +356,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
     if(linein[0] == '#') continue;
     if(linein[0] == 'f') {
       if(f_ == 0) {
-        fprintf(stderr, 
-                "readLines: attempt to input fills with a recursive read\n");
-        exit(0);
+        sys->error("readLines: attempt to input fills with a recursive read\n");
       }
       else {
         return;
@@ -391,8 +377,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
       }
       if(sscanf(linein,"%lf %lf %lf",&((*tail)->from[0]), &((*tail)->from[1]), 
                 &((*tail)->from[2])) != 3) {
-        fprintf(stderr,"readLines: from line %d bad, '%s'\n",flines+1,linein);
-        exit(0);
+        sys->error("readLines: from line %d bad, '%s'\n",flines+1,linein);
       }
       (*tail)->index = *numlines;
       fflag = 0;
@@ -410,9 +395,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
                     &((*tail)->to[1]), &((*tail)->to[2]), &linewd) != 4) {
             if(sscanf(linein, "%lf %lf %lf", &((*tail)->to[0]), 
                       &((*tail)->to[1]), &((*tail)->to[2])) != 3) {
-              fprintf(stderr, 
-                      "readLines: to line %d bad, '%s'\n",flines+1, linein);
-              exit(0);
+              sys->error("readLines: to line %d bad, '%s'\n",flines+1, linein);
             }
             linewd = LINE;
           }
@@ -429,8 +412,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
     }
   }
   if(fflag == 0) {
-    fprintf(stderr, "readLines: file ended with unmatched from line\n");
-    exit(0);
+    sys->error("readLines: file ended with unmatched from line\n");
   }
 }
 
@@ -448,9 +430,8 @@ line **getLines(ssystem *sys, const char *line_file, int *numlines)
   if(line_file == NULL) return(NULL);
 
   if((fp = fopen(line_file, "r")) == NULL) {
-    fprintf(stderr, "getLines: can't open .fig file\n `%s'\nto read\n",
-            line_file);
-    exit(0);
+    sys->error("getLines: can't open .fig file\n `%s'\nto read\n",
+               line_file);
   }
 
   readLines(sys, fp, &head, &tail, numlines);
@@ -1068,14 +1049,13 @@ static void numberLines(line **lines, int numlines, FILE *fp)
 /*
   lobotomized version of dumpPs in orthoPs.c - dumps lines/arrows
 */
-static void dumpLines(FILE *fp, line **lines, int numlines)
+static void dumpLines(ssystem *sys, FILE *fp, line **lines, int numlines)
 {
   int i, j, w_;
   double temp[3], temp1[3], x, y;
 
   if(fp == NULL) {
-    fprintf(stderr, "dumpLines: null ps file pointer\n");
-    exit(0);
+    sys->error("dumpLines: null ps file pointer\n");
   }
 
   w_ = 0;                       /* hardwire for no width override */
@@ -1246,7 +1226,7 @@ void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines
     if(sys->n_) numberFace(faces[f], fp);
   }
 
-  dumpLines(fp, lines, numlines);
+  dumpLines(sys, fp, lines, numlines);
 
   /* if this is just to check placement, number the faces */
   if(sys->n_) {

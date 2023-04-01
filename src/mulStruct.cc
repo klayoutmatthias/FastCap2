@@ -3,6 +3,7 @@
 #include "mulGlobal.h"
 
 #include <cstdarg>
+#include <stdexcept>
 
 ssystem::ssystem() :
   argv(0),
@@ -264,6 +265,35 @@ void ssystem::msg(const char *fmt, ...)
   va_list args;
   va_start(args, fmt);
   vfprintf(log, fmt, args);
+}
+
+void ssystem::info(const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+
+  FILE *out = log ? log : stderr;
+  vfprintf(out, fmt, args);
+}
+
+void ssystem::warn(const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+
+  FILE *out = log ? log : stderr;
+  fputs("WARNING: ", out);
+  vfprintf(out, fmt, args);
+}
+
+void ssystem::error(const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+
+  char buf[1024];
+  vsnprintf (buf, sizeof(buf), fmt, args);
+  throw std::runtime_error(buf);
 }
 
 // ---------------------------------------------------------------------------------

@@ -53,7 +53,7 @@ void chkLowLev(ssystem *sys, int listtype);
 void dumpSynop(ssystem *sys);
 void dumpMatBldCnts(ssystem *sys);
 void dumpMat(double **mat, int rows, int cols);
-void dumpQ2PDiag(cube *nextc);
+void dumpQ2PDiag(ssystem *sys, cube *nextc);
 void dispQ2M(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order);
 void dispM2L(double **mat, double x, double y, double z, double xp, double yp, double zp, int order);
 void dispQ2L(double **mat, charge **chgs, int numchgs, double x, double y, double z, int order);

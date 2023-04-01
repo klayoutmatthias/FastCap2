@@ -192,10 +192,8 @@ static int placeq(int flag, ssystem *sys, charge *charges)
     for(isexact = FALSE; isexact == FALSE; side *= 2, i++) {
 
       if(i > MAXDEP) {
-        fprintf(stderr, 
-                "placeq: out of cube pntr space - increase MAXDEP == %d\n", 
-                MAXDEP);
-        exit(0);
+        sys->error("placeq: out of cube pntr space - increase MAXDEP == %d\n",
+                   MAXDEP);
       }
 
       length = (1.01 * length0)/side;
@@ -218,8 +216,7 @@ static int placeq(int flag, ssystem *sys, charge *charges)
           nextc = sys->heap.alloc<cube>(1, AMSC);
           /* TODO: not working any more ...
           if(nextc == NULL) {
-            fprintf(stderr, "placeq: %d levels set up\n", i-1);
-            exit(0);
+            sys->error("placeq: %d levels set up\n", i-1);
           }
           */
           cubes[i][xindex][yindex][zindex] = nextc;

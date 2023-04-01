@@ -74,15 +74,13 @@ static int sqrdex(int i, int j, int siz)
 /*
   index into a lower triangular (w/diagonal) siz x siz matrix stored linearly
 */
-static int lowdex(int i, int j, int siz)
+static int lowdex(ssystem *sys, int i, int j, int siz)
 /* int i, j, siz: row, column and size */
 {
   int ret;
   if(j > i || (ret = i*(i+1)/2 + j) > siz*(1+siz)/2) {
-    fprintf(stderr, 
-	    "lowdex: bad indices for lower triangular i=%d  j=%d siz =%d\n",
-	    i, j, siz);
-    exit(0);
+    sys->error("lowdex: bad indices for lower triangular i=%d  j=%d siz =%d\n",
+               i, j, siz);
   }
   else return(ret);
 }
@@ -90,16 +88,14 @@ static int lowdex(int i, int j, int siz)
 /*
   index into an upper triangular (w/diagonal) siz x siz matrix stored linearly
 */
-static int uppdex(int i, int j, int siz)
+static int uppdex(ssystem *sys, int i, int j, int siz)
 /* int i, j, siz: row, column and size */
 {
   int ret;
   
   if(j < i || (ret = i*siz - i*(i-1)/2 + j - i) > siz*(1+siz)/2) {
-    fprintf(stderr, 
-	    "uppdex: bad indices for upper triangular i=%d  j=%d siz =%d\n",
-	    i, j, siz);
-    exit(0);
+    sys->error("uppdex: bad indices for upper triangular i=%d  j=%d siz =%d\n",
+               i, j, siz);
   }
   else return(ret);
 }
@@ -107,7 +103,7 @@ static int uppdex(int i, int j, int siz)
 /*
   for debug only - dumps upper left corner of a matrix
 */
-static void dumpMatCor(double **mat, double *vec, int fsize)
+static void dumpMatCor(ssystem *sys, double **mat, double *vec, int fsize)
 /* int fsize: full matrix size for flat storage */
 /* double **mat, *vec: does first one that's not null */
 {
@@ -175,46 +171,42 @@ static void transpose(double *mat, int siz)
 /*
   writes full or triangular matrices 
 */
-static void wrMat(double *mat, int siz, int file, int type)
+static void wrMat(ssystem *sys, double *mat, int siz, int file, int type)
 /* int siz: siz is #rows and cols */
 {
   int ds = sizeof(double), fdis;
-  int realsiz, actsiz;			/* size in chars */
+  int realsiz, actsiz;                  /* size in chars */
   char name[4];	           		/* name of file */
 
   /* figure the real size */
   if(type == TRIMAT) realsiz = ds*siz*(siz+1)/2;
   else if(type == SQRMAT || type == COLMAT) realsiz = sizeof(double)*siz*siz;
   else {
-    fprintf(stderr, "wrMat: bad type flag %d\n", type);
-    exit(0);
+    sys->error("wrMat: bad type flag %d\n", type);
   }
 
   /* figure name of file and create, open to write */
   if((fdis = creat(getName(file, name), PMODE)) == -1) {
-    fprintf(stderr, "wrMat: can't creat '%s'\n", name);
-    exit(0);
+    sys->error("wrMat: can't creat '%s'\n", name);
   }
 
-  fprintf(stderr,"Writing %s...", name);
+  sys->info("Writing %s...", name);
 
   /* write the data and close */
   if(type == COLMAT) transpose(mat, siz);	/* store columnwise */
   if((actsiz = write(fdis, (char *)mat, realsiz)) != realsiz) {
-    fprintf(stderr, 
-	    "wrMat: buffer write error to '%s,' wrote %d of %d dbls\n", 
-	    name, actsiz/ds, realsiz/ds);
-    exit(0);
+    sys->error("wrMat: buffer write error to '%s,' wrote %d of %d dbls\n",
+               name, actsiz/ds, realsiz/ds);
   }
   close(fdis);
 
-  fprintf(stderr, "done.\n");
+  sys->info("done.\n");
 }
 
 /*
   reads full or triangular matrices 
 */
-static void rdMat(double *mat, int siz, int file, int type)
+static void rdMat(ssystem *sys, double *mat, int siz, int file, int type)
 /* int siz: siz is #rows and cols */
 {
   int fdis;
@@ -225,22 +217,19 @@ static void rdMat(double *mat, int siz, int file, int type)
   if(type == TRIMAT) realsiz = sizeof(double)*siz*(siz+1)/2;
   else if(type == SQRMAT) realsiz = sizeof(double)*siz*siz;
   else {
-    fprintf(stderr, "rdMat: bad type flag %d\n", type);
-    exit(0);
+    sys->error("rdMat: bad type flag %d\n", type);
   }
 
   /* figure name of file and open to read */
   if((fdis = open(getName(file, name), 0)) == -1) {
-    fprintf(stderr, "rdMat: can't open '%s'\n", name);
-    exit(0);
+    sys->error("rdMat: can't open '%s'\n", name);
   }
 
   fprintf(stderr,"Reading %s...", name);
 
   /* read the data and close */
   if(realsiz != read(fdis, (char *)mat, realsiz)) {
-    fprintf(stderr, "rdMat: read error to '%s'\n", name);
-    exit(0);
+    sys->error("rdMat: read error to '%s'\n", name);
   }
   close(fdis);
 
@@ -250,7 +239,7 @@ static void rdMat(double *mat, int siz, int file, int type)
 /*
   transfer part of the square matrix to the triangular matrix
 */
-static void matXfer(double *matsq, double *matri, int siz, int type)
+static void matXfer(ssystem *sys, double *matsq, double *matri, int siz, int type)
 {
   int i, j, temp;
 
@@ -271,15 +260,14 @@ static void matXfer(double *matsq, double *matri, int siz, int type)
     }
   }
   else {
-    fprintf(stderr, "matXfer: bad type %d\n", type);
-    exit(0);
+    sys->error("matXfer: bad type %d\n", type);
   }
 }  
 
 /*
   does many rhs, triangular problem to get L21 and U12 for blk factorization
 */
-static void blkMatsolve(double *matsq, double *matri, int siz, int type)
+static void blkMatsolve(ssystem *sys, double *matsq, double *matri, int siz, int type)
 {
   int i, j, k;
 
@@ -314,8 +302,7 @@ static void blkMatsolve(double *matsq, double *matri, int siz, int type)
     fprintf(stderr, "\n");
   }
   else {
-    fprintf(stderr, "blkMatsolve: bad type %d\n", type);
-    exit(0);
+    sys->error("blkMatsolve: bad type %d\n", type);
   }
 
 }
@@ -323,7 +310,7 @@ static void blkMatsolve(double *matsq, double *matri, int siz, int type)
 /*
   figures the difference A11-(L21)(U12) - part of block factorization
 */
-static void subInnerProd(double *matsq, double *matri, int siz, int matl, int matu)
+static void subInnerProd(ssystem *sys, double *matsq, double *matri, int siz, int matl, int matu)
 /* int siz, matl, matu: size in doubles; matrices to multiply */
 {
   int i, j, k, rowlim, rowliml, colimu, fdl, fdu;
@@ -343,30 +330,26 @@ static void subInnerProd(double *matsq, double *matri, int siz, int matl, int ma
   /* matri always holds rows from matl; matri1 holds columns from matu */
   /* open the relvant files */
   if((fdl = open(getName(matl, name), 0)) == -1) {
-    fprintf(stderr, "subInnerProd: can't open '%s'\n", name);
-    exit(0);
+    sys->error("subInnerProd: can't open '%s'\n", name);
   }
 
   /* for each matl chunk, read in all chunks of matu and do inner products */
   for(froml = 0; froml < siz; froml += rowliml) { /* loop on rows in l part */
     readl = read(fdl, (char *)matri, rowliml*siz*ds);
     if(readl % (siz*ds) != 0) {	/* must read in row size chunks */
-      fprintf(stderr, "subInnerProd: read error from '%s'\n", 
-	      getName(matl, name));
-      exit(0);
+      sys->error("subInnerProd: read error from '%s'\n",
+                 getName(matl, name));
     }
     readl /= (siz*ds);
     if((fdu = open(getName(matu, name), 0)) == -1) { /* (re)open u part */
-      fprintf(stderr, "subInnerProd: can't open '%s'\n", name);
-      exit(0);
+      sys->error("subInnerProd: can't open '%s'\n", name);
     }
     for(fromu = 0; fromu < siz; fromu += colimu) { /* loop on cols in u part */
       fprintf(stderr, "%d-%d ", froml, fromu);
       readu = read(fdu, (char *)matriu, colimu*siz*ds);
       if(readu % (siz*ds) != 0) {	/* must read in col size chunks */
-	fprintf(stderr, "subInnerProd: read error from '%s'\n", 
-		getName(matu, name));
-	exit(0);
+        sys->error("subInnerProd: read error from '%s'\n",
+                   getName(matu, name));
       }
       readu /= (siz*ds);
       /* do the inner product/subtractions possible with these chunks */
@@ -400,15 +383,14 @@ static void subInnerProd(double *matsq, double *matri, int siz, int matl, int ma
   - returned matrix has L below the diagonal, U above (GVL1 pg 58)
   - meant to be used with 2x2 block matrix factorization
 */
-static void blkLudecomp(double *mat, int size)
+static void blkLudecomp(ssystem *sys, double *mat, int size)
 {
   double factor;
   int i, j, k;
 
   for(k = 0; k < size-1; k++) {	/* loop on rows */
     if(mat[SQDEX(k, k, size)] == 0.0) {
-      fprintf(stderr, "blkLudecomp: zero piovt\n");
-      exit(0);
+      sys->error("blkLudecomp: zero piovt\n");
     }
     fprintf(stderr,"%d ", k);
     for(i = k+1; i < size; i++) { /* loop on remaining rows */
@@ -426,7 +408,7 @@ static void blkLudecomp(double *mat, int size)
 /*
   solves using factored matrix on disc
 */
-void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
+void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double *matsq)
 /* double *x, *b, *matri, *matsq: solution, rhs */
 {
   int i, k;
@@ -437,7 +419,7 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   /* forward elimination, solve Ly = b (x becomes y) */
   for(i = 0; i < siz; i++) x[i] = b[i];	/* copy rhs */
 
-  rdMat(matri, siz/2, L11, TRIMAT);
+  rdMat(sys, matri, siz/2, L11, TRIMAT);
   /* a row in the result vector is a linear comb of the previous rows */
   /* do first (lower triangular only) part */
   starttimer;
@@ -451,8 +433,8 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   counters.fullsoltime += dtime;
 
   /* load L21 and LTIL */
-  rdMat(matri, siz/2, LTIL, TRIMAT);
-  rdMat(matsq, siz/2, L21, SQRMAT);
+  rdMat(sys, matri, siz/2, LTIL, TRIMAT);
+  rdMat(sys, matsq, siz/2, L21, SQRMAT);
 
   /* do second (square and lower triangular) part */
   starttimer;
@@ -473,7 +455,7 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   fflush(stdout);
 
   /* back substitute, solve Ux = y (x converted in place from y to x) */
-  rdMat(matri, siz/2, UTIL, TRIMAT); /* load lower right U factor */
+  rdMat(sys, matri, siz/2, UTIL, TRIMAT); /* load lower right U factor */
   starttimer;
   for(i = siz-1; i >= siz/2; i--) {	/* loop on rows */
     for(k = siz-1; k > i; k--) {	/* loop on rows (of x) already done */
@@ -487,8 +469,8 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   counters.fullsoltime += dtime;
 
   /* load U11, U12 to do triangle plus square part of back solve */
-  rdMat(matri, siz/2, U11, TRIMAT);
-  rdMat(matsq, siz/2, U12, SQRMAT); /* U12 is stored columnwise */
+  rdMat(sys, matri, siz/2, U11, TRIMAT);
+  rdMat(sys, matsq, siz/2, U12, SQRMAT); /* U12 is stored columnwise */
 
   starttimer;
   for(; i >= 0; i--) {		/* loop on rows */
@@ -540,8 +522,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
     *real_index = sys->heap.alloc<int>(numchgs, AMSC);
   }
   else {
-    fprintf(stderr, "blkQ2Pfull: can't handle an odd number of panels\n");
-    exit(0);
+    sys->error("blkQ2Pfull: can't handle an odd number of panels\n");
   }
 
   /* load the matrix in the style of Q2P() - no attempt to exploit symmetry */
@@ -549,8 +530,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
   /* the block implementation MUST have all the charges in 1st dlist entry */
   pp = pq = directlist;
   if(pp == NULL || pp->dnext != NULL || pp->upnumeles[0] != numchgs_wdummy) {
-    fprintf(stderr, "blkQ2Pfull: bad directlist, must run with depth 0\n");
-    exit(0);
+    sys->error("blkQ2Pfull: bad directlist, must run with depth 0\n");
   }
 
   pchgs = qchgs = pp->chgs;
@@ -564,8 +544,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
     if(!pchgs[i]->dummy) (*real_index)[j++] = i;
   }
   if(j != numchgs) {
-    fprintf(stderr, "blkQ2Pfull: panel count and given #panels don't match\n");
-    exit(0);
+    sys->error("blkQ2Pfull: panel count and given #panels don't match\n");
   }
 
   /* dump the four matrix sections */
@@ -610,12 +589,12 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
       
       /* dump the 1/4 matrix to a file */
       if(k == 0 && l == 0) {
-	wrMat(*sqrArray, numchgs/2, L11, SQRMAT);
+        wrMat(sys, *sqrArray, numchgs/2, L11, SQRMAT);
 	/* dumpMatCor((double **)NULL, *sqrArray, numchgs/2); */ /* for debug */
       }
-      else if(k == 0 && l == 1) wrMat(*sqrArray, numchgs/2, U12, SQRMAT);
-      else if(k == 1 && l == 0) wrMat(*sqrArray, numchgs/2, L21, SQRMAT);
-      else wrMat(*sqrArray, numchgs/2, LTIL, SQRMAT);
+      else if(k == 0 && l == 1) wrMat(sys, *sqrArray, numchgs/2, U12, SQRMAT);
+      else if(k == 1 && l == 0) wrMat(sys, *sqrArray, numchgs/2, L21, SQRMAT);
+      else wrMat(sys, *sqrArray, numchgs/2, LTIL, SQRMAT);
     }
   }
   fprintf(stderr, "Initial dump to disk complete\n\n");
@@ -631,73 +610,73 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
   using four sections of A stored on disk as 
   A11 = L11, A12 = U12, A21 = L21, A22 = LTI
 */
-void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
+void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
 /* double *sqrArray, *triArray: previously allocated flattened matrices */
 /* int numchgs: A is numchgsxnumchgs */
 {
   /* factor the stored matrices to give an overall stored factorization */
   /* load the A11 part */
-  rdMat(sqrArray, numchgs/2, L11, SQRMAT);
+  rdMat(sys, sqrArray, numchgs/2, L11, SQRMAT);
 
   /* factor it in place */
   starttimer;
-  blkLudecomp(sqrArray, numchgs/2);
+  blkLudecomp(sys, sqrArray, numchgs/2);
   stoptimer;
   counters.lutime += dtime;
 
   /* write out factors to different files */
-  matXfer(sqrArray, triArray, numchgs/2, UP2TR); /* upper part to triArr */
-  wrMat(triArray, numchgs/2, U11, TRIMAT);
-  matXfer(sqrArray, triArray, numchgs/2, LO2TR); /* lower part to triArr */
-  wrMat(triArray, numchgs/2, L11, TRIMAT);
+  matXfer(sys, sqrArray, triArray, numchgs/2, UP2TR); /* upper part to triArr */
+  wrMat(sys, triArray, numchgs/2, U11, TRIMAT);
+  matXfer(sys, sqrArray, triArray, numchgs/2, LO2TR); /* lower part to triArr */
+  wrMat(sys, triArray, numchgs/2, L11, TRIMAT);
 
   fprintf(stderr, "A11 factorization complete\n\n");
   fprintf(stdout, "\nblkLUdecomp: A11 factored...");
   fflush(stdout);
 
   /* load A12 and solve in place for U12 and write (L11 in position alrdy) */
-  rdMat(sqrArray, numchgs/2, U12, SQRMAT);
+  rdMat(sys, sqrArray, numchgs/2, U12, SQRMAT);
 
   starttimer;
-  blkMatsolve(sqrArray, triArray, numchgs/2, LOWMAT);
+  blkMatsolve(sys, sqrArray, triArray, numchgs/2, LOWMAT);
   stoptimer;
   counters.lutime += dtime;
 
-  wrMat(sqrArray, numchgs/2, U12, COLMAT); /* store as columns */
+  wrMat(sys, sqrArray, numchgs/2, U12, COLMAT); /* store as columns */
 
   fprintf(stderr, "A12 factorization complete\n\n");
   fprintf(stdout, "A12 factored...");
   fflush(stdout);
 
   /* load A21 and U11, solve in place for L21 and write */
-  rdMat(triArray, numchgs/2, U11, TRIMAT);
-  rdMat(sqrArray, numchgs/2, L21, SQRMAT);
+  rdMat(sys, triArray, numchgs/2, U11, TRIMAT);
+  rdMat(sys, sqrArray, numchgs/2, L21, SQRMAT);
 
   starttimer;
-  blkMatsolve(sqrArray, triArray, numchgs/2, UPPMAT);
+  blkMatsolve(sys, sqrArray, triArray, numchgs/2, UPPMAT);
   stoptimer;
   counters.lutime += dtime;
 
-  wrMat(sqrArray, numchgs/2, L21, SQRMAT); /* store as rows */
+  wrMat(sys, sqrArray, numchgs/2, L21, SQRMAT); /* store as rows */
 
   fprintf(stderr, "A21 factorization complete\n\n");
   fprintf(stdout, "A21 factored...");
   fflush(stdout);
 
   /* load A22 and subtract off (L21)(U12) product 1/4 matrix at a time */
-  rdMat(sqrArray, numchgs/2, LTIL, SQRMAT);
-  subInnerProd(sqrArray, triArray, numchgs/2, L21, U12); /* timed internally */
+  rdMat(sys, sqrArray, numchgs/2, LTIL, SQRMAT);
+  subInnerProd(sys, sqrArray, triArray, numchgs/2, L21, U12); /* timed internally */
 
   /* factor Atilde and write Ltilde, Utilde */
   starttimer;
-  blkLudecomp(sqrArray, numchgs/2);
+  blkLudecomp(sys, sqrArray, numchgs/2);
   stoptimer;
   counters.lutime += dtime;
 
-  matXfer(sqrArray, triArray, numchgs/2, UP2TR); /* upper part to triArr */
-  wrMat(triArray, numchgs/2, UTIL, TRIMAT);
-  matXfer(sqrArray, triArray, numchgs/2, LO2TR); /* lower part to triArr */
-  wrMat(triArray, numchgs/2, LTIL, TRIMAT);
+  matXfer(sys, sqrArray, triArray, numchgs/2, UP2TR); /* upper part to triArr */
+  wrMat(sys, triArray, numchgs/2, UTIL, TRIMAT);
+  matXfer(sys, sqrArray, triArray, numchgs/2, LO2TR); /* lower part to triArr */
+  wrMat(sys, triArray, numchgs/2, LTIL, TRIMAT);
 
   fprintf(stderr, "Block factorization complete\n\n");
   fprintf(stdout, "done.\n");
@@ -709,7 +688,7 @@ void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
   L11 U12
   L21 LTI
 */
-void blkAqprod(double *p, double *q, int size, double *sqmat)
+void blkAqprod(ssystem *sys, double *p, double *q, int size, double *sqmat)
 /* int size: A is size by size */
 /* double *p: p = Aq is calculated */
 /* double *sqmat: flat storage space for 1/4 of A */
@@ -720,10 +699,10 @@ void blkAqprod(double *p, double *q, int size, double *sqmat)
     for(fromq = 0, l = 0; l < 2; l++, fromq += size/2) {
       
       /* read in the correct 1/4 matrix to a file */
-      if(k == 0 && l == 0) rdMat(sqmat, size/2, L11, SQRMAT);
-      else if(k == 0 && l == 1) rdMat(sqmat, size/2, U12, SQRMAT);
-      else if(k == 1 && l == 0) rdMat(sqmat, size/2, L21, SQRMAT);
-      else rdMat(sqmat, size/2, LTIL, SQRMAT);
+      if(k == 0 && l == 0) rdMat(sys, sqmat, size/2, L11, SQRMAT);
+      else if(k == 0 && l == 1) rdMat(sys, sqmat, size/2, U12, SQRMAT);
+      else if(k == 1 && l == 0) rdMat(sys, sqmat, size/2, L21, SQRMAT);
+      else rdMat(sys, sqmat, size/2, LTIL, SQRMAT);
 
       /* do the product for this section of the matrix */
       starttimer;
@@ -746,7 +725,7 @@ void blkAqprod(double *p, double *q, int size, double *sqmat)
     (all zero columns removed and row ops done for divided differences)
   - should ultimately convert multipole over to condensed form, wont need this
 */
-void blkCompressVector(double *vec, int num_panels, int real_size, int *is_dummy)
+void blkCompressVector(ssystem *sys, double *vec, int num_panels, int real_size, int *is_dummy)
 {
   int i, j;
 
@@ -757,9 +736,8 @@ void blkCompressVector(double *vec, int num_panels, int real_size, int *is_dummy
   }
 
   if(j != real_size) {
-    fprintf(stderr, "blkCompressVector: number of real panels not right, %d\n",
-	    j);
-    exit(0);
+    sys->error("blkCompressVector: number of real panels not right, %d\n",
+               j);
   }
 }
 

@@ -286,9 +286,8 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
 		temp, condstr, 
 		&x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3, &x4, &y4, &z4)
 	 != 14) {
-	fprintf(stderr, "quickif: bad quad format, line %d:\n%s\n", 
-		linecnt, line1);
-	exit(0);
+	sys->error("quickif: bad quad format, line %d:\n%s\n",
+		   linecnt, line1);
       }
 
       /* add suffix */
@@ -327,9 +326,8 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
       if(sscanf(line1, "%s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 		temp, condstr, &x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3) 
 	 != 11) {
-	fprintf(stderr, "quickif: bad tri format, line %d:\n%s\n", 
-		linecnt, line1);
-	exit(0);
+	sys->error("quickif: bad tri format, line %d:\n%s\n",
+		   linecnt, line1);
       }
 
       /* allocate tri struct */
@@ -363,9 +361,8 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
     }
     else if(line1[0] == 'N' || line1[0] == 'n') {
       if(sscanf(line1, "%s %s %s", temp, condstr, temp2) != 3) {
-	fprintf(stderr, "quickif: bad rename format, line %d:\n%s\n", 
-		linecnt, line1);
-	exit(0);
+        sys->error("quickif: bad rename format, line %d:\n%s\n",
+                   linecnt, line1);
       }
 
       if(surf_type != DIELEC) {
@@ -376,8 +373,9 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
 	strcat(condstr, name_suffix);
 	strcat(temp2, name_suffix);
 
-	if(renameConductor(sys, condstr, temp2, name_list, num_cond) == FALSE)
-	    exit(0);
+	if(renameConductor(sys, condstr, temp2, name_list, num_cond) == FALSE) {
+	  sys->error("quickif: error renaming conductor");
+	}
       }
 
       linecnt++;
@@ -385,9 +383,8 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
     else if(line1[0] == '%' || line1[0] == '*' ||
 	    line1[0] == '#') linecnt++; /* ignore comments */
     else {
-      fprintf(stderr, "quickif: bad line format, line %d:\n%s\n", 
-		linecnt, line1);
-      exit(0);
+      sys->error("quickif: bad line format, line %d:\n%s\n",
+                 linecnt, line1);
     }
   }
 	
