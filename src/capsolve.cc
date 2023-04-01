@@ -53,7 +53,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, int maxiter, double tol, charge *chglist);
 
 /* This routine takes the cube data struct and computes capacitances. */
-int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, int numconds, Name *name_list)
+int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, double *trimat, double *sqrmat, int numconds, Name *name_list)
 /* double ***capmat: pointer to capacitance matrix */
 /* real_size: real_size = total #panels, incl dummies */
 {
@@ -69,8 +69,6 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   extern ITER *qpic_num_list;
   extern int q_;
   extern int dd_;
-
-  extern double *trimat, *sqrmat; /* globals in blkDirect.c */
 
   /* Allocate space for the capacitance matrix. */
   *capmat = sys->heap.mat(numconds+1, numconds+1);
@@ -119,7 +117,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
       if(size > MAXSIZ) {		/* index from 1 here, from 0 in solvers */
         blkCompressVector(r+1, size, real_size, sys->is_dummy+1);
         blkSolve(q+1, r+1, real_size, trimat, sqrmat);
-        blkExpandVector(q+1, size, real_size);
+        blkExpandVector(q+1, size, real_size, real_index);
       }
       else {
         starttimer;
@@ -468,8 +466,8 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 
     blkCompressVector(q+1, size, real_size, sys->is_dummy+1);
     blkAqprod(p+1, q+1, real_size, sqrmat);	/* offset since index from 1 */
-    blkExpandVector(p+1, size, real_size); /* ap changed to p, r chged to q */
-    blkExpandVector(q+1, size, real_size); /*    7 Oct 91 */
+    blkExpandVector(p+1, size, real_size, real_index); /* ap changed to p, r chged to q */
+    blkExpandVector(q+1, size, real_size, real_index); /*    7 Oct 91 */
 
   } else {
 

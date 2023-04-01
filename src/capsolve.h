@@ -36,6 +36,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(capsolve_H)
 #define capsolve_H
 
-int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, int numconds, Name *name_list);
+int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, double *trimat, double *sqrmat, int numconds, Name *name_list);
 
 #endif

@@ -61,11 +61,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #define LODEX(i, j, siz) (((i)*((i)+1))/2 + (j))
 #define UPDEX(i, j, siz) (((i)*(2*(siz) - (i) - 1))/2 + (j))
 
-double *trimat, *sqrmat;	/* flattened triangular, square matrices */
-int *real_index;		/* real_index[i] = index in full array
-				   (w/dummies) corresponding to entry i in
-				   the condensed array used by blk routines */
-
 /*
   index into a square siz x siz matrix stored linearly
 */
@@ -780,7 +775,7 @@ void blkCompressVector(double *vec, int num_panels, int real_size, int *is_dummy
 /*
   the inverse of the above function
 */
-void blkExpandVector(double *vec, int num_panels, int real_size)
+void blkExpandVector(double *vec, int num_panels, int real_size, int *real_index)
 {
   int i, j, from;
 

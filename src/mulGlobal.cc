@@ -66,12 +66,6 @@ ITER *qpic_num_list;		/* cond column names that get q picture */
 const char *kq_name_list;	/* cond names removed from q picture */
 ITER *kq_num_list;		/* cond numbers removed from q picture */
 
-int num_dielec_panels;		/* number of dielectric interface panels */
-int num_both_panels;		/* number of thin-cond-on-dielec-i/f panels */
-int num_cond_panels;		/* number of thick conductor panels */
-int up_size;			/* sum of above three (real panels) */
-int num_dummy_panels;		/* number of off-panel eval pnt panels */
-int eval_size;			/* sum of above two (total panel structs) */
 double iter_tol;		/* iterative loop tolerence on ||r|| */
 
 /*

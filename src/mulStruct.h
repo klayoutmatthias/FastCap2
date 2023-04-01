@@ -250,11 +250,9 @@ struct ssystem
   int mul_maxq;                 //  max #panels in mul_exact cube
   int mul_maxlq;                //  max #panels in lowest level cube
   int max_panel;                //  max #panels in all cubes w/multipole
-  int up_size;                  //  total #panels in all cubes, incl dummies
   int loc_maxq;                 //  max #evaluation points in loc_exact cube
   int loc_maxlq;                //  max #eval pnts in lowest level cube.
   int max_eval_pnt;             //  max #eval pnts in all cubes w/local exp
-  int eval_size;                //  total #eval pnts in entire problem
   double *q;                    //  The vector of lowest level charges.
   double *p;                    //  The vector of lowest level potentials.
   charge *panels;               //  linked list of charge panels in problem

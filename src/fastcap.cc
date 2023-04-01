@@ -60,9 +60,16 @@ int main(int argc, char *argv[])
   double relperm;
   int autmom, autlev, numMom, numLev;
 
+  double *trimat = 0, *sqrmat = 0;
+  int *real_index = 0;
+  int num_dielec_panels = 0;		/* number of dielectric interface panels */
+  int num_both_panels = 0;		/* number of thin-cond-on-dielec-i/f panels */
+  int num_cond_panels = 0;		/* number of thick conductor panels */
+  int up_size = 0;			/* sum of above three (real panels) */
+  int num_dummy_panels = 0;		/* number of off-panel eval pnt panels */
+  int eval_size = 0;			/* sum of above two (total panel structs) */
+
   extern int fulldirops, fullPqops;
-  extern int num_dummy_panels, num_dielec_panels; 
-  extern int num_both_panels, num_cond_panels, up_size, eval_size;
   extern double prectime, conjtime, dirtime, multime, uptime, downtime;
   extern double evaltime, lutime, fullsoltime, prsetime;
 
@@ -178,7 +185,7 @@ int main(int argc, char *argv[])
     dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, OPEN);
   }
 
-  mulMatDirect(&sys);		/* Compute the direct part matrices. */
+  mulMatDirect(&sys, &trimat, &sqrmat, &real_index, up_size, eval_size);		/* Compute the direct part matrices. */
 
   if (DIRSOL == OFF) {		/* with DIRSOL just want to skip to solve */
 
@@ -259,7 +266,7 @@ int main(int argc, char *argv[])
   }
 
   fprintf(stdout, "\nITERATION DATA");
-  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, num_cond,
+  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, num_cond,
 		     name_list);
 
   if (sys.mksdat) {

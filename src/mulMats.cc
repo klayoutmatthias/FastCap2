@@ -52,15 +52,13 @@ int **M2Mcnt, **M2Lcnt, **M2Pcnt, **L2Pcnt, **Q2PDcnt;
 MulMatDirect creates the matrices for the piece of the problem that is done
 directly exactly.
 */
-void mulMatDirect(ssystem *sys)
+void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_index, int up_size, int eval_size)
+  /* double *trimat, *sqrmat: flattened triangular, square matrices */
+  /* int *real_index: for map btwn condensed/expanded vectors */
 {
   cube *nextc, *nextnbr;
   int i, nummats, **temp;
   extern double lutime, dirtime;
-
-  extern double *trimat, *sqrmat; /* flattened triangular, square matrices */
-  extern int up_size, eval_size;
-  extern int *real_index;       /* for map btwn condensed/expanded vectors */
 
   /* First count the number of matrices to be done directly. */
   for(nextc=sys->directlist; nextc != NULL; nextc = nextc->dnext) {
@@ -105,7 +103,7 @@ void mulMatDirect(ssystem *sys)
                                      eval_size, TRUE);
         }
         else blkQ2Pfull(sys, sys->directlist, up_size, eval_size,
-                        &trimat, &sqrmat, &real_index, sys->is_dummy);
+                        trimat, sqrmat, real_index, sys->is_dummy);
       }
       else nextc->directmats[0]
           = Q2PDiag(sys, nextc->chgs, nextc->upnumeles[0], nextc->nbr_is_dummy[0],
@@ -133,7 +131,7 @@ void mulMatDirect(ssystem *sys)
     if (DIRSOL == ON) {
       /* transform A into LU */
       if(eval_size > MAXSIZ) {
-        blkLUdecomp(sqrmat, trimat, up_size);
+        blkLUdecomp(*sqrmat, *trimat, up_size);
       }
       else if(nextc == sys->directlist) {
         starttimer;
