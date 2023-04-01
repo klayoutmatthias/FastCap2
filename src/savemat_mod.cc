@@ -69,25 +69,8 @@ typedef struct {
      long namlen; /* name length (including NULL) */
 } Fmatrix;
 
-#ifdef __STDC__
 void savemat(FILE *fp, int type, const char *pname, int mrows, int ncols,
              int imagf, double *preal, double *pimag)
-#else
-void savemat(fp, type, pname, mrows, ncols, imagf, preal, pimag)
-FILE *fp;       /* File pointer */
-int type;       /* Type flag: Normally 0 for PC, 1000 for Sun, Mac, */
-		/* Apollo, and other Motorola format, */
-		/* 2000 for VAX D-float, 3000 for VAX G-float, and */
-		/* 4000 for CRAY */
-		/* Add 1 for text variables, 2 for sparse matrices */
-		/* See LOAD in reference section of guide for more info.*/
-char *pname;    /* pointer to matrix name */
-int mrows;      /* row dimension */
-int ncols;      /* column dimension */
-int imagf;	/* imaginary flag */
-double *preal;  /* pointer to real data */
-double *pimag;  /* pointer to imag data */
-#endif
 {
 	Fmatrix x;
 	int mn;
@@ -113,28 +96,8 @@ double *pimag;  /* pointer to imag data */
   wr_flag = 0 => open, print header (like old matlab setup)
   wr_flag = 1 => update, print without header
 */
-#ifdef __STDC__
 void savemat_mod(FILE *fp, int type, const char *pname, int mrows, int ncols,
 		 int imagf, double *preal, double *pimag, int wr_flag, int mn)
-#else
-void savemat_mod(fp, type, pname, mrows, ncols, imagf, preal, pimag, 
-		 wr_flag, mn)
-FILE *fp;       /* File pointer */
-int type;       /* Type flag: Normally 0 for PC, 1000 for Sun, Mac, */
-		/* Apollo, and other Motorola format, */
-		/* 2000 for VAX D-float, 3000 for VAX G-float, and */
-		/* 4000 for CRAY */
-		/* Add 1 for text variables, 2 for sparse matrices */
-		/* See LOAD in reference section of guide for more info.*/
-char *pname;    /* pointer to matrix name */
-int mrows;      /* row dimension */
-int ncols;      /* column dimension */
-int imagf;	/* imaginary flag */
-double *preal;  /* pointer to real data */
-double *pimag;  /* pointer to imag data */
-int wr_flag;			/* 0 for open, 1 to add to matrix */
-int mn;				/* real #entries, this dump only */
-#endif
 {
 	Fmatrix x;
 	

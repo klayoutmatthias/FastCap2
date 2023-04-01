@@ -37,9 +37,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "direct.h"
 #include "mulDo.h"
 
-#if OPCNT == ON
-static directops=0, upops=0, downops=0, evalops=0;
-#endif
+static int directops = 0, upops = 0, downops = 0, evalops = 0;
 
 /* 
 Compute the direct piece. 
@@ -63,9 +61,7 @@ cube *nextc;
       if(NUMDPT == 2 && is_dielec[j]) continue;
       for(k = dsize - 1; k >= 0; k--) {
 	if(!is_dummy[k]) p[j] += mat[j][k] * q[k];
-#if OPCNT == ON
 	directops++;
-#endif
       }
     }
   /* Through all nearest nbrs. */
@@ -77,9 +73,7 @@ cube *nextc;
         if(NUMDPT == 2 && is_dielec[j]) continue;
 	for(k = nextc->directnumeles[i] - 1; k >= 0; k--) {
 	  if(!is_dummy[k]) p[j] += mat[j][k] * qn[k];
-#if OPCNT == ON
 	  directops++;
-#endif
 	}
       }
     }
@@ -168,9 +162,7 @@ cube *nextc;
 	for(k = nextc->upnumeles[j] - 1; k >= 0; k--) {
 	  for(l = msize - 1; l >= 0; l--) {
 	    multi[l] += mat[l][k] * rhs[k];
-#if OPCNT == ON
 	    upops++;
-#endif
 	  }
 	}
       }
@@ -203,9 +195,7 @@ void mulEval(ssystem *sys)
         if(NUMDPT == 2 && is_dielec[j]) continue;
 	for(k = nc->evalnumeles[i] - 1; k >= 0; k--) {
 	  eval[j] += mat[j][k] * vec[k];
-#if OPCNT == ON
 	  evalops++;
-#endif
 	}
       }
     }
@@ -235,9 +225,7 @@ void mulDown(ssystem *sys)
 	for(j = lsize - 1; j >= 0; j--) {
 	  for(k = nc->downnumeles[i] - 1; k >= 0; k--) {
 	    local[j] += mat[j][k] * rhs[k];
-#if OPCNT == ON
 	    downops++;
-#endif
 	  }
 	}
       }
@@ -246,7 +234,6 @@ void mulDown(ssystem *sys)
 }
 
 
-#if OPCNT == ON
 void printops()
 {
   printf("Number of Direct Multi-Adds = %d\n", directops);
@@ -255,4 +242,3 @@ void printops()
   printf("Number of Evaluation Pass Multi-Adds = %d\n", evalops);
   printf("Total Number of Multi-Adds = %d\n", directops+upops+downops+evalops);
 }
-#endif

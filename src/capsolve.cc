@@ -487,20 +487,23 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
       dumpLevOneUpVecs(sys);
     }
 
-#if DNTYPE == NOSHFT
-    mulDown(sys);		/* do downward pass without local exp shifts */
-#endif
+    if (DNTYPE == NOSHFT) {
+      mulDown(sys);		/* do downward pass without local exp shifts */
+    }
 
-#if DNTYPE == GRENGD
-    mulDown(sys);	       	/* do heirarchical local shift dwnwd pass */
-#endif
+    if (DNTYPE == GRENGD) {
+      mulDown(sys);	       	/* do hierarchical local shift dwnwd pass */
+    }
+
     stoptimer;
     downtime += dtime;
 
     starttimer;
-#if MULTI == ON
-    mulEval(sys);		/* evaluate either locals or multis or both */
-#endif
+
+    if (MULTI == ON) {
+      mulEval(sys);		/* evaluate either locals or multis or both */
+    }
+
     stoptimer;
     evaltime += dtime;
 
@@ -513,10 +516,10 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     /* convert the voltage vec entries on dielectric i/f's into eps1E1-eps2E2 */
     compute_electric_fields(sys, chglist);
 
-#if OPCNT == ON
-    printops();
-    exit(0);
-#endif				/* OPCNT == ON */
+    if (OPCNT == ON) {
+      printops();
+      exit(0);
+    }
 
   }
 }

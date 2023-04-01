@@ -51,11 +51,10 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 */
 void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int use_ttl_chg)
 {
-  int i, j, k, numlines, numfaces, use_density;
+  int numlines, numfaces, use_density;
   face **faces, **sfaces;
-  double normal[3], rhs, temp;
-  double *avg, pnt[3], radius;
-  charge *cur_chg;
+  double normal[3], rhs;
+  double *avg, radius;
   line **lines;
   FILE *fp;
   char str[BUFSIZ];

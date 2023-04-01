@@ -218,7 +218,7 @@ static void figure_grey_levels(face **face_list, double *chgs, charge *chglist, 
 */
 static void get_charge_densities(double *q, char *file, int iter)
 {
-  int index, linecnt, header_found, type;
+  int index, linecnt, header_found;
   char str1[BUFSIZ], str2[BUFSIZ], str3[BUFSIZ], linein[BUFSIZ];
   double density;
   FILE *fp;
@@ -297,20 +297,13 @@ static void getAbsCoord(double *vec, charge *panel, int num)
 face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, int use_density)
 /* int use_density: use_density = TRUE => use q/A not q */
 {
-  int i, j, dummy;
-  int autmom, autlev, numMom, numLev;
-  char infile[BUFSIZ];
-  double relperm;
+  int i;
   charge *chgp;
   face *head, *tail, **faces;
-  extern int x_, k_, q_iter, q_, rc_, rd_, rb_;
+  extern int rd_;
   extern double ***axes;
   extern double axeslen;
-  extern char *q_file;
-  extern double black, white, linewd;
-  surface *surf_list;
-  int qindex=1, cindex=1;
-  double tavg[3], lavg[3];
+  extern double linewd;
   extern ITER *kq_num_list;
 
   /* transfer info to face structs (a waste but saves wrtting new fnt end) */
@@ -318,7 +311,7 @@ face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, in
       chgp = chgp->next) {
     if(chgp->dummy) continue;
 
-#if RMWEDGE == ON
+#if RMWEDGE == ON  //  TODO: remove?
     /* remove all dielectric panels in the first quadrant */
     tavg[0] = tavg[1] = tavg[2] = 0.0;
     for(i = 0; i < chgp->shape; i++) {
@@ -414,12 +407,12 @@ face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, in
 */
 static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *numlines)
 {
-  int flines = 0, falin = 0, fflag = 1, faflag = 1, getlines = 1, i, j;
+  int flines = 0, fflag = 1;
   int f_;               /* f_ == 1 => ignore face and fill info */
-  char linein[BUFSIZ], **chkp, *chk, *cp;
+  char linein[BUFSIZ], **chkp, *chk;
   char readfile[BUFSIZ], tempc[BUFSIZ];
   double arrowsize, dotsize;
-  int temp, linewd;
+  int linewd;
   FILE *fpin;
 
   f_ = 1;                       /* hardwire to take fill/face info as
@@ -1240,13 +1233,10 @@ static void dumpLines(FILE *fp, line **lines, int numlines)
 */
 void dumpPs(face **faces, int numfaces, line **lines, int numlines, FILE *fp, const char **argv, int argc, int use_density)
 {
-  int i, j, f, lowx, lowy;
+  int i, f, lowx, lowy;
   extern int s_, n_, g_, c_, x_, q_, rk_, f_, m_; /* command line flags */
   extern double ***axes;
-  extern double black, white;
   char linein[BUFSIZ];
-  double len, temp[2], xc, yc;
-  double x, y;
   
   /* print the lines before the bounding box */
   fprintf(fp, "%%!PS-Adobe-2.0 EPSF-1.2\n");

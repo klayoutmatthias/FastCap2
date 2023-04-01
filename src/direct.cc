@@ -58,10 +58,10 @@ double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int ca
             continue;
       }
       for(j=0; j < numchgs; j++) { /* need to have charge on them */
-#if SKIPQD == ON
-	if(chgs[j]->pos_dummy == chgs[i] || chgs[j]->neg_dummy == chgs[i])
-	    continue;
-#endif
+        if (SKIPQD == ON) {
+          if(chgs[j]->pos_dummy == chgs[i] || chgs[j]->neg_dummy == chgs[i])
+              continue;
+        }
 	if(!is_dummy[j]) mat[i][j] = calcp(chgs[j], chgs[i]->x, chgs[i]->y, 
 					   chgs[i]->z, NULL);
       }

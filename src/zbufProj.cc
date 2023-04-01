@@ -50,7 +50,6 @@ void image(face **faces, int numfaces, line **lines, int numlines, double *norma
   int i, j, k;
   double alpha, temp[3];
   extern double ***axes;
-  extern int x_;
 
   /* transform axes (done always, needed for alignment) */
   for(i = 0; i < 7; i++) {
@@ -153,9 +152,9 @@ void flatten(face **faces, int numfaces, line **lines, int numlines, double rhs,
 /* double rotation: rotation of image y axis rel to 1st line */
 {
   int i, j, k;
-  double temp, tvec[3], tvec1[3], crot, srot, alpha;
+  double temp, tvec[3], crot, srot;
   double y[3], x[3], z[3];		/* unit vectors */
-  double origin[3], sinth, costh, theta;
+  double origin[3];
   extern double ***axes;
   extern int x_, up_axis;
 
@@ -466,7 +465,7 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
 double getSphere(double *avg, face **faces, int numfaces, line **lines, int numlines)
 {
   double radius = 0.0, temp[3];
-  int i, j, k, l;
+  int i, j, k;
   extern int x_;
   extern double ***axes;
 

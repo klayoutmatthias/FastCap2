@@ -174,7 +174,7 @@ static int whichSide(face *fac, face *facplane)
 static int doLinesIntersect(double *isect, double *from1, double *to1, double *from2, double *to2)
 {
   double A[2][2], b[2];
-  double det, margin, temp1, temp2, margin1, margin2;
+  double det, temp1, temp2;
 
 #if DEBUGX == ON
   fprintf(stdout, "seg1 = (%g %g) (%g %g) seg2 = (%g %g) (%g %g)\n",
@@ -497,18 +497,15 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
 */
 static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, double rhs, double *normal)
 {
-  int i, j, k, olap[2], is_overlap, isect_cnt;
+  int i, j, k, is_overlap, isect_cnt;
   static double ***cproj = NULL;	/* corners of faces in view plane */
   double alpha[2][MAXSIDES];	/* 1 => view point 0 => corner */
-  double minref[2], maxref[2];	/* bounding box coordinates */
-  double minfac[2], maxfac[2];
   double x[3], y[3];		/* coordinates of x and y in facref plane */
-  double temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0, temp1;
-  double margin1;
-  double *cfr, *ctr, *cff, *ctf, avg[3], origin[3];
+  double temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0;
+  double *cfr, *ctr, *cff, *ctf, origin[3];
   double isect_avg[3], isect[3]; /* intersection points */
-  double alpha_fac, alpha_facref, alpha_origin, alpha_x;
-  int all_pos, all_neg, intersect, same_normal;
+  double alpha_fac, alpha_facref;
+  int intersect, same_normal;
   face *curf;
 
   /* allocate for local arrays on first call */
@@ -895,7 +892,7 @@ double *view;
 */
 static int chkCycle(face *fac, face *ref, FILE *fp)
 {
-  int b, i;
+  int b;
 
   if(fac->mark == TRUE) return(FALSE);
 
@@ -920,8 +917,7 @@ static int chkCycle(face *fac, face *ref, FILE *fp)
 */
 void dumpCycles(face **faces, int numfaces, FILE *file)
 {
-  int i, f, j, b, *cycled, *cyclei, numcycle, cycle = FALSE;
-  face *fp;
+  int f, j, b, cycle = FALSE;
 
   /* for each face, chase behind pointers until a leaf or same face is found */
   /*fprintf(file, "\nRecursive behind lists\n");*/
@@ -1007,7 +1003,7 @@ void getAdjGraph(ssystem *sys, face **faces, int numfaces, double *view, double 
 /* face **faces: array of face pntrs, faces[0] head of lst */
 {
   int numbehind, f, i, check;
-  face *fpcur, *fpchk, **behind;
+  face *fpcur, *fpchk;
 
   /* set up huge n^2 blocked face pointer arrays for each face */
   for(f = 0; f < numfaces; f++) {

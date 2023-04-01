@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
   sys.argv = (const char **) argv;
   sys.argc = argc;
 
-  int ttliter, i, j, num_cond;
+  int ttliter, i, num_cond;
   charge *chglist, *nq;
   double **capmat, dirtimesav, mulsetup, initalltime, ttlsetup, ttlsolve;
   double relperm;
@@ -133,9 +133,9 @@ int main(int argc, char *argv[])
   up_size = num_cond_panels + num_both_panels + num_dielec_panels;
   eval_size = up_size + num_dummy_panels;
 
-#if DISSRF == OFF
-  fprintf(stdout, "Title: `%s'\n", title);
-#endif
+  if (! sys.dissrf) {
+    fprintf(stdout, "Title: `%s'\n", title);
+  }
   fprintf(stdout, "  Total number of panels: %d\n", up_size);
   fprintf(stdout, "    Number of conductor panels: %d\n", num_cond_panels);
   fprintf(stdout, "    Number of dielectric interface panels: %d\n", 

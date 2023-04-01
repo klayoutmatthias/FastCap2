@@ -769,7 +769,7 @@ void mulMatUp(ssystem *sys)
     }
 
     /* NULL out pointers to same-geometry M2M mats for this level */
-    for (i = 0; i < sizeof(multimats) / sizeof(multimats[0]); i++) {
+    for (i = 0; i < int(sizeof(multimats) / sizeof(multimats[0])); i++) {
       multimats[i] = NULL;
     }
 
