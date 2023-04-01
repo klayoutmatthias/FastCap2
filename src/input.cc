@@ -668,13 +668,11 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
   charge *panel_list = NULL, *cur_panel, *panel_group, *c_panel;
   surface *cur_surf;
   extern NAME *start_name, *start_name_this_time;
-  extern char *title;
   NAME *name_group;
   FILE *fp;
   char surf_name[BUFSIZ];
   int patran_file_read;
 
-  /*title[0] = '\0';*/
   stdin_read = FALSE;
   for(cur_surf = surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
     if(!strcmp(cur_surf->name, "stdin")) {
@@ -729,8 +727,8 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
     cur_surf->panels = cur_panel;
 
     /* save the surface file's title */
-    cur_surf->title = sys->heap.strdup(title);
-    title[0] = '\0';		/* not sure if needed */
+    cur_surf->title = sys->heap.strdup(sys->title ? sys->title : "");
+    sys->title = 0;		/* not sure if needed */
 
     /* if the surface is a DIELEC, make sure all conductor numbers are zero */
     /* - also link each panel to its surface */

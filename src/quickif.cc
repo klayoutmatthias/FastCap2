@@ -260,7 +260,7 @@ static int renameConductor(ssystem *sys, char *old_name, char *new_name, Name **
   N <cond name string> <Rename string>
   * <Comment string>
 */
-charge *quickif(ssystem *sys, FILE *fp, char *line, char *title, int surf_type, double *trans, int *num_cond, Name **name_list,
+charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans, int *num_cond, Name **name_list,
                 char *name_suffix)
 /* char *name_suffix: suffix for all cond names read */
 /* Name **name_list: name list pointer */
@@ -276,7 +276,7 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, char *title, int surf_type, 
   chglst = NULL;
 
   /* save the title, strip leading '0' */
-  if(title[0] == '\0') strcpy(title, delcr(&line[1]));
+  if (!sys->title) sys->title = sys->heap.strdup(delcr(&line[1]));
   
   /* read in and load structs */
   while(fgets(line1, sizeof(line1), fp) != NULL) {

@@ -63,7 +63,6 @@ int main(int argc, char *argv[])
   extern int fulldirops, fullPqops;
   extern int num_dummy_panels, num_dielec_panels; 
   extern int num_both_panels, num_cond_panels, up_size, eval_size;
-  extern char *title;
   extern double prectime, conjtime, dirtime, multime, uptime, downtime;
   extern double evaltime, lutime, fullsoltime, prsetime;
 
@@ -77,7 +76,6 @@ int main(int argc, char *argv[])
   fulldirops = fullPqops = 0;
   prectime = conjtime = dirtime = multime = uptime = downtime = 0.0;
   evaltime = lutime = fullsoltime = mulsetup = 0.0;
-  title = sys.heap.alloc<char> (BUFSIZ, AMSC);
 
   /* initialize defaults, etc */
   autmom = autlev = ON;
@@ -133,7 +131,7 @@ int main(int argc, char *argv[])
   eval_size = up_size + num_dummy_panels;
 
   if (! sys.dissrf) {
-    fprintf(stdout, "Title: `%s'\n", title);
+    fprintf(stdout, "Title: `%s'\n", sys.title ? sys.title : "");
   }
   fprintf(stdout, "  Total number of panels: %d\n", up_size);
   fprintf(stdout, "    Number of conductor panels: %d\n", num_cond_panels);

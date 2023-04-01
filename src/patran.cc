@@ -54,7 +54,7 @@ static void grid_equiv_check(ssystem *sys);
 static void fill_patch_patch_table(int *patch_patch_table);
 static void assign_conductor(int *patch_patch_table);
 static void assign_names(void);
-static void file_title(FILE *stream);
+static void file_title(ssystem *sys, FILE *stream);
 static void summary_data(ssystem *sys, FILE *stream);
 static void node_data(FILE *stream, double *trans_vector);
 static void element_data(FILE *stream);
@@ -85,7 +85,6 @@ CFEG *start_cfeg;
 extern NAME *start_name;       	/* name data linked list (1 entry/component) */
 extern NAME *current_name;	/* tail pointer to above list */
 extern NAME *start_name_this_time;     /* name structs made on this call */
-char *title;       	/* overall name given in the title card */
 int conductor_count;
 
 /* these flags added to allow multiple calls; used to reset static variables */
@@ -110,7 +109,7 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
   fgets(line, BUFSIZ, stream);
   if(line[0] == '0') {
     *file_is_patran_type = FALSE;
-    firstq = quickif(sys, stream, line, title, surf_type, trans_vector,
+    firstq = quickif(sys, stream, line, surf_type, trans_vector,
 		     num_cond, name_list, name_suffix);
   }
   else {
@@ -170,7 +169,7 @@ void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_
 
     switch (type_number) {
     case 25:
-      file_title(stream);
+      file_title(sys, stream);
       break;
     case 26:
       summary_data(sys, stream);
@@ -218,12 +217,12 @@ void waste_line(int num_line, FILE *stream)
 
 /* Save the title of the Neutral file. */
 
-void file_title(FILE *stream)
+void file_title(ssystem *sys, FILE *stream)
 {
   char line[BUFSIZ];
   
   fgets(line, sizeof(line), stream);
-  if(title[0] == '\0') strcpy(title, delcr(line));
+  if (!sys->title) sys->title = sys->heap.strdup(delcr(line));
 }
 
 

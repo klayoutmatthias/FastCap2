@@ -236,6 +236,7 @@ struct ssystem
   //  global variables
   char *ps_file_base;           //  pointer to base name for .ps files
   double ***axes;               //  for PS plot
+  char *title;                  //  project title
 
   //  problem description
   int side;                     //  # cubes per side on lowest level.
