@@ -48,8 +48,24 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include <cstdlib>
 #include <cstring>
+#include <stdexcept>
+
+int main_func(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
+{
+  try {
+
+    return main_func(argc, argv);
+
+  } catch (std::exception &ex) {
+    fputs("ERROR: ", stderr);
+    fputs(ex.what(), stderr);
+    return -1;
+  }
+}
+
+int main_func(int argc, char *argv[])
 {
   ssystem sys;
   sys.argv = (const char **) argv;
@@ -319,4 +335,5 @@ int main(int argc, char *argv[])
 
   }
 
+  return 0;
 }
