@@ -69,10 +69,10 @@ void dumpChgDen(FILE *fp, double *q, charge *chglist);
 void dumpVecs(ssystem *sys, double *dblvec, int *intvec, int size);
 void chkDummyList(ssystem *sys, charge **panels, int *is_dummy, int n_chgs);
 void chkDummy(ssystem *sys, double *vector, int *is_dummy, int size);
-void disExParsimpcube(cube *pc);
-void disExtrasimpcube(cube *pc);
-void discube(cube *pc);
-void disdirectcube(cube *pc);
-void disvect(double *v, int size);
+void disExParsimpcube(ssystem *sys, cube *pc);
+void disExtrasimpcube(ssystem *sys, cube *pc);
+void discube(ssystem *sys, cube *pc);
+void disdirectcube(ssystem *sys, cube *pc);
+void disvect(ssystem *sys, double *v, int size);
 
 #endif

@@ -286,7 +286,7 @@ void olmulMatPrecond(ssystem *sys)
 
   /* Allocate a matrix big enough for any set of 7. */
   if (sys->jacdbg) {
-    printf("max direct size =%d\n", maxsize);
+    sys->msg("max direct size =%d\n", maxsize);
   }
   mat = sys->heap.alloc<double*>(maxsize, AMSC);
   for(i=0; i < maxsize; i++) {
@@ -897,7 +897,7 @@ void mulMatEval(ssystem *sys)
     
     if (sys->dilist) {
       sys->msg("\nInteraction list (%d entries) for ", ttlvects);
-      disExParsimpcube(nc);
+      disExParsimpcube(sys, nc);
     }
     
     /* set up exp/charge vectors and L2P, Q2P and/or M2P matrices as req'd */
@@ -916,7 +916,7 @@ void mulMatEval(ssystem *sys)
 
         if (sys->dilist) {
           sys->msg("L2P: ");
-          disExtrasimpcube(na);
+          disExtrasimpcube(sys, na);
         }
 
         if(DNTYPE == GRENGD) break; /* Only one local expansion if shifting. */
@@ -938,7 +938,7 @@ void mulMatEval(ssystem *sys)
 
             if (sys->dilist) {
               sys->msg("Q2P: ");
-              disExtrasimpcube(nexti);
+              disExtrasimpcube(sys, nexti);
             }
           }
           else {
@@ -956,7 +956,7 @@ void mulMatEval(ssystem *sys)
 
             if (sys->dilist) {
               sys->msg("M2P: ");
-              disExtrasimpcube(nexti);
+              disExtrasimpcube(sys, nexti);
             }
           }
         }

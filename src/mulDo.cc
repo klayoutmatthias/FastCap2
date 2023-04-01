@@ -234,11 +234,11 @@ void mulDown(ssystem *sys)
 }
 
 
-void printops()
+void printops(ssystem *sys)
 {
-  printf("Number of Direct Multi-Adds = %d\n", directops);
-  printf("Number of Upward Pass Multi-Adds = %d\n", upops);
-  printf("Number of Downward Pass Multi-Adds = %d\n", downops);
-  printf("Number of Evaluation Pass Multi-Adds = %d\n", evalops);
-  printf("Total Number of Multi-Adds = %d\n", directops+upops+downops+evalops);
+  sys->msg("Number of Direct Multi-Adds = %d\n", directops);
+  sys->msg("Number of Upward Pass Multi-Adds = %d\n", upops);
+  sys->msg("Number of Downward Pass Multi-Adds = %d\n", downops);
+  sys->msg("Number of Evaluation Pass Multi-Adds = %d\n", evalops);
+  sys->msg("Total Number of Multi-Adds = %d\n", directops+upops+downops+evalops);
 }

@@ -45,69 +45,69 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include <cmath>
 #include <cstring>
 
-static void dismat(double **mat, int rows, int cols);
-static void dischg(charge *pq);
-static void dissimpcube(cube *pc);
+static void dismat(ssystem *sys, double **mat, int rows, int cols);
+static void dischg(ssystem *sys, charge *pq);
+static void dissimpcube(ssystem *sys, cube *pc);
 static void dumpChgsWDummy(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, double x, double y, double z);
 
-void disExtrasimpcube(cube *pc)
+void disExtrasimpcube(ssystem *sys, cube *pc)
 {
-  printf("cubes[%d][%d][%d][%d]\n", pc->level, pc->j, pc->k, pc->l);
+  sys->msg("cubes[%d][%d][%d][%d]\n", pc->level, pc->j, pc->k, pc->l);
 }
 
-void disExParsimpcube(cube *pc)
+void disExParsimpcube(ssystem *sys, cube *pc)
 {
   cube *pa = pc->parent;
-  printf("cubes[%d][%d][%d][%d], ", pc->level, pc->j, pc->k, pc->l);
-  printf("parent = cubes[%d][%d][%d][%d]\n", pa->level, pa->j, pa->k, pa->l);
+  sys->msg("cubes[%d][%d][%d][%d], ", pc->level, pc->j, pc->k, pc->l);
+  sys->msg("parent = cubes[%d][%d][%d][%d]\n", pa->level, pa->j, pa->k, pa->l);
 }
 
-void dissimpcube(cube *pc)
+void dissimpcube(ssystem *sys, cube *pc)
 {
-  printf("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
-  printf("index=%d dindex=%d level=%d loc_exact=%d mul_exact=%d numkids=%d\n",
+  sys->msg("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
+  sys->msg("index=%d dindex=%d level=%d loc_exact=%d mul_exact=%d numkids=%d\n",
 	 pc->index, pc->dindex, pc->level,
 	 pc->loc_exact, pc->mul_exact, pc->numkids);
-  printf("numnbrs=%d upnumvects=%d directnumvects=%d downnumvects=%d\n",
+  sys->msg("numnbrs=%d upnumvects=%d directnumvects=%d downnumvects=%d\n",
 	 pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
 }
 
-void discube(cube *pc)
+void discube(ssystem *sys, cube *pc)
 {
   int i;
-  printf("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
-  printf("index=%d dindex=%d level=%d loc_exact=%d mul_exact=%d numkids=%d\n",
+  sys->msg("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
+  sys->msg("index=%d dindex=%d level=%d loc_exact=%d mul_exact=%d numkids=%d\n",
 	 pc->index, pc->dindex, pc->level,
 	 pc->loc_exact, pc->mul_exact, pc->numkids);
-  printf("numnbrs=%d upnumvects=%d directnumvects=%d downnumvects=%d\n",
+  sys->msg("numnbrs=%d upnumvects=%d directnumvects=%d downnumvects=%d\n",
 	 pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
   if(pc->directnumvects > 0) {
-    printf("num of elements in ");
+    sys->msg("num of elements in ");
     for(i=0; i < pc->directnumvects; i++) {
-      printf("v%d = %d ", i, pc->directnumeles[i]);
+      sys->msg("v%d = %d ", i, pc->directnumeles[i]);
     }
-    printf("\nchgs\n");
+    sys->msg("\nchgs\n");
     for(i=0; i < pc->directnumeles[0]; i++) {
-      dischg(pc->chgs[i]);
+      dischg(sys, pc->chgs[i]);
     }
   }
   if(pc->downnumvects > 0) {
-    printf("num of down elements in ");
+    sys->msg("num of down elements in ");
     for(i=0; i < pc->downnumvects; i++) {
-      printf("v%d = %d ", i, pc->downnumeles[i]);
+      sys->msg("v%d = %d ", i, pc->downnumeles[i]);
     }
   }
 }
 
-void disdirectcube(cube *pc)
+void disdirectcube(ssystem *sys, cube *pc)
 {
 int i;
   for(i=0; i < pc->directnumvects; i++) {
-    printf("matrix %d\n", i);
-    dismat(pc->directmats[i], pc->directnumeles[0], pc->directnumeles[i]);
+    sys->msg("matrix %d\n", i);
+    dismat(sys, pc->directmats[i], pc->directnumeles[0], pc->directnumeles[i]);
     if(i==0) {
-      printf("lu factored matrix\n");
-      dismat(pc->directlu, pc->directnumeles[0], pc->directnumeles[i]);
+      sys->msg("lu factored matrix\n");
+      dismat(sys, pc->directlu, pc->directnumeles[0], pc->directnumeles[i]);
     }
   }
 }
@@ -116,19 +116,19 @@ int i;
 void dissys(ssystem *sys)
 {
 int i, j, k, l, side;
-  printf("side=%d depth=%d order=%d\n",
+  sys->msg("side=%d depth=%d order=%d\n",
 	 sys->side, sys->depth, sys->order);
-  printf("Cube corner is x=%g y=%g z=%g\n", sys->minx, sys->miny, sys->minz);
-  printf("Cube side length= %g\n", sys->length);
-  printf("Printing all the cubes\n");
+  sys->msg("Cube corner is x=%g y=%g z=%g\n", sys->minx, sys->miny, sys->minz);
+  sys->msg("Cube side length= %g\n", sys->length);
+  sys->msg("Printing all the cubes\n");
   for(i = 0, side = 1; i <= sys->depth; i++, side *= 2) {
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
 	for(l=0; l < side; l++) {
 	  if (sys->cubes[i][j][k][l]) {
 	    sys->msg("\ncubes[%d][%d][%d][%d]\n", i, j, k, l);
-	    dissimpcube(sys->cubes[i][j][k][l]);
-/*          disdirectcube(&(sys->cubes[i][j][k][l])); */
+	    dissimpcube(sys, sys->cubes[i][j][k][l]);
+/*          disdirectcube(sys, &(sys->cubes[i][j][k][l])); */
 	  }
 	}
       }
@@ -138,35 +138,35 @@ int i, j, k, l, side;
 
 
 
-static void dismat(double **mat, int rows, int cols)
+static void dismat(ssystem *sys, double **mat, int rows, int cols)
 {
 int i,j;
   if(cols != 0) {
     for(i=0; i < rows; i++) {
-      printf("\n i=%d\n", i);
+      sys->msg("\n i=%d\n", i);
       for(j=0; j < cols; j++) {
-        printf("%d %g  ", j, mat[i][j]);
-        if(((j+1) % 5) == 0) printf("\n");
+        sys->msg("%d %g  ", j, mat[i][j]);
+        if(((j+1) % 5) == 0) sys->msg("\n");
       }
     }
-    printf("\n");
+    sys->msg("\n");
   }
 }
 
 
-void disvect(double *v, int size)
+void disvect(ssystem *sys, double *v, int size)
 {
 int i;
   for(i=0; i < size; i++) {
-    printf("i=%d %g ", i, v[i]);
-    if(((i+1) % 5) == 0) printf("\n");
+    sys->msg("i=%d %g ", i, v[i]);
+    if(((i+1) % 5) == 0) sys->msg("\n");
   }
-  printf("\n");
+  sys->msg("\n");
 }
 
-static void dischg(charge *pq)
+static void dischg(ssystem *sys, charge *pq)
 {
-  printf("cond=%d index=%d\n", pq->cond, pq->index);
+  sys->msg("cond=%d index=%d\n", pq->cond, pq->index);
 }
 
 /*

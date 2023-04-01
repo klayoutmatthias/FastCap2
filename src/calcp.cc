@@ -734,19 +734,19 @@ static void dp(ssystem *sys, charge *panel)
   int i;
   double c[4][3];
 
-  printf("shape=%d maxdiag=%g mindiag=%g area=%g\n", 
+  sys->msg("shape=%d maxdiag=%g mindiag=%g area=%g\n",
 	 panel->shape, 
 	 panel->max_diag, panel->min_diag, panel->area);
 
   sys->msg("surface: `%s'\n", panel->surf->name);
 
-  printf("x=%g y=%g z=%g\n", panel->x, panel->y, panel->z);
-  printf("X= %g %g %g\n", panel->X[0], panel->X[1], panel->X[2]);
-  printf("Y= %g %g %g\n", panel->Y[0], panel->Y[1], panel->Y[2]);
-  printf("Z= %g %g %g\n", panel->Z[0], panel->Z[1], panel->Z[2]);
+  sys->msg("x=%g y=%g z=%g\n", panel->x, panel->y, panel->z);
+  sys->msg("X= %g %g %g\n", panel->X[0], panel->X[1], panel->X[2]);
+  sys->msg("Y= %g %g %g\n", panel->Y[0], panel->Y[1], panel->Y[2]);
+  sys->msg("Z= %g %g %g\n", panel->Z[0], panel->Z[1], panel->Z[2]);
 
   for(i=0; i < panel->shape; i++)
-      printf("corner%d = %g %g %g\n", 
+      sys->msg("corner%d = %g %g %g\n",
 	     i, panel->corner[i][0], panel->corner[i][1], panel->corner[i][2]);
 
   for(i = 0; i < panel->shape; i++) {
@@ -756,18 +756,18 @@ static void dp(ssystem *sys, charge *panel)
 	+ panel->corner[i][1]*panel->Y[1] + panel->corner[i][1]*panel->Y[2];
     c[i][2] = panel->z + panel->corner[i][2]*panel->Z[0] 
 	+ panel->corner[i][2]*panel->Z[1] + panel->corner[i][2]*panel->Z[2];
-    printf("absolute corner%d = %g %g %g\n", i, c[i][0], c[i][1], c[i][2]);
+    sys->msg("absolute corner%d = %g %g %g\n", i, c[i][0], c[i][1], c[i][2]);
   }
 
   for(i=0; i < panel->shape; i++)
-      printf("length%d = %g\n", i, panel->length[i]);
+      sys->msg("length%d = %g\n", i, panel->length[i]);
 
-  printf("multipole coeffs:  ");
+  sys->msg("multipole coeffs:  ");
   for(i=0; i < 16; i++) {
-    printf("%g  ", panel->moments[i]);
-    if( (i % 6) == 0) printf("\n");
+    sys->msg("%g  ", panel->moments[i]);
+    if( (i % 6) == 0) sys->msg("\n");
   }
-  printf("\n");
+  sys->msg("\n");
 }
 
 

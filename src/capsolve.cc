@@ -504,7 +504,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     compute_electric_fields(sys, chglist);
 
     if (OPCNT == ON) {
-      printops();
+      printops(sys);
       //  TODO: remove?
       //  exit(0);
     }

@@ -517,9 +517,9 @@ static void grid_equiv_check(ssystem *sys)
   /* Print the equivalent grid information. 
   grid_ptr_1 = start_grid;
   while (grid_ptr_1) {
-    printf("\nGrid %d : (%d)", grid_ptr_1->ID, grid_ptr_1->number_equiv_grids);
+    sys->msg("\nGrid %d : (%d)", grid_ptr_1->ID, grid_ptr_1->number_equiv_grids);
     for (i=0; i<grid_ptr_1->number_equiv_grids; i++) 
-      printf (" %d ", *(grid_ptr_1->equiv_ID+i));
+      sys->msg (" %d ", *(grid_ptr_1->equiv_ID+i));
     grid_ptr_1 = grid_ptr_1->next;
   } */
 }
@@ -656,7 +656,7 @@ void assign_conductor(int *patch_patch_table)
   /* Prints the conductor information.
   patch_ptr = start_patch;
   while (patch_ptr) {
-    printf("\nPatch %d   Conductor %d", 
+    sys->msg("\nPatch %d   Conductor %d",
 	   patch_ptr->ID, patch_ptr->conductor_ID);
     patch_ptr = patch_ptr->next;
   } */
@@ -747,7 +747,7 @@ charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, 
 	}
 	patch_ptr = patch_ptr->next;
       }
-/*      printf("\nCEFG %d  LPH %d LPH_ID %d Conductor_ID %d",
+/*      sys->msg("\nCEFG %d  LPH %d LPH_ID %d Conductor_ID %d",
 	     cfeg_ptr->ID,cfeg_ptr->LPH,cfeg_ptr->LPH_ID,conductor_ID); */
 
       /* For each patch, call the subroutine to handle the detail. 
@@ -812,7 +812,7 @@ charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conduc
       VCOPY((pq+i)->corner[3], node_ptr->coord);
     }
     else {  /* Triangular panels. */
-/*printf("\nTTT\n");*/
+/*sys->msg("\nTTT\n");*/
       (pq+i)->shape = 3;
       node_ptr = node_search_table[*(element_corner_ptr++)]; 
       VCOPY((pq+i)->corner[0], node_ptr->coord);

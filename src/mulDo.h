@@ -36,7 +36,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #if !defined(mulDo_H)
 #define mulDo_H
 
-void printops();
+void printops(ssystem *sys);
 void mulPrecond(ssystem *sys, int type);
 void mulDirect(ssystem *sys);
 void mulUp(ssystem *sys);
