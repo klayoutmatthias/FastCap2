@@ -554,52 +554,18 @@ static void negate_cond_numbers(charge *panel_list, NAME *name_list)
 /*
   for debug - dumps the iter list
 */
-static int dump_ilist()
+static int dump_ilist(ssystem *sys)
 {
   ITER *cur_iter;
-  extern ITER *qpic_num_list;
 
   /* check the list for the iter number passed in */
   fprintf(stdout, "Iter list:");
-  for(cur_iter = qpic_num_list; cur_iter != NULL; cur_iter = cur_iter->next) {
+  for(cur_iter = sys->qpic_num_list; cur_iter != NULL; cur_iter = cur_iter->next) {
     fprintf(stdout, "%d ", cur_iter->iter);
   }
   fprintf(stdout, "\n");
   return(TRUE);
 }
-
-#if 1 == 0
-/*
-  adds an iteration number to the list that get shaded .ps file dumps
-  - list is built on global variable q_iter
-*/
-void add_iter(iter_num)
-int iter_num;
-{
-  ITER *cur_iter, *tail_iter;
-  extern ITER *q_iter;
-
-  /* check the list for the iter number passed in */
-  for(cur_iter = q_iter; cur_iter != NULL; 
-      tail_iter = cur_iter, cur_iter = cur_iter->next) {
-    if(cur_iter->iter == iter_num) {
-      return;
-    }
-  }
-
-  /* not in list; create a new iter struct to store the new iter number */
-  if(q_iter == NULL) {
-    CALLOC(q_iter, 1, ITER, ON, AMSC);
-    tail_iter = q_iter;
-  }
-  else {
-    CALLOC(tail_iter->next, 1, ITER, ON, AMSC);
-    tail_iter = tail_iter->next;
-  }
-  tail_iter->iter = iter_num;
-  tail_iter->next = NULL;
-}
-#endif
 
 /*
   checks if a particular iter is in the list; returns TRUE if it is
@@ -667,7 +633,6 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
   charge *panel_list = NULL, *cur_panel, *panel_group, *c_panel;
   surface *cur_surf;
-  extern NAME *start_name, *start_name_this_time;
   NAME *name_group;
   FILE *fp;
   char surf_name[BUFSIZ];
@@ -700,7 +665,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
 		     name_list, num_cond, surf_name);
       patran_file_read = patran_file;
       panel_group = cur_panel;
-      name_group = start_name;
+      name_group = sys->start_name;
     }
     else {
       if(cur_surf->prev->end_of_chain) {
@@ -719,7 +684,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
       if(cur_surf->prev->end_of_chain) {
 	/* if previous surface was the end of a chain, set up new group */
 	panel_group = cur_panel;
-	name_group = start_name_this_time; /* not really used anymore */
+	name_group = sys->start_name_this_time; /* not really used anymore */
       }
     }
     if(strcmp(cur_surf->name, "stdin") != 0) fclose(fp);
@@ -765,21 +730,6 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
 
     cur_surf->num_panels = num_panels;
     cur_surf->num_dummies = num_dummies;
-
-#if 1 == 0			/* now done implicitly with suffix names */
-    if(cur_surf->type == CONDTR || cur_surf->type == BOTH) {
-      if(cur_surf->end_of_chain) {
-	/* if the current surface is the end of a group to be #ed together, */
-	/*   renumber the conductors in the newly input surface so numbering */
-	/*   is unique and contiguous over the whole list */
-	if(cur_surf != surf_list) { /* if this is not the first surface */
-	  negate_cond_numbers(panel_group, name_group);
-	  reassign_cond_numbers(panel_list, start_name, cur_surf->name);
-	}
-	else reassign_cond_numbers(panel_list, start_name, cur_surf->name);
-      }
-    }
-#endif
 
   }
   return(panel_list);
@@ -901,41 +851,30 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
 
   int cmderr, i;
   char **chkp, *chk;
-  extern const char *kill_name_list, *kinp_name_list;
-  extern ITER *kill_num_list, *kinp_num_list;
-  extern double iter_tol;
 
-  extern int s_, n_, g_, c_, x_, k_, rc_, rd_, rb_, q_, rk_, m_, f_, dd_;
-  extern double moffset[], rotation, distance, linewd, scale, axeslen;
-  extern double elevation, azimuth;
-  extern int up_axis;
-  extern const char *line_file;
-  extern ITER *qpic_num_list;
-  extern const char *qpic_name_list;
-  extern ITER *kq_num_list;
-  extern const char *kq_name_list;
   /* load default parameters */
-  azimuth = DEFAZM;             /* azimuth */
-  elevation = DEFELE;           /* elevation */
-  rotation = DEFROT;            /* rotation relative to image of z axis */
-  distance = DEFDST;            /* distance to view pnt = (1+distance)radius */
-  moffset[0] = OFFSETX;         /* puts the origin this dist from lower left */
-  moffset[1] = OFFSETY;
-  scale = DEFSCL;               /* master scaling - applied to 2d image */
-  linewd = DEFWID;              /* line width used in ps file */
-  axeslen = DEFAXE;             /* length of axes lines in 3d */
-  up_axis = DEFUAX;             /* upward-pointing axis in 2d image */
-  line_file = NULL;             /* file of lines/arrows in .fig format */
-  qpic_num_list = NULL;		/* list of cond nums to get shaded plots for */
-  qpic_name_list = NULL;	/* list of cond names to get shaded plots */
-  kq_num_list = NULL;		/* list of cond nums in shaded plots */
-  kq_name_list = NULL;		/* list of cond names in shaded plots */
-  s_ = n_ = g_ = c_ = x_ = k_ = rc_ = rd_ = rb_ = q_ = rk_ = m_ = f_ = FALSE;
-  dd_ = FALSE;
+  sys->azimuth = DEFAZM;             /* azimuth */
+  sys->elevation = DEFELE;           /* elevation */
+  sys->rotation = DEFROT;            /* rotation relative to image of z axis */
+  sys->distance = DEFDST;            /* distance to view pnt = (1+distance)radius */
+  sys->moffset[0] = OFFSETX;         /* puts the origin this dist from lower left */
+  sys->moffset[1] = OFFSETY;
+  sys->scale = DEFSCL;               /* master scaling - applied to 2d image */
+  sys->linewd = DEFWID;              /* line width used in ps file */
+  sys->axeslen = DEFAXE;             /* length of axes lines in 3d */
+  sys->up_axis = DEFUAX;             /* upward-pointing axis in 2d image */
+  sys->line_file = NULL;             /* file of lines/arrows in .fig format */
+  sys->qpic_num_list = NULL;		/* list of cond nums to get shaded plots for */
+  sys->qpic_name_list = NULL;	/* list of cond names to get shaded plots */
+  sys->kq_num_list = NULL;		/* list of cond nums in shaded plots */
+  sys->kq_name_list = NULL;		/* list of cond names in shaded plots */
+  sys->s_ = sys->n_ = sys->g_ = sys->c_ = sys->x_ = sys->k_ = false;
+  sys->rc_ = sys->rd_ = sys->rb_ = sys->q_ = sys->rk_ = sys->m_ = false;
+  sys->f_ = sys->dd_ = false;
 
-  iter_tol = ABSTOL;
-  kill_num_list = kinp_num_list = NULL;
-  kill_name_list = kinp_name_list = NULL;
+  sys->iter_tol = ABSTOL;
+  sys->kill_num_list = sys->kinp_num_list = NULL;
+  sys->kill_name_list = sys->kinp_name_list = NULL;
   cmderr = FALSE;
   chkp = &chk;			/* pointers for error checking */
 
@@ -952,7 +891,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
 	else *autmom = OFF;
       }
       else if(argv[i][1] == 'd' && argv[i][2] == 'c') {
-	dd_ = TRUE;
+        sys->dd_ = true;
       }
       else if(argv[i][1] == 'd') {
 	*numLev = (int) strtol(&(argv[i][2]), chkp, 10);
@@ -976,22 +915,22 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
 	*surf_list_file = &(argv[i][2]);
       }
       else if(argv[i][1] == 'r' && argv[i][2] == 's') {
-	kill_name_list = &(argv[i][3]);
+        sys->kill_name_list = &(argv[i][3]);
       }
       else if(argv[i][1] == 'r' && argv[i][2] == 'i') {
-	kinp_name_list = &(argv[i][3]);
+        sys->kinp_name_list = &(argv[i][3]);
       }
       else if(argv[i][1] == '\0') {
 	*read_from_stdin = TRUE;
       }
       else if(argv[i][1] == 'f') {
-        f_ = TRUE;
+        sys->f_ = true;
       }
       else if(argv[i][1] == 'b') {
-        line_file = &(argv[i][2]);
+        sys->line_file = &(argv[i][2]);
       }
       else if(argv[i][1] == 'a') {
-        if(sscanf(&(argv[i][2]), "%lf", &azimuth) != 1) {
+        if(sscanf(&(argv[i][2]), "%lf", &sys->azimuth) != 1) {
           fprintf(stderr, "%s: bad view point azimuth angle '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
@@ -999,7 +938,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         }
       }
       else if(argv[i][1] == 'e') {
-        if(sscanf(&(argv[i][2]), "%lf", &elevation) != 1) {
+        if(sscanf(&(argv[i][2]), "%lf", &sys->elevation) != 1) {
           fprintf(stderr, "%s: bad view point elevation angle '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
@@ -1007,7 +946,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         }
       }
       else if(argv[i][1] == 't') {
-        if(sscanf(&(argv[i][2]), "%lf", &iter_tol) != 1 || iter_tol <= 0.0) {
+        if(sscanf(&(argv[i][2]), "%lf", &sys->iter_tol) != 1 || sys->iter_tol <= 0.0) {
           fprintf(stderr, "%s: bad iteration tolerence '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
@@ -1015,14 +954,13 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         }
       }
       else if(argv[i][1] == 'r' && argv[i][2] == 'c') {
-        kq_name_list = &(argv[i][3]);
-        rc_ = TRUE;
+        sys->kq_name_list = &(argv[i][3]);
+        sys->rc_ = true;
       }
-      else if(!strcmp(&(argv[i][1]), "rd")) rd_ = TRUE;
-      /*else if(!strcmp(&(argv[i][1]), "rb")) rb_ = TRUE;*/
-      else if(!strcmp(&(argv[i][1]), "rk")) rk_ = TRUE;
+      else if(!strcmp(&(argv[i][1]), "rd")) sys->rd_ = true;
+      else if(!strcmp(&(argv[i][1]), "rk")) sys->rk_ = true;
       else if(argv[i][1] == 'r') {
-        if(sscanf(&(argv[i][2]), "%lf", &rotation) != 1) {
+        if(sscanf(&(argv[i][2]), "%lf", &sys->rotation) != 1) {
           fprintf(stderr, "%s: bad image rotation angle '%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
@@ -1030,8 +968,8 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         }
       }
       else if(argv[i][1] == 'h') {
-        if(sscanf(&(argv[i][2]), "%lf", &distance) != 1) cmderr = TRUE;
-        else if(distance <= 0.0) cmderr = TRUE;
+        if(sscanf(&(argv[i][2]), "%lf", &sys->distance) != 1) cmderr = TRUE;
+        else if(sys->distance <= 0.0) cmderr = TRUE;
         if(cmderr) {
           fprintf(stderr, "%s: bad view point distance '%s'\n",
                   argv[0], &argv[i][2]);
@@ -1039,8 +977,8 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         }
       }
       else if(argv[i][1] == 's') {
-        if(sscanf(&(argv[i][2]), "%lf", &scale) != 1) cmderr = TRUE;
-        else if(scale <= 0.0) cmderr = TRUE;
+        if(sscanf(&(argv[i][2]), "%lf", &sys->scale) != 1) cmderr = TRUE;
+        else if(sys->scale <= 0.0) cmderr = TRUE;
         if(cmderr) {
           fprintf(stderr, "%s: bad image scale factor '%s'\n",
                   argv[0], &argv[i][2]);
@@ -1048,7 +986,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         }
       }
       else if(argv[i][1] == 'w') {
-        if(sscanf(&(argv[i][2]), "%lf", &linewd) != 1) {
+        if(sscanf(&(argv[i][2]), "%lf", &sys->linewd) != 1) {
                                 /* no check for < 0 so dash (-1) is pos. */
           fprintf(stderr, "%s: bad line width '%s'\n",
                   argv[0], &argv[i][2]);
@@ -1058,35 +996,35 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       }
       /* -x sets up axes of default length, -x<len> uses len as length */
       else if(argv[i][1] == 'x') {
-        if(argv[i][2] == '\0') x_ = TRUE;
+        if(argv[i][2] == '\0') sys->x_ = true;
         else {
-          if(sscanf(&(argv[i][2]), "%lf", &axeslen) != 1) {
+          if(sscanf(&(argv[i][2]), "%lf", &sys->axeslen) != 1) {
                                 /* no check for < 0 so axes can flip */
             fprintf(stderr, "%s: bad axes length '%s'\n",
                     argv[0], &argv[i][2]);
             cmderr = TRUE;
             break;
           }
-          else x_ = TRUE;
+          else sys->x_ = true;
         }
       }
-      else if(argv[i][1] == 'v') s_ = TRUE;
-      else if(argv[i][1] == 'n') n_ = TRUE;
-      else if(argv[i][1] == 'g') g_ = TRUE;
-      else if(argv[i][1] == 'c') c_ = TRUE;
-      else if(argv[i][1] == 'm') m_ = TRUE;
+      else if(argv[i][1] == 'v') sys->s_ = true;
+      else if(argv[i][1] == 'n') sys->n_ = true;
+      else if(argv[i][1] == 'g') sys->g_ = true;
+      else if(argv[i][1] == 'c') sys->c_ = true;
+      else if(argv[i][1] == 'm') sys->m_ = true;
       else if(argv[i][1] == 'q') {
         get_ps_file_base(sys); /* set up the output file base */
-        qpic_name_list = &(argv[i][2]);
-        q_ = TRUE;
+        sys->qpic_name_list = &(argv[i][2]);
+        sys->q_ = true;
       }
       else if(argv[i][1] == 'u') {
         if(!strcmp(&(argv[i][2]), "x") || !strcmp(&(argv[i][2]), "X"))
-            up_axis = XI;
+            sys->up_axis = XI;
         else if(!strcmp(&(argv[i][2]), "y") || !strcmp(&(argv[i][2]), "Y"))
-            up_axis = YI;
+            sys->up_axis = YI;
         else if(!strcmp(&(argv[i][2]), "z") || !strcmp(&(argv[i][2]), "Z"))
-            up_axis = ZI;
+            sys->up_axis = ZI;
         else {
           fprintf(stderr, "%s: bad up axis type `%s' -- use x, y or z\n", argv[0], &(argv[i][2]));
           cmderr = TRUE;
@@ -1379,11 +1317,10 @@ static void remove_conds(ssystem *sys, charge **panels, ITER *num_list, Name **n
   -rc list: no restrictions
   -ri/-rs: can't exhaust all conductors with combination of these lists
 */
-static void resolve_kill_lists(ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list, int num_cond)
+static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list, int num_cond)
 {
   int i, lists_exhaustive;
   ITER *cur_num;
-  extern int m_;
 
   /* check for anything in -rs list in -ri list */
   for(cur_num = ri_num_list; cur_num != NULL; cur_num = cur_num->next) {
@@ -1414,7 +1351,7 @@ static void resolve_kill_lists(ITER *rs_num_list, ITER *q_num_list, ITER *ri_num
       break;
     }
   }
-  if(lists_exhaustive && !m_) {
+  if(lists_exhaustive && !sys->m_) {
     fprintf(stderr, 
 "resolve_kill_lists: all conductors either in -ri or -rs list\n");
     exit(0);
@@ -1431,9 +1368,6 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
   char infile[BUFSIZ], hostname[BUFSIZ];
   charge *chglist;
   long clock;
-  extern ITER *kill_num_list, *qpic_num_list, *kinp_num_list, *kq_num_list;
-  extern const char *kill_name_list, *qpic_name_list, *kinp_name_list;
-  extern const char *kq_name_list;
 
   /* read the conductor and dielectric interface surface files, parse cmds */
   surf_list = input_surfaces(sys, autmom, autlev, relperm,
@@ -1441,7 +1375,7 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
 
   if(*autmom == ON) *numMom = DEFORD;
 
-  if (sys->dirsol || EXPGCR == ON) {
+  if (sys->dirsol || sys->expgcr) {
     *numLev = 0;	       	/* put all the charges in first cube */
     *autlev = OFF;
   }
@@ -1455,20 +1389,20 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
   chglist = read_panels(sys, surf_list, name_list, num_cond);
 
   /* set up the lists of conductors to remove from solve list */
-  kill_num_list = get_kill_num_list(sys, *name_list, kill_name_list);
+  sys->kill_num_list = get_kill_num_list(sys, *name_list, sys->kill_name_list);
 
   /* remove the panels on specified conductors from input list */
-  kinp_num_list = get_kill_num_list(sys, *name_list, kinp_name_list);
-  remove_conds(sys, &chglist, kinp_num_list, name_list);
+  sys->kinp_num_list = get_kill_num_list(sys, *name_list, sys->kinp_name_list);
+  remove_conds(sys, &chglist, sys->kinp_num_list, name_list);
 
   /* set up the lists of conductors to dump shaded plots for */
-  qpic_num_list = get_kill_num_list(sys, *name_list, qpic_name_list);
+  sys->qpic_num_list = get_kill_num_list(sys, *name_list, sys->qpic_name_list);
 
   /* set up the lists of conductors to eliminate from shaded plots */
-  kq_num_list = get_kill_num_list(sys, *name_list, kq_name_list);
+  sys->kq_num_list = get_kill_num_list(sys, *name_list, sys->kq_name_list);
 
   /* check for inconsistencies in kill lists */
-  resolve_kill_lists(kill_num_list, qpic_num_list, kinp_num_list, *num_cond);
+  resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list, *num_cond);
 
   if (sys->dissrf) {
     dumpSurfDat(surf_list);

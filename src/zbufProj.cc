@@ -156,7 +156,6 @@ void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numline
   double y[3], x[3], z[3];		/* unit vectors */
   double origin[3];
   double ***axes = sys->axes;
-  extern int x_, up_axis;
 
   /* load origin on view plane from axis starting point */
   for(k = 0; k < 3; k++) origin[k] = axes[0][0][k];
@@ -170,7 +169,7 @@ void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numline
   else for(i = 0; i < 3; i++) z[i] = normal[i];
 
   /* find projection of upward-pointing axis (usually z) - becomes 2d y axis */
-  for(k = 0; k < 3; k++) y[k] = axes[up_axis][1][k]-axes[up_axis][0][k];
+  for(k = 0; k < 3; k++) y[k] = axes[sys->up_axis][1][k]-axes[sys->up_axis][0][k];
   /* take out component normal to view plane */
   temp = dot(y, z);
   for(i = 0; i < 3; i++) y[i] -= temp*z[i];
@@ -210,7 +209,7 @@ void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numline
     (lines[i]->to)[0] = temp;
   }
   /* if axes are specified, they must be included */
-  for(i = 0; i < 7 && x_ == TRUE; i++) {
+  for(i = 0; i < 7 && sys->x_; i++) {
     for(j = 0; j < 2; j++) {
       for(k = 0; k < 3; k++) tvec[k] = axes[i][j][k] - origin[k];
       temp = dot(tvec, x);
@@ -240,7 +239,7 @@ void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numline
     (lines[i]->to)[0] = temp;
   }
   /* if axes are specified, they must be included */
-  for(i = 0; i < 7 && x_ == TRUE; i++) {
+  for(i = 0; i < 7 && sys->x_; i++) {
     for(j = 0; j < 2; j++) {
       temp = axes[i][j][0]*crot - axes[i][j][1]*srot;
       axes[i][j][1] = axes[i][j][0]*srot + axes[i][j][1]*crot;
@@ -261,7 +260,6 @@ void makePos(ssystem *sys, face **faces, int numfaces, line **lines, int numline
   double minx, miny, trans[2];
   double offset[2];	       	/* the margins from 0 for smallest x and y */
   double ***axes = sys->axes;
-  extern int x_;
 
   offset[1] = offset[0] = 0.0;	/* offsetting now done in scale2d */
 
@@ -292,7 +290,7 @@ void makePos(ssystem *sys, face **faces, int numfaces, line **lines, int numline
     }
   }
   /* include axes if they will be printed */
-  for(i = 0; i < 7 && x_ == TRUE; i++) {
+  for(i = 0; i < 7 && sys->x_; i++) {
     for(j = 0; j < 2; j++) {
       minx = MIN(minx, axes[i][j][0]);
       miny = MIN(miny, axes[i][j][1]);
@@ -315,7 +313,7 @@ void makePos(ssystem *sys, face **faces, int numfaces, line **lines, int numline
     (lines[i]->to)[0] += trans[0];
     (lines[i]->to)[1] += trans[1];  
   }
-  for(i = 0; i < 7 && x_ == TRUE; i++) {  /* include axes if to be printed */
+  for(i = 0; i < 7 && sys->x_; i++) {  /* include axes if to be printed */
     for(j = 0; j < 2; j++) {
       axes[i][j][0] += trans[0];
       axes[i][j][1] += trans[1];  
@@ -333,7 +331,6 @@ void scale2d(ssystem *sys, face **faces, int numfaces, line **lines, int numline
   int i, j;
   double ymax, xmax, xscale, yscale, master;
   double ***axes = sys->axes;
-  extern int x_;
 
   /* find ymax, xmax */
   for(i = 0, xmax = ymax = 0.0; i < numfaces; i++) {
@@ -349,7 +346,7 @@ void scale2d(ssystem *sys, face **faces, int numfaces, line **lines, int numline
     xmax = MAX(xmax, lines[i]->from[0]);
     ymax = MAX(ymax, lines[i]->from[1]);
   }
-  for(i = 0; i < 7 && x_ == TRUE; i++) { /* if axes to be prnted */
+  for(i = 0; i < 7 && sys->x_; i++) { /* if axes to be prnted */
     for(j = 0; j < 2; j++) {
       xmax = MAX(xmax, axes[i][j][0]);
       ymax = MAX(ymax, axes[i][j][1]);
@@ -386,7 +383,7 @@ void scale2d(ssystem *sys, face **faces, int numfaces, line **lines, int numline
     lines[i]->from[0] += OFFSETX; 
     lines[i]->from[1] += OFFSETY;
   }
-  for(i = 0; i < 7 && x_ == TRUE; i++) { /* do axes if needed */
+  for(i = 0; i < 7 && sys->x_; i++) { /* do axes if needed */
     for(j = 0; j < 2; j++) {
       axes[i][j][0] *= master; 
       axes[i][j][1] *= master;
@@ -405,7 +402,6 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
   double *avg, max[3], min[3];
   int i, j, k;
   double ***axes = sys->axes;
-  extern int x_;
 
   avg = sys->heap.alloc<double>(3, AMSC);
 
@@ -443,7 +439,7 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
   }
 
   /* if axes are specified, they must be included */
-  for(i = 0; i < 7 && x_ == TRUE && flag == ON; i++) {
+  for(i = 0; i < 7 && sys->x_ && flag == ON; i++) {
     for(j = 0; j < 2; j++) {
       for(k = 0; k < 3; k++) {
 	max[k] = MAX(max[k], axes[i][j][k]);
@@ -466,7 +462,6 @@ double getSphere(ssystem *sys, double *avg, face **faces, int numfaces, line **l
 {
   double radius = 0.0, temp[3];
   int i, j, k;
-  extern int x_;
   double ***axes = sys->axes;
 
   /* loop through all the points, save the farthest away */
@@ -486,7 +481,7 @@ double getSphere(ssystem *sys, double *avg, face **faces, int numfaces, line **l
   }
 
   /* if axes are specified, they must be included */
-  for(i = 0; i < 7 && x_ == TRUE; i++) {
+  for(i = 0; i < 7 && sys->x_; i++) {
     for(j = 0; j < 2; j++) {
       for(k = 0; k < 3; k++) temp[k] = avg[k] - axes[i][j][k];
       radius = MAX(radius, dot(temp, temp));
@@ -507,7 +502,6 @@ double getNormal(ssystem *sys, double *normal, double radius, double *avg, doubl
 {
   int i, k, j, axes_too_big, first;
   double rhs, norm, anorm, max_anorm;
-  extern int x_;
   double ***axes = sys->axes;
 
   /* figure the normal to the view plane 
@@ -526,7 +520,7 @@ double getNormal(ssystem *sys, double *normal, double radius, double *avg, doubl
   /* adjust view point - change to absolute coordinates */
   for(i = 0; i < 3; i++) view[i] = (1.0+distance)*radius*normal[i] + avg[i];
 
-  if(x_ == FALSE) {
+  if(!sys->x_) {
     /* adjust the axes if needed to keep from going beyond the view plane */
     /*    get norm of view-avg */
     for(norm = 0.0, i = 0; i < 3; i++) 

@@ -163,6 +163,24 @@ struct cube {
   struct cube *parent;    /* Ptr to parent cube. */
 };
 
+struct multi_mats
+{
+  multi_mats();
+
+  int *localcnt, *multicnt, *evalcnt;     //  counts of builds done by level
+  int **Q2Mcnt, **Q2Lcnt, **Q2Pcnt, **L2Lcnt; //  counts of xformation mats
+  int **M2Mcnt, **M2Lcnt, **M2Pcnt, **L2Pcnt, **Q2PDcnt;
+
+  double *Irn, *Mphi;		//  (1/r)^n+1, m*phi vect's
+  double *Ir, *phi;		//  1/r and phi arrays, used to update above
+  double *Rho, *Rhon;		//  rho and rho^n array
+  double *Beta, *Betam;		//  beta and beta*m array
+  double *tleg;                 //  Temporary Legendre storage.
+  double **factFac;		//  factorial factor array: (n-m+1)...(n+m)
+
+  double *sinmkB, *cosmkB, **facFrA;
+};
+
 enum dumpps_mode {
   DUMPPS_ON,
   DUMPPS_OFF,
@@ -184,7 +202,52 @@ struct ssystem
 
   FILE *log;                    //  log stream (0 to turn off output)
 
+  //  misc global
+  NAME *start_name;             //  conductor name linked list head
+  NAME *current_name;		//  conductor name linked list tail
+  NAME *start_name_this_time;	//  cond name list for the current surface
+  const char *kill_name_list;	//  cond names whose columns are omitted
+  ITER *kill_num_list;		//  cond numbers whose columns are omitted
+  const char *kinp_name_list;	//  cond names omitted from input
+  ITER *kinp_num_list;		//  cond numbers omitted from input
+  const char *qpic_name_list;	//  cond column names that get q picture
+  ITER *qpic_num_list;		//  cond column names that get q picture
+  const char *kq_name_list;	//  cond names removed from q picture
+  ITER *kq_num_list;		//  cond numbers removed from q picture
+
+  double iter_tol;		//  iterative loop tolerence on ||r||
+
+  //  command line option variables - all have to do with ps file dumping
+  bool s_;			//  true => insert showpage in .ps file(s)
+  bool n_;			//  true => number faces with input ordering
+  bool g_;			//  true => dump depth graph and quit
+  bool c_;			//  true => prbool command line on .ps file(s)
+  bool x_;			//  true => axes have been specified
+  bool k_;
+  bool rc_;			//  true => rm conductors in list from pic
+  bool rd_;			//  true => remove all dielec i/fs from pic
+  bool rb_;			//  true => rm BOTH-types in list from pic
+  bool q_;			//  true => dump shaded plots of q_iter iters
+  bool rk_;			//  true => rm chg den key in -q plots
+  bool m_;			//  true => switch to plot gen mode
+  bool f_;			//  true => don't fill faces (no hidden l rm)
+  bool dd_;			//  true => dump ttl charges to .ps pictures
+  double view[3];		//  absolute view point of 3D geometry
+  double moffset[2];		//  image offset from lower left corner
+  double elevation;		//  elevation of view rel to center of object
+  double azimuth;		//  azimuth of view rel to center of object
+  double rotation;		//  image rotation, degrees
+  double distance;		//  relative distance from center (#radii-1)
+  double linewd;		//  postscript line width
+  double scale;			//  over all image scale factor
+  double axeslen;		//  axes lengths in 3D distance
+  int up_axis;			//  X,Y or Z => which axis is vertical in pic
+  const char *line_file;	//  pointer to .fig superimposed line file
+
+  //  solver configuration
+
   bool dirsol;                  //  solve Pq=psi by Gaussian elim.
+  bool expgcr;                  //  do explicit full P*q products
 
   //  configuration options
   bool timdat;                  //  print timing data
@@ -268,6 +331,9 @@ struct ssystem
   cube *revprecondlist;		//  reversed linked lst of precond blks.
   int *is_dummy;                //  is_dummy[i] = TRUE => panel i is a dummy
   int *is_dielec;		//  is_dielec[i] = TRUE => panel i on dielec
+
+  multi_mats mm;
+
   Heap heap;                    //  allocation heap
 
   void msg(const char *fmt, ...);

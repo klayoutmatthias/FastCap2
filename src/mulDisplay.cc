@@ -627,7 +627,6 @@ void dumpSynop(ssystem *sys)
 {
   int i, j, k, l, side, depth = sys->depth, lev;
   int excnt[BUFSIZ], fcnt[BUFSIZ], emcnt[BUFSIZ], tcnt[BUFSIZ];
-  extern int *multicnt, *localcnt;
   char str[BUFSIZ];
   cube *****cubes = sys->cubes, *nc;
 
@@ -708,10 +707,10 @@ void dumpSynop(ssystem *sys)
 
 
   sprintf(str, "Multis built");
-  dumpSynCore2(str, depth, multicnt);
+  dumpSynCore2(str, depth, sys->mm.multicnt);
 
   sprintf(str, "Locals built");
-  dumpSynCore2(str, depth, localcnt);
+  dumpSynCore2(str, depth, sys->mm.localcnt);
 
 }
 
@@ -774,35 +773,33 @@ static void dumpMatCnts(int **mat, int depth, char *type)
 void dumpMatBldCnts(ssystem *sys)
 {
   char type[BUFSIZ];
-  extern int **Q2Mcnt, **Q2Lcnt, **Q2Pcnt, **L2Lcnt;
-  extern int **M2Mcnt, **M2Lcnt, **M2Pcnt, **L2Pcnt, **Q2PDcnt;
 
   sprintf(type, "Q2M");
-  dumpMatCnts(Q2Mcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.Q2Mcnt, sys->depth, type);
 
   sprintf(type, "Q2L");
-  dumpMatCnts(Q2Lcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.Q2Lcnt, sys->depth, type);
 
   sprintf(type, "Q2P");
-  dumpMatCnts(Q2Pcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.Q2Pcnt, sys->depth, type);
 
   sprintf(type, "M2M");
-  dumpMatCnts(M2Mcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.M2Mcnt, sys->depth, type);
 
   sprintf(type, "M2L");
-  dumpMatCnts(M2Lcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.M2Lcnt, sys->depth, type);
 
   sprintf(type, "M2P");
-  dumpMatCnts(M2Pcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.M2Pcnt, sys->depth, type);
 
   sprintf(type, "L2L");
-  dumpMatCnts(L2Lcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.L2Lcnt, sys->depth, type);
 
   sprintf(type, "L2P");
-  dumpMatCnts(L2Pcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.L2Pcnt, sys->depth, type);
 
   sprintf(type, "Q2PDiag");
-  dumpMatCnts(Q2PDcnt, sys->depth, type);
+  dumpMatCnts(sys->mm.Q2PDcnt, sys->depth, type);
 
 }
 
@@ -899,7 +896,7 @@ void dumpConfig(ssystem *sys, FILE *fp, const char *name)
   else fprintf(fp, " == OFF (do the calculation iteratively)\n");
 
   fprintf(fp, "   EXPGCR");
-  if(EXPGCR == ON) 
+  if (sys->expgcr)
       fprintf(fp, " == ON (do all P*q's explicitly w/full matrix)\n");
   else fprintf(fp, " == OFF (do P*q's with multipole)\n");
 
@@ -958,8 +955,6 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
   double maxdiag = 0.0, minoffd, rowttl, scale = 1.0, **sym_mat;
   double mat_entry;
   char unit[BUFSIZ], name[BUFSIZ], cond_name[BUFSIZ];
-  extern ITER *kill_num_list, *kinp_num_list;
-  extern double iter_tol;
 
   first_offd = TRUE;
   minoffd = capmat[1][1];	/* this entry is always present */
@@ -976,9 +971,9 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
   for(i = 1; i <= numconds; i++) {
 
     /* skip conductors removed from input */
-    if(want_this_iter(kinp_num_list, i)) continue;
+    if(want_this_iter(sys->kinp_num_list, i)) continue;
 
-    i_killed = want_this_iter(kill_num_list, i);
+    i_killed = want_this_iter(sys->kill_num_list, i);
 
     if(capmat[i][i] <= 0.0 && !i_killed) {
       fprintf(stderr, "\nmksCapDump: Warning - capacitance matrix has non-positive diagonal\n  row %d\n", i+1);
@@ -988,7 +983,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
     for(j = 1; j <= numconds; j++) {
 
       /* skip conductors removed from input */
-      if(want_this_iter(kinp_num_list, j)) continue;
+      if(want_this_iter(sys->kinp_num_list, j)) continue;
 
       if(j == i) {
 	sym_mat[i][i] = capmat[i][i];
@@ -998,7 +993,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
       /* if this column was not calculated and neither was the column
          with the same number as the current row, then symetrized mat has
 	 no entry at [i][j], [j][i] */
-      j_killed = want_this_iter(kill_num_list, j);
+      j_killed = want_this_iter(sys->kill_num_list, j);
       if(i_killed && j_killed) continue;
 
       /* if this column was calculated but column with the same number
@@ -1075,17 +1070,17 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
   }
 
   /* print the matrix */
-  sigfig = 2+log10(1.0/iter_tol);	/* get no. significant figs to prnt */
+  sigfig = 2+log10(1.0/sys->iter_tol);	/* get no. significant figs to prnt */
   colwidth = sigfig+6;		/* field width for cap mat columns */
   if(!sys->itrdat) fprintf(stdout, "\n");
-  if(kill_num_list != NULL) 
+  if(sys->kill_num_list != NULL)
       fprintf(stdout, "\nPARTIAL CAPACITANCE MATRIX, %sfarads\n", unit);
   else fprintf(stdout, "\nCAPACITANCE MATRIX, %sfarads\n", unit);
   if(numconds < 10) fprintf(stdout, "%s", spaces(unit, maxlen+2));
   else if(numconds < 100) fprintf(stdout, "%s", spaces(unit, maxlen+3));
   else fprintf(stdout, "%s", spaces(unit, maxlen+4));
   for(j = 1; j <= numconds; j++) { /* column headings */
-    if(want_this_iter(kinp_num_list, j)) continue;
+    if(want_this_iter(sys->kinp_num_list, j)) continue;
     sprintf(name, "%d ", j);
     sprintf(unit, "%%%ds", colwidth+1);
     fprintf(stdout, unit, name);
@@ -1094,7 +1089,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
   for(i = 1; i <= numconds; i++) { /* rows */
 
     /* skip conductors removed from input */
-    if(want_this_iter(kinp_num_list, i)) continue;
+    if(want_this_iter(sys->kinp_num_list, i)) continue;
 
     sprintf(unit, "%d", i);
 
@@ -1110,10 +1105,10 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
     for(j = 1; j <= numconds; j++) {
 
       /* skip conductors removed from input */
-      if(want_this_iter(kinp_num_list, j)) continue;
+      if(want_this_iter(sys->kinp_num_list, j)) continue;
 
-      if(want_this_iter(kill_num_list, i) 
-	 && want_this_iter(kill_num_list, j)) {
+      if(want_this_iter(sys->kill_num_list, i)
+         && want_this_iter(sys->kill_num_list, j)) {
 	/* print a blank if capacitance was not calculated */
 	fprintf(stdout, "%s", spaces(unit, colwidth+1));
       }

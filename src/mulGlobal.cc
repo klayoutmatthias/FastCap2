@@ -70,7 +70,7 @@ int m_;				/* TRUE => switch to plot gen mode */
 int f_;				/* TRUE => don't fill faces (no hidden l rm) */
 int dd_;			/* TRUE => dump ttl charges to .ps pictures */
 double view[3];			/* absolute view point of 3D geometry */
-double moffset[2];		/* image offset from lower left corner */
+// double moffset[2];		/* image offset from lower left corner */
 double elevation;		/* elevation of view rel to center of object */
 double azimuth;			/* azimuth of view rel to center of object */
 double rotation;		/* image rotation, degrees */
@@ -78,6 +78,5 @@ double distance;		/* relative distance from center (#radii-1) */
 double linewd;			/* postscript line width */
 double scale;			/* over all image scale factor */
 double axeslen;			/* axes lengths in 3D distance */
-double axes[10][2][3];		/* the 2d image of the coordinate axes */
 int up_axis;			/* X,Y or Z => which axis is vertical in pic */
 char *line_file;		/* pointer to .fig superimposed line file */

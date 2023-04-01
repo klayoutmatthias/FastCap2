@@ -74,8 +74,6 @@ int main(int argc, char *argv[])
 
   char filename[BUFSIZ];
 
-  extern int m_, q_, dd_;
-
   /* initialize defaults, etc */
   autmom = autlev = ON;
   relperm = 1.0;
@@ -91,9 +89,9 @@ int main(int argc, char *argv[])
 			  &numMom, &numLev, &name_list, &num_cond);
 
   /* if no fastcap run is to be done, just dump the psfile */
-  if(sys.capvew && m_) {
-    if(!q_) get_ps_file_base(&sys);
-    dump_ps_geometry(&sys, chglist, NULL, 0, dd_);
+  if(sys.capvew && sys.m_) {
+    if(!sys.q_) get_ps_file_base(&sys);
+    dump_ps_geometry(&sys, chglist, NULL, 0, sys.dd_);
     exit(0);
   }
 
@@ -294,7 +292,7 @@ int main(int argc, char *argv[])
       fprintf(stdout,"Total direct, full matrix solve time: %g\n", counters.fullsoltime);
       fprintf(stdout, "Total direct operations: %d\n", counters.fulldirops);
     }
-    else if(EXPGCR == ON) {	/* if solution done iteratively w/o multis */
+    else if (sys.expgcr) {	/* if solution done iteratively w/o multis */
       fprintf(stdout,"\nTotal A*q operations: %d (%d/iter)\n",
               counters.fullPqops, counters.fullPqops/ttliter);
     }

@@ -58,21 +58,17 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   line **lines;
   FILE *fp;
   char str[BUFSIZ];
-
-  extern double view[], moffset[], distance, rotation, scale;
-  extern double azimuth, elevation;
-  extern int g_;
-  extern char *line_file;
+  double black = 0.0, white = 0.0;
 
   /* set up use density flag---not too clean; saves changes in called funcs */
   if(use_ttl_chg) use_density = FALSE;
   else use_density = TRUE;
 
   /* convert fastcap structs to zbuf structs - COULD ELIMINATE THIS */
-  faces = fastcap2faces(sys, &numfaces, chglist, q, use_density);
+  faces = fastcap2faces(sys, &numfaces, chglist, q, use_density, &black, &white);
   
   /* get .fig format lines in file specified with -b option */
-  lines = getLines(sys, line_file, &numlines);
+  lines = getLines(sys, sys->line_file, &numlines);
 
   /* figure the cntr of extremal (average) coordinates of all points */
   avg = getAvg(sys, faces, numfaces, lines, numlines, OFF);
@@ -83,20 +79,20 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   /* get normal to image plane, adjust view point to be (1+distance)*radius 
      away from object center point avg, view plane (1+distance/2)*radius away
      - view coordinates taken rel to obj center but changed to absolute */
-  view[0] = azimuth; view[1] = elevation;
-  rhs = getNormal(sys, normal, radius, avg, view, distance);
+  sys->view[0] = sys->azimuth; sys->view[1] = sys->elevation;
+  rhs = getNormal(sys, normal, radius, avg, sys->view, sys->distance);
 
-#if 1 == 0
-  fprintf(stderr, " %d faces read\n", numfaces);
-  fprintf(stderr, " %d lines read\n", numlines);
-  fprintf(stderr, " average obj point: (%g %g %g), radius = %g\n", 
-	  avg[0], avg[1], avg[2], radius);
-  fprintf(stderr, " absolute view point: (%g %g %g)\n",
-	  view[0],view[1],view[2]);
-#endif
+  if (false) {
+    fprintf(stderr, " %d faces read\n", numfaces);
+    fprintf(stderr, " %d lines read\n", numlines);
+    fprintf(stderr, " average obj point: (%g %g %g), radius = %g\n",
+            avg[0], avg[1], avg[2], radius);
+    fprintf(stderr, " absolute view point: (%g %g %g)\n",
+            sys->view[0],sys->view[1],sys->view[2]);
+  }
 
   /* set up all the normals and rhs for the faces (needed for sort) */
-  initFaces(faces, numfaces, view);
+  initFaces(faces, numfaces, sys->view);
 
   /* set up ps file name */
   if(q == NULL) sprintf(str, "%s.ps", sys->ps_file_base);
@@ -105,7 +101,7 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   /* set up the adjacency graph for the depth sort */
   fprintf(stdout, "\nSorting %d faces for %s...", numfaces, str);
   fflush(stdout);
-  getAdjGraph(sys, faces, numfaces, view, rhs, normal);
+  getAdjGraph(sys, faces, numfaces, sys->view, rhs, normal);
   fprintf(stdout, "done.\n");
 
   /* depth sort the faces */
@@ -114,11 +110,11 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   /*fprintf(stderr, "done.\n");*/
 
   /* get the 2d figure and dump to ps file */
-  image(sys, sfaces, numfaces, lines, numlines, normal, rhs, view);
-  flatten(sys, sfaces, numfaces, lines, numlines, rhs, rotation, normal, view);
+  image(sys, sfaces, numfaces, lines, numlines, normal, rhs, sys->view);
+  flatten(sys, sfaces, numfaces, lines, numlines, rhs, sys->rotation, normal, sys->view);
   makePos(sys, sfaces, numfaces, lines, numlines);
-  scale2d(sys, sfaces, numfaces, lines, numlines, scale, moffset);
-  if(g_ == TRUE) {
+  scale2d(sys, sfaces, numfaces, lines, numlines, sys->scale, sys->moffset);
+  if(sys->g_) {
     dumpCycles(sfaces, numfaces, stdout); /* DANGER - doesnt work (?) */
     dumpFaceText(sfaces, numfaces, stdout);
   }
@@ -128,7 +124,7 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
       exit(0);
     }
     fprintf(stdout, "Writing %s...", str);
-    dumpPs(sys, sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density);
+    dumpPs(sys, sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density, black, white);
     fprintf(stdout, "done.\n");
     fclose(fp);
   }

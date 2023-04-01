@@ -42,8 +42,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include <cstring>
 #include <cmath>
 
-double black, white;            /* densities corresponding to shades */
-
 /*
   loads axes' lines
 */
@@ -57,94 +55,16 @@ static void setupLine(double ***axi, int index, double x1, double y1, double z1,
   axi[index][1][2] = z2;
 }
 
-#if 1 == 0
-/*
-  replaces Song's make_charges_all_patches when only patches are
-  to be dispalyed
-  - requires minor mods to main in patran.c
-*/
-charge *make_charges_from_patches()
-{
-  int i, j, k;
-  PATCH *patch_pntr;
-  extern PATCH *start_patch;
-  charge *start_chg, *charge_pntr;
-  GRID *current_grid;
-  extern GRID *start_grid;
-
-  start_chg = NULL;
-
-  /* for each patch, */
-  patch_pntr = start_patch;
-  while(patch_pntr != NULL) {
-
-    /* create a charge struct */
-    if(start_chg == NULL) {
-      CALLOC(charge_pntr, 1, charge *, ON, AMSC);
-      start_chg = charge_pntr;
-    }
-    else {
-      CALLOC(charge_pntr->next, 1, charge *, ON, AMSC);
-      charge_pntr = charge_pntr->next;
-    }
-
-    /* for each patch grid, find and load the coordinates 
-       (assumes 4 sides, just like Song does throughout) */
-    for(i = 0; i < 4; i++) {
-      current_grid = start_grid;
-      while(current_grid != NULL) {
-        if(patch_pntr->corner[i] == current_grid->ID) {
-          if(i == 0) {
-            CALLOC(charge_pntr->corner0, 3, double *, ON, AMSC)
-            for(k = 0; k < 3; k++) 
-                charge_pntr->corner0[k] = current_grid->coord[k];
-          }
-          else if(i == 1) {
-            CALLOC(charge_pntr->corner1, 3, double *, ON, AMSC)
-            for(k = 0; k < 3; k++) 
-                charge_pntr->corner1[k] = current_grid->coord[k];
-          }
-          else if(i == 2) {
-            CALLOC(charge_pntr->corner2, 3, double *, ON, AMSC)
-            for(k = 0; k < 3; k++) 
-                charge_pntr->corner2[k] = current_grid->coord[k];
-          }
-          else if(i == 3) {
-            CALLOC(charge_pntr->corner3, 3, double *, ON, AMSC)
-            for(k = 0; k < 3; k++) 
-                charge_pntr->corner3[k] = current_grid->coord[k];
-          }
-          else {
-            fprintf(stderr, "make_charges_from_patches: panel has more than 4 sides\n");
-            exit(0);
-          }
-          break;
-        }
-        current_grid = current_grid->next;
-      }
-    }
-
-    /* put in the shape - always rectangular */
-    charge_pntr->shape = 4;
-    patch_pntr = patch_pntr->next;
-  }
-  return(start_chg);
-}
-#endif
-
 /*
   set the grey levels taking into account the rd_, rc_, and rb_ options
   - levels are scaled to match the range of densities present
   - sets the values of the extremal densities (`black' and `white')
 */
-static void figure_grey_levels(face **face_list, double *chgs, charge *chglist, int use_density)
+static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, charge *chglist, int use_density, double *black, double *white)
 {
   int first, i;
   double dif;
   charge *panel;
-  extern int rd_;
-  extern double black, white;
-  extern ITER *kq_num_list;
 
   /* find the minimum and maximum charge density values */
   first = TRUE;
@@ -153,29 +73,29 @@ static void figure_grey_levels(face **face_list, double *chgs, charge *chglist, 
 
     /* skip if panel is on conductor in q picture kill list */
     if(panel->surf->type == CONDTR || panel->surf->type == BOTH) {
-      if(want_this_iter(kq_num_list, panel->cond)) continue;
+      if(want_this_iter(sys->kq_num_list, panel->cond)) continue;
     }
 
     /* skip if removing DIELEC's and panel is on dielectric i/f
        - type both interfaces are considered conductors for removal purposes */
-    if(panel->surf->type == DIELEC && rd_ == TRUE) continue;
+    if(panel->surf->type == DIELEC && sys->rd_) continue;
 
     if(first == TRUE) {
       first = FALSE;
-      if(use_density) black = white = chgs[panel->index]/panel->area;
-      else black = white = chgs[panel->index];
+      if(use_density) *black = *white = chgs[panel->index]/panel->area;
+      else *black = *white = chgs[panel->index];
     }
     else {
       if(chgs[panel->index] == 0.0) {
         dif = 0.0;
       }
       if(use_density) {
-        black = MAX(black, chgs[panel->index]/panel->area);
-        white = MIN(white, chgs[panel->index]/panel->area);
+        *black = MAX(*black, chgs[panel->index]/panel->area);
+        *white = MIN(*white, chgs[panel->index]/panel->area);
       }
       else {
-        black = MAX(black, chgs[panel->index]);
-        white = MIN(white, chgs[panel->index]);
+        *black = MAX(*black, chgs[panel->index]);
+        *white = MIN(*white, chgs[panel->index]);
       }   
     }
 
@@ -188,16 +108,16 @@ static void figure_grey_levels(face **face_list, double *chgs, charge *chglist, 
 
     /* skip if panel is on conductor in q picture kill list */
     if(panel->surf->type == CONDTR || panel->surf->type == BOTH) {
-      if(want_this_iter(kq_num_list, panel->cond)) continue;
+      if(want_this_iter(sys->kq_num_list, panel->cond)) continue;
     }
 
     /* skip if removing DIELEC's and panel is on dielectric i/f
        - type both interfaces are considered conductors for removal purposes */
-    if(panel->surf->type == DIELEC && rd_ == TRUE) continue;
+    if(panel->surf->type == DIELEC && sys->rd_) continue;
 
     if(use_density)
-        face_list[i]->greylev = (chgs[panel->index]/panel->area - white)/dif;
-    else face_list[i]->greylev = (chgs[panel->index] - white)/dif;
+        face_list[i]->greylev = (chgs[panel->index]/panel->area - *white)/dif;
+    else face_list[i]->greylev = (chgs[panel->index] - *white)/dif;
     i++;
   }
 }
@@ -294,17 +214,14 @@ static void getAbsCoord(double *vec, charge *panel, int num)
 /*
   transfer fastcap panel info to face structs
 */
-face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, int use_density)
+face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, int use_density, double *black, double *white)
 /* int use_density: use_density = TRUE => use q/A not q */
 {
   int i;
   charge *chgp;
   face *head, *tail, **faces;
-  extern int rd_;
   double ***axes = sys->axes;
-  extern double axeslen;
-  extern double linewd;
-  extern ITER *kq_num_list;
+  double axeslen = sys->axeslen;
 
   /* transfer info to face structs (a waste but saves wrtting new fnt end) */
   for(chgp = chglist, head = NULL, *numfaces = 0; chgp != NULL; 
@@ -325,12 +242,12 @@ face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, in
 
     /* skip if panel is on conductor in q picture kill list */
     if(chgp->surf->type == CONDTR || chgp->surf->type == BOTH) {
-      if(want_this_iter(kq_num_list, chgp->cond)) continue;
+      if(want_this_iter(sys->kq_num_list, chgp->cond)) continue;
     }
 
     /* skip if removing DIELEC's and panel is on dielectric i/f
        - type both interfaces are considered conductors for removal purposes */
-    if(chgp->surf->type == DIELEC && rd_ == TRUE) continue;
+    if(chgp->surf->type == DIELEC && sys->rd_) continue;
 
     /* create and link in a new face */
     if(head == NULL) {
@@ -352,7 +269,7 @@ face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, in
     tail->rhs = getPlane(tail->normal, tail->c[0], tail->c[1], tail->c[2]);
     /* load grey level and line width */
     tail->greylev = GREYLEV;
-    tail->width = linewd;
+    tail->width = sys->linewd;
     tail->index = *numfaces;
     (*numfaces)++;
 
@@ -363,8 +280,8 @@ face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, in
   for(tail = head, i = 0; tail != NULL; tail = tail->next, i++) 
       faces[i] = tail;
 
-  if(q != NULL) {
-    figure_grey_levels(faces, q, chglist, use_density);
+  if (q != NULL) {
+    figure_grey_levels(sys, faces, q, chglist, use_density, black, white);
   }
 
   /* set up axes lines (always done - needed for alignment) */
@@ -520,7 +437,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
 /*
   opens a .fig file and reads only lines from it - closes if faces/fills found
 */
-line **getLines(ssystem *sys, char *line_file, int *numlines)
+line **getLines(ssystem *sys, const char *line_file, int *numlines)
 {
   int i;
   FILE *fp;
@@ -551,16 +468,15 @@ line **getLines(ssystem *sys, char *line_file, int *numlines)
 /*
   figure the bounding box and write ps file line
 */
-static void getBndingBox(face **faces, int numfaces, line **lines, int numlines, int *lowx, int *lowy, FILE *fp, double ***axes)
+static void getBndingBox(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, int *lowx, int *lowy, FILE *fp, double ***axes)
 {
   int upx, upy;
   double xmax, ymax, minx, miny;
   int i, j;
-  extern int x_;
 
   /* find the smallest and largest x and y coordinates (assumed pos) */
   xmax = ymax = 0.0;
-  for(i = 0; i < 7 && x_ == TRUE; i++) { /* check axes */
+  for(i = 0; i < 7 && sys->x_; i++) { /* check axes */
     for(j = 0; j < 2; j++) {
       if(i == 0 && j == 0) {
         minx = axes[i][j][0];
@@ -576,7 +492,7 @@ static void getBndingBox(face **faces, int numfaces, line **lines, int numlines,
   }
   for(i = 0; i < numfaces; i++) { /* check faces */
     for(j = 0; j < faces[i]->numsides; j++) {
-      if(i == 0 && j == 0 && x_ == FALSE) {
+      if(i == 0 && j == 0 && !sys->x_) {
         minx = faces[i]->c[j][0];
         miny = faces[i]->c[j][1];
       }
@@ -589,7 +505,7 @@ static void getBndingBox(face **faces, int numfaces, line **lines, int numlines,
     }
   }
   for(i = 0; i < numlines; i++) { /* check lines */
-    if(i == 0 && x_ == FALSE && numfaces == 0) {
+    if(i == 0 && !sys->x_ && numfaces == 0) {
       minx = MIN(lines[i]->from[0], lines[i]->to[0]);
       miny = MIN(lines[i]->from[1], lines[i]->to[1]);
     }
@@ -1051,13 +967,12 @@ void dump_line_as_ps(FILE *fp, char *psline, double x_position, double y_positio
 /*
   dump nblocks blocks with shades between white and black, labeled with density
 */
-static void dump_shading_key(FILE *fp, int nblocks, int precision, double font_size, int use_density)
+static void dump_shading_key(ssystem *sys, FILE *fp, int nblocks, int precision, double font_size, int use_density, double black, double white)
 {
   int i;
   double x_right, y_top, block_hgt, block_x, block_y, string_x, diddle_x;
   double grey_step, grey_lev, density, density_step, white_width;
   char linein[BUFSIZ], ctrl[BUFSIZ];
-  extern double black, white, linewd;
 
   x_right = OFFSETX + IMAGEX;
   y_top = OFFSETY + IMAGEY;
@@ -1114,7 +1029,7 @@ static void dump_shading_key(FILE *fp, int nblocks, int precision, double font_s
     fprintf(fp, "%g %g lineto\n", block_x, block_y - block_hgt);
     fprintf(fp, "closepath\n");
     fprintf(fp, "%g setlinewidth %d setlinecap %d setlinejoin ",
-            linewd, LINCAP, LINJIN);
+            sys->linewd, LINCAP, LINJIN);
     fprintf(fp, " 0 setgray  stroke\n");
 
     /* dump the label */
@@ -1231,10 +1146,9 @@ static void dumpLines(FILE *fp, line **lines, int numlines)
 /*
   dump faces in ps Aldus FreeHand format - assumes header body in afhpsheader
 */
-void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, FILE *fp, const char **argv, int argc, int use_density)
+void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, FILE *fp, const char **argv, int argc, int use_density, double black, double white)
 {
   int i, f, lowx, lowy;
-  extern int s_, n_, g_, c_, x_, q_, rk_, f_, m_; /* command line flags */
   double ***axes = sys->axes;
   char linein[BUFSIZ];
   
@@ -1244,13 +1158,13 @@ void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines
   fprintf(fp, "%%%%Title: test.ps\n");
   fprintf(fp, "%%%%CreationDate: 4/19/90 10:47 AM\n");
 
-  getBndingBox(faces, numfaces, lines, numlines, 
+  getBndingBox(sys, faces, numfaces, lines, numlines,
                &lowx, &lowy, fp, axes); /* prnt bnding box */
   copyBody(fp);                 /* copys the body of the header from
                                    "afhpsheader" */
   
   /* dump the text header if needed */
-  if(n_ == TRUE || g_ == TRUE || c_ == TRUE || q_ == TRUE) {
+  if(sys->n_ || sys->g_ || sys->c_ || sys->q_) {
     fprintf(fp, "/textopf false def\n/curtextmtx{}def\n/otw .25 def\n");
     fprintf(fp, "/msf{dup/curtextmtx xdf makefont setfont}bdf\n");
     fprintf(fp, "/makesetfont/msf load def\n");
@@ -1281,11 +1195,11 @@ void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines
   for(i = 0; i < argc; i++) fprintf(fp, " %s", argv[i]);
   fprintf(fp, "\n");
 
-  if(x_ == TRUE) dumpAxes(axes, fp); /* dump axes if called for */
+  if(sys->x_) dumpAxes(axes, fp); /* dump axes if called for */
 
   /* for each face - dump fill, then outline - assumes depth ordering */
   for(f = 0; f < numfaces; f++) {
-    if(!f_) {
+    if(!sys->f_) {
       /* dump the fill */
       fprintf(fp, "%%%% Begin face %d\n", f);
       /* fprintf(fp, "0 sf\nnewpath\n"); */
@@ -1329,13 +1243,13 @@ void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines
       fprintf(fp, " 0 setgray  stroke\n");
       /* fprintf(fp, "grestore\n");*/
     }
-    if(n_ == TRUE) numberFace(faces[f], fp);
+    if(sys->n_) numberFace(faces[f], fp);
   }
 
   dumpLines(fp, lines, numlines);
 
   /* if this is just to check placement, number the faces */
-  if(n_ == TRUE) {
+  if(sys->n_) {
     /* numberFaces(faces, numfaces, fp); */
     numberLines(lines, numlines, fp);
     /*fprintf(stderr, "Faces and lines numbered\n");*/
@@ -1345,11 +1259,11 @@ void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines
   if(f_) fprintf(stderr, "Face fills not written to ps file\n"); */
 
   /* print shading key if not disabled and charge density info was inputed */
-  if(q_ && !rk_ && !m_) 
-      dump_shading_key(fp, KEYBLKS, KEYPREC, KEYFONT, use_density);
+  if(sys->q_ && !sys->rk_ && !sys->m_)
+      dump_shading_key(sys, fp, KEYBLKS, KEYPREC, KEYFONT, use_density, black, white);
     
   /* print footer */
-  if(c_ == TRUE) {                      /* print command line if asked for */
+  if(sys->c_) {                      /* print command line if asked for */
     for(f = 0, linein[0] = '\0'; f < argc; f++) {
       strcat(linein, argv[f]);
       strcat(linein, " ");
@@ -1359,7 +1273,7 @@ void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines
   }
    
   fprintf(fp, "vmr\nend  %% FreeHandDict\n");
-  if(s_ == FALSE) {
+  if(!sys->s_) {
     fprintf(fp, "showpage\n");
     /*fprintf(stderr, "Showpage inserted\n");*/
   }

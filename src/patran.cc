@@ -53,7 +53,7 @@ static void input(ssystem *sys, FILE *stream, char *line, int surf_type, double 
 static void grid_equiv_check(ssystem *sys);
 static void fill_patch_patch_table(int *patch_patch_table);
 static void assign_conductor(int *patch_patch_table);
-static void assign_names(void);
+static void assign_names(ssystem *sys);
 static void file_title(ssystem *sys, FILE *stream);
 static void summary_data(ssystem *sys, FILE *stream);
 static void node_data(FILE *stream, double *trans_vector);
@@ -82,9 +82,6 @@ PATCH *start_patch;
 CFEG *start_cfeg;
 
 /* these are now only used for temporary name storage for patran surfaces */
-extern NAME *start_name;       	/* name data linked list (1 entry/component) */
-extern NAME *current_name;	/* tail pointer to above list */
-extern NAME *start_name_this_time;     /* name structs made on this call */
 int conductor_count;
 
 /* these flags added to allow multiple calls; used to reset static variables */
@@ -101,7 +98,7 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
 
   if(line == NULL) line = sys->heap.alloc<char>(BUFSIZ, AMSC);
 
-  start_name_this_time = NULL;
+  sys->start_name_this_time = NULL;
   first_grid = first_patch = first_cfeg = TRUE;
   number_grids = number_patches = 0;
 
@@ -133,7 +130,7 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
 
     /*********************************************************************/
 
-      assign_names();
+      assign_names(sys);
     }
 
     firstq = make_charges_all_patches(sys, name_list, num_cond, surf_type,
@@ -439,15 +436,15 @@ void name_data(ssystem *sys, FILE *stream)
   char line[BUFSIZ];
   SM_PATCH *current_patch = NULL;
 
-  if(start_name == NULL) {	/* if first time on first patfront() call */
-    start_name = sys->heap.alloc<NAME>(1, AMSC);
-    current_name = start_name_this_time = start_name;
+  if(sys->start_name == NULL) {	/* if first time on first patfront() call */
+    sys->start_name = sys->heap.alloc<NAME>(1, AMSC);
+    sys->current_name = sys->start_name_this_time = sys->start_name;
   }
   else{ 
-    current_name->next = sys->heap.alloc<NAME>(1, AMSC);
-    current_name = current_name->next;
-    if(start_name_this_time == NULL) {	/* if 1st time on this patfront call */
-      start_name_this_time = current_name;
+    sys->current_name->next = sys->heap.alloc<NAME>(1, AMSC);
+    sys->current_name = sys->current_name->next;
+    if(sys->start_name_this_time == NULL) {	/* if 1st time on this patfront call */
+      sys->start_name_this_time = sys->current_name;
     }
   }
 
@@ -455,7 +452,7 @@ void name_data(ssystem *sys, FILE *stream)
   fgets(line, sizeof(line), stream); /* eat CR */
   fgets(line, sizeof(line), stream);
   delcr(line);
-  current_name->name = sys->heap.strdup(line);
+  sys->current_name->name = sys->heap.strdup(line);
   
   /* input NTYPE ID pair lines until no more, save patch id's that come in */
   for(i = iv = 0; i < KC-1; i++) {	/* loop on lines */
@@ -463,8 +460,8 @@ void name_data(ssystem *sys, FILE *stream)
       fscanf(stream, "%d %d", &ntype, &id);
       if(ntype == 3) {		/* if its a patch, save ID */
 	if(current_patch == NULL) { /* if 1st patch */
-	  current_name->patch_list = sys->heap.alloc<SM_PATCH>(1, AMSC);
-	  current_patch = current_name->patch_list;
+	  sys->current_name->patch_list = sys->heap.alloc<SM_PATCH>(1, AMSC);
+	  current_patch = sys->current_name->patch_list;
 	}
 	else {
 	  current_patch->next = sys->heap.alloc<SM_PATCH>(1, AMSC);
@@ -478,7 +475,7 @@ void name_data(ssystem *sys, FILE *stream)
   if(patch_cnt == 0) {
     fprintf(stderr, 
 	    "\nname_data: conductor '%s'\n  has no patch - redo naming so that one is included.\n", 
-	    current_name->name);
+	    sys->current_name->name);
     exit(0);
   }
 }
@@ -699,11 +696,11 @@ void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_co
   used with new naming functions---finds the patran name in the patran list
   - this code used to be in mksCapDump()
 */
-static char *getPatranName(int cond_num)
+static char *getPatranName(ssystem *sys, int cond_num)
 {
   NAME *cname;
 
-  cname = start_name_this_time;
+  cname = sys->start_name_this_time;
   while(cname != NULL) {
     if((cname->patch_list)->conductor_ID == cond_num) return(cname->name);
     else cname = cname->next;
@@ -743,7 +740,7 @@ charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, 
       while (patch_ptr) {
 	if (patch_ptr->ID == LPH_ID) {
 	  if(surf_type == CONDTR || surf_type == BOTH) {
-	    strcpy(cond_name, getPatranName(patch_ptr->conductor_ID));
+	    strcpy(cond_name, getPatranName(sys, patch_ptr->conductor_ID));
 	    strcat(cond_name, name_suffix);
 	    conductor_ID = getConductorNum(sys, cond_name, name_list, num_cond);
 	  }
@@ -839,14 +836,14 @@ charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conduc
   - checks one linked list against another, potentially n^2 => named
     regions should be kept small (as few patches as possible)
 */
-static void assign_names(void)
+static void assign_names(ssystem *sys)
 {
   int quit, current_conductor, cnt = 0;
   PATCH *current_patch;
   SM_PATCH *current_name_patch;
-  NAME *cur_name = start_name_this_time;
+  NAME *cur_name = sys->start_name_this_time;
 
-  if(start_name_this_time == NULL) {
+  if(sys->start_name_this_time == NULL) {
     fprintf(stderr, "\nassign_names: no conductor names specified\n");
     exit(0);
   }

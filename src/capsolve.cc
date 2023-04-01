@@ -63,12 +63,6 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   double *q, *p, *r, *ap;
   double **bp, **bap;
   surface *surf;
-  extern ITER *kill_num_list, *kinp_num_list;
-  extern double iter_tol;
-
-  extern ITER *qpic_num_list;
-  extern int q_;
-  extern int dd_;
 
   /* Allocate space for the capacitance matrix. */
   *capmat = sys->heap.mat(numconds+1, numconds+1);
@@ -95,8 +89,8 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   for(cond=1; cond <= numconds; cond++) {
     
     /* skip conductors in the -rs and the -ri kill list */
-    if(want_this_iter(kill_num_list, cond)
-       || want_this_iter(kinp_num_list, cond)) continue;
+    if(want_this_iter(sys->kill_num_list, cond)
+       || want_this_iter(sys->kinp_num_list, cond)) continue;
 
     fprintf(stdout, "\nStarting on column %d (%s)\n", cond, 
 	    getConductorName(cond, &name_list));
@@ -132,13 +126,13 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
       /* Do gcr. First allocate space for back vectors. */
       /* allocation moved out of loop 30Apr90 */
       if (ITRTYP == GMRES) {
-        if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,iter_tol,chglist))
+        if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,sys->iter_tol,chglist))
            > maxiter) {
           fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
           exit(0);
         }
       } else {
-        if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,iter_tol,chglist))
+        if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,sys->iter_tol,chglist))
            > maxiter) {
           fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
           exit(0);
@@ -158,8 +152,8 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     if (sys->capvew) {
       /* dump shaded geometry file if only if this column picture wanted */
       /* (variable names are messed up - iter list now is list of columns) */
-      if(want_this_iter(qpic_num_list, cond) || (q_ && qpic_num_list == NULL)) {
-        dump_ps_geometry(sys, chglist, q, cond, dd_);
+      if(want_this_iter(sys->qpic_num_list, cond) || (sys->q_ && sys->qpic_num_list == NULL)) {
+        dump_ps_geometry(sys, chglist, q, cond, sys->dd_);
       }
     }
 
@@ -459,7 +453,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     counters.prectime += dtime;
   }
 
-  if (EXPGCR == ON) {
+  if (sys->expgcr) {
 
     blkCompressVector(q+1, size, real_size, sys->is_dummy+1);
     blkAqprod(p+1, q+1, real_size, sqrmat);	/* offset since index from 1 */

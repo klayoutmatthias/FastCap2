@@ -44,11 +44,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "resusage.h"
 #include "counters.h"
 
-int *localcnt, *multicnt, *evalcnt;     /* counts of builds done by level */
-
-int **Q2Mcnt, **Q2Lcnt, **Q2Pcnt, **L2Lcnt; /* counts of xformation mats */
-int **M2Mcnt, **M2Lcnt, **M2Pcnt, **L2Pcnt, **Q2PDcnt;
-
 /*
 MulMatDirect creates the matrices for the piece of the problem that is done
 directly exactly.
@@ -90,7 +85,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     nextc->directnumeles[0] = nextc->upnumeles[0];
 
     starttimer;
-    if (sys->dirsol || EXPGCR == ON) {
+    if (sys->dirsol || sys->expgcr) {
       if(nextc == sys->directlist) {
         if(eval_size < MAXSIZ) {
           fprintf(stderr,
@@ -125,7 +120,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     }
 
     if (sys->dmtcnt) {
-      Q2PDcnt[nextc->level][nextc->level]++;
+      sys->mm.Q2PDcnt[nextc->level][nextc->level]++;
     }
 
     if (sys->dirsol) {
@@ -161,7 +156,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
                                           nextc->chgs, nextc->upnumeles[0],
                                           FALSE);
       if (sys->dmtcnt) {
-        Q2Pcnt[nextc->level][nextnbr->level]++;
+        sys->mm.Q2Pcnt[nextc->level][nextnbr->level]++;
       }
     }
     stoptimer;
@@ -722,11 +717,11 @@ void mulMatUp(ssystem *sys)
                                   nextc->x, nextc->y, nextc->z, order);
 
     if (sys->dissyn) {
-      multicnt[nextc->level]++;
+      sys->mm.multicnt[nextc->level]++;
     }
 
     if (sys->dmtcnt) {
-      Q2Mcnt[nextc->level][nextc->level]++;
+      sys->mm.Q2Mcnt[nextc->level][nextc->level]++;
     }
 
   }
@@ -776,7 +771,7 @@ void mulMatUp(ssystem *sys)
     for(nextc=sys->multilist[depth]; nextc != NULL; nextc = nextc->mnext) {
       
       if (sys->dissyn) {
-        multicnt[nextc->level]++;
+        sys->mm.multicnt[nextc->level]++;
       }
 
       /* Save space for upvector sizes, upvect ptrs, and upmats. */
@@ -804,7 +799,7 @@ void mulMatUp(ssystem *sys)
             nextc->upmats[i] = multimats[j];
 
             if (sys->dmtcnt) {
-              M2Mcnt[kid->level][nextc->level]++; /* cnts usage, ~computation */
+              sys->mm.M2Mcnt[kid->level][nextc->level]++; /* cnts usage, ~computation */
             }
 
           }
@@ -817,7 +812,7 @@ void mulMatUp(ssystem *sys)
                                           nextc->x, nextc->y, nextc->z, order);
 
             if (sys->dmtcnt) {
-              Q2Mcnt[kid->level][nextc->level]++;
+              sys->mm.Q2Mcnt[kid->level][nextc->level]++;
             }
 
           }
@@ -923,7 +918,7 @@ void mulMatEval(ssystem *sys)
         j++; 
         
         if (sys->dmtcnt) {
-          L2Pcnt[na->level][nc->level]++;
+          sys->mm.L2Pcnt[na->level][nc->level]++;
         }
 
         if (sys->dilist) {
@@ -945,7 +940,7 @@ void mulMatEval(ssystem *sys)
             j++;
 
             if (sys->dmtcnt) {
-              Q2Pcnt[nexti->level][nc->level]++;
+              sys->mm.Q2Pcnt[nexti->level][nc->level]++;
             }
 
             if (sys->dilist) {
@@ -963,7 +958,7 @@ void mulMatEval(ssystem *sys)
             j++;
             
             if (sys->dmtcnt) {
-              M2Pcnt[nexti->level][nc->level]++;
+              sys->mm.M2Pcnt[nexti->level][nc->level]++;
             }
 
             if (sys->dilist) {
@@ -1014,7 +1009,7 @@ void mulMatDown(ssystem *sys)
       ASSERT(parent->loc_exact == FALSE); /* has >= #evals of any of its kids*/
 
       if (sys->dissyn) {
-        localcnt[nc->level]++;
+        sys->mm.localcnt[nc->level]++;
       }
 
       if((depth <= 2) || (DNTYPE == NOSHFT)) i = 0; /* No parent local. */
@@ -1027,7 +1022,7 @@ void mulMatDown(ssystem *sys)
         nc->downvects[0] = parent->local;
 
         if (sys->dmtcnt) {
-          L2Lcnt[parent->level][nc->level]++;
+          sys->mm.L2Lcnt[parent->level][nc->level]++;
         }
       }
 
@@ -1041,7 +1036,7 @@ void mulMatDown(ssystem *sys)
                                        nc->x, nc->y, nc->z, sys->order);
           nc->downnumeles[i] = ni->upnumeles[0];
           if (sys->dmtcnt) {
-            Q2Lcnt[ni->level][nc->level]++;
+            sys->mm.Q2Lcnt[ni->level][nc->level]++;
           }
         }
         else {
@@ -1050,7 +1045,7 @@ void mulMatDown(ssystem *sys)
                                            nc->y, nc->z, sys->order);
           nc->downnumeles[i] = ni->multisize;
           if (sys->dmtcnt) {
-            M2Lcnt[ni->level][nc->level]++;
+            sys->mm.M2Lcnt[ni->level][nc->level]++;
           }
         }
       }

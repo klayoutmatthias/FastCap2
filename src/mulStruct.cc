@@ -8,7 +8,43 @@ ssystem::ssystem() :
   argv(0),
   argc(0),
   log(stdout),
+  start_name(0),
+  current_name(0),
+  start_name_this_time(0),
+  kill_name_list(0),
+  kill_num_list(0),
+  kinp_name_list(0),
+  kinp_num_list(0),
+  qpic_name_list(0),
+  qpic_num_list(0),
+  kq_name_list(0),
+  kq_num_list(0),
+  iter_tol(0.0),
+  s_(false),
+  n_(false),
+  g_(false),
+  c_(false),
+  x_(false),
+  k_(false),
+  rc_(false),
+  rd_(false),
+  rb_(false),
+  q_(false),
+  rk_(false),
+  m_(false),
+  f_(false),
+  dd_(false),
+  elevation(0.0),
+  azimuth(0.0),
+  rotation(0.0),
+  distance(0.0),
+  linewd(0.0),
+  scale(0.0),
+  axeslen(0.0),
+  up_axis(0),
+  line_file(0),
   dirsol(false),
+  expgcr(false),
   timdat(false),
   mksdat(true),
   dumpps(DUMPPS_OFF),
@@ -79,9 +115,20 @@ ssystem::ssystem() :
   is_dummy(0),
   is_dielec(0)
 {
+  for (int i = 0; i < int(sizeof(view) / sizeof(view[0])); ++i) {
+    view[i] = 0;
+  }
+  for (int i = 0; i < int(sizeof(moffset) / sizeof(moffset[0])); ++i) {
+    moffset[i] = 0;
+  }
+
 #if defined(DIRSOL) && DIRSOL == ON
   dirsol = true;
 #endif
+#if defined(EXPGCR) && EXPGCR == ON
+  expgcr = true;
+#endif
+
 #if defined(TIMDAT) && TIMDAT == ON
   timdat = true;
 #endif
@@ -219,3 +266,17 @@ void ssystem::msg(const char *fmt, ...)
   vfprintf(log, fmt, args);
 }
 
+// ---------------------------------------------------------------------------------
+
+multi_mats::multi_mats()
+  : localcnt(0), multicnt(0), evalcnt(0),
+    Q2Mcnt(0), Q2Lcnt(0), Q2Pcnt(0), L2Lcnt(0),
+    M2Mcnt(0), M2Lcnt(0), M2Pcnt(0), L2Pcnt(0), Q2PDcnt(0),
+    Irn(0), Mphi(0),
+    Ir(0), phi(0),
+    Rho(0), Rhon(0),
+    Beta(0), Betam(0),
+    tleg(0), factFac(0),
+    sinmkB(0), cosmkB(0), facFrA(0)
+{
+}

@@ -39,16 +39,6 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulDisplay.h"
 #include <cmath>
 
-/*
-  Globals used for temporary storage.
-*/
-double *Irn, *Mphi;		/* (1/r)^n+1, m*phi vect's */
-double *Ir, *phi;		/* 1/r and phi arrays, used to update above */
-double *Rho, *Rhon;		/* rho and rho^n array */
-double *Beta, *Betam;		/* beta and beta*m array */
-double *tleg;		/* Temporary Legendre storage. */
-double **factFac;		/* factorial factor array: (n-m+1)...(n+m) */
-
 void evalFactFac(double **array, int order);
 
 /*
@@ -96,57 +86,6 @@ void xyz2sphere(double x, double y, double z, double x0, double y0, double z0, d
   else *beta = atan2(y, x);
 
 }
-
-/*
-  gives the linear index into vector from n and m used by all routines dealing
-  with moments (cosine parts) and Leg. function evals, e.g. Mn^m and Pn^m(cosA)
-  used for all cases except for the sine part of arrays (use sindex() instead)
-  assumed entry order: (n,m) = (0,0) (1,0) (1,1) (2,0) (2,1) (2,2) (3,0)...
-*/
-/* REPLACED BY MACRO CINDEX(N, M) 24July91 */
-
-#if TRUE == FALSE
-
-int index(n, m)
-int n, m;
-{
-  if(m > n) {
-    fprintf(stderr, "index: m = %d > n = %d\n", m, n);
-    exit(0);
-  }
-  if(n < 0 || m < 0) {
-    fprintf(stderr, "index: n = %d or m = %d negative\n", n, m);
-    exit(0);
-  }
-  return(m + (n*(n+1))/2);
-}
-
-/*
-  gives the linear index into vector from n and m used by all routines dealing
-  with moments (sine parts), e.g. Mn^m 
-  assumes an array with all m = 0 (Mn^0) entries omitted to save space
-  assumed entry order: (n,m) = (1,1) (2,1) (2,2) (3,1) (3,2) (3,3) (4,1)...
-*/
-/* REPLACED BY MACRO SINDEX(N, M, CTERMS) 24July91 */
-int sindex(n, m, cterms)
-int n, m, cterms;		/* cterms is costerms(order) */
-{
-  if(m > n) {
-    fprintf(stderr, "sindex: m = %d > n = %d\n", m, n);
-    exit(0);
-  }
-  if(n < 0 || m < 0) {
-    fprintf(stderr, "sindex: n = %d or m = %d negative\n", n, m);
-    exit(0);
-  }
-  if(m == 0) {
-    fprintf(stderr, "sindex: attempt to index M%d^0\n", n);
-    exit(0);
-  }
-  return(cterms + m + (n*(n+1))/2 - (n+1));
-}
-
-#endif				/* end of index(), sindex() comment out */
 
 /*
   returns i = sqrt(-1) to the power of the argument
@@ -213,64 +152,59 @@ void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
 {
   int x;
 
-  extern int *multicnt, *localcnt, *evalcnt;
-  extern int **Q2Mcnt, **Q2Lcnt, **Q2Pcnt, **L2Lcnt;
-  extern int **M2Mcnt, **M2Lcnt, **M2Pcnt, **L2Pcnt, **Q2PDcnt;
-  extern double *sinmkB, *cosmkB, **facFrA;
-
   if(maxchgs > 0) {
-    Rho = sys->heap.alloc<double>(maxchgs, AMSC); /* rho array */
-    Rhon = sys->heap.alloc<double>(maxchgs, AMSC); /* rho^n array */
-    Beta = sys->heap.alloc<double>(maxchgs, AMSC); /* beta array */
-    Betam = sys->heap.alloc<double>(maxchgs, AMSC); /* beta*m array */
-    Irn = sys->heap.alloc<double>(maxchgs, AMSC); /* (1/r)^n+1 vector */
-    Ir = sys->heap.alloc<double>(maxchgs, AMSC); /* 1/r vector */
-    Mphi = sys->heap.alloc<double>(maxchgs, AMSC); /* m*phi vector */
-    phi = sys->heap.alloc<double>(maxchgs, AMSC); /* phi vector */
+    sys->mm.Rho = sys->heap.alloc<double>(maxchgs, AMSC); /* rho array */
+    sys->mm.Rhon = sys->heap.alloc<double>(maxchgs, AMSC); /* rho^n array */
+    sys->mm.Beta = sys->heap.alloc<double>(maxchgs, AMSC); /* beta array */
+    sys->mm.Betam = sys->heap.alloc<double>(maxchgs, AMSC); /* beta*m array */
+    sys->mm.Irn = sys->heap.alloc<double>(maxchgs, AMSC); /* (1/r)^n+1 vector */
+    sys->mm.Ir = sys->heap.alloc<double>(maxchgs, AMSC); /* 1/r vector */
+    sys->mm.Mphi = sys->heap.alloc<double>(maxchgs, AMSC); /* m*phi vector */
+    sys->mm.phi = sys->heap.alloc<double>(maxchgs, AMSC); /* phi vector */
   }
-  tleg = sys->heap.alloc<double>(costerms(2*order), AMSC);
+  sys->mm.tleg = sys->heap.alloc<double>(costerms(2*order), AMSC);
 	       	/* temp legendre storage (2*order needed for local exp) */
-  factFac = sys->heap.mat(order+1, order+1, AMSC);
-  evalFactFac(factFac, order);	/* get factorial factors for mulMulti2P */
+  sys->mm.factFac = sys->heap.mat(order+1, order+1, AMSC);
+  evalFactFac(sys->mm.factFac, order);	/* get factorial factors for mulMulti2P */
 
   if (sys->dissyn) {
     /* for counts of local/multipole expansions and eval mat builds by level */
-    localcnt = sys->heap.alloc<int>(depth + 1, AMSC);
-    multicnt = sys->heap.alloc<int>(depth + 1, AMSC);
-    evalcnt = sys->heap.alloc<int>(depth + 1, AMSC);
+    sys->mm.localcnt = sys->heap.alloc<int>(depth + 1, AMSC);
+    sys->mm.multicnt = sys->heap.alloc<int>(depth + 1, AMSC);
+    sys->mm.evalcnt = sys->heap.alloc<int>(depth + 1, AMSC);
   }
 
   if (sys->dmtcnt) {
     /* for counts of transformation matrices by level  */
-    Q2Mcnt = sys->heap.alloc<int *>(depth+1, AMSC);
-    Q2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
-    Q2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
-    L2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
-    M2Mcnt = sys->heap.alloc<int *>(depth+1, AMSC);
-    M2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
-    M2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
-    L2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
-    Q2PDcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.Q2Mcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.Q2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.Q2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.L2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.M2Mcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.M2Lcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.M2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.L2Pcnt = sys->heap.alloc<int *>(depth+1, AMSC);
+    sys->mm.Q2PDcnt = sys->heap.alloc<int *>(depth+1, AMSC);
     for(x = 0; x < depth+1; x++) {
-      Q2Mcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
-      Q2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
-      Q2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
-      L2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
-      M2Mcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
-      M2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
-      M2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
-      L2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
-      Q2PDcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.Q2Mcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.Q2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.Q2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.L2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.M2Mcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.M2Lcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.M2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.L2Pcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
+      sys->mm.Q2PDcnt[x] = sys->heap.alloc<int>(depth+1, AMSC);
     }
   }
 
   /* from here down could be switched out when the fake dwnwd pass is used */
-  facFrA = sys->heap.mat(2*order+1, 2*order+1, AMSC);
+  sys->mm.facFrA = sys->heap.mat(2*order+1, 2*order+1, AMSC);
   /* generate table of factorial fraction evaluations (for M2L and L2L) */
-  evalFacFra(sys, facFrA, order);
-  sinmkB = sys->heap.alloc<double>(2*order+1, AMSC);
-  cosmkB = sys->heap.alloc<double>(2*order+1, AMSC);
-  cosmkB[0] = 1.0;		/* look up arrays used for local exp */
+  evalFacFra(sys, sys->mm.facFrA, order);
+  sys->mm.sinmkB = sys->heap.alloc<double>(2*order+1, AMSC);
+  sys->mm.cosmkB = sys->heap.alloc<double>(2*order+1, AMSC);
+  sys->mm.cosmkB[0] = 1.0;		/* look up arrays used for local exp */
   /* generate array of sqrt((n+m)!(n-m)!)'s for L2L
   evalSqrtFac(sqrtFac, factFac, order); */
 }
@@ -346,13 +280,13 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
 
     /* get cosA for eval; save rho, beta in rho^n and cos/sin(m*beta) arrays */
     xyz2sphere(chgs[j]->x, chgs[j]->y, chgs[j]->z,
-	       x, y, z, &(Rho[j]), &cosA, &(Beta[j]));
-    Rhon[j] = Rho[j]; /* init powers of rho_i's */
-    Betam[j] = Beta[j];		/* init multiples of beta */
-    evalLegendre(cosA, tleg, order);	/* write moments to temporary array */
+               x, y, z, &(sys->mm.Rho[j]), &cosA, &(sys->mm.Beta[j]));
+    sys->mm.Rhon[j] = sys->mm.Rho[j]; /* init powers of rho_i's */
+    sys->mm.Betam[j] = sys->mm.Beta[j];		/* init multiples of beta */
+    evalLegendre(cosA, sys->mm.tleg, order);	/* write moments to temporary array */
 
     /* write a column of the matrix with each set of legendre evaluations */
-    for(i = 0; i < cterms; i++) mat[i][j] = tleg[i]; /* copy for cos terms */
+    for(i = 0; i < cterms; i++) mat[i][j] = sys->mm.tleg[i]; /* copy for cos terms */
   }
 
   if (sys->dalq2m) {
@@ -364,11 +298,11 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   /* some of this can be avoided using is_dummy to skip unused columns */
   /* add the rho^n factors to the cos matrix entries. */
   for(i = 1, k = kold = 2; i < cterms; i++) { /* loop on rows of matrix */
-    for(j = 0; j < numchgs; j++) mat[i][j] *= Rhon[j]; /* mul in factor */
+    for(j = 0; j < numchgs; j++) mat[i][j] *= sys->mm.Rhon[j]; /* mul in factor */
     k -= 1;
     if(k == 0) {		/* so that effective n varys appropriately */
       kold = k = kold + 1;
-      for(j = 0; j < numchgs; j++) Rhon[j] *= Rho[j];	/* r^n-1 -> r^n */
+      for(j = 0; j < numchgs; j++) sys->mm.Rhon[j] *= sys->mm.Rho[j];	/* r^n-1 -> r^n */
     }
   }
 
@@ -395,11 +329,11 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   for(m = 1; m <= order; m++) {	/* lp on m in Mn^m (no m=0 since cos(0)=1) */
     for(n = m; n <= order; n++) { /* loop over rows with same m */
       for(j = 0; j < numchgs; j++) { /* add factors to a row */
-	mat[CINDEX(n, m)][j] *= (2.0*cos(Betam[j]));   /* note factors of 2 */
-	mat[SINDEX(n, m, cterms)][j] *= (2.0*sin(Betam[j]));
+        mat[CINDEX(n, m)][j] *= (2.0*cos(sys->mm.Betam[j]));   /* note factors of 2 */
+        mat[SINDEX(n, m, cterms)][j] *= (2.0*sin(sys->mm.Betam[j]));
       }
     }
-    for(j = 0; j < numchgs; j++) Betam[j] += Beta[j]; /* (m-1)*beta->m*beta */
+    for(j = 0; j < numchgs; j++) sys->mm.Betam[j] += sys->mm.Beta[j]; /* (m-1)*beta->m*beta */
   }
 
   /* THIS IS NOT VERY GOOD: zero out columns corresponding to dummy panels */
@@ -437,7 +371,7 @@ double **mulMulti2Multi(ssystem *sys, double x, double y, double z, double xp, d
   xyz2sphere(x, y, z, xp, yp, zp, &rho, &cosA, &beta);
 
   /* get the requisite Legendre function evaluations */
-  evalLegendre(cosA, tleg, order);
+  evalLegendre(cosA, sys->mm.tleg, order);
 
   /* for each new moment (Nj^k) stuff the appropriate matrix entries */
   /* done completely brute force, one term at a time; uses exp in nb 12, p29 */
@@ -448,7 +382,7 @@ double **mulMulti2Multi(ssystem *sys, double x, double y, double z, double xp, d
 
 	  if(k == 0) {		/* figure terms for Nj^0, ie k = 0 */
 	    if(m <= j-n) {	/* if O moments are nonzero */
-	      temp1 = fact(j)*rhoPwr*iPwr(2*m)*tleg[CINDEX(n, m)];
+	      temp1 = fact(j)*rhoPwr*iPwr(2*m)*sys->mm.tleg[CINDEX(n, m)];
 	      temp1 /= (fact(j-n+m)*fact(n+m));
 	      mat[CINDEX(j, k)][CINDEX(j-n, m)] += temp1*cos(mBeta);
 	      if(m != 0) {		/* if sin term is non-zero */
@@ -457,7 +391,7 @@ double **mulMulti2Multi(ssystem *sys, double x, double y, double z, double xp, d
 	    }
 	  }
 	  else {		/* figure terms for Nj^k, k != 0 */
-	    temp1 = fact(j+k)*rhoPwr*tleg[CINDEX(n, m)]/fact(n+m);
+	    temp1 = fact(j+k)*rhoPwr*sys->mm.tleg[CINDEX(n, m)]/fact(n+m);
 	    temp2 = temp1*iPwr(2*m)/fact(j-n+k+m);
 	    temp1 = temp1*iPwr(k-m-abs(k-m))/fact(j-n+abs(k-m));
 
@@ -536,10 +470,10 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   /*   also get charge coordinates to set up rest of matrix */
   for(i = 0; i < numchgs; i++) { /* for each charge, do a legendre eval set */
     xyz2sphere(chgs[i]->x, chgs[i]->y, chgs[i]->z,
-	       x, y, z, &(Ir[i]), &cosTh, &(phi[i]));
+               x, y, z, &(sys->mm.Ir[i]), &cosTh, &(sys->mm.phi[i]));
 
-    Irn[i] = Ir[i]; /* initialize (1/r)^n+1 vec. */
-    Mphi[i] = phi[i];		/* initialize m*phi vector */
+    sys->mm.Irn[i] = sys->mm.Ir[i]; /* initialize (1/r)^n+1 vec. */
+    sys->mm.Mphi[i] = sys->mm.phi[i];		/* initialize m*phi vector */
 
     evalLegendre(cosTh, mat[i], order);	/* wr moms to 1st (cos) half of row */
 
@@ -553,11 +487,11 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
 
   /* add the (1/r)^n+1 factors to the left (cos(m*phi)) half of the matrix */
   for(j = 0, k = kold = 1; j < cterms; j++) { /* loop on columns of matrix */
-    for(i = 0; i < numchgs; i++) mat[i][j] /= Irn[i]; /* divide by r^n+1 */
+    for(i = 0; i < numchgs; i++) mat[i][j] /= sys->mm.Irn[i]; /* divide by r^n+1 */
     k -= 1;
     if(k == 0) {		/* so that n changes as appropriate */
       kold = k = kold + 1;
-      for(i = 0; i < numchgs; i++) Irn[i] *= Ir[i]; /* r^n -> r^n+1 */
+      for(i = 0; i < numchgs; i++) sys->mm.Irn[i] *= sys->mm.Ir[i]; /* r^n -> r^n+1 */
     }
   }
 
@@ -571,7 +505,7 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   /*  note that (n-m)!/(n+m)! = 1/(n-m+1)...(n+m) since m \leq n */
   for(n = 1; n <= order; n++) {
     for(m = 1; m <= n; m++) {
-      for(i = 0; i < numchgs; i++) mat[i][CINDEX(n, m)] /= factFac[n][m];
+      for(i = 0; i < numchgs; i++) mat[i][CINDEX(n, m)] /= sys->mm.factFac[n][m];
     }
   }
 
@@ -600,11 +534,11 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   for(m = 1; m <= order; m++) {	/* lp on m in Mn^m (no m=0 since cos(0)=1) */
     for(n = m; n <= order; n++) { /* loop over cols with same m */
       for(i = 0; i < numchgs; i++) { /* add factors to a column */
-	mat[i][CINDEX(n, m)] *= cos(Mphi[i]);
-	mat[i][SINDEX(n, m, cterms)] *= sin(Mphi[i]);
+        mat[i][CINDEX(n, m)] *= cos(sys->mm.Mphi[i]);
+        mat[i][SINDEX(n, m, cterms)] *= sin(sys->mm.Mphi[i]);
       }
     }
-    for(i = 0; i < numchgs; i++) Mphi[i] += phi[i]; /* (m-1)*phi->m*phi */
+    for(i = 0; i < numchgs; i++) sys->mm.Mphi[i] += sys->mm.phi[i]; /* (m-1)*phi->m*phi */
   }
 
   if (sys->dism2p) {

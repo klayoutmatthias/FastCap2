@@ -174,10 +174,6 @@ misc. global macros
 /* Linear System Solution Configuration */
 #define ITRTYP GMRES		/* type of iterative method */
 #define PRECOND OL		/* NONE=> no preconditioner OL=> use prec. */
-#if !defined(EXPGCR)
-//  NOTE: this option does not build
-#define EXPGCR OFF		/* ON=> do explicit full P*q products */
-#endif
 #define ABSTOL 0.01		/* iterations until ||res||inf < ABSTOL */
 #define MAXITER size		/* max num iterations ('size' => # panels) */
 #define EXRTSH 0.9		/* exact/ttl>EXRTSH for lev => make last lev */
