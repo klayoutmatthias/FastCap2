@@ -90,7 +90,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     nextc->directnumeles[0] = nextc->upnumeles[0];
 
     starttimer;
-    if (DIRSOL == ON || EXPGCR == ON) {
+    if (sys->dirsol || EXPGCR == ON) {
       if(nextc == sys->directlist) {
         if(eval_size < MAXSIZ) {
           fprintf(stderr,
@@ -128,7 +128,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
       Q2PDcnt[nextc->level][nextc->level]++;
     }
 
-    if (DIRSOL == ON) {
+    if (sys->dirsol) {
       /* transform A into LU */
       if(eval_size > MAXSIZ) {
         blkLUdecomp(*sqrmat, *trimat, up_size);

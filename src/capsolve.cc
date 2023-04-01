@@ -49,12 +49,12 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include <cmath>
 
-static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, int maxiter, double tol, charge *chglist);
-static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, charge *chglist);
-static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, int maxiter, double tol, charge *chglist);
+static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, double *sqrmat, int *real_index, int maxiter, double tol, charge *chglist);
+static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, double *sqrmat, int *real_index, charge *chglist);
+static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, double *sqrmat, int *real_index, int maxiter, double tol, charge *chglist);
 
 /* This routine takes the cube data struct and computes capacitances. */
-int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, double *trimat, double *sqrmat, int numconds, Name *name_list)
+int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, double *trimat, double *sqrmat, int *real_index, int numconds, Name *name_list)
 /* double ***capmat: pointer to capacitance matrix */
 /* real_size: real_size = total #panels, incl dummies */
 {
@@ -77,7 +77,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   q = sys->heap.alloc<double>(size+1, AMSC);
   r = sys->heap.alloc<double>(size+1, AMSC);
 
-  if (DIRSOL != ON) {		/* too much to allocate if not used */
+  if (! sys->dirsol) {		/* too much to allocate if not used */
 
     /* allocate for gcr accumulated basis vectors (moved out of loop 30Apr90) */
     fflush(stdout);		/* so header will be saved if crash occurs */
@@ -111,7 +111,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 	  r[nq->index] = 1.0;
     }
 
-    if (DIRSOL == ON) {
+    if (sys->dirsol) {
 
       /* do a direct forward elimination/back solve for the charge vector */
       if(size > MAXSIZ) {		/* index from 1 here, from 0 in solvers */
@@ -132,13 +132,13 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
       /* Do gcr. First allocate space for back vectors. */
       /* allocation moved out of loop 30Apr90 */
       if (ITRTYP == GMRES) {
-        if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,maxiter,iter_tol,chglist))
+        if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,iter_tol,chglist))
            > maxiter) {
           fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
           exit(0);
         }
       } else {
-        if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,maxiter,iter_tol,chglist))
+        if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,iter_tol,chglist))
            > maxiter) {
           fprintf(stderr, "NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
           exit(0);
@@ -197,7 +197,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 /* 
 Preconditioned(possibly) Generalized Conjugate Residuals.
 */
-static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, int maxiter, double tol, charge *chglist)
+static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, double *sqrmat, int *real_index, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double norm, beta, alpha, maxnorm;
@@ -218,7 +218,7 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
       bp[iter][i] = p[i] = r[i];
     }
 
-    computePsi(sys, p, ap, size, real_size, chglist);
+    computePsi(sys, p, ap, size, real_size, sqrmat, real_index, chglist);
     
     starttimer;
     for(i=1; i <= size; i++) {
@@ -286,7 +286,7 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
 /* 
   Preconditioned(possibly) Generalized Minimum Residual. 
   */
-static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, int maxiter, double tol, charge *chglist)
+static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, double *sqrmat, int *real_index, int maxiter, double tol, charge *chglist)
 {
   int iter, i, j;
   double rnorm, norm;
@@ -336,7 +336,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
     counters.conjtime += dtime;
 
     /* Form Av{iter}. */
-    computePsi(sys, p, ap, size, real_size, chglist);
+    computePsi(sys, p, ap, size, real_size, sqrmat, real_index, chglist);
 
     starttimer;
     
@@ -443,7 +443,7 @@ charge and potential have already been set up and that the potential
 vector has been zeroed.  ARBITRARY VECTORS CAN NOT BE USED.
 */
 
-static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, charge *chglist)
+static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, double *sqrmat, int *real_index, charge *chglist)
 {
   int i;
 

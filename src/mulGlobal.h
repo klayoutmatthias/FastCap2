@@ -174,9 +174,6 @@ misc. global macros
 /* Linear System Solution Configuration */
 #define ITRTYP GMRES		/* type of iterative method */
 #define PRECOND OL		/* NONE=> no preconditioner OL=> use prec. */
-#if !defined(DIRSOL)
-#define DIRSOL OFF		/* ON=> solve Pq=psi by Gaussian elim. */
-#endif
 #if !defined(EXPGCR)
 //  NOTE: this option does not build
 #define EXPGCR OFF		/* ON=> do explicit full P*q products */

@@ -184,6 +184,8 @@ struct ssystem
 
   FILE *log;                    //  log stream (0 to turn off output)
 
+  bool dirsol;                  //  solve Pq=psi by Gaussian elim.
+
   //  configuration options
   bool timdat;                  //  print timing data
   bool mksdat;                  //  dump symmetrized, MKS units cap mat

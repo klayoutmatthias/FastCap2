@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 
   mulMatDirect(&sys, &trimat, &sqrmat, &real_index, up_size, eval_size);		/* Compute the direct part matrices. */
 
-  if (DIRSOL == OFF) {		/* with DIRSOL just want to skip to solve */
+  if (! sys.dirsol) {		/* with DIRSOL just want to skip to solve */
 
     if (PRECOND == BD) {
       starttimer;
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
   dirtimesav = counters.dirtime;    /* save direct matrix setup time */
   counters.dirtime = 0.0;           /* make way for direct solve time */
 
-  if (DIRSOL == OFF) {
+  if (! sys.dirsol) {
 
     if (sys.dumpps == DUMPPS_ON) {
       dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
   }
 
   fprintf(stdout, "\nITERATION DATA");
-  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, num_cond,
+  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, real_index, num_cond,
 		     name_list);
 
   if (sys.mksdat) {
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "    Preconditioner solution time: %g\n", counters.prectime);
     fprintf(stdout, "    Iterative loop overhead time: %g\n", counters.conjtime);
 
-    if(DIRSOL == ON) {		/* if solution is done by Gaussian elim. */
+    if(sys.dirsol) {		/* if solution is done by Gaussian elim. */
       fprintf(stdout,"\nTotal direct, full matrix LU factor time: %g\n", counters.lutime);
       fprintf(stdout,"Total direct, full matrix solve time: %g\n", counters.fullsoltime);
       fprintf(stdout, "Total direct operations: %d\n", counters.fulldirops);

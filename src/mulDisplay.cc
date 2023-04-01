@@ -809,7 +809,7 @@ void dumpMatBldCnts(ssystem *sys)
 /* 
   dumps state of important compile flags
 */
-void dumpConfig(FILE *fp, const char *name)
+void dumpConfig(ssystem *sys, FILE *fp, const char *name)
 {
   int size = -1;		/* for '#define MAXITER size' case */
 
@@ -894,7 +894,7 @@ void dumpConfig(FILE *fp, const char *name)
   else fprintf(fp, " == %d (not implemented - use BD, OL or NONE)\n", PRECOND);
 
   fprintf(fp, "   DIRSOL");
-  if (DIRSOL == ON)
+  if (sys->dirsol)
       fprintf(fp, " == ON (do the whole calculation directly)\n");
   else fprintf(fp, " == OFF (do the calculation iteratively)\n");
 

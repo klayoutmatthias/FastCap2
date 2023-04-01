@@ -44,7 +44,4 @@ void blkExpandVector(double *vec, int num_panels, int real_size, int *real_index
 void blkLUdecomp(double *sqrArray, double *triArray, int numchgs);
 void blkSolve(double *x, double *b, int siz, double *matri, double *matsq);
 
-extern double *trimat, *sqrmat;
-extern int *real_index;
-
 #endif

@@ -10,7 +10,7 @@ add_executable(FastCap2
   src/mulSetup.h src/mulStruct.h src/calcp.h src/capsolve.h src/mulDisplay.h src/direct.h
   src/mulDo.h src/zbufInOut.h src/zbufProj.h src/zbufSort.h src/patran.h src/patran_f.h
   src/quickif.h src/mulLocal.h src/psMatDisplay.h src/savemat_mod.h
-  src/heap.h src/counters.h
+  src/heap.h src/counters.h src/blkDirect.h
   src/fastcap.cc
   src/mulGlobal.cc src/mulStruct.cc
   src/mulSetup.cc src/mulMats.cc src/mulDo.cc

@@ -1160,7 +1160,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       fprintf(stderr, "  -ri = remove conductors from input\n");
     }
     fprintf(stderr, "  <cond list> = [<name>],[<name>],...,[<name>]\n");
-    dumpConfig(stderr, argv[0]);
+    dumpConfig(sys, stderr, argv[0]);
     exit(0);
   }
 }
@@ -1441,7 +1441,7 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
 
   if(*autmom == ON) *numMom = DEFORD;
 
-  if (DIRSOL == ON || EXPGCR == ON) {
+  if (sys->dirsol || EXPGCR == ON) {
     *numLev = 0;	       	/* put all the charges in first cube */
     *autlev = OFF;
   }
@@ -1481,7 +1481,7 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
   else fprintf(stdout, "  Host: ? (gethostname() failure)\n");
 
   if (sys->cfgdat) {
-    dumpConfig(stdout, sys->argv[0]);
+    dumpConfig(sys, stdout, sys->argv[0]);
   }
 
   /* return the panels from the surface files */

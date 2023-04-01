@@ -8,6 +8,7 @@ ssystem::ssystem() :
   argv(0),
   argc(0),
   log(stdout),
+  dirsol(false),
   timdat(false),
   mksdat(true),
   dumpps(DUMPPS_OFF),
@@ -78,6 +79,9 @@ ssystem::ssystem() :
   is_dummy(0),
   is_dielec(0)
 {
+#if defined(DIRSOL) && DIRSOL == ON
+  dirsol = true;
+#endif
 #if defined(TIMDAT) && TIMDAT == ON
   timdat = true;
 #endif
