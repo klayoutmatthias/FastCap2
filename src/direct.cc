@@ -44,9 +44,7 @@ double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int ca
   int i, j;
 
   /* Allocate storage for the potential coefficients. */
-  mat = sys->heap.alloc<double *>(numchgs, AQ2PD);
-  for(i=0; i < numchgs; i++)
-    mat[i] = sys->heap.alloc<double>(numchgs, AQ2PD);
+  mat = sys->heap.mat(numchgs, numchgs, AQ2PD);
 
   if(calc) {
     /* Compute the potential coeffs. */
@@ -83,9 +81,8 @@ double **Q2P(ssystem *sys, charge **qchgs, int numqchgs, int *is_dummy, charge *
   int i, j;
 
   /* Allocate storage for the potential coefficients. P rows by Q cols. */
-  mat = sys->heap.alloc<double *>(numpchgs, AQ2P);
+  mat = sys->heap.mat(numpchgs, numqchgs, AQ2P);
   for(i=0; i < numpchgs; i++) {
-    mat[i] = sys->heap.alloc<double>(numqchgs, AQ2P);
     if(calc) {
       /* exclude:
          - dummy panels in the charge list
@@ -122,9 +119,7 @@ double **Q2Pfull(ssystem *sys, cube *directlist, int numchgs)
   charge **pchgs, **qchgs, *eval;
 
   /* allocate room for full P matrix */
-  mat = sys->heap.alloc<double *>(numchgs, AQ2P);
-  for(i=0; i < numchgs; i++)
-    mat[i] = sys->heap.alloc<double>(numchgs, AQ2P);
+  mat = sys->heap.mat(numchgs, numchgs, AQ2P);
 
   /* load the matrix in the style of Q2P() - no attempt to exploit symmetry */
   /* calculate interaction between every direct list entry and entire dlist */
@@ -161,9 +156,8 @@ double **ludecomp(ssystem *sys, double **matin, int size, int allocate)
 
   if(allocate == TRUE) {
     /* allocate for LU matrix and copy A */
-    mat = sys->heap.alloc<double *>(size, AMSC);
+    mat = sys->heap.mat(size, size);
     for(i = 0; i < size; i++) {
-      mat[i] = sys->heap.alloc<double>(size, AMSC);
       for(j = 0; j < size; j++) mat[i][j] = matin[i][j];
     }
   }

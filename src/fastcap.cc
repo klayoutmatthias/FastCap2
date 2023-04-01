@@ -83,12 +83,9 @@ int main(int argc, char *argv[])
   /* initialize defaults, etc */
   autmom = autlev = ON;
   relperm = 1.0;
-  axes = sys.heap.alloc<double **>(10, AMSC);
+  axes = sys.heap.alloc<double **>(10);
   for(i = 0; i < 10; i++) {
-    axes[i] = sys.heap.alloc<double *>(2, AMSC);
-    for(j = 0; j < 2; j++) {
-      axes[i][j] = sys.heap.alloc<double>(3, AMSC);
-    }
+    axes[i] = sys.heap.mat(2, 3);
   }
 
   /* get the list of all panels in the problem */

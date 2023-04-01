@@ -48,6 +48,22 @@ Heap::malloc(size_t n, MemoryType type)
   return d;
 }
 
+char *Heap::strdup(const char *str, MemoryType type)
+{
+  char *d = this->alloc<char>(strlen(str) + 1, type);
+  strcpy(d, str);
+  return d;
+}
+
+double **Heap::mat(int n, int m, MemoryType type)
+{
+  double **d = this->alloc<double *>(n, type);
+  for (int i = 0; i < n; ++i) {
+    d[i] = this->alloc<double>(m, type);
+  }
+  return d;
+}
+
 size_t
 Heap::memory(MemoryType type) const
 {

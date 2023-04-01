@@ -73,10 +73,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   extern double *trimat, *sqrmat; /* globals in blkDirect.c */
 
   /* Allocate space for the capacitance matrix. */
-  *capmat = sys->heap.alloc<double *>(numconds+1, AMSC);
-  for(i=1; i <= numconds; i++)  {
-    (*capmat)[i] = sys->heap.alloc<double>(numconds+1, AMSC);
-  }
+  *capmat = sys->heap.mat(numconds+1, numconds+1);
 
   /* Allocate space for cg vectors , r=residual and p=projection, ap = Ap. */
   q = sys->heap.alloc<double>(size+1, AMSC);
@@ -91,8 +88,6 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     bap = sys->heap.alloc<double *>(maxiter+1, AMSC);
 
   }
-
-  /* ualloc_verify(); */
 
   /* P is the "psuedo-charge" for multipole. Ap is the "psuedo-potential". */
   p = sys->q;

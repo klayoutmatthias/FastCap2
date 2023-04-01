@@ -87,13 +87,11 @@ static void add_to_alias(ssystem *sys, Name *cur_name, char *new_name)
 
   if(last_alias == NULL) {
     cur_name->alias_list = sys->heap.alloc<Name>(1, AMSC);
-    cur_name->alias_list->name = sys->heap.alloc<char>(strlen(new_name)+1, AMSC);
-    strcpy(cur_name->alias_list->name, new_name);
+    cur_name->alias_list->name = sys->heap.strdup(new_name);
   }
   else {
     last_alias = sys->heap.alloc<Name>(1, AMSC);
-    last_alias->name = sys->heap.alloc<char>(strlen(new_name)+1, AMSC);
-    strcpy(last_alias->name, new_name);
+    last_alias->name = sys->heap.strdup(new_name);
   }
 }
 
@@ -125,8 +123,7 @@ int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond)
   /* if this is the very first name, make and load struct on *name_list */
   if(*num_cond == 0) {
     *name_list = sys->heap.alloc<Name>(1, AMSC);
-    (*name_list)->name = sys->heap.alloc<char>(strlen(name)+1, AMSC);
-    strcpy((*name_list)->name, name);
+    (*name_list)->name = sys->heap.strdup(name);
     (*name_list)->next = NULL;
     *num_cond = 1;
     return(1);
@@ -142,8 +139,7 @@ int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond)
 
   /* add the new name to the list */
   prev_name->next = sys->heap.alloc<Name>(1, AMSC);
-  prev_name->next->name = sys->heap.alloc<char>(strlen(name)+1, AMSC);
-  strcpy(prev_name->next->name, name);
+  prev_name->next->name = sys->heap.strdup(name);
   prev_name->next->next = NULL;
   *num_cond = i;
   return(i);

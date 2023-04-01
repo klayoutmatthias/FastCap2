@@ -639,10 +639,7 @@ static void ComputeMoments(ssystem *sys, charge *pp)
       YP[i] = sys->heap.alloc<double>(order+3, AQ2P);
     }
     /* Allocate the euclidean moments matrix, Imn. */
-    I = sys->heap.alloc<double *>(order+1, AQ2P);
-    for(i = 0; i <= order; i++)
-      I[i] = sys->heap.alloc<double>(order+1, AQ2P);
-
+    I = sys->heap.mat(order+1, order+1, AQ2P);
     maxorder = order;
   }
 

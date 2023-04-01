@@ -144,7 +144,7 @@ static double cosB(int sum)
 double **mulMulti2Local(ssystem *sys, double x, double y, double z, double xp, double yp, double zp, int order)
 /* double x, y, z, xp, yp, zp: multipole and local cube centers */
 {
-  int i, j, k, n, m;
+  int j, k, n, m;
   int terms = multerms(order);	/* the number of non-zero moments */
   int ct = costerms(order);	/* the number of non-zero cos (bar) moments */
   double **mat;			/* the transformation matrix */
@@ -155,9 +155,7 @@ double **mulMulti2Local(ssystem *sys, double x, double y, double z, double xp, d
   extern double *tleg;          /* external temporary storage */
 
   /* allocate the multi to local transformation matrix */
-  mat = sys->heap.alloc<double *>(terms, AM2L);
-  for(i = 0; i < terms; i++)
-      mat[i] = sys->heap.alloc<double>(terms, AM2L);
+  mat = sys->heap.mat(terms, terms, AM2L);
 
   /* find relative spherical coordinates */
   xyz2sphere(x, y, z, xp, yp, zp, &rho, &cosA, &beta);
@@ -231,7 +229,7 @@ double **mulMulti2Local(ssystem *sys, double x, double y, double z, double xp, d
 double **mulLocal2Local(ssystem *sys, double x, double y, double z, double xc, double yc, double zc, int order)
 /* double x, y, z, xc, yc, zc: parent and child cube centers */
 {
-  int i, j, k, n, m;
+  int j, k, n, m;
   int terms = multerms(order);	/* the number of non-zero moments */
   int ct = costerms(order);	/* the number of non-zero cos (bar) moments */
   double **mat;			/* the transformation matrix */
@@ -242,9 +240,7 @@ double **mulLocal2Local(ssystem *sys, double x, double y, double z, double xc, d
   extern double *tleg;          /* external temporary storage */
 
   /* allocate the local to local transformation matrix */
-  mat = sys->heap.alloc<double *>(terms, AL2L);
-  for(i = 0; i < terms; i++)
-      mat[i] = sys->heap.alloc<double>(terms, AL2L);
+  mat = sys->heap.mat(terms, terms, AL2L);
 
   /* find relative spherical coordinates */
   xyz2sphere(x, y, z, xc, yc, zc, &rho, &cosA, &beta);
@@ -337,9 +333,7 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   extern double *Rhon, *Rho, *Betam, *Beta, *tleg;
 
   /* Allocate the matrix. */
-  mat = sys->heap.alloc<double *>(terms, AQ2L);
-  for(i = 0; i < terms; i++)
-      mat[i] = sys->heap.alloc<double>(numchgs, AQ2L);
+  mat = sys->heap.mat(terms, numchgs, AQ2L);
 
   /* get Legendre function evaluations, one set for each charge */
   /*  also get charge coordinates, set up for subsequent evals */
@@ -435,9 +429,7 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   int i, j, k, m, n, kold;
   int cterms = costerms(order), terms = multerms(order);
 
-  mat = sys->heap.alloc<double *>(numchgs, AL2P);
-  for(i = 0; i < numchgs; i++)
-      mat[i] = sys->heap.alloc<double>(terms, AL2P);
+  mat = sys->heap.mat(numchgs, terms, AL2P);
 
   /* get Legendre function evaluations, one set for each charge */
   /*   also get charge coordinates to set up rest of matrix */

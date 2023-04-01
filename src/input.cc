@@ -168,13 +168,11 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
       cur_surf->trans[1] = ty;
       cur_surf->trans[2] = tz;
       cur_surf->end_of_chain = end_of_chain;
-      cur_surf->name = sys->heap.alloc<char>(strlen(file_name)+1, AMSC);
-      strcpy(cur_surf->name, file_name);
+      cur_surf->name = sys->heap.strdup(file_name);
       cur_surf->outer_perm = outer_perm;
 
       /* set up group name */
-      cur_surf->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
-      strcpy(cur_surf->group_name, group_name);
+      cur_surf->group_name = sys->heap.strdup(group_name);
 
       /* update group name if end of chain */
       if(end_of_chain) {
@@ -228,14 +226,12 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
       cur_surf->ref[2] = rz;
       cur_surf->ref_inside = ref_pnt_is_inside;
       cur_surf->end_of_chain = end_of_chain;
-      cur_surf->name = sys->heap.alloc<char>(strlen(file_name)+1, AMSC);
-      strcpy(cur_surf->name, file_name);
+      cur_surf->name = sys->heap.strdup(file_name);
       cur_surf->outer_perm = outer_perm;
       cur_surf->inner_perm = inner_perm;
 
       /* set up group name */
-      cur_surf->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
-      strcpy(cur_surf->group_name, group_name);
+      cur_surf->group_name = sys->heap.strdup(group_name);
 
       /* update group name if end of chain */
       if(end_of_chain) {
@@ -283,14 +279,12 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
       cur_surf->ref[2] = rz;
       cur_surf->ref_inside = ref_pnt_is_inside;
       cur_surf->end_of_chain = TRUE;
-      cur_surf->name = sys->heap.alloc<char>(strlen(file_name)+1, AMSC);
-      strcpy(cur_surf->name, file_name);
+      cur_surf->name = sys->heap.strdup(file_name);
       cur_surf->outer_perm = outer_perm;
       cur_surf->inner_perm = inner_perm;
 
       /* set up group name */
-      cur_surf->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
-      strcpy(cur_surf->group_name, group_name);
+      cur_surf->group_name = sys->heap.strdup(group_name);
 
       /* update group name (DIELEC surface is always end of chain) */
       sprintf(group_name, "GROUP%d", ++group_cnt);
@@ -534,27 +528,7 @@ static void reassign_cond_numbers(charge *panel_list, NAME *name_list, char * /*
 	   "reassign_cond_numbers: cant find conductor number in name list\n");
       exit(0);
     }
-#if 1 == 0
-    /* change the name given to this conductor if it was derived from the ID */
-    /* check the number */
-    if(sscanf(&(cur_name->name[9]), "%d", &temp) == 1) {
-      if(temp == cur_name->patch_list->conductor_ID) {
-	strcpy(str, cur_name->name);
-	str[9] = '\0';
-	/* check the rest of the string, replace if necessary */
-	if(!strcmp(str, "CONDUCTOR")) {
-	  sprintf(str, "COND%d (%s)", i+1, hack_path(surf_name));
-	  if(strlen(str) > strlen(cur_name->name))
-	      CALLOC(cur_name->name, strlen(str)+1, char, ON, AMSC);
-	  strcpy(cur_name->name, str);
-	}
-      }
-    }
-    cur_name->patch_list->conductor_ID = i+1;
-#endif
   }
-    
-    
 }
 
 /*
@@ -664,8 +638,7 @@ void get_ps_file_base(ssystem *sys)
       for(; temp[j] != '.' && j >= 0; j--);
       if(temp[j] == '.') temp[j] = '\0';
       /* save list file base */
-      sys->ps_file_base = sys->heap.alloc<char>(strlen(temp)+1, AMSC);
-      strcpy(sys->ps_file_base, hack_path(temp));
+      sys->ps_file_base = sys->heap.strdup(hack_path(temp));
       break;
     }
     else if(argv[i][0] != '-') { /* not an option, must be input file */
@@ -673,15 +646,13 @@ void get_ps_file_base(ssystem *sys)
       for(j = 0; temp[j] != '\0' && temp[j] != '.'; j++);
       temp[j] = '\0';
       /* save list file base */
-      sys->ps_file_base = sys->heap.alloc<char>(strlen(temp)+1, AMSC);
-      strcpy(sys->ps_file_base, hack_path(temp));
+      sys->ps_file_base = sys->heap.strdup(hack_path(temp));
       break;
     }
   }
 
   if(sys->ps_file_base == NULL) {	/* input must be stdin */
-    sys->ps_file_base = sys->heap.alloc<char>(strlen("stdin")+1, AMSC);
-    strcpy(sys->ps_file_base, "stdin");
+    sys->ps_file_base = sys->heap.strdup("stdin");
   }
 }
 
@@ -758,8 +729,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
     cur_surf->panels = cur_panel;
 
     /* save the surface file's title */
-    cur_surf->title = sys->heap.alloc<char>(strlen(title)+1, AMSC);
-    strcpy(cur_surf->title, title);
+    cur_surf->title = sys->heap.strdup(title);
     title[0] = '\0';		/* not sure if needed */
 
     /* if the surface is a DIELEC, make sure all conductor numbers are zero */
@@ -1217,14 +1187,12 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
   if(read_from_stdin || (input_file == NULL && surf_list_file == NULL)) {
     surf_list = sys->heap.alloc<surface>(1, AMSC);
     surf_list->type = CONDTR;	/* only conductors can come in stdin */
-    surf_list->name = sys->heap.alloc<char>(strlen("stdin")+1, AMSC);
-    strcpy(surf_list->name, "stdin");
+    surf_list->name = sys->heap.strdup("stdin");
     surf_list->outer_perm = relperm;
     surf_list->end_of_chain = TRUE;
 
     /* set up group name */
-    surf_list->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
-    strcpy(surf_list->group_name, group_name);
+    surf_list->group_name = sys->heap.strdup(group_name);
     strcpy(group_name, "GROUP2");
 
     cur_surf = surf_list;
@@ -1244,14 +1212,12 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
       cur_surf = cur_surf->next;
     }
     cur_surf->type = CONDTR;
-    cur_surf->name = sys->heap.alloc<char>(strlen(input_file)+1, AMSC);
-    strcpy(cur_surf->name, input_file);
+    cur_surf->name = sys->heap.strdup(input_file);
     cur_surf->outer_perm = relperm;
     cur_surf->end_of_chain = TRUE;
 
     /* set up group name */
-    cur_surf->group_name = sys->heap.alloc<char>(strlen(group_name)+1, AMSC);
-    strcpy(cur_surf->group_name, group_name);
+    cur_surf->group_name = sys->heap.strdup(group_name);
 
     for(i = 0; infile[i] != '\0'; i++);
     if(infile[0] != '\0') sprintf(&(infile[i]), ", %s", input_file);

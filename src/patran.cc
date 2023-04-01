@@ -436,7 +436,7 @@ void CFEG_table(ssystem *sys, FILE *stream)
 */
 void name_data(ssystem *sys, FILE *stream)
 {
-  int len, iv, i, j, ntype, id, patch_cnt = 0;
+  int iv, i, j, ntype, id, patch_cnt = 0;
   char line[BUFSIZ];
   SM_PATCH *current_patch = NULL;
 
@@ -455,10 +455,8 @@ void name_data(ssystem *sys, FILE *stream)
   /* get conductor name and store */
   fgets(line, sizeof(line), stream); /* eat CR */
   fgets(line, sizeof(line), stream);
-  len = strlen(line);
-  current_name->name = sys->heap.alloc<char>(len+1, AMSC);
   delcr(line);
-  strcpy(current_name->name, line);
+  current_name->name = sys->heap.strdup(line);
   
   /* input NTYPE ID pair lines until no more, save patch id's that come in */
   for(i = iv = 0; i < KC-1; i++) {	/* loop on lines */
@@ -712,7 +710,6 @@ static char *getPatranName(int cond_num)
     else cname = cname->next;
   }
 
-  /*strcpy(cond_name, "??UNKNOWN??");*/
   fprintf(stdout, "getPatranName: conductor %d has no name\n", cond_num);
   return(NULL);
 

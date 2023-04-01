@@ -350,9 +350,7 @@ face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, in
     }
     tail->numsides = chgp->shape;
     /* allocate for corner coordinates */
-    tail->c = sys->heap.alloc<double *>(tail->numsides, AMSC);
-    for(i = 0; i < tail->numsides; i++)
-      tail->c[i] = sys->heap.alloc<double>(3, AMSC);
+    tail->c = sys->heap.mat(tail->numsides, 3);
     /* xfer corner coordinates */
     for(i = 0; i < tail->numsides; i++) {
       getAbsCoord(tail->c[i], chgp, i);

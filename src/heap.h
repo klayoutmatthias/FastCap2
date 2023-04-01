@@ -36,12 +36,16 @@ public:
   ~Heap();
 
   template <class T>
-  T *alloc(size_t n, MemoryType type)
+  T *alloc(size_t n, MemoryType type = AMSC)
   {
     return (T *)malloc(n * sizeof(T), type);
   }
 
-  void *malloc(size_t n, MemoryType type);
+  void *malloc(size_t n, MemoryType type = AMSC);
+
+  char *strdup(const char *str, MemoryType type = AMSC);
+  double **mat(int n, int m, MemoryType = AMSC);
+
   size_t memory(MemoryType type) const;
   size_t total_memory() const;
 

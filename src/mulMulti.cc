@@ -230,10 +230,7 @@ void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
   }
   tleg = sys->heap.alloc<double>(costerms(2*order), AMSC);
 	       	/* temp legendre storage (2*order needed for local exp) */
-  factFac = sys->heap.alloc<double *>(order+1, AMSC);
-  for(x = 0; x < order+1; x++) {
-    factFac[x] = sys->heap.alloc<double>(order+1, AMSC);
-  }
+  factFac = sys->heap.mat(order+1, order+1, AMSC);
   evalFactFac(factFac, order);	/* get factorial factors for mulMulti2P */
 
   if (sys->dissyn) {
@@ -268,10 +265,7 @@ void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
   }
 
   /* from here down could be switched out when the fake dwnwd pass is used */
-  facFrA = sys->heap.alloc<double *>(2*order+1, AMSC);
-  for(x = 0; x < 2*order+1; x++) {
-    facFrA[x] = sys->heap.alloc<double>(2*order+1, AMSC);
-  }
+  facFrA = sys->heap.mat(2*order+1, 2*order+1, AMSC);
   /* generate table of factorial fraction evaluations (for M2L and L2L) */
   evalFacFra(sys, facFrA, order);
   sinmkB = sys->heap.alloc<double>(2*order+1, AMSC);
@@ -536,9 +530,7 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   int cterms = costerms(order), sterms = sinterms(order);
   int terms = cterms + sterms;
 
-  mat = sys->heap.alloc<double *>(numchgs, AM2P);
-  for(i=0; i < numchgs; i++)
-    mat[i] = sys->heap.alloc<double>(terms, AM2P);
+  mat = sys->heap.mat(numchgs, terms, AM2P);
 
   /* get Legendre function evaluations, one set for each charge */
   /*   also get charge coordinates to set up rest of matrix */

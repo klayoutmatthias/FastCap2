@@ -513,12 +513,9 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
 
   /* allocate for local arrays on first call */
   if(cproj == NULL) {
-    cproj = sys->heap.alloc<double **>(2, AMSC);
+    cproj = sys->heap.alloc<double **>(2);
     for(k = 0; k < 2; k++) {
-      cproj[k] = sys->heap.alloc<double *>(MAXSIDES, AMSC);
-      for(i = 0; i < MAXSIDES; i++) {
-        cproj[k][i] = sys->heap.alloc<double>(3, AMSC);
-      }
+      cproj[k] = sys->heap.mat(MAXSIDES, 3);
     }
   }
 
