@@ -62,7 +62,6 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   charge *nq;
   double *q, *p, *r, *ap;
   double **bp, **bap;
-  extern double fullsoltime;
   surface *surf;
   extern ITER *kill_num_list, *kinp_num_list;
   extern double iter_tol;
@@ -124,7 +123,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
         starttimer;
         solve(sys->directlist->directmats[0], q+1, r+1, size);
         stoptimer;
-        fullsoltime += dtime;
+        counters.fullsoltime += dtime;
       }
       iter = 0;
 
