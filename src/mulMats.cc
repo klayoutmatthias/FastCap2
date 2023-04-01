@@ -42,6 +42,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "calcp.h"
 #include "blkDirect.h"
 #include "resusage.h"
+#include "counters.h"
 
 int *localcnt, *multicnt, *evalcnt;     /* counts of builds done by level */
 
@@ -58,7 +59,6 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
 {
   cube *nextc, *nextnbr;
   int i, nummats, **temp;
-  extern double lutime, dirtime;
 
   /* First count the number of matrices to be done directly. */
   for(nextc=sys->directlist; nextc != NULL; nextc = nextc->dnext) {
@@ -118,7 +118,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     }
 
     stoptimer;
-    dirtime += dtime;
+    counters.dirtime += dtime;
 
     if (sys->dsq2pd) {
       dumpQ2PDiag(nextc);
@@ -137,7 +137,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
         starttimer;
         nextc->directlu = ludecomp(sys, nextc->directmats[0], eval_size, TRUE);
         stoptimer;
-        lutime += dtime;
+        counters.lutime += dtime;
       }
     }
     
@@ -165,7 +165,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
       }
     }
     stoptimer;
-    dirtime += dtime;
+    counters.dirtime += dtime;
   }
 }
 

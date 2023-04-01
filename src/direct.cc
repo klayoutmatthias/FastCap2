@@ -37,6 +37,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "mulDisplay.h"
 #include "direct.h"
 #include "calcp.h"
+#include "counters.h"
 
 double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int calc)
 {
@@ -150,7 +151,6 @@ double **Q2Pfull(ssystem *sys, cube *directlist, int numchgs)
 */
 double **ludecomp(ssystem *sys, double **matin, int size, int allocate)
 {
-  extern int fulldirops;
   double factor, **mat;
   int i, j, k;
 
@@ -170,10 +170,10 @@ double **ludecomp(ssystem *sys, double **matin, int size, int allocate)
     }
     for(i = k+1; i < size; i++) { /* loop on remaining rows */
       factor = (mat[i][k] /= mat[k][k]);
-      fulldirops++;
+      counters.fulldirops++;
       for(j = k+1; j < size; j++) { /* loop on remaining columns */
 	mat[i][j] -= (factor*mat[k][j]);
-	fulldirops++;
+	counters.fulldirops++;
       }
     }
   }
@@ -185,7 +185,6 @@ double **ludecomp(ssystem *sys, double **matin, int size, int allocate)
 */
 void solve(double **mat, double *x, double *b, int size)
 {
-  extern int fulldirops;
   int i, j;
 
   /* copy rhs */
@@ -195,7 +194,7 @@ void solve(double **mat, double *x, double *b, int size)
   for(i = 0; i < size; i++) {	/* loop on pivot row */
     for(j = i+1; j < size; j++) { /* loop on elimnation row */
       x[j] -= mat[j][i]*x[i];
-      fulldirops++;
+      counters.fulldirops++;
     }
   }
 
@@ -203,10 +202,10 @@ void solve(double **mat, double *x, double *b, int size)
   for(i--; i > -1; i--) {		/* loop on rows */
     for(j = i+1; j < size; j++) { /* loop on columns */
       x[i] -= mat[i][j]*x[j];
-      fulldirops++;
+      counters.fulldirops++;
     }
     x[i] /= mat[i][i];
-    fulldirops++;
+    counters.fulldirops++;
   }
 }
 

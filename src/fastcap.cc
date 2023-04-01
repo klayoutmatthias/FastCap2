@@ -44,6 +44,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "capsolve.h"
 #include "psMatDisplay.h"
 #include "resusage.h"
+#include "counters.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -69,20 +70,11 @@ int main(int argc, char *argv[])
   int num_dummy_panels = 0;		/* number of off-panel eval pnt panels */
   int eval_size = 0;			/* sum of above two (total panel structs) */
 
-  extern int fulldirops, fullPqops;
-  extern double prectime, conjtime, dirtime, multime, uptime, downtime;
-  extern double evaltime, lutime, fullsoltime, prsetime;
-
   Name *name_list;
 
   char filename[BUFSIZ];
 
   extern int m_, q_, dd_;
-
-  /* initialize memory and time counters, etc. */
-  fulldirops = fullPqops = 0;
-  prectime = conjtime = dirtime = multime = uptime = downtime = 0.0;
-  evaltime = lutime = fullsoltime = mulsetup = 0.0;
 
   /* initialize defaults, etc */
   autmom = autlev = ON;
@@ -193,14 +185,14 @@ int main(int argc, char *argv[])
       starttimer;
       bdmulMatPrecond(&sys);
       stoptimer;
-      prsetime = dtime;		/* preconditioner set up time */
+      counters.prsetime = dtime;		/* preconditioner set up time */
     }
 
     if (PRECOND == OL) {
       starttimer;
       olmulMatPrecond(&sys);
       stoptimer;
-      prsetime = dtime;		/* preconditioner set up time */
+      counters.prsetime = dtime;		/* preconditioner set up time */
     }
 
     if (sys.dmprec) {
@@ -218,8 +210,8 @@ int main(int argc, char *argv[])
 
   dumpnums(&sys, ON, eval_size);    /* save num/type of pot. coeff calcs */
 
-  dirtimesav = dirtime;		/* save direct matrix setup time */
-  dirtime = 0.0;		/* make way for direct solve time */
+  dirtimesav = counters.dirtime;    /* save direct matrix setup time */
+  counters.dirtime = 0.0;           /* make way for direct solve time */
 
   if (DIRSOL == OFF) {
 
@@ -275,8 +267,8 @@ int main(int argc, char *argv[])
 
   if (sys.timdat) {
     ttlsetup = initalltime + dirtimesav + mulsetup;
-    multime = uptime + downtime + evaltime;
-    ttlsolve = dirtime + multime + prectime + conjtime;
+    counters.multime = counters.uptime + counters.downtime + counters.evaltime;
+    ttlsolve = counters.dirtime + counters.multime + counters.prectime + counters.conjtime;
 
     fprintf(stdout, "\nTIME AND MEMORY USAGE SYNOPSIS\n");
   }
@@ -289,22 +281,22 @@ int main(int argc, char *argv[])
     fprintf(stdout, "    Multipole matrix setup time: %g\n", mulsetup);
     fprintf(stdout, "    Initial misc. allocation time: %g\n", initalltime);
     fprintf(stdout, "  Total iterative P*q = psi solve time: %g\n", ttlsolve);
-    fprintf(stdout, "    P*q product time, direct part: %g\n", dirtime);
-    fprintf(stdout, "    Total P*q time, multipole part: %g\n", multime);
-    fprintf(stdout, "      Upward pass time: %g\n", uptime);
-    fprintf(stdout, "      Downward pass time: %g\n", downtime);
-    fprintf(stdout, "      Evaluation pass time: %g\n", evaltime);
-    fprintf(stdout, "    Preconditioner solution time: %g\n", prectime);
-    fprintf(stdout, "    Iterative loop overhead time: %g\n", conjtime);
+    fprintf(stdout, "    P*q product time, direct part: %g\n", counters.dirtime);
+    fprintf(stdout, "    Total P*q time, multipole part: %g\n", counters.multime);
+    fprintf(stdout, "      Upward pass time: %g\n", counters.uptime);
+    fprintf(stdout, "      Downward pass time: %g\n", counters.downtime);
+    fprintf(stdout, "      Evaluation pass time: %g\n", counters.evaltime);
+    fprintf(stdout, "    Preconditioner solution time: %g\n", counters.prectime);
+    fprintf(stdout, "    Iterative loop overhead time: %g\n", counters.conjtime);
 
     if(DIRSOL == ON) {		/* if solution is done by Gaussian elim. */
-      fprintf(stdout,"\nTotal direct, full matrix LU factor time: %g\n",lutime);
-      fprintf(stdout,"Total direct, full matrix solve time: %g\n",fullsoltime);
-      fprintf(stdout, "Total direct operations: %d\n", fulldirops);
+      fprintf(stdout,"\nTotal direct, full matrix LU factor time: %g\n", counters.lutime);
+      fprintf(stdout,"Total direct, full matrix solve time: %g\n", counters.fullsoltime);
+      fprintf(stdout, "Total direct operations: %d\n", counters.fulldirops);
     }
     else if(EXPGCR == ON) {	/* if solution done iteratively w/o multis */
       fprintf(stdout,"\nTotal A*q operations: %d (%d/iter)\n",
-              fullPqops, fullPqops/ttliter);
+              counters.fullPqops, counters.fullPqops/ttliter);
     }
 
     fprintf(stdout, "Total memory allocated: %d kilobytes ", int(sys.heap.total_memory()/1024));

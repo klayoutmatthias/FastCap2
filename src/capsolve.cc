@@ -45,6 +45,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "blkDirect.h"
 #include "direct.h"
 #include "resusage.h"
+#include "counters.h"
 
 #include <cmath>
 
@@ -201,7 +202,6 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
 {
   int iter, i, j;
   double norm, beta, alpha, maxnorm;
-  extern double conjtime;
 
   /* NOTE ON EFFICIENCY: all the loops of length "size" could have */
   /*   if(sys->is_dummy[i]) continue; as their first line to save some ops */
@@ -261,7 +261,7 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
     }
     fflush(stdout);
     stoptimer;
-    conjtime += dtime;
+    counters.conjtime += dtime;
     if(maxnorm < tol) break;
   }
   
@@ -292,7 +292,6 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   int iter, i, j;
   double rnorm, norm;
   double hi, hip1, length;
-  extern double conjtime, prectime;
 
   static double *c=NULL, *s=NULL, *g=NULL, *y=NULL;
   
@@ -316,7 +315,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   g[1] = rnorm;
 
   stoptimer;
-  conjtime += dtime;
+  counters.conjtime += dtime;
 
   if (sys->itrdat) {
     fprintf(stdout, "||res|| = %g\n", rnorm); /* initial guess residual norm */
@@ -335,7 +334,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
     for(i=1; i <= size; i++) bv[iter][i] = p[i];
     
     stoptimer;
-    conjtime += dtime;
+    counters.conjtime += dtime;
 
     /* Form Av{iter}. */
     computePsi(sys, p, ap, size, real_size, chglist);
@@ -384,7 +383,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
     rnorm = ABS(g[iter+1]);
 
     stoptimer;
-    conjtime += dtime;
+    counters.conjtime += dtime;
 
     if (sys->itrdat) {
       fprintf(stdout, "||res|| = %g\n", rnorm);
@@ -415,7 +414,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   }
 
   stoptimer;
-  conjtime += dtime;
+  counters.conjtime += dtime;
   
   if (PRECOND != NONE) {
     /* Undo the preconditioning to get the real q. */
@@ -429,7 +428,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
       q[i] = p[i];
     }
     stoptimer;
-    prectime += dtime;
+    counters.prectime += dtime;
   }
 
   if(rnorm > tol) {
@@ -447,7 +446,6 @@ vector has been zeroed.  ARBITRARY VECTORS CAN NOT BE USED.
 
 static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, charge *chglist)
 {
-  extern double dirtime, uptime, downtime, evaltime, prectime;
   int i;
 
   ASSERT(p == sys->p);
@@ -459,7 +457,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     starttimer;
     mulPrecond(sys, PRECOND);
     stoptimer;
-    prectime += dtime;
+    counters.prectime += dtime;
   }
 
   if (EXPGCR == ON) {
@@ -474,12 +472,12 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     starttimer;
     mulDirect(sys);
     stoptimer;
-    dirtime += dtime;
+    counters.dirtime += dtime;
 
     starttimer;
     mulUp(sys);
     stoptimer;
-    uptime += dtime;
+    counters.uptime += dtime;
 
     if (sys->dupvec) {
       dumpLevOneUpVecs(sys);
@@ -494,7 +492,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     }
 
     stoptimer;
-    downtime += dtime;
+    counters.downtime += dtime;
 
     starttimer;
 
@@ -503,7 +501,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     }
 
     stoptimer;
-    evaltime += dtime;
+    counters.evaltime += dtime;
 
     if (sys->dmpchg == DMPCHG_LAST) {
       fprintf(stdout, "\nPanel potentials divided by areas\n");

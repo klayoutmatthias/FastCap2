@@ -10,7 +10,7 @@ add_executable(FastCap2
   src/mulSetup.h src/mulStruct.h src/calcp.h src/capsolve.h src/mulDisplay.h src/direct.h
   src/mulDo.h src/zbufInOut.h src/zbufProj.h src/zbufSort.h src/patran.h src/patran_f.h
   src/quickif.h src/mulLocal.h src/psMatDisplay.h src/savemat_mod.h
-  src/heap.h
+  src/heap.h src/counters.h
   src/fastcap.cc
   src/mulGlobal.cc src/mulStruct.cc
   src/mulSetup.cc src/mulMats.cc src/mulDo.cc
@@ -20,7 +20,7 @@ add_executable(FastCap2
   src/patran.cc src/quickif.cc src/electric.cc
   src/input.cc src/psMatDisplay.cc src/capsolve.cc
   src/zbufInOut.cc src/zbuf2fastcap.cc src/zbufProj.cc src/zbufSort.cc
-  src/heap.cc
+  src/heap.cc src/counters.cc
 )
 
 target_link_libraries(FastCap2 m)

@@ -37,6 +37,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include "calcp.h"
 #include "blkDirect.h"
 #include "resusage.h"
+#include "counters.h"
 
 #include <cstdio>
 #include <fcntl.h>
@@ -281,7 +282,6 @@ static void matXfer(double *matsq, double *matri, int siz, int type)
 static void blkMatsolve(double *matsq, double *matri, int siz, int type)
 {
   int i, j, k;
-  extern int fulldirops;
 
   if(type == LOWMAT) {
     /* a row in the result matrix is a linear comb of the previous rows */
@@ -291,7 +291,7 @@ static void blkMatsolve(double *matsq, double *matri, int siz, int type)
 	for(k = 0; k < i; k++) {	/* loop on previous rows */
 	  matsq[SQDEX(i, j, siz)]
 	      -= (matri[LODEX(i, k, siz)]*matsq[SQDEX(k, j, siz)]);
-	  fulldirops++;
+	  counters.fulldirops++;
 	}
       }
     }
@@ -305,10 +305,10 @@ static void blkMatsolve(double *matsq, double *matri, int siz, int type)
 	for(k = 0; k < j; k++) {	/* loop on previous columns */
 	  matsq[SQDEX(i, j, siz)]
 	      -= (matri[UPDEX(k, j, siz)]*matsq[SQDEX(i, k, siz)]);
-	  fulldirops++;
+	  counters.fulldirops++;
 	}
 	matsq[SQDEX(i, j, siz)] /= matri[UPDEX(j, j, siz)];
-	fulldirops++;
+	counters.fulldirops++;
       }
     }
     fprintf(stderr, "\n");
@@ -330,8 +330,6 @@ static void subInnerProd(double *matsq, double *matri, int siz, int matl, int ma
   int froml, fromu, ds = sizeof(double), readl, readu;
   char name[4];
   double *matriu, temp;
-  extern int fulldirops;
-  extern double lutime;
 
   /* figure how many doubles will fit in matrix
   matrisiz = siz*(siz + 1)/2; */
@@ -378,15 +376,15 @@ static void subInnerProd(double *matsq, double *matri, int siz, int matl, int ma
 	  for(k = 0, temp = 0.0; k < siz; k++) { /* inner product loop */
 	    /* matriu indices are flipped since it was stored as columns */
 	    temp += matri[SQDEX(i, k, siz)] * matriu[SQDEX(j, k, siz)];
-	    fulldirops++;
+	    counters.fulldirops++;
 	  }
 	  /* indices must be offset to get right square matrix entry */
 	  matsq[SQDEX(i + froml, j + fromu, siz)] -= temp;
-	  fulldirops++;
+	  counters.fulldirops++;
 	}
       }
       stoptimer;
-      lutime += dtime;
+      counters.lutime += dtime;
     }
 
     /* close the u file so it can be reread for next set of l rows */
@@ -404,7 +402,6 @@ static void subInnerProd(double *matsq, double *matri, int siz, int matl, int ma
 */
 static void blkLudecomp(double *mat, int size)
 {
-  extern int fulldirops;
   double factor;
   int i, j, k;
 
@@ -416,10 +413,10 @@ static void blkLudecomp(double *mat, int size)
     fprintf(stderr,"%d ", k);
     for(i = k+1; i < size; i++) { /* loop on remaining rows */
       factor = (mat[SQDEX(i, k, size)] /= mat[SQDEX(k, k, size)]);
-      fulldirops++;
+      counters.fulldirops++;
       for(j = k+1; j < size; j++) { /* loop on remaining columns */
 	mat[SQDEX(i, j, size)] -= (factor*mat[SQDEX(k, j, size)]);
-	fulldirops++;
+	counters.fulldirops++;
       }
     }
   }
@@ -433,8 +430,6 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
 /* double *x, *b, *matri, *matsq: solution, rhs */
 {
   int i, k;
-  extern int fulldirops;
-  extern double fullsoltime;
 
   fprintf(stdout, "blkSolve: fwd elimination...");
   fflush(stdout);
@@ -449,11 +444,11 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   for(i = 1; i < siz/2; i++) {	/* loop on rows */
     for(k = 0; k < i; k++) {	/* loop on previous rows */
       x[i] -= (matri[LODEX(i, k, siz/2)]*x[k]);
-      fulldirops++;
+      counters.fulldirops++;
     }
   }
   stoptimer;
-  fullsoltime += dtime;
+  counters.fullsoltime += dtime;
 
   /* load L21 and LTIL */
   rdMat(matri, siz/2, LTIL, TRIMAT);
@@ -464,15 +459,15 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   for(; i < siz; i++) {		/* loop on rows of entire matrix */
     for(k = 0; k < siz/2; k++) { /* loop on first half of rows (L21) */
       x[i] -= (matsq[SQDEX(i-siz/2, k, siz/2)]*x[k]);
-      fulldirops++;
+      counters.fulldirops++;
     }
     for(; k < i; k++) {	/* loop on 2nd half of rows (LTIL) */
       x[i] -= (matri[LODEX(i-siz/2, k-siz/2, siz/2)]*x[k]);
-      fulldirops++;
+      counters.fulldirops++;
     }
   }
   stoptimer;
-  fullsoltime += dtime;
+  counters.fullsoltime += dtime;
 
   fprintf(stdout, "back substitution...");
   fflush(stdout);
@@ -483,13 +478,13 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
   for(i = siz-1; i >= siz/2; i--) {	/* loop on rows */
     for(k = siz-1; k > i; k--) {	/* loop on rows (of x) already done */
       x[i] -= (matri[UPDEX(i-siz/2, k-siz/2, siz/2)]*x[k]);
-      fulldirops++;
+      counters.fulldirops++;
     }
     x[i] /= matri[UPDEX(i-siz/2, i-siz/2, siz/2)]; /* divide by u_{ii} */
-    fulldirops++;
+    counters.fulldirops++;
   }
   stoptimer;
-  fullsoltime += dtime;
+  counters.fullsoltime += dtime;
 
   /* load U11, U12 to do triangle plus square part of back solve */
   rdMat(matri, siz/2, U11, TRIMAT);
@@ -500,17 +495,17 @@ void blkSolve(double *x, double *b, int siz, double *matri, double *matsq)
     for(k = siz-1; k >= siz/2; k--) { /* loop on rows corresponding to U12 */
       /* note flipped index because U12 stored as columns */
       x[i] -= (matsq[SQDEX(k-siz/2, i, siz/2)]*x[k]);
-      fulldirops++;
+      counters.fulldirops++;
     }
     for(; k > i; k--) {		/* loop on rows corresponding to cols of U11 */
       x[i] -= (matri[UPDEX(i, k, siz/2)]*x[k]);
-      fulldirops++;
+      counters.fulldirops++;
     }
     x[i] /= matri[UPDEX(i, i, siz/2)];
-    fulldirops++;
+    counters.fulldirops++;
   }
   stoptimer;
-  fullsoltime += dtime;
+  counters.fullsoltime += dtime;
 
   fprintf(stdout, "done.\n\n");
   fflush(stdout);
@@ -640,8 +635,6 @@ void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
 /* double *sqrArray, *triArray: previously allocated flattened matrices */
 /* int numchgs: A is numchgsxnumchgs */
 {
-  extern double lutime;
-
   /* factor the stored matrices to give an overall stored factorization */
   /* load the A11 part */
   rdMat(sqrArray, numchgs/2, L11, SQRMAT);
@@ -650,7 +643,7 @@ void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
   starttimer;
   blkLudecomp(sqrArray, numchgs/2);
   stoptimer;
-  lutime += dtime;
+  counters.lutime += dtime;
 
   /* write out factors to different files */
   matXfer(sqrArray, triArray, numchgs/2, UP2TR); /* upper part to triArr */
@@ -668,7 +661,7 @@ void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
   starttimer;
   blkMatsolve(sqrArray, triArray, numchgs/2, LOWMAT);
   stoptimer;
-  lutime += dtime;
+  counters.lutime += dtime;
 
   wrMat(sqrArray, numchgs/2, U12, COLMAT); /* store as columns */
 
@@ -683,7 +676,7 @@ void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
   starttimer;
   blkMatsolve(sqrArray, triArray, numchgs/2, UPPMAT);
   stoptimer;
-  lutime += dtime;
+  counters.lutime += dtime;
 
   wrMat(sqrArray, numchgs/2, L21, SQRMAT); /* store as rows */
 
@@ -699,7 +692,7 @@ void blkLUdecomp(double *sqrArray, double *triArray, int numchgs)
   starttimer;
   blkLudecomp(sqrArray, numchgs/2);
   stoptimer;
-  lutime += dtime;
+  counters.lutime += dtime;
 
   matXfer(sqrArray, triArray, numchgs/2, UP2TR); /* upper part to triArr */
   wrMat(triArray, numchgs/2, UTIL, TRIMAT);
@@ -722,8 +715,6 @@ void blkAqprod(double *p, double *q, int size, double *sqmat)
 /* double *sqmat: flat storage space for 1/4 of A */
 {
   int i, j, k, l, fromp, fromq;
-  extern int fullPqops;
-  extern double dirtime;
 
   for(fromp = 0, k = 0; k < 2; k++, fromp += size/2) {
     for(fromq = 0, l = 0; l < 2; l++, fromq += size/2) {
@@ -739,11 +730,11 @@ void blkAqprod(double *p, double *q, int size, double *sqmat)
       for(i = 0; i < size/2; i++) {
 	for(j = 0; j < size/2; j++) {
 	  p[fromp+i] += sqmat[SQDEX(i, j, size/2)]*q[fromq+j];
-	  fullPqops++;
+	  counters.fullPqops++;
 	}
       }
       stoptimer;
-      dirtime += dtime;
+      counters.dirtime += dtime;
 
     }
   }
