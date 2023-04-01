@@ -186,66 +186,6 @@ misc. global macros
 #define EXRTSH 0.9		/* exact/ttl>EXRTSH for lev => make last lev */
 /* (add any new configuration flags to dumpConfig() in mulDisplay.c) */
 
-/* display of transformation matrices */
-#if !defined(DISQ2M)
-#define DISQ2M OFF		/* ON=> display Q2M matrices when built */
-#endif
-#if !defined(DISM2M)
-#define DISM2M OFF		/* ON=> display M2M matrices when built */
-#endif
-#if !defined(DISM2P)
-#define DISM2P OFF		/* ON=> display M2P matrices when built */
-#endif
-#if !defined(DISL2P)
-#define DISL2P OFF		/* ON=> display L2P matrices when built */
-#endif
-#if !defined(DISQ2P)
-#define DISQ2P OFF		/* ON=> display Q2P matrices when built */
-#endif
-#if !defined(DSQ2PD)
-#define DSQ2PD OFF		/* ON=> display Q2PDiag matrices > build */
-#endif
-#if !defined(DISQ2L)
-#define DISQ2L OFF		/* ON=> display Q2L matrices when built */
-#endif
-#if !defined(DISM2L)
-#define DISM2L OFF		/* ON=> display M2L matrices when built */
-#endif
-#if !defined(DISL2L)
-#define DISL2L OFF		/* ON=> display L2L matrices when built */
-#endif
-#if !defined(DALQ2M)
-#define DALQ2M OFF		/* ON=> display all Q2M matrix build steps */
-#endif
-#if !defined(DALM2P)
-#define DALM2P OFF		/* ON=> display all M2P matrix build steps */
-#endif
-#if !defined(DALL2P)
-#define DALL2P OFF		/* ON=> display all L2P matrix build steps */
-#endif
-#if !defined(DALQ2L)
-#define DALQ2L OFF		/* ON=> display all Q2L matrix build steps */
-#endif
-/* display of other intermediate results */
-#if !defined(DUPVEC)
-#define DUPVEC OFF		/* ON=> display lev 1 upward pass vectors */
-#endif
-#if !defined(DISFAC)
-#define DISFAC OFF		/* ON=> display factorial fractions in M2L */
-#endif
-#if !defined(DPSYSD)
-#define DPSYSD OFF		/* ON=> display system after direct build */
-#endif
-#if !defined(DILIST)
-#define DILIST OFF		/* ON=> display interaction lists */
-#endif
-#if !defined(DMPELE)
-#define DMPELE OFF		/* ON=> display electric flux densities */
-#endif
-#if !defined(DMPCHG)
-#define DMPCHG OFF		/* ON=> display all charge vector iterates
-				   LAST=> display final charge vector */
-#endif
 /* misc debug */
 #if !defined(CKDLST)
 #define CKDLST OFF		/* ON=> check direct list, prnt msg if bad */

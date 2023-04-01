@@ -206,9 +206,9 @@ int main(int argc, char *argv[])
     dump_preconditioner(sys, chglist, 1);	/* dump prec. and P to matlab file */
 #endif
 
-#if DPSYSD == ON
-    dissys(sys);
-#endif
+    if (sys.dpsysd) {
+      dissys(&sys);
+    }
 
 #if CKDLST == ON
     chkList(sys, DIRECT);

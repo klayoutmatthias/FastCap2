@@ -54,11 +54,11 @@ double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int ca
        - exclude dielec i/f panels when they would lead to evals at their
          centers (only if using two-point flux-den-diff evaluations) */
     for(i=0; i < numchgs; i++) { 
-#if NUMDPT == 2
-      if(chgs[i]->dummy);	/* don't check surface of a dummy */
-      else if(chgs[i]->surf->type == DIELEC || chgs[i]->surf->type == BOTH)
-	  continue;
-#endif
+      if (NUMDPT == 2) {
+        if(chgs[i]->dummy);	/* don't check surface of a dummy */
+        else if(chgs[i]->surf->type == DIELEC || chgs[i]->surf->type == BOTH)
+            continue;
+      }
       for(j=0; j < numchgs; j++) { /* need to have charge on them */
 #if SKIPQD == ON
 	if(chgs[j]->pos_dummy == chgs[i] || chgs[j]->neg_dummy == chgs[i])
@@ -70,9 +70,9 @@ double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int ca
     }
   }
 
-#if DSQ2PD == ON
-  dispQ2PDiag(sys, mat, chgs, numchgs, is_dummy);
-#endif
+  if (sys->dsq2pd) {
+    dispQ2PDiag(mat, chgs, numchgs, is_dummy);
+  }
 
   return(mat);
 }
@@ -90,11 +90,11 @@ double **Q2P(ssystem *sys, charge **qchgs, int numqchgs, int *is_dummy, charge *
       /* exclude:
          - dummy panels in the charge list
 	 - dielectric i/f panels in the eval list (if doing 2-point E's)*/
-#if NUMDPT == 2
-      if(pchgs[i]->dummy);	/* don't check the surface of a dummy */
-      else if(pchgs[i]->surf->type == DIELEC || pchgs[i]->surf->type == BOTH)
-	  continue;
-#endif
+      if (NUMDPT == 2) {
+        if(pchgs[i]->dummy);	/* don't check the surface of a dummy */
+        else if(pchgs[i]->surf->type == DIELEC || pchgs[i]->surf->type == BOTH)
+            continue;
+      }
       for(j=0; j < numqchgs; j++) { /* only dummy panels in the charge list */
 	if(!is_dummy[j])          /* (not the eval list) are excluded */
 	    mat[i][j] = calcp(qchgs[j], pchgs[i]->x, pchgs[i]->y, 
@@ -103,9 +103,9 @@ double **Q2P(ssystem *sys, charge **qchgs, int numqchgs, int *is_dummy, charge *
     }
   }
 
-#if DISQ2P == ON
-  dispQ2P(mat, qchgs, numqchgs, is_dummy, pchgs, numpchgs);
-#endif
+  if (sys->disq2p) {
+    dispQ2P(mat, qchgs, numqchgs, is_dummy, pchgs, numpchgs);
+  }
 
   return(mat);
 }

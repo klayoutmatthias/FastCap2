@@ -1281,7 +1281,6 @@ int has_duplicate_panels(FILE *fp, charge *chglst)
   else return(TRUE);
 }
 
-#if DSQ2PD == ON
 /*
   dump the condensed matrix for matlab use
 */
@@ -1360,8 +1359,6 @@ void dumpQ2PDiag(cube *nextc)
   fclose(fp);
   fprintf(stdout, "Dumped Q2PDiag matrix to `Q2PDiag.mat'\n");
 }
-
-#endif
 
 #if 1 == 0
 /*

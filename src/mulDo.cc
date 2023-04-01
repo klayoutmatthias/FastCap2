@@ -60,9 +60,7 @@ cube *nextc;
   /* Inside Cube piece. */
     mat = nextc->directmats[0];
     for(j = dsize - 1; j >= 0; j--) {
-#if NUMDPT == 2
-      if(is_dielec[j]) continue;
-#endif
+      if(NUMDPT == 2 && is_dielec[j]) continue;
       for(k = dsize - 1; k >= 0; k--) {
 	if(!is_dummy[k]) p[j] += mat[j][k] * q[k];
 #if OPCNT == ON
@@ -76,9 +74,7 @@ cube *nextc;
       qn = nextc->directq[i];
       is_dummy = nextc->nbr_is_dummy[i];
       for(j = dsize - 1; j >= 0; j--) {
-#if NUMDPT == 2
-	if(is_dielec[j]) continue;
-#endif
+        if(NUMDPT == 2 && is_dielec[j]) continue;
 	for(k = nextc->directnumeles[i] - 1; k >= 0; k--) {
 	  if(!is_dummy[k]) p[j] += mat[j][k] * qn[k];
 #if OPCNT == ON
@@ -204,9 +200,7 @@ void mulEval(ssystem *sys)
       mat = nc->evalmats[i];
       vec = nc->evalvects[i];
       for(j = size - 1; j >= 0; j--) {
-#if NUMDPT == 2
-	if(is_dielec[j]) continue;
-#endif
+        if(NUMDPT == 2 && is_dielec[j]) continue;
 	for(k = nc->evalnumeles[i] - 1; k >= 0; k--) {
 	  eval[j] += mat[j][k] * vec[k];
 #if OPCNT == ON

@@ -169,6 +169,12 @@ enum dumpps_mode {
   DUMPPS_ALL
 };
 
+enum dmpchg_mode {
+  DMPCHG_ON,
+  DMPCHG_OFF,
+  DMPCHG_LAST
+};
+
 struct ssystem
 {
   ssystem();
@@ -177,6 +183,8 @@ struct ssystem
   int argc;
 
   FILE *log;                    //  log stream (0 to turn off output)
+
+  //  configuration options
   bool timdat;                  //  print timing data
   bool mksdat;                  //  dump symmetrized, MKS units cap mat
   dumpps_mode dumpps;           //  ON=> dump ps file w/mulMatDirect calcp's
@@ -192,8 +200,34 @@ struct ssystem
   bool dissrf;                  //  display input surface information
   bool namdat;                  //  dump conductor names
 
+  //  display of transformation matrices
+  bool disq2m;                  //  display Q2M matrices when built
+  bool dism2m;                  //  display M2M matrices when built
+  bool dism2p;                  //  display M2P matrices when built
+  bool disl2p;                  //  display L2P matrices when built
+  bool disq2p;                  //  display Q2P matrices when built
+  bool dsq2pd;                  //  display Q2PDiag matrices > build
+  bool disq2l;                  //  display Q2L matrices when built
+  bool dism2l;                  //  display M2L matrices when built
+  bool disl2l;                  //  display L2L matrices when built
+  bool dalq2m;                  //  display all Q2M matrix build steps
+  bool dalm2p;                  //  display all M2P matrix build steps
+  bool dall2p;                  //  display all L2P matrix build steps
+  bool dalq2l;                  //  display all Q2L matrix build steps
+
+  //  display of other intermediate results
+  bool dupvec;                  //  display lev 1 upward pass vectors */
+  bool disfac;                  //  display factorial fractions in M2L */
+  bool dpsysd;                  //  display system after direct build */
+  bool dilist;                  //  display interaction lists */
+  bool dmpele;                  //  display electric flux densities */
+  dmpchg_mode dmpchg;           //  ON=> display all charge vector iterates
+                                //  LAST=> display final charge vector */
+
+  //  global variables
   char *ps_file_base;           //  pointer to base name for .ps files
 
+  //  problem description
   int side;                     //  # cubes per side on lowest level.
   int depth;			//  # of levels of cubes.
   int order;			//  # of levels of cubes.

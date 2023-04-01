@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(FastCap2
   src/mulGlobal.h src/input.h src/zbuf2fastcap.h src/mulMulti.h src/mulMats.h
-  src/mulSetup.h src/calcp.h src/capsolve.h src/mulDisplay.h src/direct.h
+  src/mulSetup.h src/mulStruct.h src/calcp.h src/capsolve.h src/mulDisplay.h src/direct.h
   src/mulDo.h src/zbufInOut.h src/zbufProj.h src/zbufSort.h src/patran.h src/patran_f.h
   src/quickif.h src/mulLocal.h src/psMatDisplay.h src/savemat_mod.h
   src/heap.h

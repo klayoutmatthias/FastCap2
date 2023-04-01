@@ -156,11 +156,11 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 
     }
 
-#if DMPCHG == LAST
-    fprintf(stdout, "\nPanel charges, iteration %d\n", iter);
-    dumpChgDen(stdout, q, chglist);
-    fprintf(stdout, "End panel charges\n");
-#endif
+    if (sys->dmpchg == DMPCHG_LAST) {
+      fprintf(stdout, "\nPanel charges, iteration %d\n", iter);
+      dumpChgDen(stdout, q, chglist);
+      fprintf(stdout, "End panel charges\n");
+    }
 
     if (sys->capvew) {
       /* dump shaded geometry file if only if this column picture wanted */
@@ -488,9 +488,9 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     stoptimer;
     uptime += dtime;
 
-#if DUPVEC == ON
-    dumpLevOneUpVecs(sys);
-#endif
+    if (sys->dupvec) {
+      dumpLevOneUpVecs(sys);
+    }
 
 #if DNTYPE == NOSHFT
     mulDown(sys);		/* do downward pass without local exp shifts */
@@ -509,11 +509,11 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     stoptimer;
     evaltime += dtime;
 
-#if DMPCHG == LAST
-    fprintf(stdout, "\nPanel potentials divided by areas\n");
-    dumpChgDen(stdout, p, chglist);
-    fprintf(stdout, "End panel potentials\n");
-#endif
+    if (sys->dmpchg == DMPCHG_LAST) {
+      fprintf(stdout, "\nPanel potentials divided by areas\n");
+      dumpChgDen(stdout, p, chglist);
+      fprintf(stdout, "End panel potentials\n");
+    }
 
     /* convert the voltage vec entries on dielectric i/f's into eps1E1-eps2E2 */
     compute_electric_fields(sys, chglist);

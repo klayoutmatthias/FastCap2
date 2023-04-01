@@ -122,9 +122,9 @@ void mulMatDirect(ssystem *sys)
     stoptimer;
     dirtime += dtime;
 
-#if DSQ2PD == ON
-    dumpQ2PDiag(nextc);
-#endif
+    if (sys->dsq2pd) {
+      dumpQ2PDiag(nextc);
+    }
 
     if (sys->dmtcnt) {
       Q2PDcnt[nextc->level][nextc->level]++;
@@ -499,22 +499,22 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
   surface *surf = eval_panels[eval_row]->surf;
 
   /* do divided difference w/ three rows to get dielectric row */
-#if NUMDPT == 3
-  /* - dielectric panel row first */
-  factor = -(surf->outer_perm + surf->inner_perm)/
-      (eval_panels[eval_row]->pos_dummy->area);
+  if (NUMDPT == 3) {
+    /* - dielectric panel row first */
+    factor = -(surf->outer_perm + surf->inner_perm)/
+        (eval_panels[eval_row]->pos_dummy->area);
 #if DPDDIF == ON
-  fprintf(stdout, "Center row, factor = %g\n", factor);
+    fprintf(stdout, "Center row, factor = %g\n", factor);
 #endif
-  for(j = n_chg - 1; j >= 0; j--) { /* loop on columns */
-    if(!chg_is_dummy[j]) 
-        to_mat[row_offset + eval_row][col_offset + j] 
-            = from_mat[eval_row][j]*factor;
+    for(j = n_chg - 1; j >= 0; j--) { /* loop on columns */
+      if(!chg_is_dummy[j])
+          to_mat[row_offset + eval_row][col_offset + j]
+              = from_mat[eval_row][j]*factor;
 #if DPDDIF == ON
-    fprintf(stdout, " %.16e", from_mat[eval_row][j]);
+      fprintf(stdout, " %.16e", from_mat[eval_row][j]);
 #endif                          /* #if DPDDIF == ON */
-  }
-#endif                          /* #if NUMDPT == 3 */
+    }
+  }                          /* #if NUMDPT == 3 */
   /* - do positive dummy row */
   /*   first find the dummy row */
   dindex = -1;
@@ -527,14 +527,14 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
     }
   }
   if(dindex != -1) { /* dummy row found */
-#if NUMDPT == 3
-    factor = surf->outer_perm/eval_panels[dindex]->area;
-#else
-    /* this is the only factor required for two dummy rows in two point case */
-    factor = (surf->inner_perm - surf->outer_perm)
-        /(eval_panels[eval_row]->neg_dummy->area 
-          + eval_panels[eval_row]->pos_dummy->area);
-#endif
+    if (NUMDPT == 3) {
+      factor = surf->outer_perm/eval_panels[dindex]->area;
+    } else {
+      /* this is the only factor required for two dummy rows in two point case */
+      factor = (surf->inner_perm - surf->outer_perm)
+          /(eval_panels[eval_row]->neg_dummy->area
+            + eval_panels[eval_row]->pos_dummy->area);
+    }
 #if DPDDIF == ON
     fprintf(stdout, "\nPos dummy row, factor = %g\n", factor);
 #endif
@@ -546,27 +546,27 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
       }
 #endif
       if(!chg_is_dummy[j])
-#if NUMDPT == 3
-          to_mat[row_offset + eval_row][col_offset + j] 
-              += from_mat[dindex][j]*factor;
-#else                           /* make sure to overwrite possible garbage */
-          to_mat[row_offset + eval_row][col_offset + j] 
-              = -from_mat[dindex][j]*factor;
-#endif
+          if (NUMDPT == 3) {
+            to_mat[row_offset + eval_row][col_offset + j]
+                += from_mat[dindex][j]*factor;
+          } else {                      /* make sure to overwrite possible garbage */
+            to_mat[row_offset + eval_row][col_offset + j]
+                = -from_mat[dindex][j]*factor;
+          }
 #if DPDDIF == ON
       fprintf(stdout, " %.16e (%d)", from_mat[dindex][j],chg_panels[j]->index);
 #endif
     }
   }
   else {                /* dummy row out of cube => build it w/calcp */
-#if NUMDPT == 3
-    factor = surf->outer_perm/dp->area;
-#else
-    /* this is the only factor required for two dummy rows in two point case */
-    factor = (surf->inner_perm - surf->outer_perm)
-        /(eval_panels[eval_row]->neg_dummy->area 
-          + eval_panels[eval_row]->pos_dummy->area);
-#endif
+    if (NUMDPT == 3) {
+      factor = surf->outer_perm/dp->area;
+    } else {
+      /* this is the only factor required for two dummy rows in two point case */
+      factor = (surf->inner_perm - surf->outer_perm)
+          /(eval_panels[eval_row]->neg_dummy->area
+            + eval_panels[eval_row]->pos_dummy->area);
+    }
 #if DPDDIF == ON
     fprintf(stdout, "\nPos dummy calcp row, factor = %g\n", factor);
 #else
@@ -580,13 +580,13 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
       }
 #endif
       if(!chg_is_dummy[j]) {
-#if NUMDPT == 3
-        to_mat[row_offset + eval_row][col_offset + j] 
-            += calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL)*factor;
-#else
-        to_mat[row_offset + eval_row][col_offset + j] 
-            = -calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL)*factor;
-#endif
+        if (NUMDPT == 3) {
+          to_mat[row_offset + eval_row][col_offset + j]
+              += calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL)*factor;
+        } else {
+          to_mat[row_offset + eval_row][col_offset + j]
+              = -calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL)*factor;
+        }
 #if DPDDIF == ON
         fprintf(stdout, " %.16e (%d)",
                 calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL),
@@ -610,9 +610,9 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
     }
   }
   if(dindex != -1) { /* dummy row found */
-#if NUMDPT == 3
-    factor = surf->inner_perm/eval_panels[dindex]->area;
-#endif
+    if (NUMDPT == 3) {
+      factor = surf->inner_perm/eval_panels[dindex]->area;
+    }
 #if DPDDIF == ON
     fprintf(stdout, "\nNeg dummy row, factor = %g\n", factor);
 #endif
@@ -653,27 +653,27 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
       }
     }
   }
-#if NUMDPT == 2
-  /* - do row entry due to panel contribution 
-     - entry only necessary if eval panel is in chg panel list */
-  /*   search for the eval panel in the charge panel list */
-  dp = NULL;
-  for(j = n_chg - 1; j >= 0; j--) {
-    if(!chg_is_dummy[j]) {
-      if(eval_panels[eval_row] == chg_panels[j]) {
-        dp = eval_panels[eval_row];
-        break;
+  if (NUMDPT == 2) {
+    /* - do row entry due to panel contribution
+       - entry only necessary if eval panel is in chg panel list */
+    /*   search for the eval panel in the charge panel list */
+    dp = NULL;
+    for(j = n_chg - 1; j >= 0; j--) {
+      if(!chg_is_dummy[j]) {
+        if(eval_panels[eval_row] == chg_panels[j]) {
+          dp = eval_panels[eval_row];
+          break;
+        }
       }
     }
+    /*   set entry if eval panel found in chg panel list
+         - this is an overwrite; contributions of other rows should cancel */
+    if(dp != NULL) {
+      to_mat[row_offset + eval_row][col_offset + j]
+          = -(2*M_PI*(surf->inner_perm + surf->outer_perm)
+              /eval_panels[eval_row]->area);
+    }
   }
-  /*   set entry if eval panel found in chg panel list 
-       - this is an overwrite; contributions of other rows should cancel */
-  if(dp != NULL) {
-    to_mat[row_offset + eval_row][col_offset + j]
-        = -(2*M_PI*(surf->inner_perm + surf->outer_perm)
-            /eval_panels[eval_row]->area);
-  }
-#endif
 
 #if DPDDIF == ON
   fprintf(stdout, "\nDivided difference row (%d)\n", 
@@ -906,10 +906,10 @@ void mulMatEval(ssystem *sys)
       nc->evalmats = sys->heap.alloc<double**>(ttlvects, AMSC);
     }
     
-#if DILIST == ON
-    fprintf(stdout, "\nInteraction list (%d entries) for ", ttlvects);
-    disExParsimpcube(nc);
-#endif
+    if (sys->dilist) {
+      fprintf(stdout, "\nInteraction list (%d entries) for ", ttlvects);
+      disExParsimpcube(nc);
+    }
     
     /* set up exp/charge vectors and L2P, Q2P and/or M2P matrices as req'd */
     for(j=0, na = nc, ttlvects = 0; na->level > 1; na = na->parent) { 
@@ -924,11 +924,12 @@ void mulMatEval(ssystem *sys)
         if (sys->dmtcnt) {
           L2Pcnt[na->level][nc->level]++;
         }
-        
-#if DILIST == ON
-        fprintf(stdout, "L2P: ");
-        disExtrasimpcube(na);
-#endif
+
+        if (sys->dilist) {
+          fprintf(stdout, "L2P: ");
+          disExtrasimpcube(na);
+        }
+
         if(DNTYPE == GRENGD) break; /* Only one local expansion if shifting. */
       }
       else { /* build matrices for ancestor's (or cube's if 1st time) ilist */
@@ -946,10 +947,10 @@ void mulMatEval(ssystem *sys)
               Q2Pcnt[nexti->level][nc->level]++;
             }
 
-#if DILIST == ON
-            fprintf(stdout, "Q2P: ");
-            disExtrasimpcube(nexti);
-#endif
+            if (sys->dilist) {
+              fprintf(stdout, "Q2P: ");
+              disExtrasimpcube(nexti);
+            }
           }
           else {
             nc->evalvects[j] = nexti->multi;
@@ -964,10 +965,10 @@ void mulMatEval(ssystem *sys)
               M2Pcnt[nexti->level][nc->level]++;
             }
 
-#if DILIST == ON
-            fprintf(stdout, "M2P: ");
-            disExtrasimpcube(nexti);
-#endif
+            if (sys->dilist) {
+              fprintf(stdout, "M2P: ");
+              disExtrasimpcube(nexti);
+            }
           }
         }
       }
