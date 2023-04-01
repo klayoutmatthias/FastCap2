@@ -45,7 +45,7 @@ void mulMatDown(ssystem *sys);
 void mulMatEval(ssystem *sys);
 void mulMatDirect(ssystem *sys);
 
-void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int n_chg, int n_eval, int row_offset,
+void find_flux_density_row(ssystem *sys, double **to_mat, double **from_mat, int eval_row, int n_chg, int n_eval, int row_offset,
                       int col_offset, charge **eval_panels, charge **chg_panels, int *eval_is_dummy,
                       int *chg_is_dummy);
 

@@ -298,23 +298,23 @@ void olmulMatPrecond(ssystem *sys)
     maxsize = MAX(nsize, maxsize);
   }
 
-/* Allocate a matrix big enough for any set of 7. */
-#if JACDBG == ON
-  printf("max direct size =%d\n", maxsize);
-#endif
+  /* Allocate a matrix big enough for any set of 7. */
+  if (sys->jacdbg) {
+    printf("max direct size =%d\n", maxsize);
+  }
   mat = sys->heap.alloc<double*>(maxsize, AMSC);
   for(i=0; i < maxsize; i++) {
     mat[i] = sys->heap.alloc<double>(maxsize, AMSC);
   }
 
-/* Now go fill-in a matrix. */
+  /* Now go fill-in a matrix. */
   for(maxsize=0, nc=sys->directlist; nc != NULL; nc = nc->dnext) {
     nsize = nc->directnumeles[0];
     nc_dummy = nc->nbr_is_dummy[0];
     nc_pc = nc->chgs;
-#if CHKDUM == ON
-    chkDummyList(nc_pc, nc_dummy, nsize);
-#endif
+    if (sys->chkdum) {
+      chkDummyList(nc_pc, nc_dummy, nsize);
+    }
     nj = nc->j;
     nk = nc->k;
     nl = nc->l;
@@ -326,11 +326,11 @@ void olmulMatPrecond(ssystem *sys)
         }
       }
       else {
-#if DPCOMP == ON
-        fprintf(stdout, "Source mat, nc to nc\n");
-        dumpMat(nc->directmats[0], nsize, nsize);
-#endif
-        find_flux_density_row(mat, nc->directmats[0], i, nsize, nsize, 0, 0,
+        if (sys->dpcomp) {
+          fprintf(stdout, "Source mat, nc to nc\n");
+          dumpMat(nc->directmats[0], nsize, nsize);
+        }
+        find_flux_density_row(sys, mat, nc->directmats[0], i, nsize, nsize, 0, 0,
                               nc_pc, nc_pc, nc_dummy, nc_dummy);
       } 
     }
@@ -343,9 +343,9 @@ void olmulMatPrecond(ssystem *sys)
         ASSERT(nc->directnumeles[k+1] == nnbr->directnumeles[0]);
         nnbr_dummy = nnbr->nbr_is_dummy[0];
         nnbr_pc = nnbr->chgs;
-#if CHKDUM == ON
-        chkDummyList(nnbr_pc, nnbr_dummy, nnsize);
-#endif
+        if (sys->chkdum) {
+          chkDummyList(nnbr_pc, nnbr_dummy, nnsize);
+        }
         for(i = nsize - 1; i >= 0; i--) {
           if(nc_dummy[i]) continue;
           if(nc_pc[i]->surf->type != DIELEC) {
@@ -354,11 +354,11 @@ void olmulMatPrecond(ssystem *sys)
             }
           }
           else {
-#if DPCOMP == ON
-            fprintf(stdout, "Source mat, nnbr to nc\n");
-            dumpMat(nmat, nsize, nnsize);
-#endif
-            find_flux_density_row(mat, nmat, i, nnsize, nsize, 0, offset,
+            if (sys->dpcomp) {
+              fprintf(stdout, "Source mat, nnbr to nc\n");
+              dumpMat(nmat, nsize, nnsize);
+            }
+            find_flux_density_row(sys, mat, nmat, i, nnsize, nsize, 0, offset,
                                   nc_pc, nnbr_pc, nc_dummy, nnbr_dummy);
           }
         }
@@ -379,9 +379,9 @@ void olmulMatPrecond(ssystem *sys)
             ASSERT(nnbr->directnumeles[m+1] == nnnbr->directnumeles[0]);
             nnnbr_pc = nnnbr->chgs; /* panels in nnnbr */
             nnnbr_dummy = nnnbr->nbr_is_dummy[0];
-#if CHKDUM == ON
-            chkDummyList(nnnbr_pc, nnnbr_dummy, nnnsize);
-#endif
+            if (sys->chkdum) {
+              chkDummyList(nnnbr_pc, nnnbr_dummy, nnnsize);
+            }
             for(i = nnsize - 1; i >= 0; i--) { /* loop on panels in nnbr */
               if(nnbr_dummy[i]) continue;
               if(nnbr_pc[i]->surf->type != DIELEC) {
@@ -390,11 +390,11 @@ void olmulMatPrecond(ssystem *sys)
                 }
               }
               else {
-#if DPCOMP == ON
-                fprintf(stdout, "Source mat, nnnbr to nnbr\n");
-                dumpMat(nmat, nnsize, nnnsize);
-#endif
-                find_flux_density_row(mat, nmat, i, nnnsize, nnsize, offset,
+                if (sys->dpcomp) {
+                  fprintf(stdout, "Source mat, nnnbr to nnbr\n");
+                  dumpMat(nmat, nnsize, nnnsize);
+                }
+                find_flux_density_row(sys, mat, nmat, i, nnnsize, nnsize, offset,
                                       noffset, nnbr_pc, nnnbr_pc, nnbr_dummy,
                                       nnnbr_dummy);
               }
@@ -431,21 +431,21 @@ void olmulMatPrecond(ssystem *sys)
     }
 
     /* The big Matrix is filled in, invert it and get the preconditioner. */
-#if DPCOMP == ON
-    fprintf(stdout, "Before compression\n");
-    dumpMat(mat, offset, offset);
-#endif
+    if (sys->dpcomp) {
+      fprintf(stdout, "Before compression\n");
+      dumpMat(mat, offset, offset);
+    }
     nnnsize = compressMat(sys, mat, offset, is_dummy, BOTH);
-#if DPCOMP == ON
-    fprintf(stdout, "After compression\n");
-    dumpMat(mat, nnnsize, nnnsize);
-#endif
+    if (sys->dpcomp) {
+      fprintf(stdout, "After compression\n");
+      dumpMat(mat, nnnsize, nnnsize);
+    }
     invert(mat, nnnsize, NULL);
     expandMat(mat, offset, nnnsize, is_dummy, BOTH);
-#if DPCOMP == ON
-    fprintf(stdout, "After expansion\n");
-    dumpMat(mat, offset, offset);
-#endif
+    if (sys->dpcomp) {
+      fprintf(stdout, "After expansion\n");
+      dumpMat(mat, offset, offset);
+    }
 
     /* Copy out the preconditioner to the saved matrices. */
     for(i = nsize - 1; i >= 0; i--) {
@@ -489,7 +489,7 @@ void olmulMatPrecond(ssystem *sys)
     SKIPDQ = ON=>don't do cancellation-prone add-subtract of identical
       influence of DIELEC/BOTH panels' charges on dummy panel pot. evals
 */
-void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int n_chg, int n_eval, int row_offset,
+void find_flux_density_row(ssystem *sys, double **to_mat, double **from_mat, int eval_row, int n_chg, int n_eval, int row_offset,
                       int col_offset, charge **eval_panels, charge **chg_panels, int *eval_is_dummy, 
                       int *chg_is_dummy)
 {
@@ -503,18 +503,18 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
     /* - dielectric panel row first */
     factor = -(surf->outer_perm + surf->inner_perm)/
         (eval_panels[eval_row]->pos_dummy->area);
-#if DPDDIF == ON
-    fprintf(stdout, "Center row, factor = %g\n", factor);
-#endif
+    if (sys->dpddif) {
+      fprintf(stdout, "Center row, factor = %g\n", factor);
+    }
     for(j = n_chg - 1; j >= 0; j--) { /* loop on columns */
       if(!chg_is_dummy[j])
           to_mat[row_offset + eval_row][col_offset + j]
               = from_mat[eval_row][j]*factor;
-#if DPDDIF == ON
-      fprintf(stdout, " %.16e", from_mat[eval_row][j]);
-#endif                          /* #if DPDDIF == ON */
+      if (sys->dpddif) {
+        fprintf(stdout, " %.16e", from_mat[eval_row][j]);
+      }
     }
-  }                          /* #if NUMDPT == 3 */
+  }                          /* if (NUMDPT == 3) */
   /* - do positive dummy row */
   /*   first find the dummy row */
   dindex = -1;
@@ -535,27 +535,28 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
           /(eval_panels[eval_row]->neg_dummy->area
             + eval_panels[eval_row]->pos_dummy->area);
     }
-#if DPDDIF == ON
-    fprintf(stdout, "\nPos dummy row, factor = %g\n", factor);
-#endif
+    if (sys->dpddif) {
+      fprintf(stdout, "\nPos dummy row, factor = %g\n", factor);
+    }
     for(j = n_chg - 1; j >= 0; j--) {
-#if SKIPDQ == ON
-      if(chg_panels[j]->index == eval_panels[eval_row]->index) {
-        to_mat[row_offset + eval_row][col_offset + j] = 0.0;
-        continue;
+      if (SKIPQD == ON) {
+        if(chg_panels[j]->index == eval_panels[eval_row]->index) {
+          to_mat[row_offset + eval_row][col_offset + j] = 0.0;
+          continue;
+        }
       }
-#endif
-      if(!chg_is_dummy[j])
-          if (NUMDPT == 3) {
-            to_mat[row_offset + eval_row][col_offset + j]
-                += from_mat[dindex][j]*factor;
-          } else {                      /* make sure to overwrite possible garbage */
-            to_mat[row_offset + eval_row][col_offset + j]
-                = -from_mat[dindex][j]*factor;
-          }
-#if DPDDIF == ON
-      fprintf(stdout, " %.16e (%d)", from_mat[dindex][j],chg_panels[j]->index);
-#endif
+      if(!chg_is_dummy[j]) {
+        if (NUMDPT == 3) {
+          to_mat[row_offset + eval_row][col_offset + j]
+              += from_mat[dindex][j]*factor;
+        } else {                      /* make sure to overwrite possible garbage */
+          to_mat[row_offset + eval_row][col_offset + j]
+              = -from_mat[dindex][j]*factor;
+        }
+      }
+      if (sys->dpddif) {
+        fprintf(stdout, " %.16e (%d)", from_mat[dindex][j],chg_panels[j]->index);
+      }
     }
   }
   else {                /* dummy row out of cube => build it w/calcp */
@@ -567,18 +568,18 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
           /(eval_panels[eval_row]->neg_dummy->area
             + eval_panels[eval_row]->pos_dummy->area);
     }
-#if DPDDIF == ON
-    fprintf(stdout, "\nPos dummy calcp row, factor = %g\n", factor);
-#else
-    fprintf(stderr, "\nolmulMatPrecond: building pos. dummy row\n");
-#endif
+    if (sys->dpddif) {
+      fprintf(stdout, "\nPos dummy calcp row, factor = %g\n", factor);
+    } else {
+      fprintf(stderr, "\nolmulMatPrecond: building pos. dummy row\n");
+    }
     for(j = n_chg - 1; j >= 0; j--) {
-#if SKIPQD == ON
-      if(chg_panels[j]->index == eval_panels[eval_row]->index) {
-        to_mat[row_offset + eval_row][col_offset + j] = 0.0;
-        continue;
+      if (SKIPQD == ON) {
+        if(chg_panels[j]->index == eval_panels[eval_row]->index) {
+          to_mat[row_offset + eval_row][col_offset + j] = 0.0;
+          continue;
+        }
       }
-#endif
       if(!chg_is_dummy[j]) {
         if (NUMDPT == 3) {
           to_mat[row_offset + eval_row][col_offset + j]
@@ -587,14 +588,16 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
           to_mat[row_offset + eval_row][col_offset + j]
               = -calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL)*factor;
         }
-#if DPDDIF == ON
-        fprintf(stdout, " %.16e (%d)",
-                calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL),
-                chg_panels[j]->index);
+        if (sys->dpddif) {
+          fprintf(stdout, " %.16e (%d)",
+                  calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL),
+                  chg_panels[j]->index);
+        }
       }
       else {
-        fprintf(stdout, " dummy");
-#endif
+        if (sys->dpddif) {
+          fprintf(stdout, " dummy");
+        }
       }
     }
   }
@@ -613,43 +616,45 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
     if (NUMDPT == 3) {
       factor = surf->inner_perm/eval_panels[dindex]->area;
     }
-#if DPDDIF == ON
-    fprintf(stdout, "\nNeg dummy row, factor = %g\n", factor);
-#endif
+    if (sys->dpddif) {
+      fprintf(stdout, "\nNeg dummy row, factor = %g\n", factor);
+    }
     for(j = n_chg - 1; j >= 0; j--) {
-#if SKIPQD == ON
-      if(chg_panels[j]->index == eval_panels[eval_row]->index) continue;
-#endif
+      if (SKIPQD == ON) {
+        if(chg_panels[j]->index == eval_panels[eval_row]->index) continue;
+      }
       if(!chg_is_dummy[j])
           to_mat[row_offset + eval_row][col_offset + j] 
               += from_mat[dindex][j]*factor;
-#if DPDDIF == ON
-      fprintf(stdout, " %.16e (%d)", from_mat[dindex][j],chg_panels[j]->index);
-#endif
+      if (sys->dpddif) {
+        fprintf(stdout, " %.16e (%d)", from_mat[dindex][j],chg_panels[j]->index);
+      }
     }
   }
   else {                /* dummy row out of cube => build it w/calcp */
     factor = surf->inner_perm/dp->area;
-#if DPDDIF == ON
-    fprintf(stdout, "\nNeg dummy calcp row, factor = %g\n", factor);
-#else
-    fprintf(stderr, "olmulMatPrecond: building neg. dummy row\n");
-#endif
+    if (sys->dpddif) {
+      fprintf(stdout, "\nNeg dummy calcp row, factor = %g\n", factor);
+    } else {
+      fprintf(stderr, "olmulMatPrecond: building neg. dummy row\n");
+    }
     for(j = n_chg - 1; j >= 0; j--) {
-#if SKIPQD == ON
-      if(chg_panels[j]->index == eval_panels[eval_row]->index) continue;
-#endif
+      if (SKIPQD == ON) {
+        if(chg_panels[j]->index == eval_panels[eval_row]->index) continue;
+      }
       if(!chg_is_dummy[j]) {
         to_mat[row_offset + eval_row][col_offset + j] 
             += calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL)*factor;
-#if DPDDIF == ON
-        fprintf(stdout, " %.16e (%d)",
-                calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL),
-                chg_panels[j]->index);
+        if (sys->dpddif) {
+          fprintf(stdout, " %.16e (%d)",
+                  calcp(chg_panels[j], dp->x, dp->y, dp->z, NULL),
+                  chg_panels[j]->index);
+        }
       }
       else {
-        fprintf(stdout, " dummy");
-#endif
+        if (sys->dpddif) {
+          fprintf(stdout, " dummy");
+        }
       }
     }
   }
@@ -675,16 +680,16 @@ void find_flux_density_row(double **to_mat, double **from_mat, int eval_row, int
     }
   }
 
-#if DPDDIF == ON
-  fprintf(stdout, "\nDivided difference row (%d)\n", 
-          eval_panels[eval_row]->index);
-  for(j = n_chg - 1; j >= 0; j--) {
-    fprintf(stdout, " %.16e (%d)", 
-            to_mat[row_offset + eval_row][col_offset + j], 
-            chg_panels[j]->index);
+  if (sys->dpddif) {
+    fprintf(stdout, "\nDivided difference row (%d)\n",
+            eval_panels[eval_row]->index);
+    for(j = n_chg - 1; j >= 0; j--) {
+      fprintf(stdout, " %.16e (%d)",
+              to_mat[row_offset + eval_row][col_offset + j],
+              chg_panels[j]->index);
+    }
+    fprintf(stdout, "\n\n");
   }
-  fprintf(stdout, "\n\n");
-#endif
 }
 
 
@@ -697,13 +702,9 @@ uniform break-up of three-space (ie many shifts have similar geometries).
 */
 void mulMatUp(ssystem *sys) 
 {
-cube *nextc, *kid;
-int i, j, numterms, depth, order = sys->order;
-double **multimats[8];
-
-#if OFF == ON                   /* OFF == OFF produces the M2M error!! */
-    for(i=0; i < 8; i++) multimats[i] = NULL;
-#endif
+  cube *nextc, *kid;
+  int i, j, numterms, depth, order = sys->order;
+  double **multimats[8];
 
   numterms = multerms(order);
 
@@ -712,7 +713,7 @@ double **multimats[8];
     return;     /* return if upward pass not possible */
   }
 
-/* Handle the lowest level cubes first (set up Q2M's). */
+  /* Handle the lowest level cubes first (set up Q2M's). */
   for(nextc=sys->multilist[sys->depth]; nextc != NULL; nextc = nextc->mnext) {
     nextc->multisize = numterms;
     nextc->multi = sys->heap.alloc<double>(numterms, AMSC);
@@ -748,10 +749,11 @@ double **multimats[8];
         fprintf(stdout, " (Warning: no multipole acceleration)\n");*/
   }
 
-/* Allocate the vectors and matrices for the cubes. */
+  /* Allocate the vectors and matrices for the cubes. */
   /* no multipoles over root cube or its kids (would not be used if made) */
   for(depth = (sys->depth - 1); depth > 1; depth--) {
-  /* set up M2M's and Q2M's to compute the multipoles needed for this level */
+
+    /* set up M2M's and Q2M's to compute the multipoles needed for this level */
     if(sys->locallist[depth] == NULL && sys->multilist[depth] == NULL) {
       fprintf(stdout, "No expansions at level %d\n", depth);
       /*if(depth < 3) fprintf(stdout, " (Warning: no multipole acceleration)\n");
@@ -766,20 +768,20 @@ double **multimats[8];
       else fprintf(stdout, "\n");*/
     }
 
-#if ON == ON                    /* ON == OFF produces the M2M error!! */
     /* NULL out pointers to same-geometry M2M mats for this level */
-    for(i=0; i < 8; i++) multimats[i] = NULL;
-#endif
+    for (i = 0; i < sizeof(multimats) / sizeof(multimats[0]); i++) {
+      multimats[i] = NULL;
+    }
 
-  /* Hit nonempty cubes at this level assigning ptrs to precomputed   */
-  /* M2M mats (for this lev), or if a kid is exact, computing Q2M matrices. */
+    /* Hit nonempty cubes at this level assigning ptrs to precomputed   */
+    /* M2M mats (for this lev), or if a kid is exact, computing Q2M matrices. */
     for(nextc=sys->multilist[depth]; nextc != NULL; nextc = nextc->mnext) {
       
       if (sys->dissyn) {
         multicnt[nextc->level]++;
       }
 
-    /* Save space for upvector sizes, upvect ptrs, and upmats. */
+      /* Save space for upvector sizes, upvect ptrs, and upmats. */
       nextc->multisize = numterms;
       if(numterms > 0) {
         nextc->multi = sys->heap.alloc<double>(numterms, AMSC);
@@ -789,7 +791,8 @@ double **multimats[8];
         nextc->upvects = sys->heap.alloc<double*>(nextc->upnumvects, AMSC);
         nextc->upmats = sys->heap.alloc<double**>(nextc->upnumvects, AMSC);
       }
-    /* Go through nonempty kids and fill in upvectors and upmats. */
+
+      /* Go through nonempty kids and fill in upvectors and upmats. */
       for(i=0, j=0; j < nextc->numkids; j++) {
         if((kid = nextc->kids[j]) != NULL) { /* NULL => empty kid cube */
           if(kid->mul_exact == FALSE) { /* if kid has a multi */

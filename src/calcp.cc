@@ -100,17 +100,16 @@ void initcalcp(ssystem *sys, charge *panel_list)
   double vtemp[3];
   double length, maxlength, minlength, length20, length31, sum, sum2, delta;
   int i, j, next;
+  FILE *foo = 0;
 
-#if JACDBG == ON
-  FILE *foo;
-
-  foo = fopen("corners.txt", "w");
-#endif
+  if (sys->jacdbg) {
+    foo = fopen("corners.txt", "w");
+  }
 
   for(i=0, pq = panel_list; pq != NULL; pq = pq->next) i++;
-#if JACDBG == ON
-  printf("Initial number of panels = %d\n", i);
-#endif
+  if (sys->jacdbg) {
+    fprintf(stdout, "Initial number of panels = %d\n", i);
+  }
 
   pq = panel_list; 
   while (pq != NULL) {
@@ -222,14 +221,15 @@ void initcalcp(ssystem *sys, charge *panel_list)
       pq->corner[i][ZI] = 0.0;
     }
 
-#if JACDBG == ON			/* dump corners, center to file */
-    fprintf(foo, "%g %g %g: ", pq->x, pq->y, pq->z);
-    for(i = 0; i < pq->shape; i++) {
-      fprintf(foo, "%g %g %g ", pq->corner[i][XI], pq->corner[i][YI],
-	      pq->corner[i][ZI]);
+    /* dump corners, center to file */
+    if (sys->jacdbg) {
+      fprintf(foo, "%g %g %g: ", pq->x, pq->y, pq->z);
+      for(i = 0; i < pq->shape; i++) {
+        fprintf(foo, "%g %g %g ", pq->corner[i][XI], pq->corner[i][YI],
+                pq->corner[i][ZI]);
+      }
+      fprintf(foo, "\n");
     }
-    fprintf(foo, "\n");
-#endif
 
     /* Finally, calculate the moments. */
     ComputeMoments(sys, pq);

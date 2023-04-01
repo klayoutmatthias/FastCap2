@@ -40,6 +40,13 @@ ssystem::ssystem() :
   dilist(false),
   dmpele(false),
   dmpchg(DMPCHG_OFF),
+  ckdlst(false),
+  dmprec(false),
+  ckclst(false),
+  dpcomp(false),
+  dpddif(false),
+  chkdum(false),
+  jacdbg(false),
   side(0),
   depth(0),
   order(0),
@@ -173,6 +180,27 @@ ssystem::ssystem() :
   dmpchg = DMPCHG_LAST;
 #endif
 
+#if defined(CKDLST) && CKDLST == ON
+  ckdlst = true;
+#endif
+#if defined(DMPREC) && DMPREC == ON
+  dmprec = true;
+#endif
+#if defined(CKCLST) && CKCLST == ON
+  ckclst = true;
+#endif
+#if defined(DPCOMP) && DPCOMP == ON
+  dpcomp = true;
+#endif
+#if defined(DPDDIF) && DPDDIF == ON
+  dpddif = true;
+#endif
+#if defined(CHKDUM) && CHKDUM == ON
+  chkdum = true;
+#endif
+#if defined(JACDBG) && JACDBG == ON
+  jacdbg = true;
+#endif
 }
 
 void ssystem::msg(const char *fmt, ...)

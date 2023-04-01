@@ -216,13 +216,22 @@ struct ssystem
   bool dalq2l;                  //  display all Q2L matrix build steps
 
   //  display of other intermediate results
-  bool dupvec;                  //  display lev 1 upward pass vectors */
-  bool disfac;                  //  display factorial fractions in M2L */
-  bool dpsysd;                  //  display system after direct build */
-  bool dilist;                  //  display interaction lists */
-  bool dmpele;                  //  display electric flux densities */
+  bool dupvec;                  //  display lev 1 upward pass vectors
+  bool disfac;                  //  display factorial fractions in M2L
+  bool dpsysd;                  //  display system after direct build
+  bool dilist;                  //  display interaction lists
+  bool dmpele;                  //  display electric flux densities
   dmpchg_mode dmpchg;           //  ON=> display all charge vector iterates
-                                //  LAST=> display final charge vector */
+                                //  LAST=> display final charge vector
+
+  //  misc debug
+  bool ckdlst;                  //  check direct list, prnt msg if bad
+  bool dmprec;                  //  dump P and Ctil to matlab file
+  bool ckclst;                  //  check charge list, prnt msg if bad
+  bool dpcomp;                  //  dump prec pts before&aft compression
+  bool dpddif;                  //  dump divided difference components
+  bool chkdum;                  //  print msg if dummy list inconsistent
+  bool jacdbg;                  //  print random Jacob debug messages
 
   //  global variables
   char *ps_file_base;           //  pointer to base name for .ps files

@@ -157,14 +157,14 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-#if CKCLST == ON
-  fprintf(stdout, "Checking panels...");
-  if(has_duplicate_panels(stdout, chglist)) {
-    fprintf(stdout, "charge list has duplicates\n");
-    exit(-1);
+  if (sys.ckclst) {
+    fprintf(stdout, "Checking panels...");
+    if(has_duplicate_panels(stdout, chglist)) {
+      fprintf(stdout, "charge list has duplicates\n");
+      exit(-1);
+    }
+    fprintf(stdout, "no duplicates\n");
   }
-  fprintf(stdout, "no duplicates\n");
-#endif
 
   if (sys.muldat) {
     dumpMulSet(&sys, numLev, numMom);
@@ -199,18 +199,17 @@ int main(int argc, char *argv[])
       prsetime = dtime;		/* preconditioner set up time */
     }
 
-#if DMPREC == ON
-    dump_preconditioner(sys, chglist, 1);	/* dump prec. and P to matlab file */
-#endif
+    if (sys.dmprec) {
+      dump_preconditioner(&sys, chglist, 1);	/* dump prec. and P to matlab file */
+    }
 
     if (sys.dpsysd) {
       dissys(&sys);
     }
 
-#if CKDLST == ON
-    chkList(sys, DIRECT);
-#endif
-
+    if (sys.ckdlst) {
+      chkList(&sys, DIRECT);
+    }
   }
 
   dumpnums(&sys, ON, eval_size);    /* save num/type of pot. coeff calcs */
@@ -227,19 +226,19 @@ int main(int argc, char *argv[])
     starttimer;
     mulMatUp(&sys);		/* Compute the upward pass matrices. */
 
-#if DNTYPE == NOSHFT
-    mulMatDown(sys);		/* find matrices for no L2L shift dwnwd pass */
-#endif
+    if (DNTYPE == NOSHFT) {
+      mulMatDown(&sys);		/* find matrices for no L2L shift dwnwd pass */
+    }
 
-#if DNTYPE == GRENGD
-    mulMatDown(&sys);		/* find matrices for full Greengard dnwd pass*/
-#endif
+    if (DNTYPE == GRENGD) {
+      mulMatDown(&sys);		/* find matrices for full Greengard dnwd pass*/
+    }
 
-#if CKDLST == ON
-    chkList(sys, DIRECT);
-    chkLowLev(sys, DIRECT);
-    //  Not available anywhere: chkEvalLstD(sys, DIRECT);
-#endif
+    if (sys.ckdlst) {
+      chkList(&sys, DIRECT);
+      chkLowLev(&sys, DIRECT);
+      //  Not available anywhere: chkEvalLstD(sys, DIRECT);
+    }
 
     mulMatEval(&sys);		/* set up matrices for evaluation pass */
 

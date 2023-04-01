@@ -186,28 +186,6 @@ misc. global macros
 #define EXRTSH 0.9		/* exact/ttl>EXRTSH for lev => make last lev */
 /* (add any new configuration flags to dumpConfig() in mulDisplay.c) */
 
-/* misc debug */
-#if !defined(CKDLST)
-#define CKDLST OFF		/* ON=> check direct list, prnt msg if bad */
-#endif
-#if !defined(DMPREC)
-#define DMPREC OFF		/* ON=> dump P and Ctil to matlab file */
-#endif
-#if !defined(CKCLST)
-#define CKCLST OFF		/* ON=> check charge list, prnt msg if bad */
-#endif
-#if !defined(DPCOMP)
-#define DPCOMP OFF		/* ON=> dump prec pts before&aft compression */
-#endif
-#if !defined(DPDDIF)
-#define DPDDIF OFF		/* ON=> dump divided difference components */
-#endif
-#if !defined(CHKDUM)
-#define CHKDUM OFF		/* ON=> print msg if dummy list inconsistent */
-#endif
-#if !defined(JACDBG)
-#define JACDBG OFF		/* ON=> print random Jacob debug messages */
-#endif
 /* blkDirect.c related flags - used only when DIRSOL == ON || EXPGCR == ON */
 #define MAXSIZ 0		/* any more tiles than this uses matrix on disk
 				   for DIRSOL == ON or EXPGCR == ON */
