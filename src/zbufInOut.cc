@@ -301,7 +301,7 @@ face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, in
   charge *chgp;
   face *head, *tail, **faces;
   extern int rd_;
-  extern double ***axes;
+  double ***axes = sys->axes;
   extern double axeslen;
   extern double linewd;
   extern ITER *kq_num_list;
@@ -1231,11 +1231,11 @@ static void dumpLines(FILE *fp, line **lines, int numlines)
 /*
   dump faces in ps Aldus FreeHand format - assumes header body in afhpsheader
 */
-void dumpPs(face **faces, int numfaces, line **lines, int numlines, FILE *fp, const char **argv, int argc, int use_density)
+void dumpPs(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, FILE *fp, const char **argv, int argc, int use_density)
 {
   int i, f, lowx, lowy;
   extern int s_, n_, g_, c_, x_, q_, rk_, f_, m_; /* command line flags */
-  extern double ***axes;
+  double ***axes = sys->axes;
   char linein[BUFSIZ];
   
   /* print the lines before the bounding box */

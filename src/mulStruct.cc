@@ -47,6 +47,8 @@ ssystem::ssystem() :
   dpddif(false),
   chkdum(false),
   jacdbg(false),
+  ps_file_base(0),
+  axes(0),
   side(0),
   depth(0),
   order(0),

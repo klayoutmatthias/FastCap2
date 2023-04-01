@@ -72,7 +72,6 @@ int main(int argc, char *argv[])
   char filename[BUFSIZ];
 
   extern int m_, q_, dd_;
-  extern double ***axes;
 
   /* initialize memory and time counters, etc. */
   fulldirops = fullPqops = 0;
@@ -83,9 +82,9 @@ int main(int argc, char *argv[])
   /* initialize defaults, etc */
   autmom = autlev = ON;
   relperm = 1.0;
-  axes = sys.heap.alloc<double **>(10);
+  sys.axes = sys.heap.alloc<double **>(10);
   for(i = 0; i < 10; i++) {
-    axes[i] = sys.heap.mat(2, 3);
+    sys.axes[i] = sys.heap.mat(2, 3);
   }
 
   /* get the list of all panels in the problem */

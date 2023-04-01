@@ -44,12 +44,12 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
   takes a list of 3d lines and returns a list of 3d lines mapped onto a plane
   given by a normal when projected back to the given view point
 */
-void image(face **faces, int numfaces, line **lines, int numlines, double *normal, double rhs, double *view)
+void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, double *normal, double rhs, double *view)
 /* double rhs: rhs of the plane's equation */
 {
   int i, j, k;
   double alpha, temp[3];
-  extern double ***axes;
+  double ***axes = sys->axes;
 
   /* transform axes (done always, needed for alignment) */
   for(i = 0; i < 7; i++) {
@@ -148,14 +148,14 @@ void initFaces(face **faces, int numfaces, double *view)
   a 2d coordinate system in the plane 
   - sets up y axis in plane || to 1st line rotated according to rotation arg
 */
-void flatten(face **faces, int numfaces, line **lines, int numlines, double rhs, double rotation, double *normal, double *view)
+void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, double rhs, double rotation, double *normal, double *view)
 /* double rotation: rotation of image y axis rel to 1st line */
 {
   int i, j, k;
   double temp, tvec[3], crot, srot;
   double y[3], x[3], z[3];		/* unit vectors */
   double origin[3];
-  extern double ***axes;
+  double ***axes = sys->axes;
   extern int x_, up_axis;
 
   /* load origin on view plane from axis starting point */
@@ -255,12 +255,12 @@ void flatten(face **faces, int numfaces, line **lines, int numlines, double rhs,
 /*
   translates a list of 2d faces, lines to make all the coordinates positive
 */
-void makePos(face **faces, int numfaces, line **lines, int numlines)
+void makePos(ssystem *sys, face **faces, int numfaces, line **lines, int numlines)
 {
   int i,j;
   double minx, miny, trans[2];
   double offset[2];	       	/* the margins from 0 for smallest x and y */
-  extern double ***axes;
+  double ***axes = sys->axes;
   extern int x_;
 
   offset[1] = offset[0] = 0.0;	/* offsetting now done in scale2d */
@@ -328,11 +328,11 @@ void makePos(face **faces, int numfaces, line **lines, int numlines)
   - the global defines OFFSETX/Y set the offset
   - assumes smallest x and y coordinates are zero (called after makePos())
 */
-void scale2d(face **faces, int numfaces, line **lines, int numlines, double scale, double *offset)
+void scale2d(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, double scale, double *offset)
 {
   int i, j;
   double ymax, xmax, xscale, yscale, master;
-  extern double ***axes;
+  double ***axes = sys->axes;
   extern int x_;
 
   /* find ymax, xmax */
@@ -404,7 +404,7 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
 {
   double *avg, max[3], min[3];
   int i, j, k;
-  extern double ***axes;
+  double ***axes = sys->axes;
   extern int x_;
 
   avg = sys->heap.alloc<double>(3, AMSC);
@@ -462,12 +462,12 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
   returns the radius of the smallest sphere with center at avg that
   encloses all the faces given in faces, all lines and axes, if required
 */
-double getSphere(double *avg, face **faces, int numfaces, line **lines, int numlines)
+double getSphere(ssystem *sys, double *avg, face **faces, int numfaces, line **lines, int numlines)
 {
   double radius = 0.0, temp[3];
   int i, j, k;
   extern int x_;
-  extern double ***axes;
+  double ***axes = sys->axes;
 
   /* loop through all the points, save the farthest away */
   for(i = 0; i <  numfaces; i++) {
@@ -503,12 +503,12 @@ double getSphere(double *avg, face **faces, int numfaces, line **lines, int numl
   - also change axes lengths so that they are smaller than view distance
     (ie so they won't cross the view plane)
 */
-double getNormal(double *normal, double radius, double *avg, double *view, double distance)
+double getNormal(ssystem *sys, double *normal, double radius, double *avg, double *view, double distance)
 {
   int i, k, j, axes_too_big, first;
   double rhs, norm, anorm, max_anorm;
   extern int x_;
-  extern double ***axes;
+  double ***axes = sys->axes;
 
   /* figure the normal to the view plane 
      - remember view is rel to avg

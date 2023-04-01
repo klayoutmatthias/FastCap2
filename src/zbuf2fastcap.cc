@@ -78,13 +78,13 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   avg = getAvg(sys, faces, numfaces, lines, numlines, OFF);
 
   /* get the radius of the smallest sphere enclosing all the lines */
-  radius = getSphere(avg, faces, numfaces, lines, numlines);
+  radius = getSphere(sys, avg, faces, numfaces, lines, numlines);
 
   /* get normal to image plane, adjust view point to be (1+distance)*radius 
      away from object center point avg, view plane (1+distance/2)*radius away
      - view coordinates taken rel to obj center but changed to absolute */
   view[0] = azimuth; view[1] = elevation;
-  rhs = getNormal(normal, radius, avg, view, distance);
+  rhs = getNormal(sys, normal, radius, avg, view, distance);
 
 #if 1 == 0
   fprintf(stderr, " %d faces read\n", numfaces);
@@ -114,10 +114,10 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   /*fprintf(stderr, "done.\n");*/
 
   /* get the 2d figure and dump to ps file */
-  image(sfaces, numfaces, lines, numlines, normal, rhs, view);
-  flatten(sfaces, numfaces, lines, numlines, rhs, rotation, normal, view);
-  makePos(sfaces, numfaces, lines, numlines);
-  scale2d(sfaces, numfaces, lines, numlines, scale, moffset);
+  image(sys, sfaces, numfaces, lines, numlines, normal, rhs, view);
+  flatten(sys, sfaces, numfaces, lines, numlines, rhs, rotation, normal, view);
+  makePos(sys, sfaces, numfaces, lines, numlines);
+  scale2d(sys, sfaces, numfaces, lines, numlines, scale, moffset);
   if(g_ == TRUE) {
     dumpCycles(sfaces, numfaces, stdout); /* DANGER - doesnt work (?) */
     dumpFaceText(sfaces, numfaces, stdout);
@@ -128,7 +128,7 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
       exit(0);
     }
     fprintf(stdout, "Writing %s...", str);
-    dumpPs(sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density);
+    dumpPs(sys, sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density);
     fprintf(stdout, "done.\n");
     fclose(fp);
   }
