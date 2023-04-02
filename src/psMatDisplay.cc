@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "zbufInOut.h"
@@ -46,13 +12,13 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 /* must be defined somewhere */
 #ifndef OPEN
-#define OPEN 0			/* open ps file, print hdr, ignore row/col */
+#define OPEN 0                  /* open ps file, print hdr, ignore row/col */
 #endif
 #ifndef CLOSE
-#define CLOSE 1			/* print trailer, close ps file */
+#define CLOSE 1                 /* print trailer, close ps file */
 #endif
 #ifndef UPDATE
-#define UPDATE 2		/* => add 2 dots for this row and col */
+#define UPDATE 2                /* => add 2 dots for this row and col */
 #endif
 #ifndef TRUE
 #define TRUE 1
@@ -76,17 +42,17 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
                                    IMAGEX/Y to get final image size
                                    - these values should allow 7.5x10 images */
 
-#define LINCAP 0		/* line cap parameter - 0 => butt cap */
-#define LINJIN 0		/* line join parameter - 0 => miter join */
-#define GREYLV 0		/* grey level for lines - 0 => black */
+#define LINCAP 0                /* line cap parameter - 0 => butt cap */
+#define LINJIN 0                /* line join parameter - 0 => miter join */
+#define GREYLV 0                /* grey level for lines - 0 => black */
 
-#define LINPIN 300		/* lines per inch resolution of printer */
-#define MINLIN 5		/* min number of lines per aliased row/col */
+#define LINPIN 300              /* lines per inch resolution of printer */
+#define MINLIN 5                /* min number of lines per aliased row/col */
 #define MKSPNT (LINPIN/(MINLIN*72.0)) /* #marks per point - intermediate val */
 #define ASIZER floor(IMAGEY*MKSPNT)/* matrix aliased down to this many rows */
 #define ASIZEC floor(IMAGEX*MKSPNT)/* matrix aliased down to this many cols */
 
-char **aliased_matrix;	/* the aliased matrix */
+char **aliased_matrix;  /* the aliased matrix */
 
 /*
   dump Aldus Freehand readable header
@@ -148,7 +114,7 @@ static void dump_aldus_foot(FILE *fp, int insert_showpage, char *argv[], int arg
     }
     strcat(line, aux_str);
     dump_line_as_ps(fp, line, OFFSETX+2*CMDFONT, OFFSETY+IMAGEY+CMDFONT/2, 
-		    CMDFONT);
+                    CMDFONT);
     /* sys->info("Command line printed\n"); */
   }
 
@@ -226,20 +192,20 @@ void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, in
       num_alias_r = num_row;
       num_alias_c = num_col;
     }
-    else {			/* alias in x or y if needed */
+    else {                      /* alias in x or y if needed */
       if(num_row > (int)ASIZER) {
-	rows_aliased = TRUE;
-	/* get number of rows per cell (last cell may have different num) */
-	/* - +1 needed to get even division case to work correctly */
-	alias_size_r = (int) ceil((double)(num_row+1)/ASIZER);
+        rows_aliased = TRUE;
+        /* get number of rows per cell (last cell may have different num) */
+        /* - +1 needed to get even division case to work correctly */
+        alias_size_r = (int) ceil((double)(num_row+1)/ASIZER);
       }
       else alias_size_r = 1;
 
       if(num_col > (int)ASIZEC) {
-	cols_aliased = TRUE;
-	/* get number of cols per cell (last cell may have different num) */
-	/* - +1 needed to get even division case to work correctly */
-	alias_size_c = (int) ceil((double)(num_col+1)/ASIZEC);
+        cols_aliased = TRUE;
+        /* get number of cols per cell (last cell may have different num) */
+        /* - +1 needed to get even division case to work correctly */
+        alias_size_c = (int) ceil((double)(num_col+1)/ASIZEC);
       }
       else alias_size_c = 1;
 
@@ -250,12 +216,12 @@ void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, in
       if(rows_aliased && !cols_aliased) cols_aliased = TRUE;
       else if(!rows_aliased && cols_aliased) rows_aliased = TRUE;
 
-      if(rows_aliased)	
-	  num_alias_r = (int) ceil((double)num_row/(double)alias_size);
+      if(rows_aliased)  
+          num_alias_r = (int) ceil((double)num_row/(double)alias_size);
       else num_alias_r = num_row;
 
       if(cols_aliased) 
-	  num_alias_c = (int) ceil((double)num_col/(double)alias_size);
+          num_alias_c = (int) ceil((double)num_col/(double)alias_size);
       else num_alias_c = num_col;
 
     }
@@ -277,11 +243,11 @@ void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, in
 
     /* setup lines to be of the proper size and shape */
     fprintf(fp, "%g setlinewidth %d setlinecap %d setlinejoin %d setgray\n",
-	    blk_size, LINCAP, LINJIN, GREYLV);
+            blk_size, LINCAP, LINJIN, GREYLV);
 
     /* dump the line definition */
     fprintf(fp, "/L {2 copy moveto exch %g add exch lineto stroke} def\n",
-	    blk_size);
+            blk_size);
 
   }
   else if(type == UPDATE) {
@@ -291,7 +257,7 @@ void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, in
 
     /* write a block in the (row, col) position
     dump_line(fp, OFFSETX+(blk_size*(double)col), 
-	      OFFSETY+IMAGEY-(blk_size*(double)row)-blk_size/2.0, blk_size); */
+              OFFSETY+IMAGEY-(blk_size*(double)row)-blk_size/2.0, blk_size); */
 
     /* set the corresponding flag in the aliased matrix
        - floor of index divided by alias size */
@@ -309,17 +275,17 @@ void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, in
        (at least for lower resolution) */
     for(i = 0; i < num_alias_r; i++) {
       for(j = 0; j < num_alias_c; j++) {
-	if(aliased_matrix[i][j] == '1') {
-	  dump_line(fp, OFFSETX+(blk_size*(double)j), 
-		    OFFSETY+IMAGEY-(blk_size*(double)i)-blk_size/2.0, 
-		    blk_size);
-	}
+        if(aliased_matrix[i][j] == '1') {
+          dump_line(fp, OFFSETX+(blk_size*(double)j), 
+                    OFFSETY+IMAGEY-(blk_size*(double)i)-blk_size/2.0, 
+                    blk_size);
+        }
       }
     }
 
     /* set up alias info string */
     sprintf(str, "     (matrix %dX%d, printed as %dX%d)",
-	    rows, cols, num_alias_r, num_alias_c);
+            rows, cols, num_alias_r, num_alias_c);
 
     dump_aldus_foot(fp, TRUE, argv, argc, TRUE, str);
     fclose(fp);

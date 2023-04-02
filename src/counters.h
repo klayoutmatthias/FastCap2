@@ -1,5 +1,6 @@
-#ifndef COUNTERS_H
-#define COUNTERS_H
+
+#if !defined(counters_H)
+#define counters_H
 
 struct Counters
 {

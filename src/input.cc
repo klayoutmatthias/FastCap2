@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "mulDisplay.h"
@@ -106,8 +72,8 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
         `BIT_LINE (GROUP3)' if it is in the third group
       - a string other than `GROUP<number>' may be specified for the
         group name using G line `G <group name>' just before the group to
-	be renamed; this is helpful when idenifying conductors to omit
-	from capacitance calculations using the -k option
+        be renamed; this is helpful when idenifying conductors to omit
+        from capacitance calculations using the -k option
 */
 static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, const char *list_file, int read_from_stdin)
 {
@@ -120,7 +86,7 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
   /* find the end of the current surface list */
   if(*surf_list != NULL) {
     for(cur_surf = *surf_list; cur_surf->next != NULL; 
-	cur_surf = cur_surf->next);
+        cur_surf = cur_surf->next);
   }
   
   /* attempt to open file list file */
@@ -137,27 +103,27 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
     linecnt++;
     if(tline[0] == 'C' || tline[0] == 'c') {
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf", 
-		file_name, &outer_perm, &tx, &ty, &tz) != 5) {
-	sys->error("read_list_file: bad conductor surface format, tline %d:\n%s\n",
-		   linecnt, tline);
+                file_name, &outer_perm, &tx, &ty, &tz) != 5) {
+        sys->error("read_list_file: bad conductor surface format, tline %d:\n%s\n",
+                   linecnt, tline);
       }
 
       /* check if end of chain of surfaces with same conductor numbers */
       end_of_chain = TRUE;
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %s", 
-		file_name, &outer_perm, &tx, &ty, &tz, plus) == 6) {
-	if(!strcmp(plus, "+")) end_of_chain = FALSE;
+                file_name, &outer_perm, &tx, &ty, &tz, plus) == 6) {
+        if(!strcmp(plus, "+")) end_of_chain = FALSE;
       }
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
         *surf_list = sys->heap.alloc<surface>(1, AMSC);
-	cur_surf = *surf_list;
+        cur_surf = *surf_list;
       }
       else {
         cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
-	cur_surf->next->prev = cur_surf;
-	cur_surf = cur_surf->next;
+        cur_surf->next->prev = cur_surf;
+        cur_surf = cur_surf->next;
       }
       
       cur_surf->type = CONDTR;
@@ -173,43 +139,43 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
 
       /* update group name if end of chain */
       if(end_of_chain) {
-	sprintf(group_name, "GROUP%d", ++group_cnt);
+        sprintf(group_name, "GROUP%d", ++group_cnt);
       }
 
       (*num_surf)++;
     }
     else if(tline[0] == 'B' || tline[0] == 'b') {
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf", 
-		file_name, &outer_perm, &inner_perm, &tx, &ty, &tz,
-		&rx, &ry, &rz) != 9) {
-	sys->error("read_list_file: bad thin conductor on dielectric interface surface format, line %d:\n%s\n",
-		   linecnt, tline);
+                file_name, &outer_perm, &inner_perm, &tx, &ty, &tz,
+                &rx, &ry, &rz) != 9) {
+        sys->error("read_list_file: bad thin conductor on dielectric interface surface format, line %d:\n%s\n",
+                   linecnt, tline);
       }
 
       /* check if end of chain of surfaces with same conductor numbers */
       end_of_chain = TRUE;
       ref_pnt_is_inside = FALSE;
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf %s", 
-		file_name, &outer_perm, &inner_perm, &tx, &ty, &tz, 
-		&rx, &ry, &rz, plus) 
-	 == 10) {
-	if(!strcmp(plus, "+")) end_of_chain = FALSE;
-	if(!strcmp(plus, "+-") || !strcmp(plus, "-+")) {
-	  end_of_chain = FALSE;
-	  ref_pnt_is_inside = TRUE;
-	}
-	if(!strcmp(plus, "-")) ref_pnt_is_inside = TRUE;
+                file_name, &outer_perm, &inner_perm, &tx, &ty, &tz, 
+                &rx, &ry, &rz, plus) 
+         == 10) {
+        if(!strcmp(plus, "+")) end_of_chain = FALSE;
+        if(!strcmp(plus, "+-") || !strcmp(plus, "-+")) {
+          end_of_chain = FALSE;
+          ref_pnt_is_inside = TRUE;
+        }
+        if(!strcmp(plus, "-")) ref_pnt_is_inside = TRUE;
       }
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
         *surf_list = sys->heap.alloc<surface>(1, AMSC);
-	cur_surf = *surf_list;
+        cur_surf = *surf_list;
       }
       else {
         cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
-	cur_surf->next->prev = cur_surf;
-	cur_surf = cur_surf->next;
+        cur_surf->next->prev = cur_surf;
+        cur_surf = cur_surf->next;
       }
       
       cur_surf->type = BOTH;
@@ -230,37 +196,37 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
 
       /* update group name if end of chain */
       if(end_of_chain) {
-	sprintf(group_name, "GROUP%d", ++group_cnt);
+        sprintf(group_name, "GROUP%d", ++group_cnt);
       }
 
       (*num_surf)++;
     }
     else if(tline[0] == 'D' || tline[0] == 'd') {
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf", 
-		file_name, &outer_perm, &inner_perm, &tx, &ty, &tz,
-		&rx, &ry, &rz) != 9) {
-	sys->error("read_list_file: bad dielectric interface surface format, line %d:\n%s\n",
-		   linecnt, tline);
+                file_name, &outer_perm, &inner_perm, &tx, &ty, &tz,
+                &rx, &ry, &rz) != 9) {
+        sys->error("read_list_file: bad dielectric interface surface format, line %d:\n%s\n",
+                   linecnt, tline);
       }
 
       /* check to see if reference point is negative side of surface */
       ref_pnt_is_inside = FALSE;
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf %s", 
-		file_name, &outer_perm, &inner_perm, &tx, &ty, &tz, 
-		&rx, &ry, &rz, plus) 
-	 == 10) {
-	if(!strcmp(plus, "-")) ref_pnt_is_inside = TRUE;
+                file_name, &outer_perm, &inner_perm, &tx, &ty, &tz, 
+                &rx, &ry, &rz, plus) 
+         == 10) {
+        if(!strcmp(plus, "-")) ref_pnt_is_inside = TRUE;
       }
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
         *surf_list = sys->heap.alloc<surface>(1, AMSC);
-	cur_surf = *surf_list;
+        cur_surf = *surf_list;
       }
       else {
         cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
-	cur_surf->next->prev = cur_surf;
-	cur_surf = cur_surf->next;
+        cur_surf->next->prev = cur_surf;
+        cur_surf = cur_surf->next;
       }
       
       cur_surf->type = DIELEC;
@@ -291,7 +257,7 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
       }
     }
     else if(tline[0] == '%' || tline[0] == '*' ||
-	    tline[0] == '#'); /* ignore comments */
+            tline[0] == '#'); /* ignore comments */
     else {
       sys->error("read_list_file: bad line format, line %d:\n%s\n",
                  linecnt, tline);
@@ -392,8 +358,8 @@ static void reassign_cond_numbers(ssystem *sys, charge *panel_list, NAME *name_l
     cond_num_found = FALSE;
     for(i = 0; i < num_cond; i++) {
       if(cur_panel->cond == cond_nums[i]) {
-	cond_num_found = TRUE;
-	break;
+        cond_num_found = TRUE;
+        break;
       }
     }
     if(!cond_num_found) cond_nums[num_cond++] = cur_panel->cond;
@@ -413,8 +379,8 @@ static void reassign_cond_numbers(ssystem *sys, charge *panel_list, NAME *name_l
   /* do the same for the name structs */
   for(cur_name = name_list; cur_name != NULL; cur_name = cur_name->next) {
     for(i = 0; 
-	i < num_cond && cur_name->patch_list->conductor_ID != cond_nums[i]; 
-	i++);
+        i < num_cond && cur_name->patch_list->conductor_ID != cond_nums[i]; 
+        i++);
     if(i == num_cond) {
       sys->error("reassign_cond_numbers: cant find conductor number in name list\n");
     }
@@ -507,7 +473,7 @@ void get_ps_file_base(ssystem *sys)
     }
   }
 
-  if(sys->ps_file_base == NULL) {	/* input must be stdin */
+  if(sys->ps_file_base == NULL) {       /* input must be stdin */
     sys->ps_file_base = sys->heap.strdup("stdin");
   }
 }
@@ -535,8 +501,8 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
         sys->error("read_panels: attempt to read stdin twice\n");
       }
       else {
-	stdin_read = TRUE;
-	fp = stdin;
+        stdin_read = TRUE;
+        fp = stdin;
       }
     }
     else if((fp = fopen(cur_surf->name, "r")) == NULL) {
@@ -550,28 +516,28 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
       sprintf(surf_name, "%%%s", cur_surf->group_name);
       panel_list = cur_panel 
           = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
-		     name_list, num_cond, surf_name);
+                     name_list, num_cond, surf_name);
       patran_file_read = patran_file;
       panel_group = cur_panel;
       name_group = sys->start_name;
     }
     else {
       if(cur_surf->prev->end_of_chain) {
-	sprintf(surf_name, "%%%s", cur_surf->group_name);
-	patran_file_read = FALSE;
+        sprintf(surf_name, "%%%s", cur_surf->group_name);
+        patran_file_read = FALSE;
       }
       cur_panel->next 
           = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
-		     name_list, num_cond, surf_name);
+                     name_list, num_cond, surf_name);
       if(!patran_file && patran_file_read) {
         sys->error("read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
       }
       patran_file_read = patran_file;
       cur_panel = cur_panel->next;
       if(cur_surf->prev->end_of_chain) {
-	/* if previous surface was the end of a chain, set up new group */
-	panel_group = cur_panel;
-	name_group = sys->start_name_this_time; /* not really used anymore */
+        /* if previous surface was the end of a chain, set up new group */
+        panel_group = cur_panel;
+        name_group = sys->start_name_this_time; /* not really used anymore */
       }
     }
     if(strcmp(cur_surf->name, "stdin") != 0) fclose(fp);
@@ -580,7 +546,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
 
     /* save the surface file's title */
     cur_surf->title = sys->heap.strdup(sys->title ? sys->title : "");
-    sys->title = 0;		/* not sure if needed */
+    sys->title = 0;             /* not sure if needed */
 
     /* if the surface is a DIELEC, make sure all conductor numbers are zero */
     /* - also link each panel to its surface */
@@ -612,7 +578,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
     }
 
     /*sys->msg("Surface %s has %d quads and %d tris\n",
-	    cur_surf->name, num_quads, num_tris);*/
+            cur_surf->name, num_quads, num_tris);*/
 
     cur_surf->num_panels = num_panels;
     cur_surf->num_dummies = num_dummies;
@@ -644,7 +610,7 @@ static int getUniqueCondNum(char *name, Name *name_list)
     for(j = 0; j < nlen; j++) name_frag[j] = cur_alias[j];
     name_frag[j] = '\0';
     if(!strcmp(name_frag, name)) {
-      times_in_list++;	/* increment times name in list count */
+      times_in_list++;  /* increment times name in list count */
       cond = i;
     }
     prev_name = cur_name;
@@ -685,13 +651,13 @@ static ITER *get_kill_num_list(ssystem *sys, Name *name_list, const char *kill_n
 
     /* loop until next comma or end of list */
     for(i = start_token; kill_name_list[i] != '\0' && kill_name_list[i] != ',';
-	i++);
+        i++);
     end_token = i;
 
     /* extract the name%group_name string */
     /*   copy the name */
     for(i = start_token, j = 0; i < end_token; i++, j++) 
-	name[j] = kill_name_list[i];
+        name[j] = kill_name_list[i];
     name[j] = '\0';
 
     /* attempt to get conductor number from name and group_name */
@@ -746,10 +712,10 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
   sys->axeslen = DEFAXE;             /* length of axes lines in 3d */
   sys->up_axis = DEFUAX;             /* upward-pointing axis in 2d image */
   sys->line_file = NULL;             /* file of lines/arrows in .fig format */
-  sys->qpic_num_list = NULL;		/* list of cond nums to get shaded plots for */
-  sys->qpic_name_list = NULL;	/* list of cond names to get shaded plots */
-  sys->kq_num_list = NULL;		/* list of cond nums in shaded plots */
-  sys->kq_name_list = NULL;		/* list of cond names in shaded plots */
+  sys->qpic_num_list = NULL;            /* list of cond nums to get shaded plots for */
+  sys->qpic_name_list = NULL;   /* list of cond names to get shaded plots */
+  sys->kq_num_list = NULL;              /* list of cond nums in shaded plots */
+  sys->kq_name_list = NULL;             /* list of cond names in shaded plots */
   sys->s_ = sys->n_ = sys->g_ = sys->c_ = sys->x_ = sys->k_ = false;
   sys->rc_ = sys->rd_ = sys->rb_ = sys->q_ = sys->rk_ = sys->m_ = false;
   sys->f_ = sys->dd_ = false;
@@ -758,43 +724,43 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
   sys->kill_num_list = sys->kinp_num_list = NULL;
   sys->kill_name_list = sys->kinp_name_list = NULL;
   cmderr = FALSE;
-  chkp = &chk;			/* pointers for error checking */
+  chkp = &chk;                  /* pointers for error checking */
 
   for(i = 1; i < argc && cmderr == FALSE; i++) {
     if(argv[i][0] == '-') {
       if(argv[i][1] == 'o') {
-	*numMom = (int) strtol(&(argv[i][2]), chkp, 10);
-	if(*chkp == &(argv[i][2]) || *numMom < 0) {
-	  sys->info("%s: bad expansion order `%s'\n",
-		  argv[0], &argv[i][2]);
-	  cmderr = TRUE;
-	  break;
-	}
-	else *autmom = OFF;
+        *numMom = (int) strtol(&(argv[i][2]), chkp, 10);
+        if(*chkp == &(argv[i][2]) || *numMom < 0) {
+          sys->info("%s: bad expansion order `%s'\n",
+                  argv[0], &argv[i][2]);
+          cmderr = TRUE;
+          break;
+        }
+        else *autmom = OFF;
       }
       else if(argv[i][1] == 'd' && argv[i][2] == 'c') {
         sys->dd_ = true;
       }
       else if(argv[i][1] == 'd') {
-	*numLev = (int) strtol(&(argv[i][2]), chkp, 10);
-	if(*chkp == &(argv[i][2]) || *numLev < 0) {
-	  sys->info("%s: bad partitioning depth `%s'\n",
-		  argv[0], &argv[i][2]);
-	  cmderr = TRUE;
-	  break;
-	}
-	else *autlev = OFF;
+        *numLev = (int) strtol(&(argv[i][2]), chkp, 10);
+        if(*chkp == &(argv[i][2]) || *numLev < 0) {
+          sys->info("%s: bad partitioning depth `%s'\n",
+                  argv[0], &argv[i][2]);
+          cmderr = TRUE;
+          break;
+        }
+        else *autlev = OFF;
       }
       else if(argv[i][1] == 'p') {
-	if(sscanf(&(argv[i][2]), "%lf", relperm) != 1) cmderr = TRUE;
-	else if(*relperm <= 0.0) cmderr = TRUE;
-	if(cmderr) {
-	  sys->info("%s: bad permittivity `%s'\n", argv[0], &argv[i][2]);
-	  break;
-	}
+        if(sscanf(&(argv[i][2]), "%lf", relperm) != 1) cmderr = TRUE;
+        else if(*relperm <= 0.0) cmderr = TRUE;
+        if(cmderr) {
+          sys->info("%s: bad permittivity `%s'\n", argv[0], &argv[i][2]);
+          break;
+        }
       }
       else if(argv[i][1] == 'l') {
-	*surf_list_file = &(argv[i][2]);
+        *surf_list_file = &(argv[i][2]);
       }
       else if(argv[i][1] == 'r' && argv[i][2] == 's') {
         sys->kill_name_list = &(argv[i][3]);
@@ -803,7 +769,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
         sys->kinp_name_list = &(argv[i][3]);
       }
       else if(argv[i][1] == '\0') {
-	*read_from_stdin = TRUE;
+        *read_from_stdin = TRUE;
       }
       else if(argv[i][1] == 'f') {
         sys->f_ = true;
@@ -915,11 +881,11 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
       }
       else {
         sys->info("%s: illegal option -- %s\n", argv[0], &(argv[i][1]));
-	cmderr = TRUE;
-	break;
+        cmderr = TRUE;
+        break;
       }
     }
-    else {			/* isn't an option, must be the input file */
+    else {                      /* isn't an option, must be the input file */
       *input_file = argv[i];
     }
   }
@@ -1004,7 +970,7 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
   strcpy(group_name, "GROUP1");
   if(read_from_stdin || (input_file == NULL && surf_list_file == NULL)) {
     surf_list = sys->heap.alloc<surface>(1, AMSC);
-    surf_list->type = CONDTR;	/* only conductors can come in stdin */
+    surf_list->type = CONDTR;   /* only conductors can come in stdin */
     surf_list->name = sys->heap.strdup("stdin");
     surf_list->outer_perm = relperm;
     surf_list->end_of_chain = TRUE;
@@ -1071,10 +1037,10 @@ static surface *input_surfaces(ssystem *sys, int *autmom, int *autlev, double *r
   read_from_stdin = FALSE;
 
   parse_command_line(sys, autmom, autlev, relperm, numMom, numLev,
-		     &input_file, &surf_list_file, &read_from_stdin);
+                     &input_file, &surf_list_file, &read_from_stdin);
 
   return(read_all_surfaces(sys, input_file, surf_list_file,
-			   read_from_stdin, infile, *relperm));
+                           read_from_stdin, infile, *relperm));
 }
 
 /*
@@ -1098,29 +1064,29 @@ static void dumpSurfDat(ssystem *sys, surface *surf_list)
       sys->msg(", conductor\n");
       sys->msg("      title: `%s'\n", cur_surf->title);
       sys->msg("      outer permittivity: %g\n",
-	      cur_surf->outer_perm);
+              cur_surf->outer_perm);
     }
     else if(cur_surf->type == DIELEC) {
       sys->msg(", dielectric interface\n");
       sys->msg("      title: `%s'\n", cur_surf->title);
       sys->msg("      permittivities: %g (inner) %g (outer)\n",
-	      cur_surf->inner_perm, cur_surf->outer_perm);
+              cur_surf->inner_perm, cur_surf->outer_perm);
     }
     else if(cur_surf->type == BOTH) {
       sys->msg(", thin conductor on dielectric interface\n");
       sys->msg("      title: `%s'\n", cur_surf->title);
       sys->msg("      permittivities: %g (inner) %g (outer)\n",
-	      cur_surf->inner_perm, cur_surf->outer_perm);
+              cur_surf->inner_perm, cur_surf->outer_perm);
     }
     else {
       sys->error("dumpSurfDat: bad surface type\n");
     }
     sys->msg("      number of panels: %d\n",
-	    cur_surf->num_panels - cur_surf->num_dummies);
+            cur_surf->num_panels - cur_surf->num_dummies);
     sys->msg("      number of extra evaluation points: %d\n",
-	    cur_surf->num_dummies);
+            cur_surf->num_dummies);
     sys->msg("      translation: (%g %g %g)\n",
-	    cur_surf->trans[0], cur_surf->trans[1], cur_surf->trans[2]);
+            cur_surf->trans[0], cur_surf->trans[1], cur_surf->trans[2]);
 
   }
 }
@@ -1148,17 +1114,17 @@ static void remove_name(ssystem *sys, Name **name_list, int num)
 
       /* overwrite aliases */
       for(cur_alias = cur_name->alias_list; cur_alias != NULL;
-	  cur_alias = cur_alias->next) {
-	if(strlen(cur_alias->name) < (size_t)slen) {
-	  cur_alias->name = sys->heap.alloc<char>(slen+1, AMSC);
-	}
-	strcpy(cur_alias->name, str);
+          cur_alias = cur_alias->next) {
+        if(strlen(cur_alias->name) < (size_t)slen) {
+          cur_alias->name = sys->heap.alloc<char>(slen+1, AMSC);
+        }
+        strcpy(cur_alias->name, str);
       }
     }
   }
 
 }
-	
+        
 /*
   removes (unlinks from linked list) panels that are on conductors to delete
 */
@@ -1172,11 +1138,11 @@ static void remove_conds(ssystem *sys, charge **panels, ITER *num_list, Name **n
     if(cur_panel->dummy) continue;
     if(cur_panel->surf->type == CONDTR || cur_panel->surf->type == BOTH) {
       if(want_this_iter(num_list, cur_panel->cond)) {
-	/* panel's conductor is to be removed, so unlink the panel */
-	/* - if panel to be removed is first panel, rewrite head pointer */
-	if(cur_panel == *panels) *panels = cur_panel->next;
-	/* - otherwise bypass cur_panel with next pointers */
-	else prev_panel->next = cur_panel->next;
+        /* panel's conductor is to be removed, so unlink the panel */
+        /* - if panel to be removed is first panel, rewrite head pointer */
+        if(cur_panel == *panels) *panels = cur_panel->next;
+        /* - otherwise bypass cur_panel with next pointers */
+        else prev_panel->next = cur_panel->next;
       }
       else prev_panel = cur_panel;
     }
@@ -1246,12 +1212,12 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
 
   /* read the conductor and dielectric interface surface files, parse cmds */
   surf_list = input_surfaces(sys, autmom, autlev, relperm,
-			     numMom, numLev, infile);
+                             numMom, numLev, infile);
 
   if(*autmom == ON) *numMom = DEFORD;
 
   if (sys->dirsol || sys->expgcr) {
-    *numLev = 0;	       	/* put all the charges in first cube */
+    *numLev = 0;                /* put all the charges in first cube */
     *autlev = OFF;
   }
 
@@ -1260,7 +1226,7 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
           sys->argv[0], VERSION, hostname, infile);
 
   /* input the panels from the surface files */
-  *num_cond = 0;		/* initialize conductor count */
+  *num_cond = 0;                /* initialize conductor count */
   chglist = read_panels(sys, surf_list, name_list, num_cond);
 
   /* set up the lists of conductors to remove from solve list */

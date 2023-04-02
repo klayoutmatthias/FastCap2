@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "mulDisplay.h"
@@ -54,7 +20,7 @@ double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int ca
          centers (only if using two-point flux-den-diff evaluations) */
     for(i=0; i < numchgs; i++) { 
       if (NUMDPT == 2) {
-        if(chgs[i]->dummy);	/* don't check surface of a dummy */
+        if(chgs[i]->dummy);     /* don't check surface of a dummy */
         else if(chgs[i]->surf->type == DIELEC || chgs[i]->surf->type == BOTH)
             continue;
       }
@@ -65,7 +31,7 @@ double **Q2PDiag(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, int ca
         }
         if(!is_dummy[j]) mat[i][j] = calcp(sys,
                                            chgs[j], chgs[i]->x, chgs[i]->y,
-					   chgs[i]->z, NULL);
+                                           chgs[i]->z, NULL);
       }
     }
   }
@@ -88,17 +54,17 @@ double **Q2P(ssystem *sys, charge **qchgs, int numqchgs, int *is_dummy, charge *
     if(calc) {
       /* exclude:
          - dummy panels in the charge list
-	 - dielectric i/f panels in the eval list (if doing 2-point E's)*/
+         - dielectric i/f panels in the eval list (if doing 2-point E's)*/
       if (NUMDPT == 2) {
-        if(pchgs[i]->dummy);	/* don't check the surface of a dummy */
+        if(pchgs[i]->dummy);    /* don't check the surface of a dummy */
         else if(pchgs[i]->surf->type == DIELEC || pchgs[i]->surf->type == BOTH)
             continue;
       }
       for(j=0; j < numqchgs; j++) { /* only dummy panels in the charge list */
-	if(!is_dummy[j])          /* (not the eval list) are excluded */
-	    mat[i][j] = calcp(sys,
-			      qchgs[j], pchgs[i]->x, pchgs[i]->y,
-			      pchgs[i]->z, NULL); /* old: pchgs[i],qchgs[j] */
+        if(!is_dummy[j])          /* (not the eval list) are excluded */
+            mat[i][j] = calcp(sys,
+                              qchgs[j], pchgs[i]->x, pchgs[i]->y,
+                              pchgs[i]->z, NULL); /* old: pchgs[i],qchgs[j] */
       }
     }
   }
@@ -136,10 +102,10 @@ double **Q2Pfull(ssystem *sys, cube *directlist, int numchgs)
       toq = fromq + pq->upnumeles[0];
 
       for(i = fromp; i < top; i++) {
-	for(j = fromq; j < toq; j++) { 
-	  eval = qchgs[j-fromq];
-	  mat[i][j] = calcp(sys, pchgs[i-fromp],eval->x, eval->y, eval->z, NULL);
-	}
+        for(j = fromq; j < toq; j++) { 
+          eval = qchgs[j-fromq];
+          mat[i][j] = calcp(sys, pchgs[i-fromp],eval->x, eval->y, eval->z, NULL);
+        }
       }
 
     }
@@ -165,7 +131,7 @@ double **ludecomp(ssystem *sys, double **matin, int size, int allocate)
   }
   else mat = matin;
 
-  for(k = 0; k < size-1; k++) {	/* loop on rows */
+  for(k = 0; k < size-1; k++) { /* loop on rows */
     if(mat[k][k] == 0.0) {
       sys->error("ludecomp: zero piovt\n");
     }
@@ -173,8 +139,8 @@ double **ludecomp(ssystem *sys, double **matin, int size, int allocate)
       factor = (mat[i][k] /= mat[k][k]);
       counters.fulldirops++;
       for(j = k+1; j < size; j++) { /* loop on remaining columns */
-	mat[i][j] -= (factor*mat[k][j]);
-	counters.fulldirops++;
+        mat[i][j] -= (factor*mat[k][j]);
+        counters.fulldirops++;
       }
     }
   }
@@ -192,7 +158,7 @@ void solve(double **mat, double *x, double *b, int size)
   if(x != b) for(i = 0; i < size; i++) x[i] = b[i];
 
   /* forward elimination */
-  for(i = 0; i < size; i++) {	/* loop on pivot row */
+  for(i = 0; i < size; i++) {   /* loop on pivot row */
     for(j = i+1; j < size; j++) { /* loop on elimnation row */
       x[j] -= mat[j][i]*x[i];
       counters.fulldirops++;
@@ -200,7 +166,7 @@ void solve(double **mat, double *x, double *b, int size)
   }
 
   /* back substitution */
-  for(i--; i > -1; i--) {		/* loop on rows */
+  for(i--; i > -1; i--) {               /* loop on rows */
     for(j = i+1; j < size; j++) { /* loop on columns */
       x[i] -= mat[i][j]*x[j];
       counters.fulldirops++;
@@ -227,8 +193,8 @@ void invert(double **mat, int size, int *reorder)
     for(j = i+1; j < size; j++) {
       nextbest = ABS(mat[i][j]);
       if(nextbest > bestval) {
-	best = j;
-	bestval = nextbest;
+        best = j;
+        bestval = nextbest;
       }
     }
 
@@ -236,11 +202,11 @@ void invert(double **mat, int size, int *reorder)
     if(reorder != NULL) {
       reorder[i] = best;
       if(best != i) {
-	for(k=0; k < size; k++) {
-	  bestval = mat[k][best];
-	  mat[k][best] = mat[k][i];
-	  mat[k][i] = bestval;
-	}
+        for(k=0; k < size; k++) {
+          bestval = mat[k][best];
+          mat[k][best] = mat[k][i];
+          mat[k][i] = bestval;
+        }
       }
     }
 
@@ -254,11 +220,11 @@ void invert(double **mat, int size, int *reorder)
     /* Fix the backward columns. */
     for(j=0; j < size; j++) {
       if(j != i) {
-	multiplier = -mat[i][j];
-	for(k=0; k < size; k++) {
-	  if(k != i) mat[k][j] += mat[k][i] * multiplier;
-	  else mat[k][j] = mat[k][i] * multiplier;
-	}
+        multiplier = -mat[i][j];
+        for(k=0; k < size; k++) {
+          if(k != i) mat[k][j] += mat[k][i] * multiplier;
+          else mat[k][j] = mat[k][i] * multiplier;
+        }
       }
     }
   }
@@ -267,11 +233,11 @@ void invert(double **mat, int size, int *reorder)
   if(reorder != NULL) {
     for(i=size-2; i >= 0; i--) {
       if(reorder[i] != i) {
-	for(k=0; k < size; k++) {
-	  bestval = mat[k][i];
-	  mat[k][reorder[i]] = mat[k][i];
-	  mat[k][i] = bestval;
-	}
+        for(k=0; k < size; k++) {
+          bestval = mat[k][i];
+          mat[k][reorder[i]] = mat[k][i];
+          mat[k][i] = bestval;
+        }
       }
     }
   }
@@ -308,7 +274,7 @@ int compressMat(ssystem *sys, double **mat, int size, int *is_dummy, int comp_ro
     for(i = 0; i < cur_order_size; i++) {
       if((k = cur_order[i]) == i) continue; /* if not reordered */
       for(j = 0; j < size; j++) { /* copy the row to its new location */
-	mat[i][j] = mat[k][j];
+        mat[i][j] = mat[k][j];
       }
     }
   }
@@ -317,7 +283,7 @@ int compressMat(ssystem *sys, double **mat, int size, int *is_dummy, int comp_ro
     for(j = 0; j < cur_order_size; j++) {
       if((k = cur_order[j]) == j) continue; /* if not reordered */
       for(i = 0; i < size; i++) { /* copy the col to its new location */
-	mat[i][j] = mat[i][k];
+        mat[i][j] = mat[i][k];
       }
     }
   }
@@ -338,12 +304,12 @@ void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_row
     next_rc = comp_size - 1;
     /* add rows to the matrix starting from the bottom */
     for(i = size - 1; i >= 0; i--) {
-      if(is_dummy[i]) {		/* zero out dummy row */
-	for(j = 0; j < size; j++) mat[i][j] = 0.0;
+      if(is_dummy[i]) {         /* zero out dummy row */
+        for(j = 0; j < size; j++) mat[i][j] = 0.0;
       }
-      else {			/* copy the row from its compressed location */
-	for(j = 0; j < size; j++) mat[i][j] = mat[next_rc][j];
-	next_rc--;
+      else {                    /* copy the row from its compressed location */
+        for(j = 0; j < size; j++) mat[i][j] = mat[next_rc][j];
+        next_rc--;
       }
     }
   }
@@ -351,12 +317,12 @@ void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_row
     next_rc = comp_size - 1;
     /* add columns to the matrix starting from the right */
     for(j = size - 1; j >= 0; j--) {
-      if(is_dummy[j]) {		/* zero out dummy column */
-	for(i = 0; i < size; i++) mat[i][j] = 0.0;
+      if(is_dummy[j]) {         /* zero out dummy column */
+        for(i = 0; i < size; i++) mat[i][j] = 0.0;
       }
-      else {			/* copy the col from its compressed location */
-	for(i = 0; i < size; i++) mat[i][j] = mat[i][next_rc];
-	next_rc--;
+      else {                    /* copy the col from its compressed location */
+        for(i = 0; i < size; i++) mat[i][j] = mat[i][next_rc];
+        next_rc--;
       }
     }
   }
@@ -374,14 +340,14 @@ static void matcheck(double **mat, int rows, int size)
   for(i = rows - 1; i >= 0; i--) {
     for(rowsum = 0.0, j = size - 1; j >= 0; j--) {
       if((i != j)  && (mat[i][j] > 0.0)) {
-	printf("violation mat[%d][%d] =%g\n", i, j, mat[i][j]);
+        printf("violation mat[%d][%d] =%g\n", i, j, mat[i][j]);
       }
       if(i != j) rowsum += ABS(mat[i][j]);
     }
     printf("row %d diag=%g rowsum=%g\n", i, mat[i][i], rowsum);
     if(rowsum > mat[i][i]) {
       for(j = size - 1; j >= 0; j--) {
-	printf("col%d = %g ", j, mat[i][j]);
+        printf("col%d = %g ", j, mat[i][j]);
       }
       printf("\n");
     }

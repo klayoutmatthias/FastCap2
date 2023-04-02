@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
@@ -66,10 +32,10 @@ void dissimpcube(ssystem *sys, cube *pc)
 {
   sys->msg("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
   sys->msg("index=%d dindex=%d level=%d loc_exact=%d mul_exact=%d numkids=%d\n",
-	 pc->index, pc->dindex, pc->level,
-	 pc->loc_exact, pc->mul_exact, pc->numkids);
+         pc->index, pc->dindex, pc->level,
+         pc->loc_exact, pc->mul_exact, pc->numkids);
   sys->msg("numnbrs=%d upnumvects=%d directnumvects=%d downnumvects=%d\n",
-	 pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
+         pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
 }
 
 void discube(ssystem *sys, cube *pc)
@@ -77,10 +43,10 @@ void discube(ssystem *sys, cube *pc)
   int i;
   sys->msg("cube center: x=%g y=%g z=%g\n", pc->x, pc->y, pc->z);
   sys->msg("index=%d dindex=%d level=%d loc_exact=%d mul_exact=%d numkids=%d\n",
-	 pc->index, pc->dindex, pc->level,
-	 pc->loc_exact, pc->mul_exact, pc->numkids);
+         pc->index, pc->dindex, pc->level,
+         pc->loc_exact, pc->mul_exact, pc->numkids);
   sys->msg("numnbrs=%d upnumvects=%d directnumvects=%d downnumvects=%d\n",
-	 pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
+         pc->numnbrs, pc->upnumvects, pc->directnumvects, pc->downnumvects);
   if(pc->directnumvects > 0) {
     sys->msg("num of elements in ");
     for(i=0; i < pc->directnumvects; i++) {
@@ -117,20 +83,20 @@ void dissys(ssystem *sys)
 {
 int i, j, k, l, side;
   sys->msg("side=%d depth=%d order=%d\n",
-	 sys->side, sys->depth, sys->order);
+         sys->side, sys->depth, sys->order);
   sys->msg("Cube corner is x=%g y=%g z=%g\n", sys->minx, sys->miny, sys->minz);
   sys->msg("Cube side length= %g\n", sys->length);
   sys->msg("Printing all the cubes\n");
   for(i = 0, side = 1; i <= sys->depth; i++, side *= 2) {
     for(j=0; j < side; j++) {
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
-	  if (sys->cubes[i][j][k][l]) {
-	    sys->msg("\ncubes[%d][%d][%d][%d]\n", i, j, k, l);
-	    dissimpcube(sys, sys->cubes[i][j][k][l]);
+        for(l=0; l < side; l++) {
+          if (sys->cubes[i][j][k][l]) {
+            sys->msg("\ncubes[%d][%d][%d][%d]\n", i, j, k, l);
+            dissimpcube(sys, sys->cubes[i][j][k][l]);
 /*          disdirectcube(sys, &(sys->cubes[i][j][k][l])); */
-	  }
-	}
+          }
+        }
       }
     }
   }
@@ -222,7 +188,7 @@ static void dumpChgs(ssystem *sys, charge **chgs, int numchgs, double x, double 
   double rho, cosA, beta;
   for(i = 0; i < numchgs; i++) {
     xyz2sphere(chgs[i]->x, chgs[i]->y, chgs[i]->z,
-	       x, y, z, &rho, &cosA, &beta);
+               x, y, z, &rho, &cosA, &beta);
     sys->msg("    %d %d ", chgs[i]->index, chgs[i]->cond);
     if(rho < 0) sys->msg("(%.5e ", rho);
     else sys->msg("( %.5e ", rho);
@@ -249,9 +215,9 @@ void dumpChgsWDummy(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   double rho, cosA, beta;
   for(i = 0; i < numchgs; i++) {
     xyz2sphere(chgs[i]->x, chgs[i]->y, chgs[i]->z,
-	       x, y, z, &rho, &cosA, &beta);
+               x, y, z, &rho, &cosA, &beta);
     sys->msg("    %d %d(%d) %d ", chgs[i]->index, is_dummy[i], 
-	    chgs[i]->dummy, chgs[i]->cond);
+            chgs[i]->dummy, chgs[i]->cond);
     if(rho < 0) sys->msg("(%.5e ", rho);
     else sys->msg("( %.5e ", rho);
     if(cosA < 0) sys->msg("%.5e ", cosA);
@@ -275,7 +241,7 @@ void dispQ2M(ssystem *sys, double **mat, charge **chgs, int numchgs, double x, d
   sys->msg("\nQ2M MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(sys, mat, multerms(order), numchgs);
   sys->msg(
-	  "    CHARGES IN CUBE # cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
+          "    CHARGES IN CUBE # cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
   dumpChgs(sys, chgs, numchgs, x, y, z);
 }
 
@@ -286,7 +252,7 @@ void dispM2L(ssystem *sys, double **mat, double x, double y, double z, double xp
 {
   sys->msg(
    "\nM2L MATRIX: multi at (%.5e %.5e %.5e) -> local at (%.5e %.5e %.5e)\n",
-	  x, y, z, xp, yp, zp);
+          x, y, z, xp, yp, zp);
   dumpMat(sys, mat, multerms(order), multerms(order));
 }
 
@@ -298,7 +264,7 @@ void dispQ2L(ssystem *sys, double **mat, charge **chgs, int numchgs, double x, d
   sys->msg("\nQ2L MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(sys, mat, multerms(order), numchgs);
   sys->msg(
-	  "    CHARGES IN CUBE # cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
+          "    CHARGES IN CUBE # cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
   dumpChgs(sys, chgs, numchgs, x, y, z);
 }
 
@@ -310,10 +276,10 @@ void dispQ2P(ssystem *sys, double **mat, charge **chgs, int numchgs, int *is_dum
   sys->msg("\nQ2P MATRIX:\n");
   dumpMat(sys, mat, numpchgs, numchgs);
   sys->msg(
-	  "    PANELS IN CUBE # dummy(real) cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
+          "    PANELS IN CUBE # dummy(real) cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
   dumpChgsWDummy(sys, chgs, numchgs, is_dummy, 0.0, 0.0, 0.0);
   sys->msg(
-	  "    EVALS IN CUBE # cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
+          "    EVALS IN CUBE # cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
   dumpChgs(sys, pchgs, numpchgs, 0.0, 0.0, 0.0);
 }
 
@@ -325,7 +291,7 @@ void dispQ2PDiag(ssystem *sys, double **mat, charge **chgs, int numchgs, int *is
   sys->msg("\nQ2PDiag MATRIX:\n");
   dumpMat(sys, mat, numchgs, numchgs);
   sys->msg(
-	  "    PANELS IN CUBE # dummy(real) cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
+          "    PANELS IN CUBE # dummy(real) cond (rho_i cos(alpha_i) beta_i) (x y z):\n");
   dumpChgsWDummy(sys, chgs, numchgs, is_dummy, 0.0, 0.0, 0.0);
 }
 
@@ -336,7 +302,7 @@ void dispM2M(ssystem *sys, double **mat, double x, double y, double z, double xp
 {
   sys->msg(
       "\nM2M MATRIX: cube at (%.5e %.5e %.5e) shifted to (%.5e %.5e %.5e)\n", 
-	  x, y, z, xp, yp, zp);
+          x, y, z, xp, yp, zp);
   dumpMat(sys, mat, multerms(order), multerms(order));
 }
 
@@ -347,7 +313,7 @@ void dispL2L(ssystem *sys, double **mat, double x, double y, double z, double xp
 {
   sys->msg(
       "\nL2L MATRIX: cube at (%.5e %.5e %.5e) shifted to (%.5e %.5e %.5e)\n", 
-	  x, y, z, xp, yp, zp);
+          x, y, z, xp, yp, zp);
   dumpMat(sys, mat, multerms(order), multerms(order));
 }
 
@@ -359,7 +325,7 @@ void dispM2P(ssystem *sys, double **mat, double x, double y, double z, charge **
   sys->msg("\nM2P MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(sys, mat, numchgs, multerms(order));
   sys->msg(
-	  "    EVAL PNTS IN CUBE # cond (rho_i, cos(alpha_i), beta_i):\n");
+          "    EVAL PNTS IN CUBE # cond (rho_i, cos(alpha_i), beta_i):\n");
   dumpChgs(sys, chgs, numchgs, x, y, z);
 }
 
@@ -371,7 +337,7 @@ void dispL2P(ssystem *sys, double **mat, double x, double y, double z, charge **
   sys->msg("\nL2P MATRIX: cube at (%.5e %.5e %.5e)\n", x, y, z);
   dumpMat(sys, mat, numchgs, multerms(order));
   sys->msg(
-	  "    EVAL PNTS IN CUBE # cond (rho_i, cos(alpha_i), beta_i):\n");
+          "    EVAL PNTS IN CUBE # cond (rho_i, cos(alpha_i), beta_i):\n");
   dumpChgs(sys, chgs, numchgs, x, y, z);
 }
 
@@ -383,12 +349,12 @@ static void dumpUpVecs(ssystem *sys, cube *pc)
   int i, j;
   sys->msg(
     "\nUPWARD PASS/MOMENT VECTORS, LEVEL %d CUBE AT (%.5e %.5e %.5e):\n",
-	  pc->level, pc->x, pc->y, pc->z);
+          pc->level, pc->x, pc->y, pc->z);
   for(i = 0; i < pc->upnumvects; i++) {
     sys->msg("%d", i);
     for(j = 0; j < pc->upnumeles[i]; j++) {
       if(pc->upvects[i][j] < 0.0) 
-	  sys->msg(" %.5e", pc->upvects[i][j]);
+          sys->msg(" %.5e", pc->upvects[i][j]);
       else sys->msg("  %.5e", pc->upvects[i][j]);
     }
     sys->msg("\n");
@@ -424,7 +390,7 @@ void dumpLevOneUpVecs(ssystem *sys)
 void chkList(ssystem *sys, int listtype)
 /* int listtype: DIRECT, LOCAL or EVAL */
 {
-  int cnt[BUFSIZ];		/* # of cubes processed by level */
+  int cnt[BUFSIZ];              /* # of cubes processed by level */
   int depth = sys->depth;
   int lev, nn;
   int i, j;
@@ -437,12 +403,12 @@ void chkList(ssystem *sys, int listtype)
     nn = nc->numnbrs;
     for(i = 0; i < nn; i++) {
       if(lev != ((nc->nbrs)[i])->level) {
-	sys->info("chkList: level %d cube has a level %d nbr\n", lev,
-		((nc->nbrs)[i])->level);
-	sys->info(" ok cubes ");
-	for(j = 0; j <= depth; j++) sys->info("lev%d: %d ", j, cnt[j]);
-	sys->info("\n");
-	sys->error("List check error - see previous messages for details");
+        sys->info("chkList: level %d cube has a level %d nbr\n", lev,
+                ((nc->nbrs)[i])->level);
+        sys->info(" ok cubes ");
+        for(j = 0; j <= depth; j++) sys->info("lev%d: %d ", j, cnt[j]);
+        sys->info("\n");
+        sys->error("List check error - see previous messages for details");
       }
     }
     /* check number of kids */
@@ -456,18 +422,18 @@ void chkList(ssystem *sys, int listtype)
     /* if lowest level, check status of eval and direct vects */
     if(lev == depth) {
       if(nc->dindex == 0 || nc->directnumeles == NULL) {
-	sys->info("chkList: level %d cube has bad direct info\n", lev);
-	sys->info(" ok cubes ");
-	for(j = 0; j <= depth; j++) sys->info("lev%d: %d ", j, cnt[j]);
-	sys->info("\n");
-	sys->error("List check error - see previous messages for details");
+        sys->info("chkList: level %d cube has bad direct info\n", lev);
+        sys->info(" ok cubes ");
+        for(j = 0; j <= depth; j++) sys->info("lev%d: %d ", j, cnt[j]);
+        sys->info("\n");
+        sys->error("List check error - see previous messages for details");
       }
       if(nc->evalnumvects == 0 && listtype == EVAL) {
-	sys->info("chkList: level %d cube has no eval info\n", lev);
-	sys->info(" ok cubes ");
-	for(j = 0; j <= depth; j++) sys->info("lev%d: %d ", j, cnt[j]);
-	sys->info("\n");
-	sys->error("List check error - see previous messages for details");
+        sys->info("chkList: level %d cube has no eval info\n", lev);
+        sys->info(" ok cubes ");
+        for(j = 0; j <= depth; j++) sys->info("lev%d: %d ", j, cnt[j]);
+        sys->info("\n");
+        sys->error("List check error - see previous messages for details");
       }
     }
     cnt[lev]++;
@@ -501,9 +467,9 @@ static void chkCube(ssystem *sys, cube *nc, int listtype)
     nn = nc->numnbrs;
     for(i = 0; i < nn; i++) {
       if(lev != ((nc->nbrs)[i])->level) {
-	sys->msg("chkCube: level %d cube has a level %d nbr\n", lev,
-		((nc->nbrs)[i])->level);
-/*	exit(0);*/
+        sys->msg("chkCube: level %d cube has a level %d nbr\n", lev,
+                ((nc->nbrs)[i])->level);
+/*      exit(0);*/
       }
     }
     /* check number of kids */
@@ -513,17 +479,17 @@ static void chkCube(ssystem *sys, cube *nc, int listtype)
     /* if lowest level, check status of eval and direct vects */
     if(lev == depth) {
       if(nc->dindex == 0) {
-	sys->msg("chkCube: level %d cube has zero direct index\n", lev);
+        sys->msg("chkCube: level %d cube has zero direct index\n", lev);
       }
       if(nc->directnumeles == NULL) {
-	sys->msg(
-		"chkCube: level %d cube has NULL directnumeles\n", lev);
+        sys->msg(
+                "chkCube: level %d cube has NULL directnumeles\n", lev);
       }
       if(nc->evalnumvects == 0 && listtype == EVAL) {
-	sys->msg("chkCube: level %d cube has no eval info\n", lev);
+        sys->msg("chkCube: level %d cube has no eval info\n", lev);
       }
       if(nc->eval == NULL && listtype == EVAL) {
-	sys->msg("chkCube: level %d cube has no eval pntr\n", lev);
+        sys->msg("chkCube: level %d cube has no eval pntr\n", lev);
       }
     }
   }
@@ -538,19 +504,19 @@ void chkLowLev(ssystem *sys, int listtype)
   int i, j, k, l, side, depth = sys->depth, cnt = 0;
   cube *nc, *****cubes = sys->cubes;
   for(i = 1, side = 1; i <= depth; i++, side *= 2);
-  for(j=0; j < side; j++) {	/* loop through all cubes at level depth */
+  for(j=0; j < side; j++) {     /* loop through all cubes at level depth */
     for(k=0; k < side; k++) {
       for(l=0; l < side; l++) {
-	nc = cubes[depth][j][k][l];
-	if(nc != NULL) {
-	  chkCube(sys, nc, listtype);
-	  cnt++;
-	}
+        nc = cubes[depth][j][k][l];
+        if(nc != NULL) {
+          chkCube(sys, nc, listtype);
+          cnt++;
+        }
       }
     }
   }
   sys->msg("Total lowest level (level %d) cubes checked = %d\n", 
-	  depth, cnt);
+          depth, cnt);
 }
 
 /*
@@ -562,9 +528,9 @@ void dump_face(FILE *fp, face *fac)
   face **behind = fac->behind;
 
   fprintf(fp, "Face %d, %d sides, depth %d, mark %d, greylev %g\n",
-	  fac->index, fac->numsides, fac->depth, fac->mark, fac->greylev);
+          fac->index, fac->numsides, fac->depth, fac->mark, fac->greylev);
   fprintf(fp, "  plane: n = (%g %g %g) rhs = %g\n",
-	  fac->normal[0], fac->normal[1], fac->normal[2], fac->rhs);
+          fac->normal[0], fac->normal[1], fac->normal[2], fac->rhs);
   fprintf(fp, "  behind [depth(index)]:");
   for(i = 0; i < fac->numbehind; i++) {
     fprintf(fp, " %d(%d)", behind[i]->depth, behind[i]->index);
@@ -628,7 +594,7 @@ void dumpSynop(ssystem *sys)
   for(i = 0; i <= depth; i++) excnt[i] = fcnt[i] = emcnt[i] = tcnt[i] = 0;
 
   sys->msg(
-	  "\nCUBE AND EXPANSION SYNOPSIS (full/mul_exact/empty/ttl):\n");
+          "\nCUBE AND EXPANSION SYNOPSIS (full/mul_exact/empty/ttl):\n");
   sys->msg("             ");
   for(i = 0; i <= depth; i++) {
     sprintf(str, "level%d ", i);
@@ -642,18 +608,18 @@ void dumpSynop(ssystem *sys)
   sys->msg("\n");
   /* dump cube usage by level */
   for(i = 0, side = 1; i <= depth; i++, side *= 2) {
-    for(j=0; j < side; j++) {	/* loop through all cubes at levels >= 0 */
+    for(j=0; j < side; j++) {   /* loop through all cubes at levels >= 0 */
       for(k=0; k < side; k++) {
-	for(l=0; l < side; l++) {
-	  nc = cubes[i][j][k][l];
-	  tcnt[i]++;
-	  if(nc != NULL) {
-	    lev = nc->level;
-	    fcnt[i]++;
-	    if(nc->mul_exact == TRUE) excnt[i]++;
-	  }
-	  else emcnt[i]++;
-	}
+        for(l=0; l < side; l++) {
+          nc = cubes[i][j][k][l];
+          tcnt[i]++;
+          if(nc != NULL) {
+            lev = nc->level;
+            fcnt[i]++;
+            if(nc->mul_exact == TRUE) excnt[i]++;
+          }
+          else emcnt[i]++;
+        }
       }
     }
   }
@@ -719,7 +685,7 @@ void dumpChgDen(FILE *fp, double *q, charge *chglist)
   for(panel = chglist; panel != NULL; panel = panel->next) {
     if(panel->dummy) continue;
     fprintf(fp, "%d\tq/A = %.5e %g", panel->index,
-	    q[panel->index]/panel->area, panel->area);
+            q[panel->index]/panel->area, panel->area);
     if(panel->surf->type == CONDTR) fprintf(fp, " CONDTR");
     if(panel->surf->type == DIELEC) fprintf(fp, " DIELEC");
     if(panel->surf->type == BOTH) fprintf(fp, " BOTH");
@@ -738,8 +704,8 @@ static void dumpMatCnts(ssystem *sys, int **mat, int depth, char *type)
   char str[BUFSIZ];
 
   sys->msg(
-	  "\n%s MATRIX BUILD TOTALS (row = from cube, col = to cube):\n", 
-	  type);
+          "\n%s MATRIX BUILD TOTALS (row = from cube, col = to cube):\n", 
+          type);
 
   for(i = 0; i <= depth; i++) {
     sprintf(str, " to %d ", i);
@@ -803,7 +769,7 @@ void dumpMatBldCnts(ssystem *sys)
 */
 void dumpConfig(ssystem *sys, FILE *fp, const char *name)
 {
-  int size = -1;		/* for '#define MAXITER size' case */
+  int size = -1;                /* for '#define MAXITER size' case */
 
   fprintf(fp, "\n%s CONFIGURATION FLAGS:\n", name);
 
@@ -853,13 +819,13 @@ void dumpConfig(ssystem *sys, FILE *fp, const char *name)
 
   fprintf(fp, "   MAXDEP");
   fprintf(fp, 
-	  " == %d (assume no more than %d partitioning levels are needed)\n",
-	  MAXDEP, MAXDEP);
+          " == %d (assume no more than %d partitioning levels are needed)\n",
+          MAXDEP, MAXDEP);
 
   fprintf(fp, "   NUMDPT");
   fprintf(fp, 
-	  " == %d (do %d potential evaluations for each dielectric panel)\n",
-	  NUMDPT, NUMDPT);
+          " == %d (do %d potential evaluations for each dielectric panel)\n",
+          NUMDPT, NUMDPT);
 
   fprintf(fp, " LINEAR SYSTEM SOLUTION CONFIGURATION\n");
 
@@ -873,15 +839,15 @@ void dumpConfig(ssystem *sys, FILE *fp, const char *name)
   fprintf(fp, "   PRECOND");
   if(PRECOND == BD) {
     fprintf(fp, 
-	    " == BD (use block diagonal preconditioner)\n");
+            " == BD (use block diagonal preconditioner)\n");
   }
   else if(PRECOND == OL) {
     fprintf(fp, 
-	    " == OL (use overlap preconditioner)\n");
+            " == OL (use overlap preconditioner)\n");
   }
   else if(PRECOND == NONE) {
     fprintf(fp, 
-	    " == NONE (no preconditioner)\n");
+            " == NONE (no preconditioner)\n");
   }
   else fprintf(fp, " == %d (not implemented - use BD, OL or NONE)\n", PRECOND);
 
@@ -900,12 +866,12 @@ void dumpConfig(ssystem *sys, FILE *fp, const char *name)
     fprintf(fp, " == size (for n panel system, do at most n iterations)\n");
   }
   else fprintf(fp, " == %d (stop after %d iterations if not converged)\n", 
-	  MAXITER, MAXITER);
+          MAXITER, MAXITER);
 
   fprintf(fp, "   EXRTSH");
   fprintf(fp, 
-	  " == %g (exact/ttl cubes > %g on lowest level => stop refinement)\n",
-	  EXRTSH, EXRTSH);
+          " == %g (exact/ttl cubes > %g on lowest level => stop refinement)\n",
+          EXRTSH, EXRTSH);
 }
 
 
@@ -917,8 +883,8 @@ static char *padName(char *tostr, char *frstr, int len)
   int i;
 
   for(i = 0; frstr[i] != '\0'; i++) tostr[i] = frstr[i];
-  if(i > len) tostr[len] = '\0';		/* truncate */
-  else {			/* pad */
+  if(i > len) tostr[len] = '\0';                /* truncate */
+  else {                        /* pad */
     for(; i < len; i++) tostr[i] = ' ';
     tostr[len] = '\0';
   }
@@ -952,8 +918,8 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
   char unit[BUFSIZ], name[BUFSIZ], cond_name[BUFSIZ];
 
   first_offd = TRUE;
-  minoffd = capmat[1][1];	/* this entry is always present */
-				/* - in the 1 cond case, assign is still ok */
+  minoffd = capmat[1][1];       /* this entry is always present */
+                                /* - in the 1 cond case, assign is still ok */
 
   /* set up symetrized matrix storage */
   sym_mat = sys->heap.alloc<double*>(numconds+1, AMSC);
@@ -981,41 +947,41 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
       if(want_this_iter(sys->kinp_num_list, j)) continue;
 
       if(j == i) {
-	sym_mat[i][i] = capmat[i][i];
-	continue;
+        sym_mat[i][i] = capmat[i][i];
+        continue;
       }
 
       /* if this column was not calculated and neither was the column
          with the same number as the current row, then symetrized mat has
-	 no entry at [i][j], [j][i] */
+         no entry at [i][j], [j][i] */
       j_killed = want_this_iter(sys->kill_num_list, j);
       if(i_killed && j_killed) continue;
 
       /* if this column was calculated but column with the same number
          as the current row wasnt, then symmetrized mat has unaveraged entry 
-	 at [i][j], [j][i] */
+         at [i][j], [j][i] */
       else if(i_killed && !j_killed) mat_entry = capmat[i][j];
 
       /* if this column was not calculated but column with the same number
          as the current row was, then symmetrized mat has unaveraged entry 
-	 at [i][j], [j][i] */
+         at [i][j], [j][i] */
       else if(!i_killed && j_killed) mat_entry = capmat[j][i];
 
       /* if this column was calculated and column with the same number
          as the current row was also, then symmetrized mat has averaged entry 
-	 at [i][j], [j][i] */
+         at [i][j], [j][i] */
       else mat_entry = (capmat[i][j] + capmat[j][i])/2.0;
 
       rowttl += mat_entry;
       if(mat_entry >= 0.0) {
-	sys->info("\nmksCapDump: Warning - capacitance matrix has non-negative off-diagonals\n  row %d col %d\n", i, j);
+        sys->info("\nmksCapDump: Warning - capacitance matrix has non-negative off-diagonals\n  row %d col %d\n", i, j);
       }
       if(fabs(mat_entry) != 0.0) {
-	if(first_offd) {
-	  minoffd = fabs(mat_entry);
-	  first_offd = FALSE;
-	}
-	else minoffd = MIN(minoffd, fabs(mat_entry));
+        if(first_offd) {
+          minoffd = fabs(mat_entry);
+          first_offd = FALSE;
+        }
+        else minoffd = MIN(minoffd, fabs(mat_entry));
       }
 
       sym_mat[i][j] = mat_entry;
@@ -1065,8 +1031,8 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
   }
 
   /* print the matrix */
-  sigfig = 2+log10(1.0/sys->iter_tol);	/* get no. significant figs to prnt */
-  colwidth = sigfig+6;		/* field width for cap mat columns */
+  sigfig = 2+log10(1.0/sys->iter_tol);  /* get no. significant figs to prnt */
+  colwidth = sigfig+6;          /* field width for cap mat columns */
   if(!sys->itrdat) sys->msg("\n");
   if(sys->kill_num_list != NULL)
       sys->msg("\nPARTIAL CAPACITANCE MATRIX, %sfarads\n", unit);
@@ -1091,11 +1057,11 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
     strcpy(cond_name, getConductorName(sys, i, name_list));
 
     if(numconds < 10)
-	sys->msg("%s %1s", padName(name, cond_name, maxlen), unit);
+        sys->msg("%s %1s", padName(name, cond_name, maxlen), unit);
     else if(numconds < 100)
-	sys->msg("%s %2s", padName(name, cond_name, maxlen), unit);
+        sys->msg("%s %2s", padName(name, cond_name, maxlen), unit);
     else
-	sys->msg("%s %3s", padName(name, cond_name, maxlen), unit);
+        sys->msg("%s %3s", padName(name, cond_name, maxlen), unit);
 
     for(j = 1; j <= numconds; j++) {
 
@@ -1104,12 +1070,12 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
 
       if(want_this_iter(sys->kill_num_list, i)
          && want_this_iter(sys->kill_num_list, j)) {
-	/* print a blank if capacitance was not calculated */
-	sys->msg("%s", spaces(unit, colwidth+1));
+        /* print a blank if capacitance was not calculated */
+        sys->msg("%s", spaces(unit, colwidth+1));
       }
       else {
-	sprintf(unit, " %%%d.%dg", colwidth, sigfig);
-	sys->msg(unit, scale*FPIEPS*relperm*sym_mat[j][i]);
+        sprintf(unit, " %%%d.%dg", colwidth, sigfig);
+        sys->msg(unit, scale*FPIEPS*relperm*sym_mat[j][i]);
       }
     }
     sys->msg("\n");
@@ -1135,21 +1101,21 @@ void dumpMulSet(ssystem *sys, int numLev, int order)
   sys->msg("  z: %g to %g\n", 
           sys->minz, sys->minz + numsides * (sys->length));
   sys->msg("Level %d (lowest level) cubes\n  %d total\n", 
-	  numLev, numcubes);
+          numLev, numcubes);
   sys->msg(
-	  "  side length = %g\n  maximum number of panels in each = %d\n",
-	  sys->length, sys->mul_maxlq);
+          "  side length = %g\n  maximum number of panels in each = %d\n",
+          sys->length, sys->mul_maxlq);
   sys->msg("  maximum number of evaluation points in each = %d\n",
           sys->loc_maxlq);
   sys->msg(
-	  "Maximum number of panels treated with a multipole expansion = %d\n",
-	  sys->max_panel);
+          "Maximum number of panels treated with a multipole expansion = %d\n",
+          sys->max_panel);
   sys->msg(
   "Maximum number of evaluation points treated with a local expansion = %d\n",
           sys->max_eval_pnt);
   sys->msg(
-	  "Maximum number of panels treated exactly = %d (limit = %d)\n",
-	  sys->mul_maxq, multerms(order));
+          "Maximum number of panels treated exactly = %d (limit = %d)\n",
+          sys->mul_maxq, multerms(order));
   sys->msg(
    "Maximum number of evaluation points treated exactly = %d (limit = %d)\n",
           sys->loc_maxq, multerms(order));
@@ -1243,24 +1209,24 @@ int has_duplicate_panels(FILE *fp, charge *chglst)
   for(cp = chglst; cp != NULL; cp = cp->next) {
     for(cpinner = cp->next; cpinner != NULL; cpinner = cpinner->next) {
       if(cp->x == cpinner->x && cp->y == cpinner->y && cp->z == cpinner->z) {
-	no_duplicates = FALSE;
+        no_duplicates = FALSE;
 
-	if(cp->surf->type == CONDTR) fprintf(fp, "Panels %d(CONDTR)",
-						cp->index);
-	if(cp->surf->type == DIELEC) fprintf(fp, "Panels %d(DIELEC)",
-						cp->index);
-	if(cp->surf->type == BOTH) fprintf(fp, "Panels %d(BOTH)",
-					      cp->index);
+        if(cp->surf->type == CONDTR) fprintf(fp, "Panels %d(CONDTR)",
+                                                cp->index);
+        if(cp->surf->type == DIELEC) fprintf(fp, "Panels %d(DIELEC)",
+                                                cp->index);
+        if(cp->surf->type == BOTH) fprintf(fp, "Panels %d(BOTH)",
+                                              cp->index);
 
-	if(cpinner->surf->type == CONDTR) fprintf(fp, " and %d(CONDTR)",
-						cpinner->index);
-	if(cpinner->surf->type == DIELEC) fprintf(fp, " and %d(DIELEC)",
-						cpinner->index);
-	if(cpinner->surf->type == BOTH) fprintf(fp, " and %d(BOTH)",
-					      cpinner->index);
+        if(cpinner->surf->type == CONDTR) fprintf(fp, " and %d(CONDTR)",
+                                                cpinner->index);
+        if(cpinner->surf->type == DIELEC) fprintf(fp, " and %d(DIELEC)",
+                                                cpinner->index);
+        if(cpinner->surf->type == BOTH) fprintf(fp, " and %d(BOTH)",
+                                              cpinner->index);
 
-	fprintf(fp, " both have center (%.3g %.3g %.3g)\n",
-		cp->x, cp->y, cp->z);
+        fprintf(fp, " both have center (%.3g %.3g %.3g)\n",
+                cp->x, cp->y, cp->z);
       }
     }
   }
@@ -1299,22 +1265,22 @@ void dumpQ2PDiag(ssystem *sys, cube *nextc)
 
     if(nextc->chgs[i]->surf->type == CONDTR) {
       for(j = 0; j < nextc->upnumeles[0]; j++) {
-	temp_mat[i][j] = rmat[i][j];
+        temp_mat[i][j] = rmat[i][j];
       }
     }
     else {
 
       pos_fact 
-	  = nextc->chgs[i]->surf->outer_perm/nextc->chgs[i]->pos_dummy->area;
+          = nextc->chgs[i]->surf->outer_perm/nextc->chgs[i]->pos_dummy->area;
       pos_d = nextc->chgs[i]->pos_dummy->index - 1;
       neg_fact 
-	  = nextc->chgs[i]->surf->inner_perm/nextc->chgs[i]->neg_dummy->area;
+          = nextc->chgs[i]->surf->inner_perm/nextc->chgs[i]->neg_dummy->area;
       neg_d = nextc->chgs[i]->neg_dummy->index - 1;
       panel_fact = pos_fact + neg_fact;
 
       for(j = 0; j < nextc->upnumeles[0]; j++) {
-	temp_mat[i][j] = pos_fact*rmat[pos_d][j] - panel_fact*rmat[i][j]
-	    + neg_fact*rmat[neg_d][j];
+        temp_mat[i][j] = pos_fact*rmat[pos_d][j] - panel_fact*rmat[i][j]
+            + neg_fact*rmat[neg_d][j];
       }
     }
   }
@@ -1326,13 +1292,13 @@ void dumpQ2PDiag(ssystem *sys, cube *nextc)
     }
   }
   savemat(fp, 1000, "A", nextc->upnumeles[0], nextc->upnumeles[0],
-	  0, temp, (double *)NULL);
+          0, temp, (double *)NULL);
 
   /* make the is_dummy vector a vector of doubles */
   for(i = 0; i < nextc->upnumeles[0]; i++) 
       temp[i] = (double)(nextc->nbr_is_dummy[0][i]);
   savemat(fp, 1000, "is_dummy", nextc->upnumeles[0], 1,
-	  0, temp, (double *)NULL);
+          0, temp, (double *)NULL);
 
   /* make a vector with 0 => CONDTR 1 => DIELEC 2 => BOTH -1 => dummy */
   for(i = 0; i < nextc->upnumeles[0]; i++) {
@@ -1340,7 +1306,7 @@ void dumpQ2PDiag(ssystem *sys, cube *nextc)
     else temp[i] = (double)(nextc->chgs[i]->surf->type);
   }
   savemat(fp, 1000, "surf_type", nextc->upnumeles[0], 1,
-	  0, temp, (double *)NULL);
+          0, temp, (double *)NULL);
 
   fclose(fp);
   sys->msg("Dumped Q2PDiag matrix to `Q2PDiag.mat'\n");
@@ -1356,8 +1322,8 @@ void chkDummy(ssystem *sys, double *vector, int *is_dummy, int size)
   for(i = 0; i < size; i++) {
     if(is_dummy[i] && vector[i] != 0.0) {
       if(first) {
-	first = FALSE;
-	sys->info("\nchkDummy: entries should be 0.0: %d", i);
+        first = FALSE;
+        sys->info("\nchkDummy: entries should be 0.0: %d", i);
       }
       else sys->info(" %d", i);
     }
@@ -1376,11 +1342,11 @@ void chkDummyList(ssystem *sys, charge **panels, int *is_dummy, int n_chgs)
   for(i = 0; i < n_chgs; i++) {
     if((is_dummy[i] && !panels[i]->dummy) || (!is_dummy[i] && panels[i]->dummy)) {
       if(first) {
-	first = FALSE;
-	sys->info("chkDummyList: inconsistent dummy list entries:\n");
+        first = FALSE;
+        sys->info("chkDummyList: inconsistent dummy list entries:\n");
       }
       sys->info(" %d is_dummy = %d, panel->dummy = %d\n", i,
-	      is_dummy[i], panels[i]->dummy);
+              is_dummy[i], panels[i]->dummy);
     }
   }
 
@@ -1411,7 +1377,7 @@ int dumpNameList(ssystem *sys, Name *name_list)
   for(cur_name = name_list; cur_name != NULL; cur_name = cur_name->next) {
     sys->msg("`%s'\n", cur_name->name);
     for(cur_alias = cur_name->alias_list; cur_alias != NULL; 
-	cur_alias = cur_alias->next) {
+        cur_alias = cur_alias->next) {
       sys->msg("  `%s'\n", cur_alias->name);
     }
   }

@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 /**************************************************************************
 
@@ -71,7 +37,7 @@ static charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int
 
 #define BIG 35000              /* Size of element and node serach table. */
 #define SMALL_NUMBER 0.005     /* See functions if_same_coord() and 
-				 grid_equiv_check(). */
+                                 grid_equiv_check(). */
 
 int type_number, ID, IV, KC, N1, N2, N3, N4, N5;
 int number_nodes, number_elements, number_grids=0, number_patches=0;
@@ -85,9 +51,9 @@ CFEG *start_cfeg;
 int conductor_count;
 
 /* these flags added to allow multiple calls; used to reset static variables */
-int first_grid;			/* note that current_name static is not */
-int first_patch;		/*   reset since the name list must */
-int first_cfeg;			/*   be preserved as new files are read */
+int first_grid;                 /* note that current_name static is not */
+int first_patch;                /*   reset since the name list must */
+int first_cfeg;                 /*   be preserved as new files are read */
 
 charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
                  Name **name_list, int *num_cond, char *name_suffix)
@@ -107,7 +73,7 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
   if(line[0] == '0') {
     *file_is_patran_type = FALSE;
     firstq = quickif(sys, stream, line, surf_type, trans_vector,
-		     num_cond, name_list, name_suffix);
+                     num_cond, name_list, name_suffix);
   }
   else {
     *file_is_patran_type = TRUE;
@@ -134,7 +100,7 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
     }
 
     firstq = make_charges_all_patches(sys, name_list, num_cond, surf_type,
-				      name_suffix);
+                                      name_suffix);
   }
 
   return (firstq);
@@ -155,13 +121,13 @@ void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_
      N1, N2, N3, N4 and N5 are global variables accessible by subroutines. */
 
   while (!END) {
-    if(line[0] == '2') {	/* if first line */
+    if(line[0] == '2') {        /* if first line */
       sscanf(line,"%d %d %d %d %d %d %d %d %d", 
-	   &type_number, &ID, &IV, &KC, &N1, &N2, &N3, &N4, &N5);    
+           &type_number, &ID, &IV, &KC, &N1, &N2, &N3, &N4, &N5);    
       line[0] = '0';
     }
     else fscanf(stream,"%d %d %d %d %d %d %d %d %d", 
-		&type_number, &ID, &IV, &KC, &N1, &N2, &N3, &N4, &N5);
+                &type_number, &ID, &IV, &KC, &N1, &N2, &N3, &N4, &N5);
       
 
     switch (type_number) {
@@ -344,7 +310,7 @@ void patch_data(ssystem *sys, FILE *stream)
 
   waste_line(9,stream);
   fscanf(stream, "%lg %lg %lg %d %d %d %d",
-	 &tmp, &tmp, &tmp, corner, corner+1, corner+2, corner+3);
+         &tmp, &tmp, &tmp, corner, corner+1, corner+2, corner+3);
   for (i=0; i<4; i++) current_patch->corner[i] = corner[i];
   prev_patch = current_patch;
   current_patch->next=0;
@@ -436,14 +402,14 @@ void name_data(ssystem *sys, FILE *stream)
   char line[BUFSIZ];
   SM_PATCH *current_patch = NULL;
 
-  if(sys->start_name == NULL) {	/* if first time on first patfront() call */
+  if(sys->start_name == NULL) { /* if first time on first patfront() call */
     sys->start_name = sys->heap.alloc<NAME>(1, AMSC);
     sys->current_name = sys->start_name_this_time = sys->start_name;
   }
   else{ 
     sys->current_name->next = sys->heap.alloc<NAME>(1, AMSC);
     sys->current_name = sys->current_name->next;
-    if(sys->start_name_this_time == NULL) {	/* if 1st time on this patfront call */
+    if(sys->start_name_this_time == NULL) {     /* if 1st time on this patfront call */
       sys->start_name_this_time = sys->current_name;
     }
   }
@@ -455,20 +421,20 @@ void name_data(ssystem *sys, FILE *stream)
   sys->current_name->name = sys->heap.strdup(line);
   
   /* input NTYPE ID pair lines until no more, save patch id's that come in */
-  for(i = iv = 0; i < KC-1; i++) {	/* loop on lines */
+  for(i = iv = 0; i < KC-1; i++) {      /* loop on lines */
     for(j = 0; j < 5 && iv < IV/2; j++, iv++) { /* loop on items */
       fscanf(stream, "%d %d", &ntype, &id);
-      if(ntype == 3) {		/* if its a patch, save ID */
-	if(current_patch == NULL) { /* if 1st patch */
-	  sys->current_name->patch_list = sys->heap.alloc<SM_PATCH>(1, AMSC);
-	  current_patch = sys->current_name->patch_list;
-	}
-	else {
-	  current_patch->next = sys->heap.alloc<SM_PATCH>(1, AMSC);
-	  current_patch = current_patch->next;
-	}
-	current_patch->ID = id;
-	patch_cnt++;
+      if(ntype == 3) {          /* if its a patch, save ID */
+        if(current_patch == NULL) { /* if 1st patch */
+          sys->current_name->patch_list = sys->heap.alloc<SM_PATCH>(1, AMSC);
+          current_patch = sys->current_name->patch_list;
+        }
+        else {
+          current_patch->next = sys->heap.alloc<SM_PATCH>(1, AMSC);
+          current_patch = current_patch->next;
+        }
+        current_patch->ID = id;
+        patch_cnt++;
       }
     }
   }
@@ -502,12 +468,12 @@ static void grid_equiv_check(ssystem *sys)
     grid_ptr_2 = grid_ptr_1->next;
     while (grid_ptr_2) {
       if (if_same_coord(grid_ptr_1->coord,grid_ptr_2->coord)) {
-	*(grid_ptr_1->equiv_ID + grid_ptr_1->number_equiv_grids)
-	  = grid_ptr_2->ID;
-	*(grid_ptr_2->equiv_ID + grid_ptr_2->number_equiv_grids)
-	  = grid_ptr_1->ID;
-	(grid_ptr_1->number_equiv_grids)++;
-	(grid_ptr_2->number_equiv_grids)++;
+        *(grid_ptr_1->equiv_ID + grid_ptr_1->number_equiv_grids)
+          = grid_ptr_2->ID;
+        *(grid_ptr_2->equiv_ID + grid_ptr_2->number_equiv_grids)
+          = grid_ptr_1->ID;
+        (grid_ptr_1->number_equiv_grids)++;
+        (grid_ptr_2->number_equiv_grids)++;
       }
       grid_ptr_2 = grid_ptr_2->next;
     }
@@ -583,16 +549,16 @@ void fill_patch_patch_table(int *patch_patch_table)
     while (patch_ptr) {
       corner = patch_ptr->corner;
       for (i=0; i<4; i++) 
-	if (if_same_grid(*corner++,grid_ptr)) {
-	  if (current_table_ptr) {  /* Have we already found another patch 
-				       with the same grid as its corner?  */
-	    *(current_table_ptr+patch_count)=1;
-	    *(patch_patch_table + (patch_count * number_patches) 
-	      + patch_count_save)=1;
-	  }
-	  current_table_ptr = patch_patch_table + patch_count*number_patches;
-	  patch_count_save = patch_count;
-	}
+        if (if_same_grid(*corner++,grid_ptr)) {
+          if (current_table_ptr) {  /* Have we already found another patch 
+                                       with the same grid as its corner?  */
+            *(current_table_ptr+patch_count)=1;
+            *(patch_patch_table + (patch_count * number_patches) 
+              + patch_count_save)=1;
+          }
+          current_table_ptr = patch_patch_table + patch_count*number_patches;
+          patch_count_save = patch_count;
+        }
       patch_ptr = patch_ptr->next;
       patch_count++;
     }
@@ -643,7 +609,7 @@ void assign_conductor(int *patch_patch_table)
   patch_ptr = start_patch;
   while (patch_ptr) {
     if ((patch_ptr->conductor_ID) == 0) {  /* If the patch is not assigned 
-					      a conductor number. */
+                                              a conductor number. */
       patch_ptr->conductor_ID = conductor_count;
       depth_search(patch_patch_table,current_table_ptr,conductor_count);
       conductor_count++;
@@ -657,7 +623,7 @@ void assign_conductor(int *patch_patch_table)
   patch_ptr = start_patch;
   while (patch_ptr) {
     sys->msg("\nPatch %d   Conductor %d",
-	   patch_ptr->ID, patch_ptr->conductor_ID);
+           patch_ptr->ID, patch_ptr->conductor_ID);
     patch_ptr = patch_ptr->next;
   } */
 }
@@ -675,15 +641,15 @@ void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_co
   new_table_ptr=patch_patch_table;
   for (i=0; i<number_patches; i++) {
     if ((*(current_table_ptr+i)) != 0) {  /* If the current patch is connected
-					     to i'th patch. */
+                                             to i'th patch. */
       if (patch_ptr->conductor_ID == 0) {  /* If the patch is yet to be 
-					      assigned a conductor number. */
-	patch_ptr -> conductor_ID = conductor_count;
-	new_table_ptr = patch_patch_table+i*number_patches;
+                                              assigned a conductor number. */
+        patch_ptr -> conductor_ID = conductor_count;
+        new_table_ptr = patch_patch_table+i*number_patches;
 
-	/* Call depth_search recursively to continue searching for 
-	   connected patches. */
-	depth_search(patch_patch_table,new_table_ptr,conductor_count); 	
+        /* Call depth_search recursively to continue searching for 
+           connected patches. */
+        depth_search(patch_patch_table,new_table_ptr,conductor_count);  
       }
     }
     patch_ptr=patch_ptr->next;
@@ -733,35 +699,35 @@ charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, 
       LPH_ID = cfeg_ptr->LPH_ID;
 
       /* Find the patch structure that is associated with the current cfeg
-	 pointer in order to find the conductor number. */
+         pointer in order to find the conductor number. */
       patch_ptr = start_patch;
       while (patch_ptr) {
-	if (patch_ptr->ID == LPH_ID) {
-	  if(surf_type == CONDTR || surf_type == BOTH) {
-	    strcpy(cond_name, getPatranName(sys, patch_ptr->conductor_ID));
-	    strcat(cond_name, name_suffix);
-	    conductor_ID = getConductorNum(sys, cond_name, name_list, num_cond);
-	  }
-	  else conductor_ID = 0;
-	  break;
-	}
-	patch_ptr = patch_ptr->next;
+        if (patch_ptr->ID == LPH_ID) {
+          if(surf_type == CONDTR || surf_type == BOTH) {
+            strcpy(cond_name, getPatranName(sys, patch_ptr->conductor_ID));
+            strcat(cond_name, name_suffix);
+            conductor_ID = getConductorNum(sys, cond_name, name_list, num_cond);
+          }
+          else conductor_ID = 0;
+          break;
+        }
+        patch_ptr = patch_ptr->next;
       }
 /*      sys->msg("\nCEFG %d  LPH %d LPH_ID %d Conductor_ID %d",
-	     cfeg_ptr->ID,cfeg_ptr->LPH,cfeg_ptr->LPH_ID,conductor_ID); */
+             cfeg_ptr->ID,cfeg_ptr->LPH,cfeg_ptr->LPH_ID,conductor_ID); */
 
       /* For each patch, call the subroutine to handle the detail. 
          Make sure all the lists of charges are linked. */
       element_list = cfeg_ptr->element_list;
       if (!first_pq) {
         first_pq = make_charges_patch(sys, NELS, element_list, conductor_ID);
-	current_pq = first_pq + NELS - 1;
+        current_pq = first_pq + NELS - 1;
       }
       else {
-	current_pq->next = 
-	  make_charges_patch(sys, NELS, element_list, conductor_ID);
-	current_pq = (current_pq->next) + NELS - 1;
-      }	
+        current_pq->next = 
+          make_charges_patch(sys, NELS, element_list, conductor_ID);
+        current_pq = (current_pq->next) + NELS - 1;
+      } 
     }
     cfeg_ptr=cfeg_ptr->next;
   }
@@ -853,17 +819,17 @@ static void assign_names(ssystem *sys)
       current_patch = start_patch;
       quit = 0;
       while(current_patch != NULL && quit == 0) {
-	if(current_patch->ID == current_name_patch->ID) {
-	  current_name_patch->conductor_ID = current_patch->conductor_ID;
-	  if(current_conductor == 0) { /* if this is 1st name struct patch */
-	    current_conductor = current_patch->conductor_ID;
-	  }
-	  else if(current_conductor != current_patch->conductor_ID) {
-	    sys->error("assign_names: alleged conductor '%s'\n  has patches from more than one conductor - rename more carefully\n", cur_name->name);
-	  }
-	  quit = 1;
-	}
-	current_patch = current_patch->next;
+        if(current_patch->ID == current_name_patch->ID) {
+          current_name_patch->conductor_ID = current_patch->conductor_ID;
+          if(current_conductor == 0) { /* if this is 1st name struct patch */
+            current_conductor = current_patch->conductor_ID;
+          }
+          else if(current_conductor != current_patch->conductor_ID) {
+            sys->error("assign_names: alleged conductor '%s'\n  has patches from more than one conductor - rename more carefully\n", cur_name->name);
+          }
+          quit = 1;
+        }
+        current_patch = current_patch->next;
       }
       if(quit == 0) {
         sys->error("assign_names: in conductor '%s'\n  can't find named patch in master list\n", cur_name->name);

@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "input.h"
@@ -79,12 +45,12 @@ int main_func(int argc, char *argv[])
 
   double *trimat = 0, *sqrmat = 0;
   int *real_index = 0;
-  int num_dielec_panels = 0;		/* number of dielectric interface panels */
-  int num_both_panels = 0;		/* number of thin-cond-on-dielec-i/f panels */
-  int num_cond_panels = 0;		/* number of thick conductor panels */
-  int up_size = 0;			/* sum of above three (real panels) */
-  int num_dummy_panels = 0;		/* number of off-panel eval pnt panels */
-  int eval_size = 0;			/* sum of above two (total panel structs) */
+  int num_dielec_panels = 0;            /* number of dielectric interface panels */
+  int num_both_panels = 0;              /* number of thin-cond-on-dielec-i/f panels */
+  int num_cond_panels = 0;              /* number of thick conductor panels */
+  int up_size = 0;                      /* sum of above three (real panels) */
+  int num_dummy_panels = 0;             /* number of off-panel eval pnt panels */
+  int eval_size = 0;                    /* sum of above two (total panel structs) */
 
   Name *name_list;
 
@@ -102,7 +68,7 @@ int main_func(int argc, char *argv[])
   /* - many command line parameters having to do with the postscript
        file dumping interface are passed back via globals (see mulGlobal.c) */
   chglist = input_problem(&sys, &autmom, &autlev, &relperm,
-			  &numMom, &numLev, &name_list, &num_cond);
+                          &numMom, &numLev, &name_list, &num_cond);
 
   /* if no fastcap run is to be done, just dump the psfile */
   if(sys.capvew && sys.m_) {
@@ -149,12 +115,12 @@ int main_func(int argc, char *argv[])
   sys.msg("  Total number of panels: %d\n", up_size);
   sys.msg("    Number of conductor panels: %d\n", num_cond_panels);
   sys.msg("    Number of dielectric interface panels: %d\n",
-	  num_dielec_panels);
+          num_dielec_panels);
   sys.msg(
-	  "    Number of thin conductor on dielectric interface panels: %d\n", 
-	  num_both_panels);
+          "    Number of thin conductor on dielectric interface panels: %d\n", 
+          num_both_panels);
   /*sys.msg("  Number of extra evaluation points: %d\n",
-	  num_dummy_panels);*/
+          num_dummy_panels);*/
   sys.msg("  Number of conductors: %d\n", num_cond);
 
   if (sys.namdat) {
@@ -181,33 +147,33 @@ int main_func(int argc, char *argv[])
   starttimer;
   mulMultiAlloc(&sys, MAX(sys.max_eval_pnt, sys.max_panel), numMom, sys.depth);
   stoptimer;
-  initalltime += dtime;		/* save initial allocation time */
+  initalltime += dtime;         /* save initial allocation time */
 
   if (sys.dumpps == DUMPPS_ON || sys.dumpps == DUMPPS_ALL) {
     strcpy(filename, "psmat.ps");  //  TODO: remove
     dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, OPEN);
   }
 
-  mulMatDirect(&sys, &trimat, &sqrmat, &real_index, up_size, eval_size);		/* Compute the direct part matrices. */
+  mulMatDirect(&sys, &trimat, &sqrmat, &real_index, up_size, eval_size);                /* Compute the direct part matrices. */
 
-  if (! sys.dirsol) {		/* with DIRSOL just want to skip to solve */
+  if (! sys.dirsol) {           /* with DIRSOL just want to skip to solve */
 
     if (PRECOND == BD) {
       starttimer;
       bdmulMatPrecond(&sys);
       stoptimer;
-      counters.prsetime = dtime;		/* preconditioner set up time */
+      counters.prsetime = dtime;                /* preconditioner set up time */
     }
 
     if (PRECOND == OL) {
       starttimer;
       olmulMatPrecond(&sys);
       stoptimer;
-      counters.prsetime = dtime;		/* preconditioner set up time */
+      counters.prsetime = dtime;                /* preconditioner set up time */
     }
 
     if (sys.dmprec) {
-      dump_preconditioner(&sys, chglist, 1);	/* dump prec. and P to matlab file */
+      dump_preconditioner(&sys, chglist, 1);    /* dump prec. and P to matlab file */
     }
 
     if (sys.dpsysd) {
@@ -231,14 +197,14 @@ int main_func(int argc, char *argv[])
     }
 
     starttimer;
-    mulMatUp(&sys);		/* Compute the upward pass matrices. */
+    mulMatUp(&sys);             /* Compute the upward pass matrices. */
 
     if (DNTYPE == NOSHFT) {
-      mulMatDown(&sys);		/* find matrices for no L2L shift dwnwd pass */
+      mulMatDown(&sys);         /* find matrices for no L2L shift dwnwd pass */
     }
 
     if (DNTYPE == GRENGD) {
-      mulMatDown(&sys);		/* find matrices for full Greengard dnwd pass*/
+      mulMatDown(&sys);         /* find matrices for full Greengard dnwd pass*/
     }
 
     if (sys.ckdlst) {
@@ -247,12 +213,12 @@ int main_func(int argc, char *argv[])
       //  Not available anywhere: chkEvalLstD(sys, DIRECT);
     }
 
-    mulMatEval(&sys);		/* set up matrices for evaluation pass */
+    mulMatEval(&sys);           /* set up matrices for evaluation pass */
 
     stoptimer;
-    mulsetup = dtime;		/* save multipole matrix setup time */
+    mulsetup = dtime;           /* save multipole matrix setup time */
 
-    dumpnums(&sys, OFF, eval_size);	/* dump num/type of pot. coeff calcs */
+    dumpnums(&sys, OFF, eval_size);     /* dump num/type of pot. coeff calcs */
 
     if (sys.dumpps == DUMPPS_ALL) {
       dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
@@ -270,7 +236,7 @@ int main_func(int argc, char *argv[])
 
   sys.msg("\nITERATION DATA");
   ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, real_index, num_cond,
-		     name_list);
+                     name_list);
 
   if (sys.mksdat) {
     mksCapDump(&sys, capmat, num_cond, relperm, &name_list);
@@ -300,12 +266,12 @@ int main_func(int argc, char *argv[])
     sys.msg("    Preconditioner solution time: %g\n", counters.prectime);
     sys.msg("    Iterative loop overhead time: %g\n", counters.conjtime);
 
-    if(sys.dirsol) {		/* if solution is done by Gaussian elim. */
+    if(sys.dirsol) {            /* if solution is done by Gaussian elim. */
       sys.msg("\nTotal direct, full matrix LU factor time: %g\n", counters.lutime);
       sys.msg("Total direct, full matrix solve time: %g\n", counters.fullsoltime);
       sys.msg("Total direct operations: %d\n", counters.fulldirops);
     }
-    else if (sys.expgcr) {	/* if solution done iteratively w/o multis */
+    else if (sys.expgcr) {      /* if solution done iteratively w/o multis */
       sys.msg("\nTotal A*q operations: %d (%d/iter)\n",
               counters.fullPqops, counters.fullPqops/ttliter);
     }

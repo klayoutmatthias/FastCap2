@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
-
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
-
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
-
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
-
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
-
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
-
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
-
-*/
 
 #if !defined(mulGlobal_H)
 #define mulGlobal_H
@@ -50,12 +16,12 @@ misc. global macros
 
 *****************************************************************************/
 #define NOT !
-#define  ABORT()						      \
-{   (void)fflush(stdout);					      \
+#define  ABORT()                                                      \
+{   (void)fflush(stdout);                                             \
     (void)sys->info("FastCap: panic in file `%s' at line %d.\n",\
-            __FILE__, __LINE__);				      \
-    (void)fflush(stderr);					      \
-    abort();							      \
+            __FILE__, __LINE__);                                      \
+    (void)fflush(stderr);                                             \
+    abort();                                                          \
 }
 
 #define ASSERT(condition) if(NOT(condition)) ABORT()
@@ -88,10 +54,10 @@ misc. global macros
 #define M_PI       3.1415926535897931160E0  /*Hex  2^ 1 * 1.921FB54442D18 */
 #endif
 
-#define E_0 8.854187818E-12	/* epsilon0 +- .000000071E-12 F/m */
-#define FPIEPS 4.0*M_PI*E_0	/* 4 pi times the dielectric permittivity,
-				   free-space permittivity is the default,
-				   units are F/m - all dimensions in meters */
+#define E_0 8.854187818E-12     /* epsilon0 +- .000000071E-12 F/m */
+#define FPIEPS 4.0*M_PI*E_0     /* 4 pi times the dielectric permittivity,
+                                   free-space permittivity is the default,
+                                   units are F/m - all dimensions in meters */
 
 /* flags in chkList() in mulDisplay.c (chks direct, local or eval cube lsts) */
 #define DIRECT 0
@@ -99,24 +65,24 @@ misc. global macros
 #define EVAL 3
 
 /* types of surfaces */
-#define CONDTR 0		/* conductor surfaces */
-#define DIELEC 1		/* dielectric interface surface */
-#define BOTH 3			/* dielectric i/f w/very thin cond on it */
+#define CONDTR 0                /* conductor surfaces */
+#define DIELEC 1                /* dielectric interface surface */
+#define BOTH 3                  /* dielectric i/f w/very thin cond on it */
 
 /* used in input routines */
-#define MAXCON 10000		/* assumes never more conductors than this */
+#define MAXCON 10000            /* assumes never more conductors than this */
 
 /* used in ps file dump */
-#define OPEN 0			/* open ps file, print hdr, ignore row/col */
-#define CLOSE 1			/* print trailer, close ps file */
-#define UPDATE 2		/* => add 2 dots for this row and col */
+#define OPEN 0                  /* open ps file, print hdr, ignore row/col */
+#define CLOSE 1                 /* print trailer, close ps file */
+#define UPDATE 2                /* => add 2 dots for this row and col */
 
 /* divided difference distances, see electric.c */
 #define HPOS (1e-6*cur_panel->max_diag) /* h in positive normal dir */
-#define HNEG HPOS		/* h for divided difference in neg nrml dir */
+#define HNEG HPOS               /* h for divided difference in neg nrml dir */
 
 /* level set mode, see placeq, mulSetup.c and input.c */
-#define ONELES 2		/* => auto set levs to 1 up fr fully exact */
+#define ONELES 2                /* => auto set levs to 1 up fr fully exact */
 
 /* expansion moment index generating macros (see mulMulti.c, mulLocal.c) */
 #define CINDEX(N, M) ( (M) + ((N)*((N)+1))/2 )
@@ -133,23 +99,23 @@ misc. global macros
 ***********************************************************************/
 
 /* types of downward/eval passes */
-#define NOLOCL 0	       	/* multipoles evaluated directly - no locals */
-#define NOSHFT 1		/* multis to locals w/o local2local shifts */
-#define GRENGD 3		/* full Greengard downward pass/eval */
+#define NOLOCL 0                /* multipoles evaluated directly - no locals */
+#define NOSHFT 1                /* multis to locals w/o local2local shifts */
+#define GRENGD 3                /* full Greengard downward pass/eval */
 
 /* types of iterative methods (values of ITRTYP below) */
-#define GCR 0			/* GCR with single (not block) vector iters */
+#define GCR 0                   /* GCR with single (not block) vector iters */
 #define GMRES 1                 /* GMRES with vector iterates */
 
 /* types of finite elements (NOTE: only const. chg den. panels implemented) */
-#define CONST 0			/* constant charge density on panels */
+#define CONST 0                 /* constant charge density on panels */
 #define AFFINE 1
 #define QUADRA 2
 
 /* types of weighted residuals methods (NOTE: only collocation implemented) */
-#define COLLOC 0		/* point collocation */
-#define SUBDOM 1		/* subdomain collocation */
-#define GALKIN 2		/* Galerkin */
+#define COLLOC 0                /* point collocation */
+#define SUBDOM 1                /* subdomain collocation */
+#define GALKIN 2                /* Galerkin */
 
 /* types of preconditioners. */
 #define NONE 0
@@ -157,29 +123,29 @@ misc. global macros
 #define OL 2                    /* OverLap */
 
 /* Discretization Configuration */
-#define WRMETH COLLOC		/* weighted res meth type (COLLOC only now) */
-#define ELTYPE CONST		/* finite element type (CONST only now) */
+#define WRMETH COLLOC           /* weighted res meth type (COLLOC only now) */
+#define ELTYPE CONST            /* finite element type (CONST only now) */
 /* Multipole Configuration */
-#define DNTYPE GRENGD		/* type of downward/eval pass - see above */
-#define MULTI ON		/* ON=> add in multipole contribution to P*q */
-#define RADINTER ON	        /* ON=> Parent level multis in interlist. */
-#define NNBRS 2			/* Distance to consider a nearest nbr. */
-#define ADAPT ON		/* ON=> use adaptive algorithm */
-#define OPCNT OFF		/* Counts the Matrix-Vector multiply ops. */
-#define DEFORD 2		/* default expansion order */
-#define MAXORDER 6		/* Maximum expansion order (sets ary sizes) */
-#define MAXDEP 20		/* maximum partitioning depth */
-#define NUMDPT 2		/* num pnts for ea dielec panel (2 or 3) */
-#define SKIPQD OFF		/* ON => skip dielec panel chg in E eval */
+#define DNTYPE GRENGD           /* type of downward/eval pass - see above */
+#define MULTI ON                /* ON=> add in multipole contribution to P*q */
+#define RADINTER ON             /* ON=> Parent level multis in interlist. */
+#define NNBRS 2                 /* Distance to consider a nearest nbr. */
+#define ADAPT ON                /* ON=> use adaptive algorithm */
+#define OPCNT OFF               /* Counts the Matrix-Vector multiply ops. */
+#define DEFORD 2                /* default expansion order */
+#define MAXORDER 6              /* Maximum expansion order (sets ary sizes) */
+#define MAXDEP 20               /* maximum partitioning depth */
+#define NUMDPT 2                /* num pnts for ea dielec panel (2 or 3) */
+#define SKIPQD OFF              /* ON => skip dielec panel chg in E eval */
 /* Linear System Solution Configuration */
-#define ITRTYP GMRES		/* type of iterative method */
-#define PRECOND OL		/* NONE=> no preconditioner OL=> use prec. */
-#define ABSTOL 0.01		/* iterations until ||res||inf < ABSTOL */
-#define MAXITER size		/* max num iterations ('size' => # panels) */
-#define EXRTSH 0.9		/* exact/ttl>EXRTSH for lev => make last lev */
+#define ITRTYP GMRES            /* type of iterative method */
+#define PRECOND OL              /* NONE=> no preconditioner OL=> use prec. */
+#define ABSTOL 0.01             /* iterations until ||res||inf < ABSTOL */
+#define MAXITER size            /* max num iterations ('size' => # panels) */
+#define EXRTSH 0.9              /* exact/ttl>EXRTSH for lev => make last lev */
 /* (add any new configuration flags to dumpConfig() in mulDisplay.c) */
 
 /* blkDirect.c related flags - used only when DIRSOL == ON || EXPGCR == ON */
-#define MAXSIZ 0		/* any more tiles than this uses matrix on disk
-				   for DIRSOL == ON or EXPGCR == ON */
+#define MAXSIZ 0                /* any more tiles than this uses matrix on disk
+                                   for DIRSOL == ON or EXPGCR == ON */
 #endif

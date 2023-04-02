@@ -72,45 +72,45 @@ CFLAGS = -O -DFOUR
 #CC = xlc
 
 default:
-	@echo Please specify what to make:
-	@echo "  fastcap - capacitance calculation program"
-	@echo "  busgen - bus crossing input file generator"
-	@echo "  capgen - || plate capacitor input file generator"
-	@echo "  cubegen - cubic capacitor input file generator"
-	@echo "  pyragen - pyramid capacitor input file generator"
-	@echo "  pipedgen - parallelepiped capacitor input file generator"
-	@echo "  all - all of the above"
+        @echo Please specify what to make:
+        @echo "  fastcap - capacitance calculation program"
+        @echo "  busgen - bus crossing input file generator"
+        @echo "  capgen - || plate capacitor input file generator"
+        @echo "  cubegen - cubic capacitor input file generator"
+        @echo "  pyragen - pyramid capacitor input file generator"
+        @echo "  pipedgen - parallelepiped capacitor input file generator"
+        @echo "  all - all of the above"
 
 fastcap: $(OBJS)
-	$(CC) -o temp.out $(CFLAGS) $(OBJS) $(LIBS)
-	mv temp.out $(BIN)/fastcap
+        $(CC) -o temp.out $(CFLAGS) $(OBJS) $(LIBS)
+        mv temp.out $(BIN)/fastcap
 
 busgen: $(OBJSB)
-	$(CC) -o temp.out $(CFLAGS) $(OBJSB) $(LIBS)
-	mv temp.out $(BIN)/busgen
+        $(CC) -o temp.out $(CFLAGS) $(OBJSB) $(LIBS)
+        mv temp.out $(BIN)/busgen
 
 capgen: $(OBJSP)
-	$(CC) -o temp.out $(CFLAGS) $(OBJSP) $(LIBS)
-	mv temp.out $(BIN)/capgen
+        $(CC) -o temp.out $(CFLAGS) $(OBJSP) $(LIBS)
+        mv temp.out $(BIN)/capgen
 
 cubegen: $(OBJSC)
-	$(CC) -o temp.out $(CFLAGS) $(OBJSC) $(LIBS)
-	mv temp.out $(BIN)/cubegen
+        $(CC) -o temp.out $(CFLAGS) $(OBJSC) $(LIBS)
+        mv temp.out $(BIN)/cubegen
 
 pyragen: $(OBJST)
-	$(CC) -o temp.out $(CFLAGS) $(OBJST) $(LIBS)
-	mv temp.out $(BIN)/pyragen
+        $(CC) -o temp.out $(CFLAGS) $(OBJST) $(LIBS)
+        mv temp.out $(BIN)/pyragen
 
 pipedgen: $(OBJSI)
-	$(CC) -o temp.out $(CFLAGS) $(OBJSI) $(LIBS)
-	mv temp.out $(BIN)/pipedgen
+        $(CC) -o temp.out $(CFLAGS) $(OBJSI) $(LIBS)
+        mv temp.out $(BIN)/pipedgen
 
 all : fastcap busgen capgen cubegen pyragen pipedgen
 
 setmake:
-	@$(SHELL) setmake.sh $(AWK) $(TYPE) $(TOP) $(RM)
+        @$(SHELL) setmake.sh $(AWK) $(TYPE) $(TOP) $(RM)
 clean:
-	$(RM) -f *.o
+        $(RM) -f *.o
 
 $(OBJS) : $(INCL)/mulStruct.h $(INCL)/mulGlobal.h $(INCL)/patran.h \
 $(INCL)/resusage.h Makefile

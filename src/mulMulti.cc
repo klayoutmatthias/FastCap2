@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "mulMulti.h"
@@ -73,7 +39,7 @@ int sinterms(int order)
 void xyz2sphere(double x, double y, double z, double x0, double y0, double z0, double *rho, double *cosA, double *beta)
 {
   /* get relative coordinates */
-  x -= x0;			/* "0" coordinates play the role of origin */
+  x -= x0;                      /* "0" coordinates play the role of origin */
   y -= y0;
   z -= z0;
   /* get spherical coordinates */
@@ -98,7 +64,7 @@ double iPwr(ssystem *sys, int e)
     sys->error("iPwr: odd exponent %d\n", e);
   }
   else {
-    e = e/2;			/* get power of negative 1 */
+    e = e/2;                    /* get power of negative 1 */
     if(e % 2 == 0) return(1.0);
     else return(-1.0);
   }
@@ -128,7 +94,7 @@ double fact(ssystem *sys, int x)
 */
 void evalFactFac(double **array, int order)
 {
-  int n, m;			/* array[n][m] = (m+n)!/(n-m)! */
+  int n, m;                     /* array[n][m] = (m+n)!/(n-m)! */
 
   /* do first column of lower triangular part - always 1's */
   for(n = 0; n < order+1; n++) array[n][0] = 1.0;
@@ -161,9 +127,9 @@ void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
     sys->mm.phi = sys->heap.alloc<double>(maxchgs, AMSC); /* phi vector */
   }
   sys->mm.tleg = sys->heap.alloc<double>(costerms(2*order), AMSC);
-	       	/* temp legendre storage (2*order needed for local exp) */
+                /* temp legendre storage (2*order needed for local exp) */
   sys->mm.factFac = sys->heap.mat(order+1, order+1, AMSC);
-  evalFactFac(sys->mm.factFac, order);	/* get factorial factors for mulMulti2P */
+  evalFactFac(sys->mm.factFac, order);  /* get factorial factors for mulMulti2P */
 
   if (sys->dissyn) {
     /* for counts of local/multipole expansions and eval mat builds by level */
@@ -202,7 +168,7 @@ void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
   evalFacFra(sys, sys->mm.facFrA, order);
   sys->mm.sinmkB = sys->heap.alloc<double>(2*order+1, AMSC);
   sys->mm.cosmkB = sys->heap.alloc<double>(2*order+1, AMSC);
-  sys->mm.cosmkB[0] = 1.0;		/* look up arrays used for local exp */
+  sys->mm.cosmkB[0] = 1.0;              /* look up arrays used for local exp */
   /* generate array of sqrt((n+m)!(n-m)!)'s for L2L
   evalSqrtFac(sqrtFac, factFac, order); */
 }
@@ -215,14 +181,14 @@ void mulMultiAlloc(ssystem *sys, int maxchgs, int order, int depth)
 void evalLegendre(double cosA, double *vector, int order)
 {
   int x;
-  int m;			/* as in Pn^m, both <= order */
-  double sinMA;			/* becomes sin^m(alpha) in higher order P's */
-  double fact;			/* factorial factor */
+  int m;                        /* as in Pn^m, both <= order */
+  double sinMA;                 /* becomes sin^m(alpha) in higher order P's */
+  double fact;                  /* factorial factor */
 
   /* do evaluations of first four functions separately w/o recursions */
-  vector[CINDEX(0, 0)] = 1.0;	/* P0^0 */
+  vector[CINDEX(0, 0)] = 1.0;   /* P0^0 */
   if(order > 0) {
-    vector[CINDEX(1, 0)] = cosA;	/* P1^0 */
+    vector[CINDEX(1, 0)] = cosA;        /* P1^0 */
     vector[CINDEX(1, 1)] = sinMA = -sqrt(1-cosA*cosA); /* P1^1 = -sin(alpha) */
   }
   if(order > 1) vector[CINDEX(2, 1)] = 3*sinMA*cosA; /* P2^1 = -3sin()cos() */
@@ -230,27 +196,27 @@ void evalLegendre(double cosA, double *vector, int order)
   /* generate remaining evaluations by recursion on lower triangular array */
   fact = 1.0;
   for(m = 0; m < order+1; m++) {
-    if(m != 0 && m != 1) {	/* set up first two evaluations in row */
+    if(m != 0 && m != 1) {      /* set up first two evaluations in row */
       fact *= (2*m - 1); /* (2(m-1)-1)!! -> (2m-1)!! */
       /* use recursion on m */
       if(vector[CINDEX(1, 1)] == 0.0) {
-	vector[CINDEX(m, m)] = 0.0;
-	if(m != order) vector[CINDEX(m+1, m)] = 0.0;	/* if not last row */
+        vector[CINDEX(m, m)] = 0.0;
+        if(m != order) vector[CINDEX(m+1, m)] = 0.0;    /* if not last row */
       }
       else {
-	cosA = vector[CINDEX(1,0)]/vector[CINDEX(1,1)]; /* cosA= -cot(theta) */
-	sinMA *= vector[CINDEX(1,1)]; /*(-sin(alpha))^(m-1)->(-sin(alpha))^m*/
-	vector[CINDEX(m, m)] = fact * sinMA;
-	if(m != order) {		/* do if not on last row */
-	  vector[CINDEX(m+1, m)] = vector[CINDEX(1, 0)]*(2*m+1)
-	      *vector[CINDEX(m, m)];
-	}
+        cosA = vector[CINDEX(1,0)]/vector[CINDEX(1,1)]; /* cosA= -cot(theta) */
+        sinMA *= vector[CINDEX(1,1)]; /*(-sin(alpha))^(m-1)->(-sin(alpha))^m*/
+        vector[CINDEX(m, m)] = fact * sinMA;
+        if(m != order) {                /* do if not on last row */
+          vector[CINDEX(m+1, m)] = vector[CINDEX(1, 0)]*(2*m+1)
+              *vector[CINDEX(m, m)];
+        }
       }
     }
     for(x = 2; x < order-m+1; x++) { /* generate row of evals recursively */
       vector[CINDEX(x+m, m)] = 
-	  ((2*(x+m)-1)*vector[CINDEX(1, 0)]*vector[CINDEX(x+m-1, m)]
-	   - (x + 2*m - 1)*vector[CINDEX(x+m-2, m)])/x;
+          ((2*(x+m)-1)*vector[CINDEX(1, 0)]*vector[CINDEX(x+m-1, m)]
+           - (x + 2*m - 1)*vector[CINDEX(x+m-2, m)])/x;
     }
   }
 }
@@ -263,7 +229,7 @@ void evalLegendre(double cosA, double *vector, int order)
 double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, double x, double y, double z, int order)
 {
   double **mat;
-  double cosA;			/* cosine of elevation coordinate */
+  double cosA;                  /* cosine of elevation coordinate */
   int i, j, k, kold, n, m;
   int cterms = costerms(order), terms = multerms(order);
 
@@ -280,8 +246,8 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
     xyz2sphere(chgs[j]->x, chgs[j]->y, chgs[j]->z,
                x, y, z, &(sys->mm.Rho[j]), &cosA, &(sys->mm.Beta[j]));
     sys->mm.Rhon[j] = sys->mm.Rho[j]; /* init powers of rho_i's */
-    sys->mm.Betam[j] = sys->mm.Beta[j];		/* init multiples of beta */
-    evalLegendre(cosA, sys->mm.tleg, order);	/* write moments to temporary array */
+    sys->mm.Betam[j] = sys->mm.Beta[j];         /* init multiples of beta */
+    evalLegendre(cosA, sys->mm.tleg, order);    /* write moments to temporary array */
 
     /* write a column of the matrix with each set of legendre evaluations */
     for(i = 0; i < cterms; i++) mat[i][j] = sys->mm.tleg[i]; /* copy for cos terms */
@@ -298,9 +264,9 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   for(i = 1, k = kold = 2; i < cterms; i++) { /* loop on rows of matrix */
     for(j = 0; j < numchgs; j++) mat[i][j] *= sys->mm.Rhon[j]; /* mul in factor */
     k -= 1;
-    if(k == 0) {		/* so that effective n varys appropriately */
+    if(k == 0) {                /* so that effective n varys appropriately */
       kold = k = kold + 1;
-      for(j = 0; j < numchgs; j++) sys->mm.Rhon[j] *= sys->mm.Rho[j];	/* r^n-1 -> r^n */
+      for(j = 0; j < numchgs; j++) sys->mm.Rhon[j] *= sys->mm.Rho[j];   /* r^n-1 -> r^n */
     }
   }
 
@@ -313,7 +279,7 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   for(n = 1; n <= order; n++) { /* loop on rows of matrix */
     for(m = 1; m <= n; m++) {
       for(j = 0; j < numchgs; j++) { /* copy a row */
-	mat[SINDEX(n, m, cterms)][j] = mat[CINDEX(n, m)][j];
+        mat[SINDEX(n, m, cterms)][j] = mat[CINDEX(n, m)][j];
       }
     }
   }
@@ -324,7 +290,7 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   }
 
   /* add factors of cos(m*beta) and sin(m*beta) to matrix entries */
-  for(m = 1; m <= order; m++) {	/* lp on m in Mn^m (no m=0 since cos(0)=1) */
+  for(m = 1; m <= order; m++) { /* lp on m in Mn^m (no m=0 since cos(0)=1) */
     for(n = m; n <= order; n++) { /* loop over rows with same m */
       for(j = 0; j < numchgs; j++) { /* add factors to a row */
         mat[CINDEX(n, m)][j] *= (2.0*cos(sys->mm.Betam[j]));   /* note factors of 2 */
@@ -338,7 +304,7 @@ double **mulQ2Multi(ssystem *sys, charge **chgs, int *is_dummy, int numchgs, dou
   for(j = 0; j < numchgs; j++) {
     if(is_dummy[j]) {
       for(i = 0; i < terms; i++) {
-	mat[i][j] = 0.0;
+        mat[i][j] = 0.0;
       }
     }
   }
@@ -376,71 +342,71 @@ double **mulMulti2Multi(ssystem *sys, double x, double y, double z, double xp, d
   for(j = 0; j <= order; j++) {
     for(k = 0; k <= j; k++) {
       for(n = 0, rhoPwr = 1.0; n <= j; n++, rhoPwr *= rho) {
-	for(m = 0, mBeta = 0.0; m <= n; m++, mBeta += beta) {
+        for(m = 0, mBeta = 0.0; m <= n; m++, mBeta += beta) {
 
-	  if(k == 0) {		/* figure terms for Nj^0, ie k = 0 */
-	    if(m <= j-n) {	/* if O moments are nonzero */
-	      temp1 = fact(sys, j)*rhoPwr*iPwr(sys, 2*m)*sys->mm.tleg[CINDEX(n, m)];
-	      temp1 /= (fact(sys, j-n+m)*fact(sys, n+m));
-	      mat[CINDEX(j, k)][CINDEX(j-n, m)] += temp1*cos(mBeta);
-	      if(m != 0) {		/* if sin term is non-zero */
-		mat[CINDEX(j, k)][SINDEX(j-n, m, cterms)] += temp1*sin(mBeta);
-	      }
-	    }
-	  }
-	  else {		/* figure terms for Nj^k, k != 0 */
-	    temp1 = fact(sys, j+k)*rhoPwr*sys->mm.tleg[CINDEX(n, m)]/fact(sys, n+m);
-	    temp2 = temp1*iPwr(sys, 2*m)/fact(sys, j-n+k+m);
-	    temp1 = temp1*iPwr(sys, k-m-abs(k-m))/fact(sys, j-n+abs(k-m));
+          if(k == 0) {          /* figure terms for Nj^0, ie k = 0 */
+            if(m <= j-n) {      /* if O moments are nonzero */
+              temp1 = fact(sys, j)*rhoPwr*iPwr(sys, 2*m)*sys->mm.tleg[CINDEX(n, m)];
+              temp1 /= (fact(sys, j-n+m)*fact(sys, n+m));
+              mat[CINDEX(j, k)][CINDEX(j-n, m)] += temp1*cos(mBeta);
+              if(m != 0) {              /* if sin term is non-zero */
+                mat[CINDEX(j, k)][SINDEX(j-n, m, cterms)] += temp1*sin(mBeta);
+              }
+            }
+          }
+          else {                /* figure terms for Nj^k, k != 0 */
+            temp1 = fact(sys, j+k)*rhoPwr*sys->mm.tleg[CINDEX(n, m)]/fact(sys, n+m);
+            temp2 = temp1*iPwr(sys, 2*m)/fact(sys, j-n+k+m);
+            temp1 = temp1*iPwr(sys, k-m-abs(k-m))/fact(sys, j-n+abs(k-m));
 
-	    /* write the cos(kPhi) coeff, bar(N)j^k */
-	    if(m != 0) {
-	      if(k-m < 0 && abs(k-m) <= j-n) {	/* use conjugates here */
-		mat[CINDEX(j, k)][CINDEX(j-n, m-k)] += temp1*cos(mBeta);
-		mat[CINDEX(j, k)][SINDEX(j-n, m-k,cterms)] += temp1*sin(mBeta);
-	      }
-	      else if(k-m == 0) {	/* double to compensate for 2Re sub. */
-		mat[CINDEX(j, k)][CINDEX(j-n, k-m)] += 2*temp1*cos(mBeta);
-		/* sin term is always zero */
-	      }
-	      else if(k-m > 0 && k-m <= j-n) {
-		mat[CINDEX(j, k)][CINDEX(j-n, k-m)] += temp1*cos(mBeta);
-		mat[CINDEX(j, k)][SINDEX(j-n, k-m,cterms)] -= temp1*sin(mBeta);
-	      }
-	      if(k+m <= j-n) {
-		mat[CINDEX(j, k)][CINDEX(j-n, k+m)] += temp2*cos(mBeta);
-		mat[CINDEX(j, k)][SINDEX(j-n, k+m,cterms)] += temp2*sin(mBeta);
-	      }
-	    }			/* do if m = 0 and O moments not zero */
-	    else if(k <= j-n) mat[CINDEX(j, k)][CINDEX(j-n, k)] += temp2;
+            /* write the cos(kPhi) coeff, bar(N)j^k */
+            if(m != 0) {
+              if(k-m < 0 && abs(k-m) <= j-n) {  /* use conjugates here */
+                mat[CINDEX(j, k)][CINDEX(j-n, m-k)] += temp1*cos(mBeta);
+                mat[CINDEX(j, k)][SINDEX(j-n, m-k,cterms)] += temp1*sin(mBeta);
+              }
+              else if(k-m == 0) {       /* double to compensate for 2Re sub. */
+                mat[CINDEX(j, k)][CINDEX(j-n, k-m)] += 2*temp1*cos(mBeta);
+                /* sin term is always zero */
+              }
+              else if(k-m > 0 && k-m <= j-n) {
+                mat[CINDEX(j, k)][CINDEX(j-n, k-m)] += temp1*cos(mBeta);
+                mat[CINDEX(j, k)][SINDEX(j-n, k-m,cterms)] -= temp1*sin(mBeta);
+              }
+              if(k+m <= j-n) {
+                mat[CINDEX(j, k)][CINDEX(j-n, k+m)] += temp2*cos(mBeta);
+                mat[CINDEX(j, k)][SINDEX(j-n, k+m,cterms)] += temp2*sin(mBeta);
+              }
+            }                   /* do if m = 0 and O moments not zero */
+            else if(k <= j-n) mat[CINDEX(j, k)][CINDEX(j-n, k)] += temp2;
 
-	    /* write the sin(kPhi) coeff, dblbar(N)j^k, if it is non-zero */
-	    if(m != 0) {
-	      if(k-m < 0 && abs(k-m) <= j-n) {	/* use conjugates here */
-		mat[SINDEX(j, k,cterms)][CINDEX(j-n, m-k)] += temp1*sin(mBeta);
-		mat[SINDEX(j, k, cterms)][SINDEX(j-n, m-k, cterms)] 
-		    -= temp1*cos(mBeta);
-	      }
-	      else if(k-m == 0) {/* double to compensate for 2Re sub */
-		mat[SINDEX(j, k, cterms)][CINDEX(j-n, k-m)] 
-		    += 2*temp1*sin(mBeta);
-		/* sine term is always zero */
-	      }
-	      else if(k-m > 0 && k-m <= j-n) {
-		mat[SINDEX(j, k,cterms)][CINDEX(j-n, k-m)] += temp1*sin(mBeta);
-		mat[SINDEX(j, k, cterms)][SINDEX(j-n, k-m, cterms)] 
-		    += temp1*cos(mBeta);
-	      }
-	      if(k+m <= j-n) {
-		mat[SINDEX(j, k,cterms)][CINDEX(j-n, k+m)] -= temp2*sin(mBeta);
-		mat[SINDEX(j, k, cterms)][SINDEX(j-n, k+m, cterms)] 
-		    += temp2*cos(mBeta);
-	      }
-	    }			/* do if m = 0 and moments not zero */
-	    else if(k <= j-n) mat[SINDEX(j, k,cterms)][SINDEX(j-n, k, cterms)] 
-		+= temp2;
-	  }
-	}
+            /* write the sin(kPhi) coeff, dblbar(N)j^k, if it is non-zero */
+            if(m != 0) {
+              if(k-m < 0 && abs(k-m) <= j-n) {  /* use conjugates here */
+                mat[SINDEX(j, k,cterms)][CINDEX(j-n, m-k)] += temp1*sin(mBeta);
+                mat[SINDEX(j, k, cterms)][SINDEX(j-n, m-k, cterms)] 
+                    -= temp1*cos(mBeta);
+              }
+              else if(k-m == 0) {/* double to compensate for 2Re sub */
+                mat[SINDEX(j, k, cterms)][CINDEX(j-n, k-m)] 
+                    += 2*temp1*sin(mBeta);
+                /* sine term is always zero */
+              }
+              else if(k-m > 0 && k-m <= j-n) {
+                mat[SINDEX(j, k,cterms)][CINDEX(j-n, k-m)] += temp1*sin(mBeta);
+                mat[SINDEX(j, k, cterms)][SINDEX(j-n, k-m, cterms)] 
+                    += temp1*cos(mBeta);
+              }
+              if(k+m <= j-n) {
+                mat[SINDEX(j, k,cterms)][CINDEX(j-n, k+m)] -= temp2*sin(mBeta);
+                mat[SINDEX(j, k, cterms)][SINDEX(j-n, k+m, cterms)] 
+                    += temp2*cos(mBeta);
+              }
+            }                   /* do if m = 0 and moments not zero */
+            else if(k <= j-n) mat[SINDEX(j, k,cterms)][SINDEX(j-n, k, cterms)] 
+                += temp2;
+          }
+        }
       }
     }
   }
@@ -457,7 +423,7 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
 /* double x, y, z: multipole expansion origin */
 {
   double **mat;
-  double cosTh;			/* cosine of elevation coordinate */
+  double cosTh;                 /* cosine of elevation coordinate */
   int i, j, k, m, n, kold;
   int cterms = costerms(order), sterms = sinterms(order);
   int terms = cterms + sterms;
@@ -471,9 +437,9 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
                x, y, z, &(sys->mm.Ir[i]), &cosTh, &(sys->mm.phi[i]));
 
     sys->mm.Irn[i] = sys->mm.Ir[i]; /* initialize (1/r)^n+1 vec. */
-    sys->mm.Mphi[i] = sys->mm.phi[i];		/* initialize m*phi vector */
+    sys->mm.Mphi[i] = sys->mm.phi[i];           /* initialize m*phi vector */
 
-    evalLegendre(cosTh, mat[i], order);	/* wr moms to 1st (cos) half of row */
+    evalLegendre(cosTh, mat[i], order); /* wr moms to 1st (cos) half of row */
 
   }
 
@@ -487,7 +453,7 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   for(j = 0, k = kold = 1; j < cterms; j++) { /* loop on columns of matrix */
     for(i = 0; i < numchgs; i++) mat[i][j] /= sys->mm.Irn[i]; /* divide by r^n+1 */
     k -= 1;
-    if(k == 0) {		/* so that n changes as appropriate */
+    if(k == 0) {                /* so that n changes as appropriate */
       kold = k = kold + 1;
       for(i = 0; i < numchgs; i++) sys->mm.Irn[i] *= sys->mm.Ir[i]; /* r^n -> r^n+1 */
     }
@@ -516,8 +482,8 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   /* copy left half of matrix to right half for sin(m*phi) terms */
   for(i = 0; i < numchgs; i++) { /* loop on rows of matrix */
     for(n = 1; n <= order; n++) { 
-      for(m = 1; m <= n; m++) {	/* copy a row */
-	mat[i][SINDEX(n, m, cterms)] = mat[i][CINDEX(n, m)];
+      for(m = 1; m <= n; m++) { /* copy a row */
+        mat[i][SINDEX(n, m, cterms)] = mat[i][CINDEX(n, m)];
       }
     }
   }
@@ -529,7 +495,7 @@ double **mulMulti2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   /* add factors of cos(m*phi) and sin(m*phi) to left and right halves resp. */
-  for(m = 1; m <= order; m++) {	/* lp on m in Mn^m (no m=0 since cos(0)=1) */
+  for(m = 1; m <= order; m++) { /* lp on m in Mn^m (no m=0 since cos(0)=1) */
     for(n = m; n <= order; n++) { /* loop over cols with same m */
       for(i = 0; i < numchgs; i++) { /* add factors to a column */
         mat[i][CINDEX(n, m)] *= cos(sys->mm.Mphi[i]);

@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "zbufGlobal.h"
@@ -57,16 +23,16 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
       for(k = 0; k < 3; k++) temp[k] = axes[i][j][k]-view[k];
       alpha = (rhs-dot(view, normal))/dot(temp, normal);
       if(alpha <= MARGIN) {
-	sys->info(
+        sys->info(
       "image: warning, view point is btwn view plane and axis pt, alpha=%g\n",
-		alpha);
-	/*sys->info(
-		"%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
-		i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
-		view[0],view[1],view[2]);
-	sys->info(" rhs = %g\n", rhs);
-	sys->error("See previous messages for details.");
-	*/
+                alpha);
+        /*sys->info(
+                "%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
+                i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
+                view[0],view[1],view[2]);
+        sys->info(" rhs = %g\n", rhs);
+        sys->error("See previous messages for details.");
+        */
       }
       for(k = 0; k < 3; k++) axes[i][j][k] = view[k]+alpha*temp[k];
     }
@@ -78,15 +44,15 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
       for(k = 0; k < 3; k++) temp[k] = (faces[i]->c)[j][k]-view[k];
       alpha = (rhs-dot(view, normal))/dot(temp, normal);
       if(alpha <= MARGIN) {
-	sys->info(
-		"image: view point is btwn view plane and object, alpha=%g\n",
-		alpha);
-	sys->info(
-		"%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
-		i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
-		view[0],view[1],view[2]);
-	sys->info(" rhs = %g\n", rhs);
-	sys->error("See previous messages for details.");
+        sys->info(
+                "image: view point is btwn view plane and object, alpha=%g\n",
+                alpha);
+        sys->info(
+                "%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
+                i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
+                view[0],view[1],view[2]);
+        sys->info(" rhs = %g\n", rhs);
+        sys->error("See previous messages for details.");
       }
       for(k = 0; k < 3; k++) (faces[i]->c)[j][k] = view[k]+alpha*temp[k];
     }
@@ -98,12 +64,12 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
     alpha = (rhs-dot(view, normal))/dot(temp, normal);
     if(alpha <= MARGIN) {
       sys->info(
-	      "image: from point is btwn view plane and object, alpha=%g\n",
-	      alpha);
+              "image: from point is btwn view plane and object, alpha=%g\n",
+              alpha);
       sys->info(
-	      "%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
-	      i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
-	      view[0],view[1],view[2]);
+              "%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
+              i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
+              view[0],view[1],view[2]);
       sys->info(" rhs = %g\n", rhs);
       sys->error("See previous messages for details.");
     }
@@ -112,12 +78,12 @@ void image(ssystem *sys, face **faces, int numfaces, line **lines, int numlines,
     alpha = (rhs-dot(view, normal))/dot(temp, normal);
     if(alpha <= MARGIN) {
       sys->info(
-	      "image: to point is btwn view plane and object, alpha=%g\n",
-	      alpha);
+              "image: to point is btwn view plane and object, alpha=%g\n",
+              alpha);
       sys->info(
-	      "%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
-	      i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
-	      view[0],view[1],view[2]);
+              "%d pnt-view = (%g %g %g) n = (%g %g %g)\n view = (%g %g %g)",
+              i,temp[0],temp[1],temp[2],normal[0],normal[1],normal[2],
+              view[0],view[1],view[2]);
       sys->info(" rhs = %g\n", rhs);
       sys->error("See previous messages for details.");
     }
@@ -154,7 +120,7 @@ void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numline
 {
   int i, j, k;
   double temp, tvec[3], crot, srot;
-  double y[3], x[3], z[3];		/* unit vectors */
+  double y[3], x[3], z[3];              /* unit vectors */
   double origin[3];
   double ***axes = sys->axes;
 
@@ -190,7 +156,7 @@ void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numline
       for(k = 0; k < 3; k++) tvec[k] = faces[i]->c[j][k] - origin[k];
       temp = dot(tvec, x); /* x coordinate */
       (faces[i]->c)[j][1] = dot(tvec, y); /* y coordinate */
-      (faces[i]->c)[j][2] = 0.0;	/* z */
+      (faces[i]->c)[j][2] = 0.0;        /* z */
       (faces[i]->c)[j][0] = temp;
     }
   }
@@ -200,13 +166,13 @@ void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numline
     for(k = 0; k < 3; k++) tvec[k] = lines[i]->from[k] - origin[k];
     temp = dot(tvec, x); /* x coordinate */
     (lines[i]->from)[1] = dot(tvec, y); /* y coordinate */
-    (lines[i]->from)[2] = 0.0;	/* z */
+    (lines[i]->from)[2] = 0.0;  /* z */
     (lines[i]->from)[0] = temp;
     /* get new to point coordinates */
     for(k = 0; k < 3; k++) tvec[k] = lines[i]->to[k] - origin[k];
     temp = dot(tvec, x); /* x coordinate */
     (lines[i]->to)[1] = dot(tvec, y); /* y coordinate */
-    (lines[i]->to)[2] = 0.0;	/* z */
+    (lines[i]->to)[2] = 0.0;    /* z */
     (lines[i]->to)[0] = temp;
   }
   /* if axes are specified, they must be included */
@@ -259,21 +225,21 @@ void makePos(ssystem *sys, face **faces, int numfaces, line **lines, int numline
 {
   int i,j;
   double minx, miny, trans[2];
-  double offset[2];	       	/* the margins from 0 for smallest x and y */
+  double offset[2];             /* the margins from 0 for smallest x and y */
   double ***axes = sys->axes;
 
-  offset[1] = offset[0] = 0.0;	/* offsetting now done in scale2d */
+  offset[1] = offset[0] = 0.0;  /* offsetting now done in scale2d */
 
   /* find the smallest x and y coordinates */
   for(i = 0; i < numfaces; i++) {
     for(j = 0; j < faces[i]->numsides; j++) {
       if(i == 0 && j == 0) {
-	minx = faces[i]->c[j][0];
-	miny = faces[i]->c[j][1];
+        minx = faces[i]->c[j][0];
+        miny = faces[i]->c[j][1];
       }
       else {
-	minx = MIN(minx, faces[i]->c[j][0]);
-	miny = MIN(miny, faces[i]->c[j][1]);
+        minx = MIN(minx, faces[i]->c[j][0]);
+        miny = MIN(miny, faces[i]->c[j][1]);
       }
     }
   }
@@ -356,7 +322,7 @@ void scale2d(ssystem *sys, face **faces, int numfaces, line **lines, int numline
 
   if(xmax <= MARGIN || ymax <= MARGIN) {
     sys->error("scale2d: strange xmax = %g or ymax = %g\n",
-	    xmax, ymax);
+            xmax, ymax);
   }
 
   /* find the x and y scales that would make those dimensions dead on */
@@ -409,13 +375,13 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
   for(i = 0; i < numfaces; i++) {
     for(j = 0; j < faces[i]->numsides; j++) {
       if(i == 0 && j == 0) {
-	for(k = 0; k < 3; k++) max[k] = min[k] = (faces[0]->c)[0][k];
+        for(k = 0; k < 3; k++) max[k] = min[k] = (faces[0]->c)[0][k];
       }
       else {
-	for(k = 0; k < 3; k++) {
-	  max[k] = MAX(max[k], faces[i]->c[j][k]);
-	  min[k] = MIN(min[k], faces[i]->c[j][k]);
-	}
+        for(k = 0; k < 3; k++) {
+          max[k] = MAX(max[k], faces[i]->c[j][k]);
+          min[k] = MIN(min[k], faces[i]->c[j][k]);
+        }
       }
     }
   }
@@ -424,16 +390,16 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
   for(i = 0; i < numlines; i++) {
     if(i == 0 && numfaces == 0) {
       for(k = 0; k < 3; k++) {
-	max[k] = MAX((lines[0]->from)[k], (lines[0]->to)[k]);
-	min[k] = MIN((lines[0]->from)[k], (lines[0]->to)[k]);
+        max[k] = MAX((lines[0]->from)[k], (lines[0]->to)[k]);
+        min[k] = MIN((lines[0]->from)[k], (lines[0]->to)[k]);
       }
     }
     else {
       for(k = 0; k < 3; k++) {
-	max[k] = MAX(max[k], lines[0]->from[k]);
-	max[k] = MAX(max[k], lines[0]->to[k]);
-	min[k] = MIN(min[k], lines[0]->from[k]);
-	min[k] = MIN(min[k], lines[0]->to[k]);
+        max[k] = MAX(max[k], lines[0]->from[k]);
+        max[k] = MAX(max[k], lines[0]->to[k]);
+        min[k] = MIN(min[k], lines[0]->from[k]);
+        min[k] = MIN(min[k], lines[0]->to[k]);
       }
     }
   }
@@ -442,8 +408,8 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
   for(i = 0; i < 7 && sys->x_ && flag == ON; i++) {
     for(j = 0; j < 2; j++) {
       for(k = 0; k < 3; k++) {
-	max[k] = MAX(max[k], axes[i][j][k]);
-	min[k] = MIN(min[k], axes[i][j][k]);
+        max[k] = MAX(max[k], axes[i][j][k]);
+        min[k] = MIN(min[k], axes[i][j][k]);
       }
     }
   }
@@ -509,8 +475,8 @@ double getNormal(ssystem *sys, double *normal, double radius, double *avg, doubl
      - use view[0] as azimuth relative to poitive x direction
      - use view[1] as elevation relative to positive z direction */
   normal[0] = normal[1] = sin(M_PI*view[1]/180.0);
-  normal[0] *= cos(M_PI*view[0]/180.0);	/* x = sin(beta)cos(alpha) */
-  normal[1] *= sin(M_PI*view[0]/180.0);	/* y = sin(beta)sin(alpha) */
+  normal[0] *= cos(M_PI*view[0]/180.0); /* x = sin(beta)cos(alpha) */
+  normal[1] *= sin(M_PI*view[0]/180.0); /* y = sin(beta)sin(alpha) */
   normal[2] = cos(M_PI*view[1]/180.0); /* z = cos(beta) */
 
   /* figure the rhs of the plane's equation (use view for temp storage) */
@@ -524,22 +490,22 @@ double getNormal(ssystem *sys, double *normal, double radius, double *avg, doubl
     /* adjust the axes if needed to keep from going beyond the view plane */
     /*    get norm of view-avg */
     for(norm = 0.0, i = 0; i < 3; i++) 
-	norm += (view[i]-avg[i])*(view[i]-avg[i]);
+        norm += (view[i]-avg[i])*(view[i]-avg[i]);
     /*    check sizes of current axes */
     axes_too_big = FALSE;
     first = TRUE;
     for(i = 0; i < 7; i++) {
       anorm = 0.0;
       for(k = 0; k < 3; k++) {
-	anorm += (axes[i][0][k]-axes[i][1][k])*(axes[i][0][k]-axes[i][1][k]);
+        anorm += (axes[i][0][k]-axes[i][1][k])*(axes[i][0][k]-axes[i][1][k]);
       }
       if(anorm >= norm) {
-	axes_too_big = TRUE;
-	if(first) {
-	  first = FALSE;
-	  max_anorm = anorm;
-	}
-	else max_anorm = MAX(max_anorm, anorm);
+        axes_too_big = TRUE;
+        if(first) {
+          first = FALSE;
+          max_anorm = anorm;
+        }
+        else max_anorm = MAX(max_anorm, anorm);
       }
     }
     /*    adjust if too big */
@@ -549,11 +515,11 @@ double getNormal(ssystem *sys, double *normal, double radius, double *avg, doubl
       anorm = sqrt(norm)/max_anorm; /* the scale factor */
       anorm /= 2.0;
       for(i = 0; i < 7; i++) {
-	for(j = 0; j < 2; j++) {
-	  for(k = 0; k < 3; k++) {
-	    axes[i][j][k] *= anorm;
-	  }
-	}
+        for(j = 0; j < 2; j++) {
+          for(k = 0; k < 3; k++) {
+            axes[i][j][k] *= anorm;
+          }
+        }
       }
     }
   }

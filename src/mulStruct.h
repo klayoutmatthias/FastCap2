@@ -1,43 +1,9 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #if !defined(mulStruct_H)
 #define mulStruct_H
 
 #include "heap.h"
-#include "patran.h"		/* for neutral file interface */
+#include "patran.h"             /* for neutral file interface */
 
 #include <cstdio>
 
@@ -47,9 +13,9 @@ struct surface {                /* a surface file and its permittivities */
   double ref[3];                /* reference point for normal alignment */
   int ref_inside;               /* TRUE=>ref point inside (on - side of) surf*/
   int end_of_chain;             /* TRUE=>end o/surf chain all w/same cond#'s */
-  char *title;			/* title inside surface file */
+  char *title;                  /* title inside surface file */
   char *name;                   /* surface file name (neutral or quick fmat) */
-  char *group_name;		/* name of cond group (if any) surf part of */
+  char *group_name;             /* name of cond group (if any) surf part of */
   double outer_perm;            /* relative permitivity on side n pnts into
                                    (n is taken as the normal to 1st panel) */
   double inner_perm;            /* relative permitivity on other side
@@ -61,21 +27,21 @@ struct surface {                /* a surface file and its permittivities */
   struct surface *prev;
 };
 
-struct charge {			/* point charge */
-  struct charge *next;		/* Next charge in linked list. */
-  double corner[4][3];		/* Corner point coordinates. */
+struct charge {                 /* point charge */
+  struct charge *next;          /* Next charge in linked list. */
+  double corner[4][3];          /* Corner point coordinates. */
   int shape;                    /* 4=quad panel, 3 = triangular panel. */
-  int index;			/* charge value index in q array */
-  double X[3], Y[3], Z[3];	/* Def coord system, Z is normal direction. */
-  double max_diag;		/* Longest diagonal of panel. */
-  double min_diag;		/* Shortest diagonal. */
-  double length[4];		/* Edge lengths. */
-  double area;			/* Area of two triangluar regions. */
-  double x, y, z;		/* Centroid of the quadlrilateral.  */
-  double moments[16];		/* Moments of the panel. */
-  double *multipole;		/* Temporarily Stores Q2M. */
+  int index;                    /* charge value index in q array */
+  double X[3], Y[3], Z[3];      /* Def coord system, Z is normal direction. */
+  double max_diag;              /* Longest diagonal of panel. */
+  double min_diag;              /* Shortest diagonal. */
+  double length[4];             /* Edge lengths. */
+  double area;                  /* Area of two triangluar regions. */
+  double x, y, z;               /* Centroid of the quadlrilateral.  */
+  double moments[16];           /* Moments of the panel. */
+  double *multipole;            /* Temporarily Stores Q2M. */
   int cond;                     /* Conductor number. */
-  int order;			/* Multipole order. */
+  int order;                    /* Multipole order. */
   /* things needed to do electric field evaluation by divided difference */
   int dummy;                    /* TRUE => dummy panel for elec field eval */
   struct surface *surf;         /* surface that contains this panel */
@@ -83,21 +49,21 @@ struct charge {			/* point charge */
   struct charge *neg_dummy;     /* eval pnt w/neg displacement from x,y,z */
 };
 
-struct cube {		
+struct cube {           
 /* Definition variables. */
-  int index;			/* unique index */
-  int level;			/* 0 => root */
-  double x, y, z;		/* Position of cube center. */
-  int j, k, l;			/* cube is cubes[level][j][k][l] */
-  int flag;			/* used for marking for tree walks */
+  int index;                    /* unique index */
+  int level;                    /* 0 => root */
+  double x, y, z;               /* Position of cube center. */
+  int j, k, l;                  /* cube is cubes[level][j][k][l] */
+  int flag;                     /* used for marking for tree walks */
 
 /* Upward Pass variables. */
   int mul_exact;                /* TRUE => do not build a multipole expansn */
-  struct cube *mnext;		/* Ptr to next cube on which to do multi. */
-  int upnumvects;		/* 0 if empty,  1 on bot level if not empty, 
-				   else # nonempty kids. */ 
-  int *upnumeles;		/* numeles[0] = # chgs on bot level, else
-				   number of terms in kid's expansion. */
+  struct cube *mnext;           /* Ptr to next cube on which to do multi. */
+  int upnumvects;               /* 0 if empty,  1 on bot level if not empty, 
+                                   else # nonempty kids. */ 
+  int *upnumeles;               /* numeles[0] = # chgs on bot level, else
+                                   number of terms in kid's expansion. */
   double **upvects;     /* vects[0] = chgs on bot level, else vectors
                                     of kids' expansion terms. */
   int multisize;        /* Number of terms in the expansion. */
@@ -106,53 +72,53 @@ struct cube {
                            upmats[i] is multisize x upnumeles[i]. */
   int *is_dummy;        /* is_dummy[i] = TRUE => panel i is a dummy panel
                            used for elec field eval - omit from upward pass */
-  int *is_dielec;		/* is_dielec[i] = TRUE => panel i is on a surf
-				   of type DIELEC or BOTH */
+  int *is_dielec;               /* is_dielec[i] = TRUE => panel i is on a surf
+                                   of type DIELEC or BOTH */
 
 /* Downward Pass variables. */
   int loc_exact;                /* TRUE => do not build a local expansion */
   struct cube *lnext;          /* Ptr to next cube on which to do local. */
-  int downnumvects;		/* Number of cubes in iteraction list. */
-  int *downnumeles;		/* # of eles in interact cube's expansion. */
-  double **downvects;		/* Vects of interact cube's expansion. */
+  int downnumvects;             /* Number of cubes in iteraction list. */
+  int *downnumeles;             /* # of eles in interact cube's expansion. */
+  double **downvects;           /* Vects of interact cube's expansion. */
 
   int localsize;        /* Size of the local expansion */
   double *local;        /* Vector of local field coefs */
   double ***downmats;   /* Matrices for multi to chg, or multi to local
-			   or local to local.  Downnumele x localsize. */
+                           or local to local.  Downnumele x localsize. */
 
-  struct cube **interList;	/* explicit interaction list 
-				   - for fake dwnwd passes and eval pass */
-  int interSize;		/* number of elements in interList
-				   - often != downnumvects nor evalnumvects */
+  struct cube **interList;      /* explicit interaction list 
+                                   - for fake dwnwd passes and eval pass */
+  int interSize;                /* number of elements in interList
+                                   - often != downnumvects nor evalnumvects */
 
   /* evaluation pass variables */
-  struct cube *enext;		/* pntr to next cube to evaluate */
-  int evalnumvects;		/* for exact = #in inter list, o.w. = 1 */
-  int *evalnumeles;		/* num of elements in inter list entry exp */
-  double **evalvects;		/* multi, local, or chgs of ilist entry */
+  struct cube *enext;           /* pntr to next cube to evaluate */
+  int evalnumvects;             /* for exact = #in inter list, o.w. = 1 */
+  int *evalnumeles;             /* num of elements in inter list entry exp */
+  double **evalvects;           /* multi, local, or chgs of ilist entry */
 
-  double *eval;			/* vector of evaluation pnt voltages in cube */
-  double ***evalmats;		/* matrices for multi to potential, local to
-				   potential or charge to potential */
+  double *eval;                 /* vector of evaluation pnt voltages in cube */
+  double ***evalmats;           /* matrices for multi to potential, local to
+                                   potential or charge to potential */
 
 /* Direct portion variables. */
-  struct cube *dnext;		/* Ptr to next cube on which to do direct. */
-  struct cube *pnext;		/* Ptr to next cube on which to do precond. */
-  struct cube *rpnext;		/* Reverse ptr to next cube to do precond. */
-  int dindex;			/* Used to determine lower triang portion. */
-  int directnumvects;		/* Number of vects, self plus nbrs. */
-  int *directnumeles;		/* # of elements in the nbrs chg vect. 
-				   directnumeles[0] = numchgs in cube. */
-  double **directq;		/* Vecs of chg vecs, directq[0] this cube's. */
-  double ***directmats;		/* Potential Coeffs in cube and neighbors. */
-  double ***precondmats;	/* Precond Coeffs in cube and neighbors. */
-  double **directlu;		/* Decomposed cube potential Coefficients. */
-  double **precond;		/* Preconditioner. */
-  double *prevectq;		/* The charge vector for the preconditioner. */
-  double *prevectp;		/* The potential vector for preconditioner. */
-  int presize;			/* Size of the preconditioner. */
-  int **nbr_is_dummy;		/* Dummy vectors corresponding to directq's */
+  struct cube *dnext;           /* Ptr to next cube on which to do direct. */
+  struct cube *pnext;           /* Ptr to next cube on which to do precond. */
+  struct cube *rpnext;          /* Reverse ptr to next cube to do precond. */
+  int dindex;                   /* Used to determine lower triang portion. */
+  int directnumvects;           /* Number of vects, self plus nbrs. */
+  int *directnumeles;           /* # of elements in the nbrs chg vect. 
+                                   directnumeles[0] = numchgs in cube. */
+  double **directq;             /* Vecs of chg vecs, directq[0] this cube's. */
+  double ***directmats;         /* Potential Coeffs in cube and neighbors. */
+  double ***precondmats;        /* Precond Coeffs in cube and neighbors. */
+  double **directlu;            /* Decomposed cube potential Coefficients. */
+  double **precond;             /* Preconditioner. */
+  double *prevectq;             /* The charge vector for the preconditioner. */
+  double *prevectp;             /* The potential vector for preconditioner. */
+  int presize;                  /* Size of the preconditioner. */
+  int **nbr_is_dummy;           /* Dummy vectors corresponding to directq's */
 
 /* Cube structure variables. */
   charge **chgs;          /* Array of charge ptrs. Only used lowest level. */
@@ -171,12 +137,12 @@ struct multi_mats
   int **Q2Mcnt, **Q2Lcnt, **Q2Pcnt, **L2Lcnt; //  counts of xformation mats
   int **M2Mcnt, **M2Lcnt, **M2Pcnt, **L2Pcnt, **Q2PDcnt;
 
-  double *Irn, *Mphi;		//  (1/r)^n+1, m*phi vect's
-  double *Ir, *phi;		//  1/r and phi arrays, used to update above
-  double *Rho, *Rhon;		//  rho and rho^n array
-  double *Beta, *Betam;		//  beta and beta*m array
+  double *Irn, *Mphi;           //  (1/r)^n+1, m*phi vect's
+  double *Ir, *phi;             //  1/r and phi arrays, used to update above
+  double *Rho, *Rhon;           //  rho and rho^n array
+  double *Beta, *Betam;         //  beta and beta*m array
   double *tleg;                 //  Temporary Legendre storage.
-  double **factFac;		//  factorial factor array: (n-m+1)...(n+m)
+  double **factFac;             //  factorial factor array: (n-m+1)...(n+m)
 
   double *sinmkB, *cosmkB, **facFrA;
 };
@@ -204,45 +170,45 @@ struct ssystem
 
   //  misc global
   NAME *start_name;             //  conductor name linked list head
-  NAME *current_name;		//  conductor name linked list tail
-  NAME *start_name_this_time;	//  cond name list for the current surface
-  const char *kill_name_list;	//  cond names whose columns are omitted
-  ITER *kill_num_list;		//  cond numbers whose columns are omitted
-  const char *kinp_name_list;	//  cond names omitted from input
-  ITER *kinp_num_list;		//  cond numbers omitted from input
-  const char *qpic_name_list;	//  cond column names that get q picture
-  ITER *qpic_num_list;		//  cond column names that get q picture
-  const char *kq_name_list;	//  cond names removed from q picture
-  ITER *kq_num_list;		//  cond numbers removed from q picture
+  NAME *current_name;           //  conductor name linked list tail
+  NAME *start_name_this_time;   //  cond name list for the current surface
+  const char *kill_name_list;   //  cond names whose columns are omitted
+  ITER *kill_num_list;          //  cond numbers whose columns are omitted
+  const char *kinp_name_list;   //  cond names omitted from input
+  ITER *kinp_num_list;          //  cond numbers omitted from input
+  const char *qpic_name_list;   //  cond column names that get q picture
+  ITER *qpic_num_list;          //  cond column names that get q picture
+  const char *kq_name_list;     //  cond names removed from q picture
+  ITER *kq_num_list;            //  cond numbers removed from q picture
 
-  double iter_tol;		//  iterative loop tolerence on ||r||
+  double iter_tol;              //  iterative loop tolerence on ||r||
 
   //  command line option variables - all have to do with ps file dumping
-  bool s_;			//  true => insert showpage in .ps file(s)
-  bool n_;			//  true => number faces with input ordering
-  bool g_;			//  true => dump depth graph and quit
-  bool c_;			//  true => prbool command line on .ps file(s)
-  bool x_;			//  true => axes have been specified
+  bool s_;                      //  true => insert showpage in .ps file(s)
+  bool n_;                      //  true => number faces with input ordering
+  bool g_;                      //  true => dump depth graph and quit
+  bool c_;                      //  true => prbool command line on .ps file(s)
+  bool x_;                      //  true => axes have been specified
   bool k_;
-  bool rc_;			//  true => rm conductors in list from pic
-  bool rd_;			//  true => remove all dielec i/fs from pic
-  bool rb_;			//  true => rm BOTH-types in list from pic
-  bool q_;			//  true => dump shaded plots of q_iter iters
-  bool rk_;			//  true => rm chg den key in -q plots
-  bool m_;			//  true => switch to plot gen mode
-  bool f_;			//  true => don't fill faces (no hidden l rm)
-  bool dd_;			//  true => dump ttl charges to .ps pictures
-  double view[3];		//  absolute view point of 3D geometry
-  double moffset[2];		//  image offset from lower left corner
-  double elevation;		//  elevation of view rel to center of object
-  double azimuth;		//  azimuth of view rel to center of object
-  double rotation;		//  image rotation, degrees
-  double distance;		//  relative distance from center (#radii-1)
-  double linewd;		//  postscript line width
-  double scale;			//  over all image scale factor
-  double axeslen;		//  axes lengths in 3D distance
-  int up_axis;			//  X,Y or Z => which axis is vertical in pic
-  const char *line_file;	//  pointer to .fig superimposed line file
+  bool rc_;                     //  true => rm conductors in list from pic
+  bool rd_;                     //  true => remove all dielec i/fs from pic
+  bool rb_;                     //  true => rm BOTH-types in list from pic
+  bool q_;                      //  true => dump shaded plots of q_iter iters
+  bool rk_;                     //  true => rm chg den key in -q plots
+  bool m_;                      //  true => switch to plot gen mode
+  bool f_;                      //  true => don't fill faces (no hidden l rm)
+  bool dd_;                     //  true => dump ttl charges to .ps pictures
+  double view[3];               //  absolute view point of 3D geometry
+  double moffset[2];            //  image offset from lower left corner
+  double elevation;             //  elevation of view rel to center of object
+  double azimuth;               //  azimuth of view rel to center of object
+  double rotation;              //  image rotation, degrees
+  double distance;              //  relative distance from center (#radii-1)
+  double linewd;                //  postscript line width
+  double scale;                 //  over all image scale factor
+  double axeslen;               //  axes lengths in 3D distance
+  int up_axis;                  //  X,Y or Z => which axis is vertical in pic
+  const char *line_file;        //  pointer to .fig superimposed line file
 
   //  solver configuration
 
@@ -305,13 +271,13 @@ struct ssystem
 
   //  problem description
   int side;                     //  # cubes per side on lowest level.
-  int depth;			//  # of levels of cubes.
-  int order;			//  # of levels of cubes.
+  int depth;                    //  # of levels of cubes.
+  int order;                    //  # of levels of cubes.
   int num_cond;                 //  number of conductors
-  Name *cond_names;		//  conductor name list
+  Name *cond_names;             //  conductor name list
   double perm_factor;           //  overall scale factor for permittivities
-  double length;		//  Length per cube on lowest level.
-  double minx, miny, minz;	//  Coordinates of one corner of the domain.
+  double length;                //  Length per cube on lowest level.
+  double minx, miny, minz;      //  Coordinates of one corner of the domain.
   int mul_maxq;                 //  max #panels in mul_exact cube
   int mul_maxlq;                //  max #panels in lowest level cube
   int max_panel;                //  max #panels in all cubes w/multipole
@@ -321,16 +287,16 @@ struct ssystem
   double *q;                    //  The vector of lowest level charges.
   double *p;                    //  The vector of lowest level potentials.
   charge *panels;               //  linked list of charge panels in problem
-  cube *****cubes;		//  The array of cube pointers.
+  cube *****cubes;              //  The array of cube pointers.
   cube **multilist;             //  Array of ptrs to first cube in linked list
                                 //    of cubes to do multi at each level.
   cube **locallist;             //  Array of ptrs to first cube in linked list
                                 //    of cubes to do local at each level.
-  cube *directlist;		//  head of linked lst of low lev cubes w/chg
-  cube *precondlist;		//  head of linked lst of precond blks.
-  cube *revprecondlist;		//  reversed linked lst of precond blks.
+  cube *directlist;             //  head of linked lst of low lev cubes w/chg
+  cube *precondlist;            //  head of linked lst of precond blks.
+  cube *revprecondlist;         //  reversed linked lst of precond blks.
   int *is_dummy;                //  is_dummy[i] = TRUE => panel i is a dummy
-  int *is_dielec;		//  is_dielec[i] = TRUE => panel i on dielec
+  int *is_dielec;               //  is_dielec[i] = TRUE => panel i on dielec
 
   multi_mats mm;
 

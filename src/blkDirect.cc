@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "calcp.h"
@@ -43,20 +9,20 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 #include <fcntl.h>
 #include <unistd.h>
 
-#define SQRMAT 0		/* for rdMat(), wrMat() */
+#define SQRMAT 0                /* for rdMat(), wrMat() */
 #define TRIMAT 1
 #define COLMAT 2
-#define LOWMAT 0		/* for blkMatSolve() */
+#define LOWMAT 0                /* for blkMatSolve() */
 #define UPPMAT 1
-#define LO2TR 3			/* for matXfer() */
+#define LO2TR 3                 /* for matXfer() */
 #define UP2TR 4
-#define L11 0			/*1/4 matrix file names, see getName() */
+#define L11 0                   /*1/4 matrix file names, see getName() */
 #define U11 1
 #define U12 2
 #define L21 3
 #define LTIL 4
 #define UTIL 5
-#define PMODE 0644		/* protection code used with write() */
+#define PMODE 0644              /* protection code used with write() */
 
 #define SQDEX(i, j, siz) ((i)*(siz) + (j))
 #define LODEX(i, j, siz) (((i)*((i)+1))/2 + (j))
@@ -109,7 +75,7 @@ static void dumpMatCor(ssystem *sys, double **mat, double *vec, int fsize)
 {
   int i, j, size = 5;
 
-  if(mat != NULL) {		/* full matrix */
+  if(mat != NULL) {             /* full matrix */
     sys->msg("\nUPPER LEFT CORNER - full %dx%d matrix\n", fsize, fsize);
     for(i = 0; i < MIN(size, fsize); i++) {
       for(j = 0; j < MIN(size, fsize); j++) {
@@ -119,7 +85,7 @@ static void dumpMatCor(ssystem *sys, double **mat, double *vec, int fsize)
     }
 
   }
-  else if(vec != NULL){			/* flat matrix as in blkDirect.c */
+  else if(vec != NULL){                 /* flat matrix as in blkDirect.c */
     sys->msg("\nUPPER LEFT CORNER - flat %dx%d matrix\n", fsize, fsize);
     for(i = 0; i < MIN(size, fsize); i++) {
       for(j = 0; j < MIN(size, fsize); j++) {
@@ -176,7 +142,7 @@ static void wrMat(ssystem *sys, double *mat, int siz, int file, int type)
 {
   int ds = sizeof(double), fdis;
   int realsiz, actsiz;                  /* size in chars */
-  char name[4];	           		/* name of file */
+  char name[4];                         /* name of file */
 
   /* figure the real size */
   if(type == TRIMAT) realsiz = ds*siz*(siz+1)/2;
@@ -193,7 +159,7 @@ static void wrMat(ssystem *sys, double *mat, int siz, int file, int type)
   sys->info("Writing %s...", name);
 
   /* write the data and close */
-  if(type == COLMAT) transpose(mat, siz);	/* store columnwise */
+  if(type == COLMAT) transpose(mat, siz);       /* store columnwise */
   if((actsiz = write(fdis, (char *)mat, realsiz)) != realsiz) {
     sys->error("wrMat: buffer write error to '%s,' wrote %d of %d dbls\n",
                name, actsiz/ds, realsiz/ds);
@@ -210,8 +176,8 @@ static void rdMat(ssystem *sys, double *mat, int siz, int file, int type)
 /* int siz: siz is #rows and cols */
 {
   int fdis;
-  int realsiz;			/* size in chars */
-  char name[4];           	/* name of file */
+  int realsiz;                  /* size in chars */
+  char name[4];                 /* name of file */
 
   /* figure the real size */
   if(type == TRIMAT) realsiz = sizeof(double)*siz*(siz+1)/2;
@@ -243,19 +209,19 @@ static void matXfer(ssystem *sys, double *matsq, double *matri, int siz, int typ
 {
   int i, j, temp;
 
-  if(type == UP2TR) {		/* mv upper triangular part */
-    for(i = 0; i < siz; i++) {	/* from row zero up */
+  if(type == UP2TR) {           /* mv upper triangular part */
+    for(i = 0; i < siz; i++) {  /* from row zero up */
       for(j = i; j < siz; j++) {
-	temp = UPDEX(i, j, siz);
-	matri[temp] = matsq[SQDEX(i, j, siz)];
+        temp = UPDEX(i, j, siz);
+        matri[temp] = matsq[SQDEX(i, j, siz)];
       }
     }
   }
-  else if(type == LO2TR) {	/* mv lower triangular part, put 1's on diag */
-    for(i = 0; i < siz; i++) {	/* from row zero up */
+  else if(type == LO2TR) {      /* mv lower triangular part, put 1's on diag */
+    for(i = 0; i < siz; i++) {  /* from row zero up */
       for(j = 0; j <= i; j++) {
-	if(i == j) matri[LODEX(i, j, siz)] = 1.0;
-	else matri[LODEX(i, j, siz)] = matsq[SQDEX(i, j, siz)];
+        if(i == j) matri[LODEX(i, j, siz)] = 1.0;
+        else matri[LODEX(i, j, siz)] = matsq[SQDEX(i, j, siz)];
       }
     }
   }
@@ -273,30 +239,30 @@ static void blkMatsolve(ssystem *sys, double *matsq, double *matri, int siz, int
 
   if(type == LOWMAT) {
     /* a row in the result matrix is a linear comb of the previous rows */
-    for(i = 1; i < siz; i++) {	/* loop on rows */
+    for(i = 1; i < siz; i++) {  /* loop on rows */
       sys->info("%d ", i);
       for(j = 0; j < siz; j++) { /* loop on columns */
-	for(k = 0; k < i; k++) {	/* loop on previous rows */
-	  matsq[SQDEX(i, j, siz)]
-	      -= (matri[LODEX(i, k, siz)]*matsq[SQDEX(k, j, siz)]);
-	  counters.fulldirops++;
-	}
+        for(k = 0; k < i; k++) {        /* loop on previous rows */
+          matsq[SQDEX(i, j, siz)]
+              -= (matri[LODEX(i, k, siz)]*matsq[SQDEX(k, j, siz)]);
+          counters.fulldirops++;
+        }
       }
     }
     sys->info("\n");
   }
   else if(type == UPPMAT) {
     /* a column in the result matrix is a linear comb of the prev columns */
-    for(j = 0; j < siz; j++) {	/* loop on columns */
+    for(j = 0; j < siz; j++) {  /* loop on columns */
       sys->info("%d ", j);
       for(i = 0; i < siz; i++) { /* loop on rows */
-	for(k = 0; k < j; k++) {	/* loop on previous columns */
-	  matsq[SQDEX(i, j, siz)]
-	      -= (matri[UPDEX(k, j, siz)]*matsq[SQDEX(i, k, siz)]);
-	  counters.fulldirops++;
-	}
-	matsq[SQDEX(i, j, siz)] /= matri[UPDEX(j, j, siz)];
-	counters.fulldirops++;
+        for(k = 0; k < j; k++) {        /* loop on previous columns */
+          matsq[SQDEX(i, j, siz)]
+              -= (matri[UPDEX(k, j, siz)]*matsq[SQDEX(i, k, siz)]);
+          counters.fulldirops++;
+        }
+        matsq[SQDEX(i, j, siz)] /= matri[UPDEX(j, j, siz)];
+        counters.fulldirops++;
       }
     }
     sys->info("\n");
@@ -322,9 +288,9 @@ static void subInnerProd(ssystem *sys, double *matsq, double *matri, int siz, in
   matrisiz = siz*(siz + 1)/2; */
 
   /* figure max number of square matrix rows that can fit (truncate) */
-  rowlim = (siz+1)/2;	/* total #rows */
-  rowliml = rowlim/2;		/* number of rows in first chunk */
-  colimu = rowlim - rowliml;	/* number of rows in second chunk */
+  rowlim = (siz+1)/2;   /* total #rows */
+  rowliml = rowlim/2;           /* number of rows in first chunk */
+  colimu = rowlim - rowliml;    /* number of rows in second chunk */
   matriu = matri + rowliml*siz; /* pointer to second block of rows */
 
   /* matri always holds rows from matl; matri1 holds columns from matu */
@@ -336,7 +302,7 @@ static void subInnerProd(ssystem *sys, double *matsq, double *matri, int siz, in
   /* for each matl chunk, read in all chunks of matu and do inner products */
   for(froml = 0; froml < siz; froml += rowliml) { /* loop on rows in l part */
     readl = read(fdl, (char *)matri, rowliml*siz*ds);
-    if(readl % (siz*ds) != 0) {	/* must read in row size chunks */
+    if(readl % (siz*ds) != 0) { /* must read in row size chunks */
       sys->error("subInnerProd: read error from '%s'\n",
                  getName(matl, name));
     }
@@ -347,7 +313,7 @@ static void subInnerProd(ssystem *sys, double *matsq, double *matri, int siz, in
     for(fromu = 0; fromu < siz; fromu += colimu) { /* loop on cols in u part */
       sys->info("%d-%d ", froml, fromu);
       readu = read(fdu, (char *)matriu, colimu*siz*ds);
-      if(readu % (siz*ds) != 0) {	/* must read in col size chunks */
+      if(readu % (siz*ds) != 0) {       /* must read in col size chunks */
         sys->error("subInnerProd: read error from '%s'\n",
                    getName(matu, name));
       }
@@ -355,16 +321,16 @@ static void subInnerProd(ssystem *sys, double *matsq, double *matri, int siz, in
       /* do the inner product/subtractions possible with these chunks */
       starttimer;
       for(i = 0; i < readl; i++) { /* loop on rows */
-	for(j = 0; j < readu; j++) {	/* loop on columns */
-	  for(k = 0, temp = 0.0; k < siz; k++) { /* inner product loop */
-	    /* matriu indices are flipped since it was stored as columns */
-	    temp += matri[SQDEX(i, k, siz)] * matriu[SQDEX(j, k, siz)];
-	    counters.fulldirops++;
-	  }
-	  /* indices must be offset to get right square matrix entry */
-	  matsq[SQDEX(i + froml, j + fromu, siz)] -= temp;
-	  counters.fulldirops++;
-	}
+        for(j = 0; j < readu; j++) {    /* loop on columns */
+          for(k = 0, temp = 0.0; k < siz; k++) { /* inner product loop */
+            /* matriu indices are flipped since it was stored as columns */
+            temp += matri[SQDEX(i, k, siz)] * matriu[SQDEX(j, k, siz)];
+            counters.fulldirops++;
+          }
+          /* indices must be offset to get right square matrix entry */
+          matsq[SQDEX(i + froml, j + fromu, siz)] -= temp;
+          counters.fulldirops++;
+        }
       }
       stoptimer;
       counters.lutime += dtime;
@@ -388,7 +354,7 @@ static void blkLudecomp(ssystem *sys, double *mat, int size)
   double factor;
   int i, j, k;
 
-  for(k = 0; k < size-1; k++) {	/* loop on rows */
+  for(k = 0; k < size-1; k++) { /* loop on rows */
     if(mat[SQDEX(k, k, size)] == 0.0) {
       sys->error("blkLudecomp: zero piovt\n");
     }
@@ -397,8 +363,8 @@ static void blkLudecomp(ssystem *sys, double *mat, int size)
       factor = (mat[SQDEX(i, k, size)] /= mat[SQDEX(k, k, size)]);
       counters.fulldirops++;
       for(j = k+1; j < size; j++) { /* loop on remaining columns */
-	mat[SQDEX(i, j, size)] -= (factor*mat[SQDEX(k, j, size)]);
-	counters.fulldirops++;
+        mat[SQDEX(i, j, size)] -= (factor*mat[SQDEX(k, j, size)]);
+        counters.fulldirops++;
       }
     }
   }
@@ -417,14 +383,14 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
   fflush(stdout);
 
   /* forward elimination, solve Ly = b (x becomes y) */
-  for(i = 0; i < siz; i++) x[i] = b[i];	/* copy rhs */
+  for(i = 0; i < siz; i++) x[i] = b[i]; /* copy rhs */
 
   rdMat(sys, matri, siz/2, L11, TRIMAT);
   /* a row in the result vector is a linear comb of the previous rows */
   /* do first (lower triangular only) part */
   starttimer;
-  for(i = 1; i < siz/2; i++) {	/* loop on rows */
-    for(k = 0; k < i; k++) {	/* loop on previous rows */
+  for(i = 1; i < siz/2; i++) {  /* loop on rows */
+    for(k = 0; k < i; k++) {    /* loop on previous rows */
       x[i] -= (matri[LODEX(i, k, siz/2)]*x[k]);
       counters.fulldirops++;
     }
@@ -438,12 +404,12 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
 
   /* do second (square and lower triangular) part */
   starttimer;
-  for(; i < siz; i++) {		/* loop on rows of entire matrix */
+  for(; i < siz; i++) {         /* loop on rows of entire matrix */
     for(k = 0; k < siz/2; k++) { /* loop on first half of rows (L21) */
       x[i] -= (matsq[SQDEX(i-siz/2, k, siz/2)]*x[k]);
       counters.fulldirops++;
     }
-    for(; k < i; k++) {	/* loop on 2nd half of rows (LTIL) */
+    for(; k < i; k++) { /* loop on 2nd half of rows (LTIL) */
       x[i] -= (matri[LODEX(i-siz/2, k-siz/2, siz/2)]*x[k]);
       counters.fulldirops++;
     }
@@ -457,8 +423,8 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
   /* back substitute, solve Ux = y (x converted in place from y to x) */
   rdMat(sys, matri, siz/2, UTIL, TRIMAT); /* load lower right U factor */
   starttimer;
-  for(i = siz-1; i >= siz/2; i--) {	/* loop on rows */
-    for(k = siz-1; k > i; k--) {	/* loop on rows (of x) already done */
+  for(i = siz-1; i >= siz/2; i--) {     /* loop on rows */
+    for(k = siz-1; k > i; k--) {        /* loop on rows (of x) already done */
       x[i] -= (matri[UPDEX(i-siz/2, k-siz/2, siz/2)]*x[k]);
       counters.fulldirops++;
     }
@@ -473,13 +439,13 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
   rdMat(sys, matsq, siz/2, U12, SQRMAT); /* U12 is stored columnwise */
 
   starttimer;
-  for(; i >= 0; i--) {		/* loop on rows */
+  for(; i >= 0; i--) {          /* loop on rows */
     for(k = siz-1; k >= siz/2; k--) { /* loop on rows corresponding to U12 */
       /* note flipped index because U12 stored as columns */
       x[i] -= (matsq[SQDEX(k-siz/2, i, siz/2)]*x[k]);
       counters.fulldirops++;
     }
-    for(; k > i; k--) {		/* loop on rows corresponding to cols of U11 */
+    for(; k > i; k--) {         /* loop on rows corresponding to cols of U11 */
       x[i] -= (matri[UPDEX(i, k, siz/2)]*x[k]);
       counters.fulldirops++;
     }
@@ -514,7 +480,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
   /* allocate room for one 1/4 size square full P matrix, one 1/4 size tri.
      - linear arrays are used to cut down on memory overhead */
   /* allocate for read index array too */
-  if(numchgs % 2 == 0) {	/* if numchgs is even */
+  if(numchgs % 2 == 0) {        /* if numchgs is even */
     matsize = numchgs*numchgs/4;
     *sqrArray = sys->heap.alloc<double>(matsize, AMSC);
     matsize = ((numchgs/2)*(numchgs/2 + 1))/2;
@@ -555,42 +521,42 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
     for(fromq = 0, l = 0; l < 2; l++, fromq += numchgs/2) {
 
       for(i = 0; i < numchgs/2; i++) { /* loop on collocation points */
-	i_real = (*real_index)[fromp+i];
-	ASSERT(!(ppan = pchgs[i_real])->dummy);
+        i_real = (*real_index)[fromp+i];
+        ASSERT(!(ppan = pchgs[i_real])->dummy);
 
-	for(j = 0; j < numchgs/2; j++) { /* loop on charge panels */
+        for(j = 0; j < numchgs/2; j++) { /* loop on charge panels */
 
-	  /* real_index should eliminate all direct refs to dummy panels */
-	  j_real = (*real_index)[fromq+j];
-	  ASSERT(!(qpan = qchgs[j_real])->dummy);
+          /* real_index should eliminate all direct refs to dummy panels */
+          j_real = (*real_index)[fromq+j];
+          ASSERT(!(qpan = qchgs[j_real])->dummy);
 
-	  (*sqrArray)[SQDEX(i, j, numchgs/2)] = calcp(sys, qpan, ppan->x, ppan->y,
-						      ppan->z, NULL);
-	  /* old: qchgs[from+j], pchgs[fromp+i] */
-	  /* older: pchgs[fromp+i], qchgs[fromq+j] */
+          (*sqrArray)[SQDEX(i, j, numchgs/2)] = calcp(sys, qpan, ppan->x, ppan->y,
+                                                      ppan->z, NULL);
+          /* old: qchgs[from+j], pchgs[fromp+i] */
+          /* older: pchgs[fromp+i], qchgs[fromq+j] */
 
-	  if(ppan->surf->type == DIELEC || ppan->surf->type == BOTH) {
-	    /* add off-panel evaluation contributions to divided diffs */
-	    /* see also dumpQ2PDiag() in mulDisplay.c */
-	    pos_fact = ppan->surf->outer_perm/ppan->pos_dummy->area;
-	    neg_fact = ppan->surf->inner_perm/ppan->neg_dummy->area;
+          if(ppan->surf->type == DIELEC || ppan->surf->type == BOTH) {
+            /* add off-panel evaluation contributions to divided diffs */
+            /* see also dumpQ2PDiag() in mulDisplay.c */
+            pos_fact = ppan->surf->outer_perm/ppan->pos_dummy->area;
+            neg_fact = ppan->surf->inner_perm/ppan->neg_dummy->area;
 
-	    /* effectively do one columns worth of two row ops, get div dif */
-	    (*sqrArray)[SQDEX(i, j, numchgs/2)]
-		= (pos_fact*calcp(sys, qpan, ppan->pos_dummy->x, ppan->pos_dummy->y,
-				  ppan->pos_dummy->z, NULL)
-		   - (pos_fact + neg_fact)*(*sqrArray)[SQDEX(i, j, numchgs/2)]
-		   + neg_fact*calcp(sys, qpan, ppan->neg_dummy->x,
-				    ppan->neg_dummy->y, ppan->neg_dummy->z,
-				    NULL));
-	  }
-	}
+            /* effectively do one columns worth of two row ops, get div dif */
+            (*sqrArray)[SQDEX(i, j, numchgs/2)]
+                = (pos_fact*calcp(sys, qpan, ppan->pos_dummy->x, ppan->pos_dummy->y,
+                                  ppan->pos_dummy->z, NULL)
+                   - (pos_fact + neg_fact)*(*sqrArray)[SQDEX(i, j, numchgs/2)]
+                   + neg_fact*calcp(sys, qpan, ppan->neg_dummy->x,
+                                    ppan->neg_dummy->y, ppan->neg_dummy->z,
+                                    NULL));
+          }
+        }
       }
       
       /* dump the 1/4 matrix to a file */
       if(k == 0 && l == 0) {
         wrMat(sys, *sqrArray, numchgs/2, L11, SQRMAT);
-	/* dumpMatCor((double **)NULL, *sqrArray, numchgs/2); */ /* for debug */
+        /* dumpMatCor((double **)NULL, *sqrArray, numchgs/2); */ /* for debug */
       }
       else if(k == 0 && l == 1) wrMat(sys, *sqrArray, numchgs/2, U12, SQRMAT);
       else if(k == 1 && l == 0) wrMat(sys, *sqrArray, numchgs/2, L21, SQRMAT);
@@ -707,10 +673,10 @@ void blkAqprod(ssystem *sys, double *p, double *q, int size, double *sqmat)
       /* do the product for this section of the matrix */
       starttimer;
       for(i = 0; i < size/2; i++) {
-	for(j = 0; j < size/2; j++) {
-	  p[fromp+i] += sqmat[SQDEX(i, j, size/2)]*q[fromq+j];
-	  counters.fullPqops++;
-	}
+        for(j = 0; j < size/2; j++) {
+          p[fromp+i] += sqmat[SQDEX(i, j, size/2)]*q[fromq+j];
+          counters.fullPqops++;
+        }
       }
       stoptimer;
       counters.dirtime += dtime;

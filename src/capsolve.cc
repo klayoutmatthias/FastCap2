@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "mulDisplay.h"
@@ -71,10 +37,10 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   q = sys->heap.alloc<double>(size+1, AMSC);
   r = sys->heap.alloc<double>(size+1, AMSC);
 
-  if (! sys->dirsol) {		/* too much to allocate if not used */
+  if (! sys->dirsol) {          /* too much to allocate if not used */
 
     /* allocate for gcr accumulated basis vectors (moved out of loop 30Apr90) */
-    fflush(stdout);		/* so header will be saved if crash occurs */
+    fflush(stdout);             /* so header will be saved if crash occurs */
 
     bp = sys->heap.alloc<double *>(maxiter+1, AMSC);
     bap = sys->heap.alloc<double *>(maxiter+1, AMSC);
@@ -101,14 +67,14 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     i = 0;
     for(nq = chglist; nq != NULL; nq = nq->next) {
       if(nq->cond == cond && !nq->dummy 
-	 && (nq->surf->type == CONDTR || nq->surf->type == BOTH)) 
-	  r[nq->index] = 1.0;
+         && (nq->surf->type == CONDTR || nq->surf->type == BOTH)) 
+          r[nq->index] = 1.0;
     }
 
     if (sys->dirsol) {
 
       /* do a direct forward elimination/back solve for the charge vector */
-      if(size > MAXSIZ) {		/* index from 1 here, from 0 in solvers */
+      if(size > MAXSIZ) {               /* index from 1 here, from 0 in solvers */
         blkCompressVector(sys, r+1, size, real_size, sys->is_dummy+1);
         blkSolve(sys, q+1, r+1, real_size, trimat, sqrmat);
         blkExpandVector(q+1, size, real_size, real_index);
@@ -221,8 +187,8 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
     for(j= 0; j < iter; j++) {
       INNER(beta, ap, bap[j], size);
       for(i=1; i <= size; i++) {
-	bp[iter][i] -= beta * bp[j][i];
-	bap[iter][i] -= beta * bap[j][i];
+        bp[iter][i] -= beta * bp[j][i];
+        bap[iter][i] -= beta * bap[j][i];
       }
     }
     
@@ -454,7 +420,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
   if (sys->expgcr) {
 
     blkCompressVector(sys, q+1, size, real_size, sys->is_dummy+1);
-    blkAqprod(sys, p+1, q+1, real_size, sqrmat);	/* offset since index from 1 */
+    blkAqprod(sys, p+1, q+1, real_size, sqrmat);        /* offset since index from 1 */
     blkExpandVector(p+1, size, real_size, real_index); /* ap changed to p, r chged to q */
     blkExpandVector(q+1, size, real_size, real_index); /*    7 Oct 91 */
 
@@ -475,11 +441,11 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     }
 
     if (DNTYPE == NOSHFT) {
-      mulDown(sys);		/* do downward pass without local exp shifts */
+      mulDown(sys);             /* do downward pass without local exp shifts */
     }
 
     if (DNTYPE == GRENGD) {
-      mulDown(sys);	       	/* do hierarchical local shift dwnwd pass */
+      mulDown(sys);             /* do hierarchical local shift dwnwd pass */
     }
 
     stoptimer;
@@ -488,7 +454,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
     starttimer;
 
     if (MULTI == ON) {
-      mulEval(sys);		/* evaluate either locals or multis or both */
+      mulEval(sys);             /* evaluate either locals or multis or both */
     }
 
     stoptimer;

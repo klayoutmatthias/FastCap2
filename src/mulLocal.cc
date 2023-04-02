@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "mulMulti.h"
@@ -52,7 +18,7 @@ void evalFacFra(ssystem *sys, double **array, int order)
     if(i > 0 && i < 2*order) array[i+1][i] = i+1; /* do first sub diagonal */
   }
   for(d = 3; d <= 2*order; d++) { /* loop on lower triangular rows */
-    for(i = 1; i < d-1; i++) {	/* loop on columns */
+    for(i = 1; i < d-1; i++) {  /* loop on columns */
       array[d][i] = array[d-1][i]*array[d][d-1];
     }
   }
@@ -79,7 +45,7 @@ void evalFacFra(ssystem *sys, double **array, int order)
 */
 void evalSqrtFac(ssystem * /*sys*/, double **arrayout, double **arrayin, int order)
 {
-  int n, m;			/* arrayout[n][m] = sqrt((m+n)!/(n-m)!) */
+  int n, m;                     /* arrayout[n][m] = sqrt((m+n)!/(n-m)!) */
 
   /* set up first column, always ones */
   for(n = 0; n < order+1; n++) arrayout[n][0] = 1.0;
@@ -138,12 +104,12 @@ double **mulMulti2Local(ssystem *sys, double x, double y, double z, double xp, d
 /* double x, y, z, xp, yp, zp: multipole and local cube centers */
 {
   int j, k, n, m;
-  int terms = multerms(order);	/* the number of non-zero moments */
-  int ct = costerms(order);	/* the number of non-zero cos (bar) moments */
-  double **mat;			/* the transformation matrix */
-  double rho, cosA, beta;	/* spher. position of multi rel to local */
-  double rhoJ, rhoN;		/* rho^j and (-1)^n*rho^(n+1) in main loop */
-  double rhoFac;		/* = rhoJ*rhoN intermediate storage */
+  int terms = multerms(order);  /* the number of non-zero moments */
+  int ct = costerms(order);     /* the number of non-zero cos (bar) moments */
+  double **mat;                 /* the transformation matrix */
+  double rho, cosA, beta;       /* spher. position of multi rel to local */
+  double rhoJ, rhoN;            /* rho^j and (-1)^n*rho^(n+1) in main loop */
+  double rhoFac;                /* = rhoJ*rhoN intermediate storage */
   double temp1, temp2, temp3;
 
   /* allocate the multi to local transformation matrix */
@@ -162,48 +128,48 @@ double **mulMulti2Local(ssystem *sys, double x, double y, double z, double xp, d
   /* generate multi to local transformation matrix; uses NB12 pg30 */
   /*  rhoFac factor divides could be reduced to once per loop */
   for(j = 0, rhoJ = 1.0; j <= order; rhoJ *= rho, j++) {
-    for(k = 0; k <= j; k++) {	/* loop on Nj^k's, local exp moments */
+    for(k = 0; k <= j; k++) {   /* loop on Nj^k's, local exp moments */
       for(n = 0, rhoN = rho; n <= order; rhoN *= (-rho), n++) {
-	for(m = 0; m <= n; m++) { /* loop on On^m's, multipole moments */
+        for(m = 0; m <= n; m++) { /* loop on On^m's, multipole moments */
 
-	  /* generate a bar(N)j^k and dblbar(N)j^k entry */
-	  rhoFac = rhoJ*rhoN;	/* divisor to give (-1)^n/rho^(j+n+1) factor */
-	  if(k == 0) {		/* use abbreviated formulae in this case */
+          /* generate a bar(N)j^k and dblbar(N)j^k entry */
+          rhoFac = rhoJ*rhoN;   /* divisor to give (-1)^n/rho^(j+n+1) factor */
+          if(k == 0) {          /* use abbreviated formulae in this case */
 
-	    /* generate only bar(N)j^0 entry (dblbar(N)j^0 = 0 always) */
-	    if(m != 0) {
-	      temp1 = sys->mm.tleg[CINDEX(j+n, m)]*sys->mm.facFrA[j+n-m][n+m];
-	      mat[CINDEX(j, 0)][CINDEX(n, m)] += temp1*cosB(sys, m)/rhoFac;
-	      mat[CINDEX(j, 0)][SINDEX(n, m, ct)] += temp1*sinB(sys, m)/rhoFac;
-	    }
-	    else mat[CINDEX(j, 0)][CINDEX(n, 0)] 
-		+= sys->mm.tleg[CINDEX(j+n, 0)]*sys->mm.facFrA[j+n][n]/rhoFac;
-	  }
-	  else {
-	    temp1 = sys->mm.tleg[CINDEX(j+n, abs(m-k))]
-		*sys->mm.facFrA[j+n-abs(m-k)][n+m]*iPwr(sys, abs(k-m)-k-m);
-	    temp2 = sys->mm.tleg[CINDEX(j+n, m+k)]*sys->mm.facFrA[j+n-m-k][n+m];
-	    temp3 = sys->mm.tleg[CINDEX(j+n, k)]*sys->mm.facFrA[j+n-k][n]*2;
+            /* generate only bar(N)j^0 entry (dblbar(N)j^0 = 0 always) */
+            if(m != 0) {
+              temp1 = sys->mm.tleg[CINDEX(j+n, m)]*sys->mm.facFrA[j+n-m][n+m];
+              mat[CINDEX(j, 0)][CINDEX(n, m)] += temp1*cosB(sys, m)/rhoFac;
+              mat[CINDEX(j, 0)][SINDEX(n, m, ct)] += temp1*sinB(sys, m)/rhoFac;
+            }
+            else mat[CINDEX(j, 0)][CINDEX(n, 0)] 
+                += sys->mm.tleg[CINDEX(j+n, 0)]*sys->mm.facFrA[j+n][n]/rhoFac;
+          }
+          else {
+            temp1 = sys->mm.tleg[CINDEX(j+n, abs(m-k))]
+                *sys->mm.facFrA[j+n-abs(m-k)][n+m]*iPwr(sys, abs(k-m)-k-m);
+            temp2 = sys->mm.tleg[CINDEX(j+n, m+k)]*sys->mm.facFrA[j+n-m-k][n+m];
+            temp3 = sys->mm.tleg[CINDEX(j+n, k)]*sys->mm.facFrA[j+n-k][n]*2;
 
-	    /* generate bar(N)j^k entry */
-	    if(m != 0) {
-	      mat[CINDEX(j, k)][CINDEX(n, m)] 
-		  += (temp1*cosB(sys,m-k)+temp2*cosB(sys,m+k))/rhoFac;
-	      mat[CINDEX(j, k)][SINDEX(n, m, ct)] 
-		  += (temp1*sinB(sys,m-k)+temp2*sinB(sys,m+k))/rhoFac;
-	    }
-	    else mat[CINDEX(j, k)][CINDEX(n, 0)] += temp3*cosB(sys,k)/rhoFac;
+            /* generate bar(N)j^k entry */
+            if(m != 0) {
+              mat[CINDEX(j, k)][CINDEX(n, m)] 
+                  += (temp1*cosB(sys,m-k)+temp2*cosB(sys,m+k))/rhoFac;
+              mat[CINDEX(j, k)][SINDEX(n, m, ct)] 
+                  += (temp1*sinB(sys,m-k)+temp2*sinB(sys,m+k))/rhoFac;
+            }
+            else mat[CINDEX(j, k)][CINDEX(n, 0)] += temp3*cosB(sys,k)/rhoFac;
 
-	    /* generate dblbar(N)j^k entry */
-	    if(m != 0) {
-	      mat[SINDEX(j, k, ct)][CINDEX(n, m)] 
-		  += (-temp1*sinB(sys,m-k)+temp2*sinB(sys,m+k))/rhoFac;
-	      mat[SINDEX(j, k, ct)][SINDEX(n, m, ct)] 
-		  += (temp1*cosB(sys,m-k)-temp2*cosB(sys,m+k))/rhoFac;
-	    }
-	    else mat[SINDEX(j, k, ct)][CINDEX(n, 0)] += temp3*sinB(sys,k)/rhoFac;
-	  }
-	}
+            /* generate dblbar(N)j^k entry */
+            if(m != 0) {
+              mat[SINDEX(j, k, ct)][CINDEX(n, m)] 
+                  += (-temp1*sinB(sys,m-k)+temp2*sinB(sys,m+k))/rhoFac;
+              mat[SINDEX(j, k, ct)][SINDEX(n, m, ct)] 
+                  += (temp1*cosB(sys,m-k)-temp2*cosB(sys,m+k))/rhoFac;
+            }
+            else mat[SINDEX(j, k, ct)][CINDEX(n, 0)] += temp3*sinB(sys,k)/rhoFac;
+          }
+        }
       }
     }
   }
@@ -222,12 +188,12 @@ double **mulLocal2Local(ssystem *sys, double x, double y, double z, double xc, d
 /* double x, y, z, xc, yc, zc: parent and child cube centers */
 {
   int j, k, n, m;
-  int terms = multerms(order);	/* the number of non-zero moments */
-  int ct = costerms(order);	/* the number of non-zero cos (bar) moments */
-  double **mat;			/* the transformation matrix */
-  double rho, cosA, beta;	/* spher. position of multi rel to local */
-  double rhoJ, rhoN;		/* rho^j and (-1)^n*rho^(n+1) in main loop */
-  double rhoFac;		/* = rhoJ*rhoN intermediate storage */
+  int terms = multerms(order);  /* the number of non-zero moments */
+  int ct = costerms(order);     /* the number of non-zero cos (bar) moments */
+  double **mat;                 /* the transformation matrix */
+  double rho, cosA, beta;       /* spher. position of multi rel to local */
+  double rhoJ, rhoN;            /* rho^j and (-1)^n*rho^(n+1) in main loop */
+  double rhoFac;                /* = rhoJ*rhoN intermediate storage */
   double temp1, temp2, temp3;
 
   /* allocate the local to local transformation matrix */
@@ -246,59 +212,59 @@ double **mulLocal2Local(ssystem *sys, double x, double y, double z, double xc, d
   /* generate local to local transformation matrix; uses NB12 pg36Y */
   /*  rhoFac factor divides could be reduced to once per loop */
   for(j = 0, rhoJ = 1.0; j <= order; rhoJ *= (-rho), j++) {
-    for(k = 0; k <= j; k++) {	/* loop on Nj^k's, local exp moments */
+    for(k = 0; k <= j; k++) {   /* loop on Nj^k's, local exp moments */
       for(n = j, rhoN = rhoJ; n <= order; rhoN *= (-rho), n++) {
-	for(m = 0; m <= n; m++) { /* loop on On^m's, old local moments */
+        for(m = 0; m <= n; m++) { /* loop on On^m's, old local moments */
 
-	  /* generate a bar(N)j^k and dblbar(N)j^k entry */
-	  rhoFac = rhoN/rhoJ;	/* divide to give (-rho)^(n-j) factor */
-	  if(k == 0 && n-j >= m) {  /* use abbreviated formulae in this case */
+          /* generate a bar(N)j^k and dblbar(N)j^k entry */
+          rhoFac = rhoN/rhoJ;   /* divide to give (-rho)^(n-j) factor */
+          if(k == 0 && n-j >= m) {  /* use abbreviated formulae in this case */
 
-	    /* generate only bar(N)j^0 entry (dblbar(N)j^0 = 0 always) */
-	    if(m != 0) {
-	      temp1 = sys->mm.tleg[CINDEX(n-j, m)]*sys->mm.facFrA[0][n-j+m]*rhoFac;
-	      mat[CINDEX(j, 0)][CINDEX(n, m)] += temp1*cosB(sys,m);
-	      mat[CINDEX(j, 0)][SINDEX(n, m, ct)] += temp1*sinB(sys,m);
-	    }
-	    else mat[CINDEX(j, 0)][CINDEX(n, 0)] += sys->mm.tleg[CINDEX(n-j, 0)]
-		    *sys->mm.facFrA[0][n-j]*rhoFac;
-	  }
-	  else {
-	    if(n-j >= abs(m-k)) temp1 = sys->mm.tleg[CINDEX(n-j, abs(m-k))]
-		*sys->mm.facFrA[0][n-j+abs(m-k)]*iPwr(sys, m-k-abs(m-k))*rhoFac;
-	    if(n-j >= m+k) temp2 = sys->mm.tleg[CINDEX(n-j, m+k)]
-		*sys->mm.facFrA[0][n-j+m+k]*iPwr(sys, 2*k)*rhoFac;
-	    if(n-j >= k) temp3 = 2*sys->mm.tleg[CINDEX(n-j, k)]
-		*sys->mm.facFrA[0][n-j+k]*iPwr(sys, 2*k)*rhoFac;
+            /* generate only bar(N)j^0 entry (dblbar(N)j^0 = 0 always) */
+            if(m != 0) {
+              temp1 = sys->mm.tleg[CINDEX(n-j, m)]*sys->mm.facFrA[0][n-j+m]*rhoFac;
+              mat[CINDEX(j, 0)][CINDEX(n, m)] += temp1*cosB(sys,m);
+              mat[CINDEX(j, 0)][SINDEX(n, m, ct)] += temp1*sinB(sys,m);
+            }
+            else mat[CINDEX(j, 0)][CINDEX(n, 0)] += sys->mm.tleg[CINDEX(n-j, 0)]
+                    *sys->mm.facFrA[0][n-j]*rhoFac;
+          }
+          else {
+            if(n-j >= abs(m-k)) temp1 = sys->mm.tleg[CINDEX(n-j, abs(m-k))]
+                *sys->mm.facFrA[0][n-j+abs(m-k)]*iPwr(sys, m-k-abs(m-k))*rhoFac;
+            if(n-j >= m+k) temp2 = sys->mm.tleg[CINDEX(n-j, m+k)]
+                *sys->mm.facFrA[0][n-j+m+k]*iPwr(sys, 2*k)*rhoFac;
+            if(n-j >= k) temp3 = 2*sys->mm.tleg[CINDEX(n-j, k)]
+                *sys->mm.facFrA[0][n-j+k]*iPwr(sys, 2*k)*rhoFac;
 
-	    /* generate bar(N)j^k entry */
-	    if(m != 0) {
-	      if(n-j >= abs(m-k)) {
-		mat[CINDEX(j, k)][CINDEX(n, m)] += temp1*cosB(sys,m-k);
-		mat[CINDEX(j, k)][SINDEX(n, m, ct)] += temp1*sinB(sys,m-k);
-	      }
-	      if(n-j >= m+k) {
-		mat[CINDEX(j, k)][CINDEX(n, m)] += temp2*cosB(sys,m+k);
-		mat[CINDEX(j, k)][SINDEX(n, m, ct)] += temp2*sinB(sys,m+k);
-	      }
-	    }
-	    else if(n-j >= k) mat[CINDEX(j, k)][CINDEX(n, 0)] += temp3*cosB(sys,k);
+            /* generate bar(N)j^k entry */
+            if(m != 0) {
+              if(n-j >= abs(m-k)) {
+                mat[CINDEX(j, k)][CINDEX(n, m)] += temp1*cosB(sys,m-k);
+                mat[CINDEX(j, k)][SINDEX(n, m, ct)] += temp1*sinB(sys,m-k);
+              }
+              if(n-j >= m+k) {
+                mat[CINDEX(j, k)][CINDEX(n, m)] += temp2*cosB(sys,m+k);
+                mat[CINDEX(j, k)][SINDEX(n, m, ct)] += temp2*sinB(sys,m+k);
+              }
+            }
+            else if(n-j >= k) mat[CINDEX(j, k)][CINDEX(n, 0)] += temp3*cosB(sys,k);
 
-	    /* generate dblbar(N)j^k entry */
-	    if(m != 0) {
-	      if(n-j >= abs(m-k)) {
-		mat[SINDEX(j, k, ct)][CINDEX(n, m)] += (-temp1*sinB(sys,m-k));
-		mat[SINDEX(j, k, ct)][SINDEX(n, m, ct)] += temp1*cosB(sys,m-k);
-	      }
-	      if(n-j >= m+k) {
-		mat[SINDEX(j, k, ct)][CINDEX(n, m)] += (-temp2*sinB(sys,m+k));
-		mat[SINDEX(j, k, ct)][SINDEX(n, m, ct)] += temp2*cosB(sys,m+k);
-	      }
-	    }
-	    else if(n-j >= k) 
-		mat[SINDEX(j, k, ct)][CINDEX(n, 0)] += temp3*sinB(sys,k);
-	  }
-	}
+            /* generate dblbar(N)j^k entry */
+            if(m != 0) {
+              if(n-j >= abs(m-k)) {
+                mat[SINDEX(j, k, ct)][CINDEX(n, m)] += (-temp1*sinB(sys,m-k));
+                mat[SINDEX(j, k, ct)][SINDEX(n, m, ct)] += temp1*cosB(sys,m-k);
+              }
+              if(n-j >= m+k) {
+                mat[SINDEX(j, k, ct)][CINDEX(n, m)] += (-temp2*sinB(sys,m+k));
+                mat[SINDEX(j, k, ct)][SINDEX(n, m, ct)] += temp2*cosB(sys,m+k);
+              }
+            }
+            else if(n-j >= k) 
+                mat[SINDEX(j, k, ct)][CINDEX(n, 0)] += temp3*sinB(sys,k);
+          }
+        }
       }
     }
   }
@@ -320,7 +286,7 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   int i, j, n, m;
   int cterms = costerms(order), terms = multerms(order);
   double **mat, temp;
-  double cosA;			/* cosine of elevation coordinate */
+  double cosA;                  /* cosine of elevation coordinate */
 
   /* Allocate the matrix. */
   mat = sys->heap.mat(terms, numchgs, AQ2L);
@@ -333,8 +299,8 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
     xyz2sphere(chgs[j]->x, chgs[j]->y, chgs[j]->z,
                x, y, z, &(sys->mm.Rho[j]), &cosA, &(sys->mm.Beta[j]));
     sys->mm.Rhon[j] = sys->mm.Rho[j]; /* init powers of rho_i's */
-    sys->mm.Betam[j] = sys->mm.Beta[j];		/* init multiples of beta */
-    evalLegendre(cosA, sys->mm.tleg, order);	/* write moments to temporary array */
+    sys->mm.Betam[j] = sys->mm.Beta[j];         /* init multiples of beta */
+    evalLegendre(cosA, sys->mm.tleg, order);    /* write moments to temporary array */
     /* write a column of the matrix with each set of legendre evaluations */
     for(i = 0; i < cterms; i++) mat[i][j] = sys->mm.tleg[i]; /* copy for cos terms */
   }
@@ -346,12 +312,12 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   }
 
   /* add the rho^n+1 factors to the cos matrix entries. */
-  for(n = 0; n <= order; n++) {	/* loop on rows of matrix */
+  for(n = 0; n <= order; n++) { /* loop on rows of matrix */
     for(m = 0; m <= n; m++) {
       for(j = 0; j < numchgs; j++) 
           mat[CINDEX(n, m)][j] /= sys->mm.Rhon[j]; /* divide by factor */
     }
-    for(j = 0; j < numchgs; j++) sys->mm.Rhon[j] *= sys->mm.Rho[j];	/* rho^n -> rho^n+1 */
+    for(j = 0; j < numchgs; j++) sys->mm.Rhon[j] *= sys->mm.Rho[j];     /* rho^n -> rho^n+1 */
   }
 
   if (sys->dalq2l) {
@@ -363,7 +329,7 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   for(n = 1; n <= order; n++) { /* loop on rows of matrix */
     for(m = 1; m <= n; m++) {
       for(j = 0; j < numchgs; j++) { /* copy a row */
-	mat[SINDEX(n, m, cterms)][j] = mat[CINDEX(n, m)][j];
+        mat[SINDEX(n, m, cterms)][j] = mat[CINDEX(n, m)][j];
       }
     }
   }
@@ -374,15 +340,15 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   }
 
   /* add factors of cos(m*beta) and sin(m*beta) to matrix entries */
-  for(m = 0; m <= order; m++) {	/* lp on m in Mn^m */
+  for(m = 0; m <= order; m++) { /* lp on m in Mn^m */
     for(n = m; n <= order; n++) { /* loop over rows with same m */
       for(j = 0; j < numchgs; j++) { /* add factors to a row */
         if(m == 0)  mat[CINDEX(n, m)][j] *= fact(sys, n); /* j! part of bar(N)j^0 */
-	else {			/* for Nj^k, k != 0 */
-	  temp = 2.0*fact(sys, n-m);    	/* find the factorial for moment */
-	  mat[CINDEX(n, m)][j] *= (temp*cos(sys->mm.Betam[j]));   /* note mul by 2 */
-	  mat[SINDEX(n, m, cterms)][j] *= (temp*sin(sys->mm.Betam[j]));
-	}
+        else {                  /* for Nj^k, k != 0 */
+          temp = 2.0*fact(sys, n-m);            /* find the factorial for moment */
+          mat[CINDEX(n, m)][j] *= (temp*cos(sys->mm.Betam[j]));   /* note mul by 2 */
+          mat[SINDEX(n, m, cterms)][j] *= (temp*sin(sys->mm.Betam[j]));
+        }
       }
     }
     if(m > 0) {
@@ -394,7 +360,7 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
   for(j = 0; j < numchgs; j++) {
     if(is_dummy[j]) {
       for(i = 0; i < terms; i++) {
-	mat[i][j] = 0.0;
+        mat[i][j] = 0.0;
       }
     }
   }
@@ -414,7 +380,7 @@ double **mulQ2Local(ssystem *sys, charge **chgs, int numchgs, int *is_dummy, dou
 double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, int numchgs, int order)
 {
   double **mat;
-  double cosTh;			/* cosine of elevation coordinate */
+  double cosTh;                 /* cosine of elevation coordinate */
   int i, j, k, m, n, kold;
   int cterms = costerms(order), terms = multerms(order);
 
@@ -426,8 +392,8 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
     xyz2sphere(chgs[i]->x, chgs[i]->y, chgs[i]->z,
                x, y, z, &(sys->mm.Ir[i]), &cosTh, &(sys->mm.phi[i]));
     sys->mm.Irn[i] = 1.0; /* initialize r^n vec. */
-    sys->mm.Mphi[i] = sys->mm.phi[i];		/* initialize m*phi vector */
-    evalLegendre(cosTh, mat[i], order);	/* wr moms to 1st (cos) half of row */
+    sys->mm.Mphi[i] = sys->mm.phi[i];           /* initialize m*phi vector */
+    evalLegendre(cosTh, mat[i], order); /* wr moms to 1st (cos) half of row */
   }
 
   if (sys->dall2p) {
@@ -440,7 +406,7 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   for(j = 0, k = kold = 1; j < cterms; j++) { /* loop on columns of matrix */
     for(i = 0; i < numchgs; i++) mat[i][j] *= sys->mm.Irn[i]; /* multiply by r^n */
     k -= 1;
-    if(k == 0) {		/* so that n changes as appropriate */
+    if(k == 0) {                /* so that n changes as appropriate */
       kold = k = kold + 1;
       for(i = 0; i < numchgs; i++) sys->mm.Irn[i] *= sys->mm.Ir[i]; /* r^n -> r^n+1 */
     }
@@ -468,8 +434,8 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   /* copy left half of matrix to right half for sin(m*phi) terms */
   for(i = 0; i < numchgs; i++) { /* loop on rows of matrix */
     for(n = 1; n <= order; n++) { 
-      for(m = 1; m <= n; m++) {	/* copy a row */
-	mat[i][SINDEX(n, m, cterms)] = mat[i][CINDEX(n, m)];
+      for(m = 1; m <= n; m++) { /* copy a row */
+        mat[i][SINDEX(n, m, cterms)] = mat[i][CINDEX(n, m)];
       }
     }
   }
@@ -481,7 +447,7 @@ double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, i
   }
 
   /* add factors of cos(m*phi) and sin(m*phi) to left and right halves resp. */
-  for(m = 1; m <= order; m++) {	/* lp on m in Mn^m (no m=0 since cos(0)=1) */
+  for(m = 1; m <= order; m++) { /* lp on m in Mn^m (no m=0 since cos(0)=1) */
     for(n = m; n <= order; n++) { /* loop over cols with same m */
       for(i = 0; i < numchgs; i++) { /* add factors to a column */
         mat[i][CINDEX(n, m)] *= cos(sys->mm.Mphi[i]);

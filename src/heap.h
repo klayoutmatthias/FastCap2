@@ -1,5 +1,6 @@
-#ifndef HEAP_H
-#define HEAP_H
+
+#if !defined(heap_H)
+#define heap_H
 
 #include <cstdlib>
 

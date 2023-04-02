@@ -6,25 +6,59 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(FastCap2
-  src/mulGlobal.h src/input.h src/zbuf2fastcap.h src/mulMulti.h src/mulMats.h
-  src/mulSetup.h src/mulStruct.h src/calcp.h src/capsolve.h src/mulDisplay.h src/direct.h
-  src/mulDo.h src/zbufInOut.h src/zbufProj.h src/zbufSort.h src/patran.h src/patran_f.h
-  src/quickif.h src/mulLocal.h src/psMatDisplay.h src/savemat_mod.h
-  src/heap.h src/counters.h src/blkDirect.h
+  src/blkDirect.h
+  src/calcp.h
+  src/capsolve.h
+  src/counters.h
+  src/direct.h
+  src/heap.h
+  src/input.h
+  src/mulDisplay.h
+  src/mulDo.h
+  src/mulGlobal.h
+  src/mulLocal.h
+  src/mulMats.h
+  src/mulMulti.h
+  src/mulSetup.h
+  src/mulStruct.h
+  src/patran_f.h
+  src/patran.h
+  src/psMatDisplay.h
+  src/quickif.h
+  src/savemat_mod.h
+  src/zbuf2fastcap.h
+  src/zbufInOut.h
+  src/zbufProj.h
+  src/zbufSort.h
+  src/blkDirect.cc
+  src/calcp.cc
+  src/capsolve.cc
+  src/counters.cc
+  src/direct.cc
+  src/electric.cc
   src/fastcap.cc
-  src/mulGlobal.cc src/mulStruct.cc
-  src/mulSetup.cc src/mulMats.cc src/mulDo.cc
-  src/mulDisplay.cc src/mulMulti.cc
-  src/mulLocal.cc src/direct.cc src/blkDirect.cc src/calcp.cc
+  src/heap.cc
+  src/input.cc
+  src/mulDisplay.cc
+  src/mulDo.cc
+  src/mulGlobal.cc
+  src/mulLocal.cc
+  src/mulMats.cc
+  src/mulMulti.cc
+  src/mulSetup.cc
+  src/mulStruct.cc
+  src/patran.cc
+  src/psMatDisplay.cc
+  src/quickif.cc
   src/savemat_mod.cc
-  src/patran.cc src/quickif.cc src/electric.cc
-  src/input.cc src/psMatDisplay.cc src/capsolve.cc
-  src/zbufInOut.cc src/zbuf2fastcap.cc src/zbufProj.cc src/zbufSort.cc
-  src/heap.cc src/counters.cc
+  src/zbuf2fastcap.cc
+  src/zbufInOut.cc
+  src/zbufProj.cc
+  src/zbufSort.cc
 )
 
 target_link_libraries(FastCap2 m)
-target_compile_options(FastCap2 PRIVATE -Wall -pedantic)
+target_compile_options(FastCap2 PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
 # Alternative solver options
 # target_compile_definitions(FastCap2 PRIVATE DIRSOL=1 EXPGCR=1)
 # With all diagnostic options:

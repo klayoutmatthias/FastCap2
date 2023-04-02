@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "quickif.h"
@@ -133,7 +99,7 @@ int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond)
   for(cur_name = *name_list, i = 1; cur_name != NULL;
       cur_name = cur_name->next, i++) {
     if(!strcmp(cur_name->name, name) || alias_match(cur_name, name)) 
-	return(i); /* return conductor number */
+        return(i); /* return conductor number */
     prev_name = cur_name;
   }
 
@@ -161,7 +127,7 @@ static int getConductorNumNoAdd(char *name, Name *name_list)
   for(cur_name = name_list, i = 1; cur_name != NULL;
       cur_name = cur_name->next, i++) {
     if(!strcmp(cur_name->name, name) || alias_match(cur_name, name)) 
-	return(i); /* return conductor number */
+        return(i); /* return conductor number */
   }
 
   return(NOTFND);
@@ -183,7 +149,7 @@ char *getConductorName(ssystem *sys, int cond_num, Name **name_list)
 
   /* number not found */
   sys->info(
-	  "getConductorName: conductor no. %d not defined\n", cond_num);
+          "getConductorName: conductor no. %d not defined\n", cond_num);
   return(NULL);
 }
 
@@ -202,14 +168,14 @@ static int oldrenameConductor(ssystem *sys, char *old_name, char *new_name, Name
     if(!strcmp(cur_name->name, old_name)) {
       /* old name is present; check to see if new name is present */
       for(cur_name2 = *name_list, j = 1; cur_name2 != NULL;
-	  cur_name2 = cur_name2->next, j++) {
-	if(!strcmp(cur_name2->name, new_name)) {
-	  /* new name already present; just delete old name entry */
-	  if(prev_name != NULL) prev_name->next = cur_name->next;
-	  else *name_list = cur_name->next;
-	  (*num_cond)--;
-	  return(TRUE);
-	}
+          cur_name2 = cur_name2->next, j++) {
+        if(!strcmp(cur_name2->name, new_name)) {
+          /* new name already present; just delete old name entry */
+          if(prev_name != NULL) prev_name->next = cur_name->next;
+          else *name_list = cur_name->next;
+          (*num_cond)--;
+          return(TRUE);
+        }
       }
       /* substitute the new name */
       if(strlen(cur_name->name) < strlen(new_name))
@@ -282,12 +248,12 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
   while(fgets(line1, sizeof(line1), fp) != NULL) {
     if(line1[0] == 'Q' || line1[0] == 'q') {
       if(sscanf(line1, 
-		"%s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-		temp, condstr, 
-		&x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3, &x4, &y4, &z4)
-	 != 14) {
-	sys->error("quickif: bad quad format, line %d:\n%s\n",
-		   linecnt, line1);
+                "%s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                temp, condstr, 
+                &x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3, &x4, &y4, &z4)
+         != 14) {
+        sys->error("quickif: bad quad format, line %d:\n%s\n",
+                   linecnt, line1);
       }
 
       /* add suffix */
@@ -296,11 +262,11 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
       /* allocate quad struct */
       if(fstquad == NULL) {
         fstquad = sys->heap.alloc<quadl>(1, AMSC);
-	curquad = fstquad;
+        curquad = fstquad;
       }
       else {
         curquad->next = sys->heap.alloc<quadl>(1, AMSC);
-	curquad = curquad->next;
+        curquad = curquad->next;
       }
       
       /* load quad struct */
@@ -324,20 +290,20 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
     }
     else if(line1[0] == 'T' || line1[0] == 't') {
       if(sscanf(line1, "%s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-		temp, condstr, &x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3) 
-	 != 11) {
-	sys->error("quickif: bad tri format, line %d:\n%s\n",
-		   linecnt, line1);
+                temp, condstr, &x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3) 
+         != 11) {
+        sys->error("quickif: bad tri format, line %d:\n%s\n",
+                   linecnt, line1);
       }
 
       /* allocate tri struct */
       if(fsttri == NULL) {
         fsttri = sys->heap.alloc<tri>(1, AMSC);
-	curtri = fsttri;
+        curtri = fsttri;
       }
       else {
         curtri->next = sys->heap.alloc<tri>(1, AMSC);
-	curtri = curtri->next;
+        curtri = curtri->next;
       }
 
       /* add suffix */
@@ -366,28 +332,28 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
       }
 
       if(surf_type != DIELEC) {
-	/* rename only if surface is BOTH or CONDTR type */
-	/* - eventually will be used when DIELEC surfs get names (someday) */
+        /* rename only if surface is BOTH or CONDTR type */
+        /* - eventually will be used when DIELEC surfs get names (someday) */
 
-	/* add suffix */
-	strcat(condstr, name_suffix);
-	strcat(temp2, name_suffix);
+        /* add suffix */
+        strcat(condstr, name_suffix);
+        strcat(temp2, name_suffix);
 
-	if(renameConductor(sys, condstr, temp2, name_list, num_cond) == FALSE) {
-	  sys->error("quickif: error renaming conductor");
-	}
+        if(renameConductor(sys, condstr, temp2, name_list, num_cond) == FALSE) {
+          sys->error("quickif: error renaming conductor");
+        }
       }
 
       linecnt++;
     }
     else if(line1[0] == '%' || line1[0] == '*' ||
-	    line1[0] == '#') linecnt++; /* ignore comments */
+            line1[0] == '#') linecnt++; /* ignore comments */
     else {
       sys->error("quickif: bad line format, line %d:\n%s\n",
                  linecnt, line1);
     }
   }
-	
+        
   /* setup tris in charge structs */
   for(curtri = fsttri; curtri != NULL; curtri = curtri->next) {
 

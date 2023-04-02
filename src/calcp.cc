@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "mulMulti.h"
@@ -120,8 +86,8 @@ void initcalcp(ssystem *sys, charge *panel_list)
       if(i == (pq->shape -1)) next = 0;
       else next = i + 1;
       for(sum= 0, j = 0; j < 3; j++) {
-	delta = pq->corner[next][j] - pq->corner[i][j];
-	sum += delta * delta;
+        delta = pq->corner[next][j] - pq->corner[i][j];
+        sum += delta * delta;
       }
       pq->length[i] = length = sqrt(sum);
       maxlength = MAX(maxlength, length);
@@ -134,8 +100,8 @@ void initcalcp(ssystem *sys, charge *panel_list)
       sum += delta * delta;
       if(pq->shape == 3) pq->Y[i] = pq->corner[0][i] - pq->corner[1][i];      
       else {
-	pq->Y[i] = delta = pq->corner[3][i] - pq->corner[1][i];      
-	sum2 += delta * delta;
+        pq->Y[i] = delta = pq->corner[3][i] - pq->corner[1][i];      
+        sum2 += delta * delta;
       }
     }
     length20 = sqrt(sum);
@@ -157,22 +123,22 @@ void initcalcp(ssystem *sys, charge *panel_list)
 /*#if 1 == 0*/
     if(flip_normal(sys, pq)) {
       for(i = 0; i < 3; i++) {
-	pq->Z[i] = -(pq->Z[i]);	/* flip the normal */
-	pq->X[i] = -(pq->X[i]);	/* flip the x direction */
-	/* interchange points 0 and 2 so that corner order will be
-	   consistent with X flip (note this is OK for both quads and tris) */
-	vtemp[0] = pq->corner[0][i];
-	pq->corner[0][i] = pq->corner[2][i];
-	pq->corner[2][i] = vtemp[0];
+        pq->Z[i] = -(pq->Z[i]); /* flip the normal */
+        pq->X[i] = -(pq->X[i]); /* flip the x direction */
+        /* interchange points 0 and 2 so that corner order will be
+           consistent with X flip (note this is OK for both quads and tris) */
+        vtemp[0] = pq->corner[0][i];
+        pq->corner[0][i] = pq->corner[2][i];
+        pq->corner[2][i] = vtemp[0];
       }
       /* interchange length entries in length vector */
       vtemp[0] = pq->length[0];
       pq->length[0] = pq->length[1];
       pq->length[1] = vtemp[0];
       if(pq->shape == 4) {
-	vtemp[0] = pq->length[2];
-	pq->length[2] = pq->length[3];
-	pq->length[3] = vtemp[0];
+        vtemp[0] = pq->length[2];
+        pq->length[2] = pq->length[3];
+        pq->length[3] = vtemp[0];
       }
     } 
 /*#endif*/
@@ -279,16 +245,16 @@ int flip_normal(ssystem *sys, charge *panel)
   else if(!ref_inside && angle > 0.0) flip_normal = TRUE;
   else {
     sys->info(
-	    "flip_normal: inconclusive test for normal flipping\n");
+            "flip_normal: inconclusive test for normal flipping\n");
     sys->info("  Surface: %s\n", hack_path(surf_name));
     sys->info("  Translation: (%g %g %g)\n", surf->trans[0],
-	    surf->trans[1], surf->trans[2]);
+            surf->trans[1], surf->trans[2]);
     sys->info("  Reference point: (%g %g %g)\n",
-	    ref[0], ref[1], ref[2]);
+            ref[0], ref[1], ref[2]);
     sys->info("  Panel corner: (%g %g %g)\n",
-	    panel->corner[0][0], panel->corner[0][1], panel->corner[0][2]);
+            panel->corner[0][0], panel->corner[0][1], panel->corner[0][2]);
     sys->info("  Normal: (%g %g %g)\n",
-	    normal[0], normal[1], normal[2]);
+            normal[0], normal[1], normal[2]);
     sys->error("Internal error - see previous messages for details.");
   }
     
@@ -381,8 +347,8 @@ static double normalize(double vector[3])
   int i;
 
   length = sqrt( vector[0]*vector[0] 
-		+ vector[1]*vector[1] 
-		+ vector[2]*vector[2]);
+                + vector[1]*vector[1] 
+                + vector[2]*vector[2]);
     
   for (i=0; i<3; i++) vector[i] = vector[i] / length;
 
@@ -469,12 +435,12 @@ double calcp(ssystem *sys, charge *panel, double x, double y, double z, double *
       ss5 = (-xn * s813 - yn * s411 + 0.1 * (s512 + s1215)) * r5Inv;
 
       ss7 = (FIVE3 *((xn * xsq * s[13] + yn * ysq * s[4]) 
-		     + 3.0 * xn * yn * (xn * s[11]  +  yn * s[8]))
-		     - xsq * s1215 - ysq * s512 - xn * yn * s914) * r7Inv;
+                     + 3.0 * xn * yn * (xn * s[11]  +  yn * s[8]))
+                     - xsq * s1215 - ysq * s512 - xn * yn * s914) * r7Inv;
 
       ss9 = (7.0 * (ONE6 * (xsq * xsq * s[15] + ysq * ysq * s[5])
-		    + xsq * ysq * s[12])
-	     + SEVEN3 * xn * yn * (xsq * s[14] + ysq * s[9])) * r9Inv;
+                    + xsq * ysq * s[12])
+             + SEVEN3 * xn * yn * (xsq * s[14] + ysq * s[9])) * r9Inv;
 
       fs += ss5 + ss7 + ss9;
       fdsum = 5.0 * ss5 + 7.0 * ss7 + 9.0 * ss9;
@@ -502,7 +468,7 @@ double calcp(ssystem *sys, charge *panel, double x, double y, double z, double *
       fe[i] = xc * xc + zc * zc;
       r[i] = sqrt(yc * yc + fe[i]);
       if(r[i] < (1.005 * znabs)) {  /* If r almost z, on vertex normal. */
-	okay = FALSE;
+        okay = FALSE;
       }
     }
 
@@ -527,17 +493,17 @@ double calcp(ssystem *sys, charge *panel, double x, double y, double z, double *
 
       /* Okay means eval not near a vertex normal, Use Hess-Smith. */
       if(okay) {
-	s1 = v * r[i];
-	c1 = znabs * (xmxv[i] * ct + ymyv[i] * st);
-	s2 = v * r[next];
-	c2 = znabs * (xmxv[next] * ct + ymyv[next] * st);
+        s1 = v * r[i];
+        c1 = znabs * (xmxv[i] * ct + ymyv[i] * st);
+        s2 = v * r[next];
+        c2 = znabs * (xmxv[next] * ct + ymyv[next] * st);
       }
       /* Near a vertex normal, use Newman. */
       else {
-	s1 = (fe[i] * st) - (xmxv[i] * ymyv[i] * ct);
-	c1 = znabs * r[i] * ct;
-	s2 = (fe[next] * st) - (xmxv[next] * ymyv[next] * ct);
-	c2 = znabs * r[next] * ct;
+        s1 = (fe[i] * st) - (xmxv[i] * ymyv[i] * ct);
+        c1 = znabs * r[i] * ct;
+        s2 = (fe[next] * st) - (xmxv[next] * ymyv[next] * ct);
+        c2 = znabs * r[next] * ct;
       }    
 
       s12 = (s1 * c2) - (s2 * c1);
@@ -563,7 +529,7 @@ double calcp(ssystem *sys, charge *panel, double x, double y, double z, double *
 
   if(fs < 0.0) {
     sys->info(
-	    "\ncalcp: panel potential coeff. less than zero = %g\n", fs);
+            "\ncalcp: panel potential coeff. less than zero = %g\n", fs);
     sys->info("Okay = %d Evaluation Point = %g %g %g\n", okay, x, y, z);
     sys->info("Evaluation Point in local coords = %g %g %g\n",xn,yn, zn);
     sys->info("Panel Description Follows\n");
@@ -580,7 +546,7 @@ void dumpnums(ssystem *sys, int flag, int size)
 {
   double total;
 
-  if(flag == ON) {		/* if first call */
+  if(flag == ON) {              /* if first call */
     num2ndsav = num2nd;
     num4thsav = num4th;
     numexactsav = numexact;
@@ -603,7 +569,7 @@ void dumpnums(ssystem *sys, int flag, int size)
               numexact, 100*(numexact/total));
     }
     sys->msg("Percentage of multiplies done by multipole: %.3g%%\n",
-	    100*(size*size - total)/(size*size));
+            100*(size*size - total)/(size*size));
     if(size*size == total) 
         sys->msg("Warning: no multipole acceleration\n");
   }
@@ -630,7 +596,7 @@ static void ComputeMoments(ssystem *sys, charge *pp)
   static double *XP[4], *YP[4], **I;
   static int maxorder = 0;
   static double CS[16] = { 0.0, 1.0, 1.0, 1.5, 1.5, 3.75, 1.0, 3.0, 
-			   1.5, 7.5, 1.5, 1.5, 3.75, 1.5, 7.5, 3.75 };
+                           1.5, 7.5, 1.5, 1.5, 3.75, 1.5, 7.5, 3.75 };
   /* Allocate temporary storage and initialize arrays. */
   if(order > maxorder) {
     for(i = 0; i < 4; i++) {
@@ -683,36 +649,36 @@ static void ComputeMoments(ssystem *sys, charge *pp)
     if(fabs(dx) >= fabs(dy)) {
       dydx = dy/dx;
       for(M = 2; M <= order; M++) {
-	M1 = M + 1;
-	M2 = M + 2;
+        M1 = M + 1;
+        M2 = M + 2;
 
-	SI = ((xpn[M1] * ypn[1]) - (xp[M1] * yp[1])) / M1
-	     + dydx * (xp[M2] - xpn[M2]) / (M1 * M2);
-	I[M][0] += SI;
+        SI = ((xpn[M1] * ypn[1]) - (xp[M1] * yp[1])) / M1
+             + dydx * (xp[M2] - xpn[M2]) / (M1 * M2);
+        I[M][0] += SI;
 
-	for(N = 1; N <= M; N++) {
-	  N1 = N + 1;
-	  MN1 = M - N + 1;
-	  SI = (xpn[MN1] * ypn[N1] - xp[MN1] * yp[N1]) / (MN1 * N1)
-		     - (dydx * N * SI) / MN1;
-	  I[M-N][N] += SI;
-	}
+        for(N = 1; N <= M; N++) {
+          N1 = N + 1;
+          MN1 = M - N + 1;
+          SI = (xpn[MN1] * ypn[N1] - xp[MN1] * yp[N1]) / (MN1 * N1)
+                     - (dydx * N * SI) / MN1;
+          I[M-N][N] += SI;
+        }
       }
     }
     else {
       dxdy = dx/dy;
       for(M = 2; M <= order; M++) {
-	M1 = M + 1;
-	M2 = M + 2;
-	SI = (dxdy / (M1 * M2)) * (ypn[M2] - yp[M2]);
-	I[0][M] += SI;
-	for(N = 1; N <= M; N++) {
-	  MN1 = M - N + 1;
-	  MN2 = MN1 + 1;
+        M1 = M + 1;
+        M2 = M + 2;
+        SI = (dxdy / (M1 * M2)) * (ypn[M2] - yp[M2]);
+        I[0][M] += SI;
+        for(N = 1; N <= M; N++) {
+          MN1 = M - N + 1;
+          MN2 = MN1 + 1;
           SI = dxdy * ((xpn[N] * ypn[MN2] - xp[N] * yp[MN2]) / (MN1 * MN2) 
-			- (N * SI / MN1));
-	  I[N][M-N] += SI;
-	}
+                        - (N * SI / MN1));
+          I[N][M-N] += SI;
+        }
       }
     }
   }
@@ -735,8 +701,8 @@ static void dp(ssystem *sys, charge *panel)
   double c[4][3];
 
   sys->msg("shape=%d maxdiag=%g mindiag=%g area=%g\n",
-	 panel->shape, 
-	 panel->max_diag, panel->min_diag, panel->area);
+         panel->shape, 
+         panel->max_diag, panel->min_diag, panel->area);
 
   sys->msg("surface: `%s'\n", panel->surf->name);
 
@@ -747,15 +713,15 @@ static void dp(ssystem *sys, charge *panel)
 
   for(i=0; i < panel->shape; i++)
       sys->msg("corner%d = %g %g %g\n",
-	     i, panel->corner[i][0], panel->corner[i][1], panel->corner[i][2]);
+             i, panel->corner[i][0], panel->corner[i][1], panel->corner[i][2]);
 
   for(i = 0; i < panel->shape; i++) {
     c[i][0] = panel->x + panel->corner[i][0]*panel->X[0] 
-	+ panel->corner[i][0]*panel->X[1] + panel->corner[i][0]*panel->X[2];
+        + panel->corner[i][0]*panel->X[1] + panel->corner[i][0]*panel->X[2];
     c[i][1] = panel->y + panel->corner[i][1]*panel->Y[0] 
-	+ panel->corner[i][1]*panel->Y[1] + panel->corner[i][1]*panel->Y[2];
+        + panel->corner[i][1]*panel->Y[1] + panel->corner[i][1]*panel->Y[2];
     c[i][2] = panel->z + panel->corner[i][2]*panel->Z[0] 
-	+ panel->corner[i][2]*panel->Z[1] + panel->corner[i][2]*panel->Z[2];
+        + panel->corner[i][2]*panel->Z[1] + panel->corner[i][2]*panel->Z[2];
     sys->msg("absolute corner%d = %g %g %g\n", i, c[i][0], c[i][1], c[i][2]);
   }
 
@@ -791,11 +757,11 @@ static void testCalcp(ssystem *sys, charge *pp)
   for(i=0; i < DIS; i++) {
     for(j=0; j < DIS; j++) {
       for(k=0; k < DIS; k++) {
-	x = offx + i * mult * SCALE;
-	y = offy + j * mult * SCALE;
-	z = offz + k * mult * SCALE;
-	printf("Eval pt = %g %g %g\n", x, y, z);
-	calcp(sys, pp, x, y, z, NULL);
+        x = offx + i * mult * SCALE;
+        y = offy + j * mult * SCALE;
+        z = offz + k * mult * SCALE;
+        printf("Eval pt = %g %g %g\n", x, y, z);
+        calcp(sys, pp, x, y, z, NULL);
       }
     }
   }

@@ -1,37 +1,3 @@
-/*!\page LICENSE LICENSE
- 
-Copyright (C) 2003 by the Board of Trustees of Massachusetts Institute of Technology, hereafter designated as the Copyright Owners.
- 
-License to use, copy, modify, sell and/or distribute this software and
-its documentation for any purpose is hereby granted without royalty,
-subject to the following terms and conditions:
- 
-1.  The above copyright notice and this permission notice must
-appear in all copies of the software and related documentation.
- 
-2.  The names of the Copyright Owners may not be used in advertising or
-publicity pertaining to distribution of the software without the specific,
-prior written permission of the Copyright Owners.
- 
-3.  THE SOFTWARE IS PROVIDED "AS-IS" AND THE COPYRIGHT OWNERS MAKE NO
-REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, BY WAY OF EXAMPLE, BUT NOT
-LIMITATION.  THE COPYRIGHT OWNERS MAKE NO REPRESENTATIONS OR WARRANTIES OF
-MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE
-SOFTWARE WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS TRADEMARKS OR OTHER
-RIGHTS. THE COPYRIGHT OWNERS SHALL NOT BE LIABLE FOR ANY LIABILITY OR DAMAGES
-WITH RESPECT TO ANY CLAIM BY LICENSEE OR ANY THIRD PARTY ON ACCOUNT OF, OR
-ARISING FROM THE LICENSE, OR ANY SUBLICENSE OR USE OF THE SOFTWARE OR ANY
-SERVICE OR SUPPORT.
- 
-LICENSEE shall indemnify, hold harmless and defend the Copyright Owners and
-their trustees, officers, employees, students and agents against any and all
-claims arising out of the exercise of any rights under this Agreement,
-including, without limiting the generality of the foregoing, against any
-damages, losses or liabilities whatsoever with respect to death or injury to
-person or damage to property arising from or out of the possession, use, or
-operation of Software or Licensed Program(s) by LICENSEE or its customers.
- 
-*/
 
 #include "mulGlobal.h"
 #include "mulDisplay.h"
@@ -40,7 +6,7 @@ operation of Software or Licensed Program(s) by LICENSEE or its customers.
 
 #include <cmath>
 
-int cnt;			/* used in setting up the depth graph */
+int cnt;                        /* used in setting up the depth graph */
 
 /*
   returns TRUE if difference of two doubles is within machine precision
@@ -121,7 +87,7 @@ double getPlane(double *normal, double *p1, double *p2, double *p3)
 static int whichSide(ssystem *sys, face *fac, face *facplane)
 {
   int i, neg, pos, zero;
-  double value[MAXSIDES];      	/* holds values when subbed in plane equ */
+  double value[MAXSIDES];       /* holds values when subbed in plane equ */
   double margin[MAXSIDES], temp[MAXSIDES];
 
   /* if planes are identical, return SAME right away */
@@ -159,7 +125,7 @@ static int whichSide(ssystem *sys, face *fac, face *facplane)
   else if(zero == fac->numsides) return(SAME);
   else {
     sys->error("whichSide: face has %d corners, %d pos %d neg %d zero\n",
-	    fac->numsides, pos, neg, zero);
+            fac->numsides, pos, neg, zero);
   }
   return SAME;
 }
@@ -176,8 +142,8 @@ static int doLinesIntersect(double *isect, double *from1, double *to1, double *f
 
 #if DEBUGX == ON
   sys->msg("seg1 = (%g %g) (%g %g) seg2 = (%g %g) (%g %g)\n",
-	  from1[0], from1[1], to1[0], to1[1], from2[0], from2[1], 
-	  to2[0], to2[1]);
+          from1[0], from1[1], to1[0], to1[1], from2[0], from2[1], 
+          to2[0], to2[1]);
 #endif
 
   /* build the 2x2 system to solve for alpha1, alpha2 in
@@ -194,7 +160,7 @@ static int doLinesIntersect(double *isect, double *from1, double *to1, double *f
   temp2 = A[1][0]*A[0][1];
   /* margin = MARGIN*MAX(temp1, temp2); */
   det = temp1 - temp2;
-  if(diff_is_zero(temp1, temp2, 1.0)) return(FALSE);	/* check for || */
+  if(diff_is_zero(temp1, temp2, 1.0)) return(FALSE);    /* check for || */
 
   /* solve */
   /* margin1 = MARGIN*MAX(A[1][1]*b[0], A[0][1]*b[1]);
@@ -211,7 +177,7 @@ static int doLinesIntersect(double *isect, double *from1, double *to1, double *f
   /* set up intersection point using isect = from1 + alpha1*(to1 - from1) */
   isect[0] = from1[0] + temp1*(to1[0] - from1[0])/det;
   isect[1] = from1[1] + temp1*(to1[1] - from1[1])/det;
-  isect[2] = 0.0;		/* not really necessary */
+  isect[2] = 0.0;               /* not really necessary */
 
   /* check for alphas between 0 and 1 (temps btwn 0 and det) */
   if(det > 0.0) {
@@ -241,15 +207,15 @@ static int face_is_inside(double **corners1, int ccnt1, double **corners2, int c
   for(refcor = corners1, curcor = corners2, ccnt = ccnt1, ncnt = ccnt2, n = 0;
       n < 2; 
       refcor = corners2, curcor = corners1, ccnt = ccnt2, ncnt = ccnt1, n++) {
-    zeros = pos = neg = 0;	/* cross-product value counts */
-    for(i = 0; i < ccnt; i++) {	/* loop on "outer" face sides */
+    zeros = pos = neg = 0;      /* cross-product value counts */
+    for(i = 0; i < ccnt; i++) { /* loop on "outer" face sides */
       if(i == ccnt-1) j = 0;
       else j = i+1;
       /* figure the center point of the non-traversed panel */
       innerpnt[0] = innerpnt[1] = 0.0;
       for(k = 0; k < ncnt; k++) {
-	innerpnt[0] += curcor[k][0];
-	innerpnt[1] += curcor[k][1];
+        innerpnt[0] += curcor[k][0];
+        innerpnt[1] += curcor[k][1];
       }
       innerpnt[0] /= (double)ncnt;
       innerpnt[1] /= (double)ncnt;
@@ -262,18 +228,18 @@ static int face_is_inside(double **corners1, int ccnt1, double **corners2, int c
       margin2 = MARGIN*MAX(fabs(innerpnt[1]), fabs(refcor[i][1]));
       /* figure cross-product---if a cross-product would be zero, skip it */
       if(diff_is_zero(innerpnt[0], refcor[i][0], 1.0)
-	 && diff_is_zero(innerpnt[1], refcor[i][1], 1.0)) {
-	zeros++;
-	continue;
+         && diff_is_zero(innerpnt[1], refcor[i][1], 1.0)) {
+        zeros++;
+        continue;
       }
       /* now check if vertex of "inside" face is on a side, not on corner */
       if(diff_is_zero(side[0]*pnt[1], pnt[0]*side[1], 1.0)) { /* is X-prod 0 */
-	zeros++;		/*       due to vertex on side (not corner) */
+        zeros++;                /*       due to vertex on side (not corner) */
       }
       else if(diff_is_negative(side[0]*pnt[1], pnt[0]*side[1], 1.0)) {
-	neg++;
+        neg++;
       }
-      else pos++;		/* solid positive cross-product */
+      else pos++;               /* solid positive cross-product */
     }
     /* see if negative and positive are not mixed together => full overlap */
     if(((neg == 0 && pos != 0) || (neg != 0 && pos == 0)) && zeros == 0) {
@@ -284,10 +250,10 @@ static int face_is_inside(double **corners1, int ccnt1, double **corners2, int c
 
   /* wasn't any full overlap in either case => no overlap */
   return(FALSE);
-	
+        
 }
   
-#if 1 == 0			/* old is1stFaceDeeper */
+#if 1 == 0                      /* old is1stFaceDeeper */
 /*
   returns TRUE if fac is deeper than facref and facref overlaps fac
   returns FALSE if facref has no overlap with fac
@@ -298,12 +264,12 @@ static int face_is_inside(double **corners1, int ccnt1, double **corners2, int c
 int is1stFaceDeeper(face *fac, face *facref, double *view)
 {
   int i, j, k, olap[2], is_overlap;
-  static double **cproj = NULL;	/* corners of fac in facref's plane */
-  static double **cref = NULL;	/* corners of facref in facref plane */
-  double alpha[MAXSIDES];	/* 1 => view point 0 => corner */
-  double minref[2], maxref[2];	/* bounding box coordinates */
+  static double **cproj = NULL; /* corners of fac in facref's plane */
+  static double **cref = NULL;  /* corners of facref in facref plane */
+  double alpha[MAXSIDES];       /* 1 => view point 0 => corner */
+  double minref[2], maxref[2];  /* bounding box coordinates */
   double minfac[2], maxfac[2];
-  double x[3], y[3];		/* coordinates of x and y in facref plane */
+  double x[3], y[3];            /* coordinates of x and y in facref plane */
   double dot(), temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0, temp1;
   double margin1;
   double *cfr, *ctr, *cff, *ctf, avg[3];
@@ -334,8 +300,8 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
     margin = MAX(margin, fabs(facref->normal[i]));
     temp += (temp1*temp1);
   }
-  temp = sqrt(temp);		/* get norm of difference of normals */
-  margin *= MARGIN;		/* get norm of difference margin */
+  temp = sqrt(temp);            /* get norm of difference of normals */
+  margin *= MARGIN;             /* get norm of difference margin */
   /* check rhs and normal equivalence (panels in same plane) */
   if(diff_is_zero(fac->rhs, facref->rhs, 1.0) 
      && -margin <= temp && temp <= margin) {
@@ -350,13 +316,13 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
     /* test fails if v-c is perpendicular to n */
     if(temp > -margin && temp < margin) {
       sys->info(
-	      "is1stFaceDeeper: Warning, view-corner in view plane (?)\n");
+              "is1stFaceDeeper: Warning, view-corner in view plane (?)\n");
       return(FALSE);
     }
     /* get alpha as in c + alpha*(v-c) = c' */
     alpha[i] = (facref->rhs - dot(facref->normal, fac->c[i]))/temp;
-    for(j = 0; j < 3; j++)	/* get c' */
-	cproj[i][j] = (1.0-alpha[i])*fac->c[i][j]+alpha[i]*view[j];
+    for(j = 0; j < 3; j++)      /* get c' */
+        cproj[i][j] = (1.0-alpha[i])*fac->c[i][j]+alpha[i]*view[j];
   }
 
   /* figure x and y coordinates in facref plane (normal is z coordinate) */
@@ -371,17 +337,17 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
      - facref->c[0] plays the role of origin */
   for(i = 0; i < fac->numsides; i++) {
     for(j = 0; j < 3; j++) tvec1[j] = cproj[i][j] - facref->c[0][j];
-    tvec[0] = dot(x, tvec1);	/* get weight in x direction */
-    tvec[1] = dot(y, tvec1);	/* get weight in y direction */
-    tvec[2] = 0.0;		/* all z weights must = facref->rhs */
+    tvec[0] = dot(x, tvec1);    /* get weight in x direction */
+    tvec[1] = dot(y, tvec1);    /* get weight in y direction */
+    tvec[2] = 0.0;              /* all z weights must = facref->rhs */
     for(j = 0; j < 3; j++) cproj[i][j] = tvec[j]; /* xfer */
   }
   for(j = 0; j < 3; j++) cref[0][j] = 0.0;
   for(i = 1; i < facref->numsides; i++) {
     for(j = 0; j < 3; j++) tvec1[j] = facref->c[i][j] - facref->c[0][j];
-    cref[i][0] = dot(x, tvec1);	/* get weight in x direction */
-    cref[i][1] = dot(y, tvec1);	/* get weight in y direction */
-    cref[i][2] = 0.0;		/* all z weights must = facref->rhs */
+    cref[i][0] = dot(x, tvec1); /* get weight in x direction */
+    cref[i][1] = dot(y, tvec1); /* get weight in y direction */
+    cref[i][2] = 0.0;           /* all z weights must = facref->rhs */
   }
 
   /* up to here is identical to isThereBoxOverlap() */
@@ -399,32 +365,32 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
       if(j == fac->numsides - 1) ctf = cproj[0];
       else ctf = cproj[j+1];
       if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
-	  is_overlap = TRUE;
+          is_overlap = TRUE;
 #if DEBUGX == ON
       sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
     }
   }
-#if XOVTST == ON		/* do either this or face_is_inside() below */
+#if XOVTST == ON                /* do either this or face_is_inside() below */
   /* check for overlap with lines across face */
   if(facref->numsides == 4) {
     for(i = 0; i < 2; i++) {
       if(i == 0) {
-	cfr = cref[0];
-	ctr = cref[2];
+        cfr = cref[0];
+        ctr = cref[2];
       }
       else {
-	cfr = cref[1];
-	ctr = cref[3];
+        cfr = cref[1];
+        ctr = cref[3];
       }
       for(j = 0; j < fac->numsides; j++) {
-	cff = cproj[j];
-	if(j == fac->numsides - 1) ctf = cproj[0];
-	else ctf = cproj[j+1];
-	if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
-	    is_overlap = TRUE;
+        cff = cproj[j];
+        if(j == fac->numsides - 1) ctf = cproj[0];
+        else ctf = cproj[j+1];
+        if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
+            is_overlap = TRUE;
 #if DEBUGX == ON
-	sys->msg("doLinesIntersect returned %d\n", intersect);
+        sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
       }
     }
@@ -437,27 +403,27 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
     for(i = 0; i < 3; i++) {
       ctr = cref[i];
       for(j = 0; j < fac->numsides; j++) {
-	cff = cproj[j];
-	if(j == fac->numsides - 1) ctf = cproj[0];
-	else ctf = cproj[j+1];
-	if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
-	    is_overlap = TRUE;
+        cff = cproj[j];
+        if(j == fac->numsides - 1) ctf = cproj[0];
+        else ctf = cproj[j+1];
+        if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
+            is_overlap = TRUE;
 #if DEBUGX == ON
-	sys->msg("doLinesIntersect returned %d\n", intersect);
+        sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
       }
     }
   }
   else {
     sys->error("isThereProjOverlap: can't handle %d side panel\n",
-	    facref->numsides);
+            facref->numsides);
   }
 #else
   /* no sides overlap---check if one face completely obscures the other */
   if(!is_overlap) {
     is_overlap = face_is_inside(cref, facref->numsides, cproj, fac->numsides);
   }
-#endif				/* XOVTST == ON */
+#endif                          /* XOVTST == ON */
 
   /* if no overlap, no edge in graph in any case */
   if(!is_overlap) return(FALSE);
@@ -475,7 +441,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
 
   if(all_pos && all_neg) {
     sys->info(
-	 "\nis1stFaceDeeper: Warning, all projection coefficients are zero\n");
+         "\nis1stFaceDeeper: Warning, all projection coefficients are zero\n");
     return(FALSE);
   }
   else if(all_pos) return(TRUE);
@@ -483,7 +449,7 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
   else return(FALSE);
 }
 
-#else				/* new is1stFaceDeeper--proj to view plane */
+#else                           /* new is1stFaceDeeper--proj to view plane */
 
 /*
   returns TRUE if fac is deeper than facref and facref overlaps fac
@@ -495,9 +461,9 @@ int is1stFaceDeeper(face *fac, face *facref, double *view)
 static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, double rhs, double *normal)
 {
   int i, j, k, is_overlap, isect_cnt;
-  static double ***cproj = NULL;	/* corners of faces in view plane */
-  double alpha[2][MAXSIDES];	/* 1 => view point 0 => corner */
-  double x[3], y[3];		/* coordinates of x and y in facref plane */
+  static double ***cproj = NULL;        /* corners of faces in view plane */
+  double alpha[2][MAXSIDES];    /* 1 => view point 0 => corner */
+  double x[3], y[3];            /* coordinates of x and y in facref plane */
   double temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0;
   double *cfr, *ctr, *cff, *ctf, origin[3];
   double isect_avg[3], isect[3]; /* intersection points */
@@ -519,7 +485,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
   same_normal = TRUE;
   for(i = 0; i < 3 && same_normal; i++) {
     if(!diff_is_zero(fac->normal[i], facref->normal[i], PARMGN)) 
-	same_normal = FALSE;
+        same_normal = FALSE;
   }
     
   /* check rhs and normal equivalence (panels in same plane) */
@@ -531,14 +497,14 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
       for(j = 0; j < 3; j++) tvec[j] = view[j] - curf->c[i][j]; /* get v-c */
       temp = dot(normal, tvec); /* get n.(v-c) */
       margin = sqrt(dot(tvec, tvec))*MARGIN;
-      ovrlapmgn = MAX(margin, ovrlapmgn);	/* used below */
+      ovrlapmgn = MAX(margin, ovrlapmgn);       /* used below */
       /* test fails if v-c is perpendicular to n */
       if(temp > -margin && temp < margin) return(FALSE);
       /* get alpha as in c + alpha*(v-c) = c' */
       alpha[k][i] = (rhs - dot(normal, curf->c[i]))/temp;
-      for(j = 0; j < 3; j++)	/* get c' */
+      for(j = 0; j < 3; j++)    /* get c' */
      /*cproj[k][i][j] = (1.0-alpha[k][i])*curf->c[i][j]+alpha[k][i]*view[j];*/
-	  cproj[k][i][j] = curf->c[i][j] + alpha[k][i]*tvec[j];
+          cproj[k][i][j] = curf->c[i][j] + alpha[k][i]*tvec[j];
     }
   }
 
@@ -548,7 +514,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
   temp = dot(normal, view);
   if(temp == 0.0) {
     sys->info(
-	"is1stFaceDeeper: origin-view vector perpendicular to view plane\n");
+        "is1stFaceDeeper: origin-view vector perpendicular to view plane\n");
   }
   /* get projection alpha */
   alpha_origin = rhs/temp;
@@ -559,7 +525,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
   tvec[0] -= 1.0;
   if((temp = dot(normal, tvec)) == 0.0) {
     sys->info(
-	    "is1stFaceDeeper: x-view vector perpendicular to view plane\n");
+            "is1stFaceDeeper: x-view vector perpendicular to view plane\n");
   }
   /* get projection alpha */
   tvec1[0] = 1.0; tvec1[1] = tvec1[2] = 0.0;
@@ -585,12 +551,12 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
   
   /* project all face corner projections onto new x and y coordinates
      - cproj[0][0] plays the role of origin */
-  for(curf = fac, k = 0; k < 2; k++, curf = facref) {	/* loop on faces */
+  for(curf = fac, k = 0; k < 2; k++, curf = facref) {   /* loop on faces */
     for(i = 0; i < curf->numsides; i++) {
       for(j = 0; j < 3; j++) tvec1[j] = cproj[k][i][j] - origin[j];
-      tvec[0] = dot(x, tvec1);	/* get weight in x direction */
-      tvec[1] = dot(y, tvec1);	/* get weight in y direction */
-      tvec[2] = 0.0;		/* all z weights must = rhs */
+      tvec[0] = dot(x, tvec1);  /* get weight in x direction */
+      tvec[1] = dot(y, tvec1);  /* get weight in y direction */
+      tvec[2] = 0.0;            /* all z weights must = rhs */
       for(j = 0; j < 3; j++) cproj[k][i][j] = tvec[j]; /* xfer */
     }
   }
@@ -612,35 +578,35 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
       if(j == fac->numsides - 1) ctf = cproj[0][0];
       else ctf = cproj[0][j+1];
       if((intersect = doLinesIntersect(isect, cfr, ctr, cff, ctf)) == TRUE) {
-	isect_cnt++;
-	for(k = 0; k < 3; k++) isect_avg[k] += isect[k];
-	is_overlap = TRUE;
+        isect_cnt++;
+        for(k = 0; k < 3; k++) isect_avg[k] += isect[k];
+        is_overlap = TRUE;
       }
 #if DEBUGX == ON
       sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
     }
   }
-#if XOVTST == ON		/* do either this or face_is_inside() below */
+#if XOVTST == ON                /* do either this or face_is_inside() below */
   /* check for overlap with lines across face */
   if(facref->numsides == 4) {
     for(i = 0; i < 2; i++) {
       if(i == 0) {
-	cfr = cproj[1][0];
-	ctr = cproj[1][2];
+        cfr = cproj[1][0];
+        ctr = cproj[1][2];
       }
       else {
-	cfr = cproj[1][1];
-	ctr = cproj[1][3];
+        cfr = cproj[1][1];
+        ctr = cproj[1][3];
       }
       for(j = 0; j < fac->numsides; j++) {
-	cff = cproj[0][j];
-	if(j == fac->numsides - 1) ctf = cproj[0][0];
-	else ctf = cproj[0][j+1];
-	if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
-	    is_overlap = TRUE;
+        cff = cproj[0][j];
+        if(j == fac->numsides - 1) ctf = cproj[0][0];
+        else ctf = cproj[0][j+1];
+        if((intersect = doLinesIntersect(cfr, ctr, cff, ctf)) == TRUE)
+            is_overlap = TRUE;
 #if DEBUGX == ON
-	sys->msg("doLinesIntersect returned %d\n", intersect);
+        sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
       }
     }
@@ -653,27 +619,27 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
     for(i = 0; i < 3; i++) {
       ctr = cproj[1][i];
       for(j = 0; j < fac->numsides; j++) {
-	cff = cproj[0][j];
-	if(j == fac->numsides - 1) ctf = cproj[0][0];
-	else ctf = cproj[0][j+1];
-	if((intersect = doLinesIntersect(isect, cfr, ctr, cff, ctf)) == TRUE)
-	    is_overlap = TRUE;
+        cff = cproj[0][j];
+        if(j == fac->numsides - 1) ctf = cproj[0][0];
+        else ctf = cproj[0][j+1];
+        if((intersect = doLinesIntersect(isect, cfr, ctr, cff, ctf)) == TRUE)
+            is_overlap = TRUE;
 #if DEBUGX == ON
-	sys->msg("doLinesIntersect returned %d\n", intersect);
+        sys->msg("doLinesIntersect returned %d\n", intersect);
 #endif
       }
     }
   }
   else {
     sys->error("isThereProjOverlap: can't handle %d side panel\n",
-	    facref->numsides);
+            facref->numsides);
   }
 #else
   /* no sides overlap---check if one face completely obscures the other */
   if(!is_overlap) {
     is_overlap 
-	= face_is_inside(cproj[1], facref->numsides, cproj[0], fac->numsides,
-			 isect_avg);
+        = face_is_inside(cproj[1], facref->numsides, cproj[0], fac->numsides,
+                         isect_avg);
   }
   else {
     /* figure average intersect point---should be inside overlap region */
@@ -682,7 +648,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
       k = k + 0;
     }
   }
-#endif				/* XOVTST == ON */
+#endif                          /* XOVTST == ON */
 
   /* if no overlap, no edge in graph in any case */
   if(!is_overlap) return(FALSE);
@@ -711,9 +677,9 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
   else if(diff_is_negative(alpha_fac, alpha_facref, 1.0)) return(REVERSE);
   else {
     sys->info(
-	    "\nis1stFaceDeeper: Warning, face ordering test failure\n");
+            "\nis1stFaceDeeper: Warning, face ordering test failure\n");
     sys->info("  alpha_fac, face %d = %g alpha_facref, face %d = %g\n",
-	    fac->index, alpha_fac, facref->index, alpha_facref);
+            fac->index, alpha_fac, facref->index, alpha_facref);
     dump_face(stderr, fac);
     sys->info(" Projected corners\n");
     dumpCorners(stderr, cproj[0], fac->numsides, 3);
@@ -721,7 +687,7 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
     sys->info(" Projected corners\n");
     dumpCorners(stderr, cproj[1], facref->numsides, 3);
 
-    return(FALSE);		/* inconclusive test */
+    return(FALSE);              /* inconclusive test */
   }
 
 }
@@ -733,12 +699,12 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
 static int isThereBoxOverlap(face *fac, face *facref, double *view)
 {
   int i, j, olap[2];
-  double cproj[MAXSIDES][3];	/* corners of fac in facref's plane */
-  double cref[MAXSIDES][3];	/* corners of facref in facref plane */
-  double alpha[MAXSIDES];	/* 1 => view point 0 => corner */
-  double minref[2], maxref[2];	/* bounding box coordinates */
+  double cproj[MAXSIDES][3];    /* corners of fac in facref's plane */
+  double cref[MAXSIDES][3];     /* corners of facref in facref plane */
+  double alpha[MAXSIDES];       /* 1 => view point 0 => corner */
+  double minref[2], maxref[2];  /* bounding box coordinates */
   double minfac[2], maxfac[2];
-  double x[3], y[3];		/* coordinates of x and y in facref plane */
+  double x[3], y[3];            /* coordinates of x and y in facref plane */
   double temp, tvec[3], tvec1[3], margin, ovrlapmgn = 0.0;
 
   /* figure projections of fac's corners back to facref's plane rel to view */
@@ -746,17 +712,17 @@ static int isThereBoxOverlap(face *fac, face *facref, double *view)
     for(j = 0; j < 3; j++) tvec[j] = view[j] - fac->c[i][j]; /* get v-c */
     temp = dot(facref->normal, tvec); /* get n.(v-c) */
     margin = sqrt(dot(tvec, tvec))*MARGIN;
-    ovrlapmgn = MAX(margin, ovrlapmgn);	/* used below */
+    ovrlapmgn = MAX(margin, ovrlapmgn); /* used below */
     /* test fails if v-c is perpendicular to n */
     if(temp > -margin && temp < margin) return(FALSE);
     /* get alpha as in c + alpha*(v-c) = c' */
     alpha[i] = (facref->rhs - dot(facref->normal, fac->c[i]))/temp;
     /* if(alpha[i] < -margin || alpha[i] > 1.0+margin) {
       sys->error("isThereBoxOverlap: big X failure, alpha = %g\n",
-	      alpha[i]);
+              alpha[i]);
     } */
-    for(j = 0; j < 3; j++)	/* get c' */
-	cproj[i][j] = (1.0-alpha[i])*fac->c[i][j]+alpha[i]*view[j];
+    for(j = 0; j < 3; j++)      /* get c' */
+        cproj[i][j] = (1.0-alpha[i])*fac->c[i][j]+alpha[i]*view[j];
   }
 
   /* figure x and y coordinates in facref plane (normal is z coordinate) */
@@ -771,17 +737,17 @@ static int isThereBoxOverlap(face *fac, face *facref, double *view)
      - facref->c[0] plays the role of origin */
   for(i = 0; i < fac->numsides; i++) {
     for(j = 0; j < 3; j++) tvec1[j] = cproj[i][j] - facref->c[0][j];
-    tvec[0] = dot(x, tvec1);	/* get weight in x direction */
-    tvec[1] = dot(y, tvec1);	/* get weight in y direction */
-    tvec[2] = 0.0;		/* all z weights must = facref->rhs */
+    tvec[0] = dot(x, tvec1);    /* get weight in x direction */
+    tvec[1] = dot(y, tvec1);    /* get weight in y direction */
+    tvec[2] = 0.0;              /* all z weights must = facref->rhs */
     for(j = 0; j < 3; j++) cproj[i][j] = tvec[j]; /* xfer */
   }
   for(j = 0; j < 3; j++) cref[0][j] = 0.0;
   for(i = 1; i < facref->numsides; i++) {
     for(j = 0; j < 3; j++) tvec1[j] = facref->c[i][j] - facref->c[0][j];
-    cref[i][0] = dot(x, tvec1);	/* get weight in x direction */
-    cref[i][1] = dot(y, tvec1);	/* get weight in y direction */
-    cref[i][2] = 0.0;		/* all z weights must = facref->rhs */
+    cref[i][0] = dot(x, tvec1); /* get weight in x direction */
+    cref[i][1] = dot(y, tvec1); /* get weight in y direction */
+    cref[i][2] = 0.0;           /* all z weights must = facref->rhs */
   }
 
   /* figure bounding boxes in new coordinates */
@@ -811,7 +777,7 @@ static int isThereBoxOverlap(face *fac, face *facref, double *view)
        (minref[j]-ovrlapmgn < maxfac[j] && maxfac[j] < maxref[j]+ovrlapmgn) ||
        (minfac[j]-ovrlapmgn < minref[j] && minref[j] < maxfac[j]+ovrlapmgn) ||
        (minfac[j]-ovrlapmgn < maxref[j] && maxref[j] < maxfac[j]+ovrlapmgn))
-	olap[j] = TRUE;
+        olap[j] = TRUE;
   }
   if(olap[0] == FALSE || olap[1] == FALSE) return(FALSE);
   else return(TRUE);
@@ -832,7 +798,7 @@ static int chkCycle(face *fac, face *ref, FILE *fp)
   else {
     for(b = 0; b < fac->numbehind; b++) {
       /*fprintf(fp, " %d (%d)", (fac->behind)[b]->depth,
-	      (fac->behind)[b]->index);
+              (fac->behind)[b]->index);
       if(b % 5 == 0 && b != 0) fprintf(fp, "\n");*/
       if(fac->behind[b] == ref) return(TRUE);
       else if(chkCycle(fac->behind[b], ref, fp) == TRUE) return(TRUE);
@@ -856,8 +822,8 @@ void dumpCycles(face **faces, int numfaces, FILE *file)
     for(j = 0; j < numfaces; j++) faces[j]->mark = FALSE;
     for(b = 0; b < faces[f]->numbehind; b++) {
       if(chkCycle(faces[f]->behind[b], faces[f], file) == TRUE) {
-	cycle = TRUE;
-	break;
+        cycle = TRUE;
+        break;
       }
     }
     if(cycle == TRUE) break;
@@ -913,9 +879,9 @@ face **depthSortFaces(ssystem *sys, face **faces, int numfaces)
   for(f = 0; f < numfaces; f++) {
     for(i = 0, facefound = FALSE; i < numfaces; i++) {
       if(faces[i]->depth == f) {
-	rfaces[f] = faces[i];
-	facefound = TRUE;
-	break;
+        rfaces[f] = faces[i];
+        facefound = TRUE;
+        break;
       }
     }
     if(facefound == FALSE) {
@@ -944,7 +910,7 @@ void getAdjGraph(ssystem *sys, face **faces, int numfaces, double *view, double 
   for(fpcur = faces[0], f = 0; fpcur != NULL; fpcur = fpcur->next, f++) {
     for(fpchk = fpcur->next, numbehind = i = 0; fpchk != NULL;
         fpchk = fpchk->next, i++) {
-      if(fpchk == fpcur) continue;	/* a face can't be behind itself */
+      if(fpchk == fpcur) continue;      /* a face can't be behind itself */
       if((check = is1stFaceDeeper(sys, fpcur, fpchk, view, rhs, normal))==TRUE) {
         fpcur->behind[(fpcur->numbehind)++] = fpchk;
       }
