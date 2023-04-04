@@ -169,6 +169,17 @@ int main(int argc, char *argv[])
       }
       name_given = true;
     }
+    else if(argv[i][1] == 'n' && argv[i][2] == 't') {
+      top_cells = (int) strtol(&(argv[i][3]), chkp, 10);
+      if(*chkp == &(argv[i][3]) || top_cells < 1) {
+        fprintf(stderr,
+                "%s: bad number of panels/top `%s'\n",
+                argv[0], &argv[i][3]);
+        cmderr = true;
+        break;
+      }
+      top_cells_given = true;
+    }
     else if(argv[i][1] == 'n') {
       ncells = (int) strtol(&(argv[i][2]), chkp, 10);
       if(*chkp == &(argv[i][2]) || ncells < 1) {
@@ -221,7 +232,9 @@ int main(int argc, char *argv[])
 
   if(cmderr == true) {
     fprintf(stderr,
-            "Usage: %s [-cr <x y z>] [-c1 <x y z>] [-c2 <x y z>] [-c3 <x y z>] \n                [-n<num panels/side>] [-e<rel edge panel width>] \n                [-na<name>] [-t] [-b] [-p] [-pfl] [-pfr] [-pbl] [-pbr] [-d]\n", 
+            "Usage: %s [-cr <x y z>] [-c1 <x y z>] [-c2 <x y z>] [-c3 <x y z>] \n"
+            "                [-n<num panels/side>] [-nt<num panels/top>] [-e<rel edge panel width>] \n"
+            "                [-na<name>] [-t] [-b] [-p] [-pfl] [-pfr] [-pbl] [-pbr] [-d]\n",
             argv[0]);
     fprintf(stdout, "DEFAULT VALUES:\n");
     fprintf(stdout, "  -cr reference corner = (%g %g %g)\n", X0, Y0, Z0);
