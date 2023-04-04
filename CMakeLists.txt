@@ -67,31 +67,42 @@ target_compile_options(fastcap PRIVATE -Wall -pedantic -Wno-unused-function -Wno
 install(TARGETS fastcap
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-add_executable(cubegen
+add_library(genlib STATIC
   src/epsilon.h
   src/disrect.h
+  src/distri.h
   src/epsilon.cc
   src/disrect.cc
+  src/distri.cc
+)
+
+add_executable(cubegen
   src/cubegen.cc
 )
 
-target_link_libraries(cubegen m)
+target_link_libraries(cubegen m genlib)
 target_compile_options(cubegen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
 
 install(TARGETS cubegen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 add_executable(pipedgen
-  src/epsilon.h
-  src/disrect.h
-  src/epsilon.cc
-  src/disrect.cc
   src/pipedgen.cc
 )
 
-target_link_libraries(pipedgen m)
+target_link_libraries(pipedgen m genlib)
 target_compile_options(pipedgen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
 
 install(TARGETS pipedgen
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+add_executable(teragen
+  src/teragen.cc
+)
+
+target_link_libraries(teragen m genlib)
+target_compile_options(teragen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+
+install(TARGETS teragen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 

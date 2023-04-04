@@ -1,19 +1,12 @@
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
+#include <algorithm>
 
-#ifndef MAX
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#endif
+#include "distri.h"
+#include "epsilon.h"
 
-#ifndef MIN
-#define MIN(A,B)  ( (A) > (B) ? (B) : (A) )
-#endif
-
-void wrQuad(fp, cond, p1, p2, p3, p4)
-int cond;
-double *p1, *p2, *p3, *p4;
-FILE *fp;
+void wrQuad(FILE *fp, int cond, double *p1, double *p2, double *p3, double *p4)
 {
   char pan_type;
   int i;
@@ -40,14 +33,14 @@ FILE *fp;
   - currently uses a primitive algorithm that won't work for skinny triangles
   - returns number of panels generated
 */
-int disTri(fp, cond, edgefrac, ncells, no_discr,
-           x1, y1, z1, x2, y2, z2, x3, y3, z3)
-int ncells;                     /* number of cells on short side, > 2 */
-int cond;                       /* conductor number */
-int no_discr;                   /* TRUE => no discr., just wr the three pnts */
-double edgefrac;                /* edge cell widths =edgefrac*(inner widths) */
-double x1, y1, z1, x2, y2, z2, x3, y3, z3; /* 3 corners */
-FILE *fp;
+int disTri(FILE *fp, int cond, double edgefrac, int ncells, bool no_discr,
+           double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3)
+//  int ncells;                     : number of cells on short side, > 2 
+//  int cond;                       : conductor number 
+//  int no_discr;                   : TRUE => no discr., just wr the three pnts 
+//  double edgefrac;                : edge cell widths =edgefrac*(inner widths) 
+//  double x1, y1, z1, x2, y2, z2, x3, y3, z3; : 3 corners 
+//  FILE *fp;
 {
   int lflag, linernum, sinernum, npanels, i;
   double lside, sside, mside, temp, sedgewid, sinerwid, linerwid;
@@ -73,7 +66,7 @@ FILE *fp;
     exit(0);
   }
   if(ncells == 2) {
-    fprintf(stderr, "\ndisTri: ncells = 2 not implemented\n", ncells);
+    fprintf(stderr, "\ndisTri: ncells = 2 not implemented\n");
     exit(0);
   }
 
@@ -85,9 +78,9 @@ FILE *fp;
 
   /* find the minimum side length */
   sside = sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2));
-  sside = MIN(sside,
+  sside = std::min(sside,
               sqrt((x3-x2)*(x3-x2) + (y3-y2)*(y3-y2) + (z3-z2)*(z3-z2)));
-  sside = MIN(sside,
+  sside = std::min(sside,
               sqrt((x1-x3)*(x1-x3) + (y1-y3)*(y1-y3) + (z1-z3)*(z1-z3)));
 
   /* find the edge cell width */
