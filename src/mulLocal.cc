@@ -69,7 +69,7 @@ void evalSqrtFac(ssystem * /*sys*/, double **arrayout, double **arrayin, int ord
 /*
   initializes cos[(m+-k)beta] and sin[(m+-k)beta] lookup tables (M2L and L2L)
 */
-static void evalSinCos(ssystem *sys, int beta, double order)
+static void evalSinCos(ssystem *sys, double beta, int order)
 {
   int i;
   double temp = beta;

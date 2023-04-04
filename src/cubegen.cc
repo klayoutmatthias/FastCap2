@@ -1,71 +1,72 @@
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
+#include <algorithm>
 
-#define DEFSID 1.0              /* default cube side, meters */
-#define DEFEFR 0.1              /* default edge-cell-width/inner-cell-width */
-#define DEFNCL 3                /* default #cells on short side of faces */
-#define DEFPLT 2                /* default number of || plates */
+#include "disrect.h"
 
-#define X0 0.0                  /* default origin */
-#define Y0 0.0
-#define Z0 0.0
+const double DEFSID = 1.0;             /* default cube side, meters */
+const double DEFEFR = 0.1;             /* default edge-cell-width/inner-cell-width */
+const int DEFNCL = 3;                  /* default #cells on short side of faces */
+const int DEFPLT = 2;                  /* default number of || plates */
 
-#define XH 1.0                  /* default heights */
-#define YH 1.0
-#define ZH 1.0
+const double X0 = 0.0;                 /* default origin */
+const double Y0 = 0.0;
+const double Z0 = 0.0;
 
-#define TRUE 1
-#define FALSE 0
-
-#define MIN(A,B)  ( (A) > (B) ? (B) : (A) )
+const double XH = 1.0;                 /* default heights */
+const double YH = 1.0;
+const double ZH = 1.0;
 
 /*
   generates a cube example in quickif.c format
   - uses disRect() for discretization plates
 */
-main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
-  char temp[BUFSIZ], name[BUFSIZ], **chkp, *chk;
-  int npanels = 0, ncells, cmderr = FALSE, i, cond, center_on_origin, no_top;
-  int top_area, right_side_area, left_side_area, no_perimeter, no_discr;
-  int right_cells, left_cells, top_cells, no_bottom, top_cells_given;
-  int no_perimeter_front_left, no_perimeter_front_right;
-  int no_perimeter_back_left, no_perimeter_back_right, name_given;
-  double edgefrac, width, strtod(), pos_end, neg_end;
-  double x1, y1, z1, x2, y2, z2, x3, y3, z3, x0, y0, z0; /* 4 corners */
-  double xh, yh, zh;
-  long strtol();
-  FILE *fp, *fopen();
-
-  /* load default parameters */
-  width = DEFSID;
-  edgefrac = DEFEFR;
-  ncells = DEFNCL;
-  center_on_origin = no_top = no_perimeter = no_bottom = no_discr = FALSE;
-  top_cells_given = FALSE;
-  x0 = X0; y0 = Y0; z0 = Z0;
-  xh = XH; yh = YH; zh = ZH;
-  no_perimeter_front_left = no_perimeter_front_right = FALSE;
-  no_perimeter_back_left = no_perimeter_back_right = name_given = FALSE;
+  char name[BUFSIZ] = { 0 };
+  char **chkp = 0;
+  char *chk = 0;
+  int npanels = 0;
+  int ncells = DEFNCL;
+  int right_cells = 0;
+  int left_cells = 0;
+  int top_cells = 0;
+  bool center_on_origin = false;
+  bool no_bottom = false;
+  bool no_top = false;
+  bool no_perimeter = false;
+  bool no_discr = false;
+  bool top_cells_given = false;
+  bool no_perimeter_front_left = false;
+  bool no_perimeter_front_right = false;
+  bool no_perimeter_back_left = false;
+  bool no_perimeter_back_right = false;
+  bool name_given = false;
+  double edgefrac = DEFEFR;
+  double width = DEFSID;
+  double x0 = X0, y0 = Y0, z0 = Z0;
+  double x1, y1, z1, x2, y2, z2, x3, y3, z3;
+  double xh = XH, yh = YH, zh = ZH;
+  bool cmderr = false;
+  FILE *fp = NULL;
 
   /* parse command line */
   chkp = &chk;                  /* pointers for error checking */
-  for(i = 1; i < argc && cmderr == FALSE; i++) {
+  for(int i = 1; i < argc && cmderr == false; i++) {
     if(argv[i][0] != '-') {
       fprintf(stderr, "%s: illegal argument -- %s\n", argv[0], argv[i]);
-      cmderr = TRUE;
+      cmderr = true;
       break;
     }
     else if(argv[i][1] == 'n' && argv[i][2] == 'a') {
       if(sscanf(&(argv[i][3]), "%s", name) != 1) {
         fprintf(stderr, "%s: bad name `%s'\n", argv[0], &argv[i][3]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
-      name_given = TRUE;
+      name_given = true;
     }
     else if(argv[i][1] == 'n') {
       ncells = (int) strtol(&(argv[i][2]), chkp, 10);
@@ -73,7 +74,7 @@ char *argv[];
         fprintf(stderr, 
                 "%s: bad number of panels/side `%s'\n", 
                 argv[0], &argv[i][2]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
@@ -82,7 +83,7 @@ char *argv[];
       if(*chkp == &(argv[i][2]) || width <= 0.0) {
         fprintf(stderr, "%s: bad cube side length `%s'\n", 
                 argv[0], &argv[i][2]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
@@ -91,7 +92,7 @@ char *argv[];
       if(*chkp == &(argv[i][2]) || edgefrac < 0.0) {
         fprintf(stderr, "%s: bad edge panel fraction `%s'\n", 
                 argv[0], &argv[i][2]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
@@ -100,7 +101,7 @@ char *argv[];
       if(*chkp == &(argv[i][3])) {
         fprintf(stderr, "%s: bad x origin value `%s'\n", 
                 argv[0], &argv[i][3]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
@@ -109,7 +110,7 @@ char *argv[];
       if(*chkp == &(argv[i][3])) {
         fprintf(stderr, "%s: bad y origin value `%s'\n", 
                 argv[0], &argv[i][3]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
@@ -118,7 +119,7 @@ char *argv[];
       if(*chkp == &(argv[i][3])) {
         fprintf(stderr, "%s: bad z origin value `%s'\n", 
                 argv[0], &argv[i][3]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
@@ -127,7 +128,7 @@ char *argv[];
       if(*chkp == &(argv[i][3])) {
         fprintf(stderr, "%s: bad x height value `%s'\n", 
                 argv[0], &argv[i][3]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
@@ -136,7 +137,7 @@ char *argv[];
       if(*chkp == &(argv[i][3])) {
         fprintf(stderr, "%s: bad y height value `%s'\n", 
                 argv[0], &argv[i][3]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
@@ -145,48 +146,51 @@ char *argv[];
       if(*chkp == &(argv[i][3])) {
         fprintf(stderr, "%s: bad z height value `%s'\n", 
                 argv[0], &argv[i][3]);
-        cmderr = TRUE;
+        cmderr = true;
         break;
       }
     }
     else if(argv[i][1] == 'o') {
-      center_on_origin = TRUE;
+      center_on_origin = true;
     }
     else if(argv[i][1] == 't') {
-      no_top = TRUE;
+      no_top = true;
     }
     else if(!strcmp(&(argv[i][1]),"pfl")) {
-      no_perimeter_front_left = TRUE;
+      no_perimeter_front_left = true;
     }
     else if(!strcmp(&(argv[i][1]),"pfr")) {
-      no_perimeter_front_right = TRUE;
+      no_perimeter_front_right = true;
     }
     else if(!strcmp(&(argv[i][1]),"pbl")) {
-      no_perimeter_back_left = TRUE;
+      no_perimeter_back_left = true;
     }
     else if(!strcmp(&(argv[i][1]),"pbr")) {
-      no_perimeter_back_right = TRUE;
+      no_perimeter_back_right = true;
     }
     else if(!strcmp(&(argv[i][1]),"p")) {
-      no_perimeter = TRUE;
+      no_perimeter = true;
     }
     else if(argv[i][1] == 'b') {
-      no_bottom = TRUE;
+      no_bottom = true;
     }
     else if(argv[i][1] == 'd') {
-      no_discr = TRUE;
+      no_discr = true;
     }
     else {
       fprintf(stderr, "%s: illegal option -- %s\n", argv[0], &(argv[i][1]));
-      cmderr = TRUE;
+      cmderr = true;
       break;
     }
   }
 
-  if(cmderr == TRUE) {
+  if(cmderr == true) {
     fprintf(stderr,
-            "Usage: %s [-xo<originx>] [-yo<originy>] [-zo<originz>] \n               [-xh<heightx>] [-yh<heighty>] [-zh<heightz>] \n               [-n<num panels/side>] [-e<rel edge panel width>] [-na<name>]\n               [-o] [-t] [-b] [-p] [-pfl] [-pfr] [-pbl] [-pbr] [-d]\n", 
-            argv[0], DEFNCL, DEFEFR);
+            "Usage: %s [-xo<originx>] [-yo<originy>] [-zo<originz>] \n"
+            "[-xh<heightx>] [-yh<heighty>] [-zh<heightz>] \n"
+            "[-n<num panels/side>] [-e<rel edge panel width>] [-na<name>]\n"
+            "[-o] [-t] [-b] [-p] [-pfl] [-pfr] [-pbl] [-pbr] [-d]\n", 
+            argv[0]);
     fprintf(stdout, "DEFAULT VALUES:\n");
     fprintf(stderr, "  origin = (xo yo zo) = (%g %g %g)\n", X0, Y0, Z0);
     fprintf(stderr, "  side heights = (xh yh zh) = (%g %g %g)\n", XH, YH, ZH);

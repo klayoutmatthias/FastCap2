@@ -7,6 +7,7 @@
 
 #include <cstring>
 #include <cmath>
+#include <algorithm>
 
 /*
   loads axes' lines
@@ -56,12 +57,12 @@ static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, cha
         dif = 0.0;
       }
       if(use_density) {
-        *black = MAX(*black, chgs[panel->index]/panel->area);
-        *white = MIN(*white, chgs[panel->index]/panel->area);
+        *black = std::max(*black, chgs[panel->index]/panel->area);
+        *white = std::min(*white, chgs[panel->index]/panel->area);
       }
       else {
-        *black = MAX(*black, chgs[panel->index]);
-        *white = MIN(*white, chgs[panel->index]);
+        *black = std::max(*black, chgs[panel->index]);
+        *white = std::min(*white, chgs[panel->index]);
       }   
     }
 
@@ -418,7 +419,7 @@ line **getLines(ssystem *sys, const char *line_file, int *numlines)
 static void getBndingBox(ssystem *sys, face **faces, int numfaces, line **lines, int numlines, int *lowx, int *lowy, FILE *fp, double ***axes)
 {
   int upx, upy;
-  double xmax, ymax, minx, miny;
+  double xmax = 0.0, ymax = 0.0, minx = 0.0, miny = 0.0;
   int i, j;
 
   /* find the smallest and largest x and y coordinates (assumed pos) */
@@ -430,11 +431,11 @@ static void getBndingBox(ssystem *sys, face **faces, int numfaces, line **lines,
         miny = axes[i][j][1];
       }
       else {
-        minx = MIN(minx, axes[i][j][0]);
-        miny = MIN(miny, axes[i][j][1]);
+        minx = std::min(minx, axes[i][j][0]);
+        miny = std::min(miny, axes[i][j][1]);
       }
-      xmax = MAX(xmax, axes[i][j][0]);
-      ymax = MAX(ymax, axes[i][j][1]);
+      xmax = std::max(xmax, axes[i][j][0]);
+      ymax = std::max(ymax, axes[i][j][1]);
     }
   }
   for(i = 0; i < numfaces; i++) { /* check faces */
@@ -444,28 +445,28 @@ static void getBndingBox(ssystem *sys, face **faces, int numfaces, line **lines,
         miny = faces[i]->c[j][1];
       }
       else {
-        minx = MIN(minx, faces[i]->c[j][0]);
-        miny = MIN(miny, faces[i]->c[j][1]);
+        minx = std::min(minx, faces[i]->c[j][0]);
+        miny = std::min(miny, faces[i]->c[j][1]);
       }
-      xmax = MAX(xmax, faces[i]->c[j][0]);
-      ymax = MAX(ymax, faces[i]->c[j][1]);
+      xmax = std::max(xmax, faces[i]->c[j][0]);
+      ymax = std::max(ymax, faces[i]->c[j][1]);
     }
   }
   for(i = 0; i < numlines; i++) { /* check lines */
     if(i == 0 && !sys->x_ && numfaces == 0) {
-      minx = MIN(lines[i]->from[0], lines[i]->to[0]);
-      miny = MIN(lines[i]->from[1], lines[i]->to[1]);
+      minx = std::min(lines[i]->from[0], lines[i]->to[0]);
+      miny = std::min(lines[i]->from[1], lines[i]->to[1]);
     }
     else {
-      minx = MIN(minx, lines[i]->from[0]);
-      miny = MIN(miny, lines[i]->from[1]);
-      minx = MIN(minx, lines[i]->to[0]);
-      miny = MIN(miny, lines[i]->to[1]);
+      minx = std::min(minx, lines[i]->from[0]);
+      miny = std::min(miny, lines[i]->from[1]);
+      minx = std::min(minx, lines[i]->to[0]);
+      miny = std::min(miny, lines[i]->to[1]);
     }
-    xmax = MAX(xmax, lines[i]->to[0]);
-    xmax = MAX(xmax, lines[i]->from[0]);
-    ymax = MAX(ymax, lines[i]->to[1]);
-    ymax = MAX(ymax, lines[i]->from[1]);
+    xmax = std::max(xmax, lines[i]->to[0]);
+    xmax = std::max(xmax, lines[i]->from[0]);
+    ymax = std::max(ymax, lines[i]->to[1]);
+    ymax = std::max(ymax, lines[i]->from[1]);
   }
 
   *lowx = minx-2;               /* note 2pnt offset and truncation */
@@ -801,9 +802,9 @@ static void dumpAdjGraph(face **faces, int numfaces, FILE *fp)
   /* start the input numbered graph refered to lower left corner
      - row numbers on right because it's easier */
   /* set up the sizes - font never bigger than FONT; stepx, stepy <=1.25FONT */
-  stepx = MIN(1.25*FONT, (IMAGEX-OFFSETX)/(double)numfaces);
-  stepy = MIN(1.25*FONT, (IMAGEY-OFFSETY)/(double)numfaces);
-  font = MIN(stepx, stepy)/1.25;
+  stepx = std::min(1.25*FONT, (IMAGEX-OFFSETX)/(double)numfaces);
+  stepy = std::min(1.25*FONT, (IMAGEY-OFFSETY)/(double)numfaces);
+  font = std::min(stepx, stepy)/1.25;
   x = OFFSETX + numfaces*stepx; 
   y = OFFSETY + numfaces*stepy;
 

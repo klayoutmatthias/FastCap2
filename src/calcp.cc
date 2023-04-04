@@ -390,7 +390,7 @@ double calcp(ssystem *sys, charge *panel, double x, double y, double z, double *
   double ss1, ss3, ss5, ss7, ss9;
   double s914, s813, s411, s512, s1215;
   double fs, fd, fdsum;
-  int okay, i, next;
+  int okay = TRUE, i, next;
   double *corner;
 
   /* Put the evaluation point into this panel's coordinates. */

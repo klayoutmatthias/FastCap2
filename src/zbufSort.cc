@@ -198,7 +198,7 @@ static int face_is_inside(double **corners1, int ccnt1, double **corners2, int c
 {
   int i, j, k, n, ccnt, zeros, pos, neg, ncnt;
   double margin1, margin2, **refcor, **curcor;
-  double innerpnt[2], side[2], pnt[2];
+  double innerpnt[3], side[3], pnt[3];
 
   /* do cross products between sides of one face and vectors to first point
      of the other---must get same sign or zero for all if one inside other 

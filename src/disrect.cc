@@ -1,8 +1,10 @@
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
+#include <algorithm>
 
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#include "disrect.h"
+#include "epsilon.h"
 
 /*
   write a set of quadralateral panels for a rectancle in quickif.c format
@@ -16,17 +18,12 @@
   - returns number of panels generated
 */
 
-int wrQuadCells(fp, cond, sinernum, linernum, sinerwid, linerwid, sedgewid,
-                 x1, y1, z1, x2, y2, z2, x4, y4, z4)
-int cond;                       /* conductor number */
-int sinernum, linernum;
-double sinerwid, linerwid, sedgewid;
-double x1, y1, z1, x2, y2, z2, x4, y4, z4;
-FILE *fp;
+static int wrQuadCells(FILE *fp, int cond, int sinernum, int linernum, double sinerwid, double linerwid, double sedgewid,
+                 double x1, double y1, double z1, double x2, double y2, double z2, double x4, double y4, double z4)
 {
   int sncell, lncell, npanels = 0;
   double x12, y12, z12, x14, y14, z14; /* unit vector from p1 to p2, p4 */
-  double norm2, norm4, x, y, z, temp;
+  double norm2, norm4, x, y, z;
   double xt, yt, zt;
 
   /* set up unit vectors - p1-p2 must be the short side */
@@ -129,14 +126,14 @@ FILE *fp;
   - returns the number of panels made
   - no_discr 
 */
-int disRect(fp, cond, edgefrac, ncells, no_discr,
-             x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
-int ncells;                     /* number of cells on short side, > 2 */
-int cond;                       /* conductor number */
-int no_discr;                   /* TRUE => no discr., just wr the four pnts */
-double edgefrac;                /* edge cell widths =edgefrac*(inner widths) */
-double x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4; /* 4 corners */
-FILE *fp;
+int disRect(FILE *fp, int cond, double edgefrac, int ncells, bool no_discr,
+            double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4)
+// int ncells;                     number of cells on short side, > 2 
+// int cond;                       conductor number 
+// int no_discr;                   true => no discr., just wr the four pnts 
+// double edgefrac;                edge cell widths =edgefrac*(inner widths) 
+// double x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;  4 corners 
+// FILE *fp;
 {
   int lflag, linernum, sinernum, npanels;
   double lside, sside, temp, sedgewid, sinerwid, linerwid;
@@ -197,7 +194,7 @@ FILE *fp;
      - otherwise possible for truncation to eliminate a wanted panel
      - if this screws up, the worst it'll do is produce an extra inner sec'n */
   /* add scaled epsilon to result to get close numbers over trunc. threshold */
-  temp += (MAX(lside/sinerwid, 2.0*edgefrac)*uepsilon);
+  temp += (std::max(lside/sinerwid, 2.0*edgefrac)*uepsilon);
   linernum = temp;              /* truncate */
   linerwid = (lside-2.0*sedgewid)/((double)linernum); /* long side cell wdth */
 

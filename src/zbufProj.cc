@@ -5,6 +5,7 @@
 #include "zbufSort.h"
 
 #include <cmath>
+#include <algorithm>
 
 /*
   takes a list of 3d lines and returns a list of 3d lines mapped onto a plane
@@ -224,7 +225,7 @@ void flatten(ssystem *sys, face **faces, int numfaces, line **lines, int numline
 void makePos(ssystem *sys, face **faces, int numfaces, line **lines, int numlines)
 {
   int i,j;
-  double minx, miny, trans[2];
+  double minx = 0.0, miny = 0.0, trans[2];
   double offset[2];             /* the margins from 0 for smallest x and y */
   double ***axes = sys->axes;
 
@@ -238,29 +239,29 @@ void makePos(ssystem *sys, face **faces, int numfaces, line **lines, int numline
         miny = faces[i]->c[j][1];
       }
       else {
-        minx = MIN(minx, faces[i]->c[j][0]);
-        miny = MIN(miny, faces[i]->c[j][1]);
+        minx = std::min(minx, faces[i]->c[j][0]);
+        miny = std::min(miny, faces[i]->c[j][1]);
       }
     }
   }
   /* include lines */
   for(i = 0; i < numlines; i++) {
     if(i == 0 && numfaces == 0) {
-      minx = MIN(lines[i]->from[0], lines[i]->to[0]);
-      miny = MAX(lines[i]->from[1], lines[i]->to[1]);
+      minx = std::min(lines[i]->from[0], lines[i]->to[0]);
+      miny = std::max(lines[i]->from[1], lines[i]->to[1]);
     }
     else {
-      minx = MIN(minx, lines[i]->from[0]);
-      minx = MIN(minx, lines[i]->to[0]);
-      miny = MIN(miny, lines[i]->from[1]);
-      miny = MIN(miny, lines[i]->to[1]);
+      minx = std::min(minx, lines[i]->from[0]);
+      minx = std::min(minx, lines[i]->to[0]);
+      miny = std::min(miny, lines[i]->from[1]);
+      miny = std::min(miny, lines[i]->to[1]);
     }
   }
   /* include axes if they will be printed */
   for(i = 0; i < 7 && sys->x_; i++) {
     for(j = 0; j < 2; j++) {
-      minx = MIN(minx, axes[i][j][0]);
-      miny = MIN(miny, axes[i][j][1]);
+      minx = std::min(minx, axes[i][j][0]);
+      miny = std::min(miny, axes[i][j][1]);
     }
   }
     
@@ -302,26 +303,26 @@ void scale2d(ssystem *sys, face **faces, int numfaces, line **lines, int numline
   /* find ymax, xmax */
   for(i = 0, xmax = ymax = 0.0; i < numfaces; i++) {
     for(j = 0; j < faces[i]->numsides; j++) {
-      xmax = MAX(xmax, faces[i]->c[j][0]);
-      ymax = MAX(ymax, faces[i]->c[j][1]);
+      xmax = std::max(xmax, faces[i]->c[j][0]);
+      ymax = std::max(ymax, faces[i]->c[j][1]);
     }
   }
   /* include lines */
   for(i = 0; i < numlines; i++) {
-    xmax = MAX(xmax, lines[i]->to[0]);
-    ymax = MAX(ymax, lines[i]->to[1]);
-    xmax = MAX(xmax, lines[i]->from[0]);
-    ymax = MAX(ymax, lines[i]->from[1]);
+    xmax = std::max(xmax, lines[i]->to[0]);
+    ymax = std::max(ymax, lines[i]->to[1]);
+    xmax = std::max(xmax, lines[i]->from[0]);
+    ymax = std::max(ymax, lines[i]->from[1]);
   }
   for(i = 0; i < 7 && sys->x_; i++) { /* if axes to be prnted */
     for(j = 0; j < 2; j++) {
-      xmax = MAX(xmax, axes[i][j][0]);
-      ymax = MAX(ymax, axes[i][j][1]);
+      xmax = std::max(xmax, axes[i][j][0]);
+      ymax = std::max(ymax, axes[i][j][1]);
     }
   }
 
   if(xmax <= MARGIN || ymax <= MARGIN) {
-    sys->error("scale2d: strange xmax = %g or ymax = %g\n",
+    sys->warn("scale2d: strange xmax = %g or ymax = %g\n",
             xmax, ymax);
   }
 
@@ -330,7 +331,7 @@ void scale2d(ssystem *sys, face **faces, int numfaces, line **lines, int numline
   yscale = scale*IMAGEY/ymax;
   
   /* figure the final scaling and apply it - do the offsetting too */
-  master = MIN(xscale, yscale);
+  master = std::min(xscale, yscale);
   for(i = 0; i < numfaces; i++) {
     for(j = 0; j < faces[i]->numsides; j++) {
       faces[i]->c[j][0] *= master; 
@@ -379,8 +380,8 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
       }
       else {
         for(k = 0; k < 3; k++) {
-          max[k] = MAX(max[k], faces[i]->c[j][k]);
-          min[k] = MIN(min[k], faces[i]->c[j][k]);
+          max[k] = std::max(max[k], faces[i]->c[j][k]);
+          min[k] = std::min(min[k], faces[i]->c[j][k]);
         }
       }
     }
@@ -390,16 +391,16 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
   for(i = 0; i < numlines; i++) {
     if(i == 0 && numfaces == 0) {
       for(k = 0; k < 3; k++) {
-        max[k] = MAX((lines[0]->from)[k], (lines[0]->to)[k]);
-        min[k] = MIN((lines[0]->from)[k], (lines[0]->to)[k]);
+        max[k] = std::max((lines[0]->from)[k], (lines[0]->to)[k]);
+        min[k] = std::min((lines[0]->from)[k], (lines[0]->to)[k]);
       }
     }
     else {
       for(k = 0; k < 3; k++) {
-        max[k] = MAX(max[k], lines[0]->from[k]);
-        max[k] = MAX(max[k], lines[0]->to[k]);
-        min[k] = MIN(min[k], lines[0]->from[k]);
-        min[k] = MIN(min[k], lines[0]->to[k]);
+        max[k] = std::max(max[k], lines[0]->from[k]);
+        max[k] = std::max(max[k], lines[0]->to[k]);
+        min[k] = std::min(min[k], lines[0]->from[k]);
+        min[k] = std::min(min[k], lines[0]->to[k]);
       }
     }
   }
@@ -408,8 +409,8 @@ double *getAvg(ssystem *sys, face **faces, int numfaces, line **lines, int numli
   for(i = 0; i < 7 && sys->x_ && flag == ON; i++) {
     for(j = 0; j < 2; j++) {
       for(k = 0; k < 3; k++) {
-        max[k] = MAX(max[k], axes[i][j][k]);
-        min[k] = MIN(min[k], axes[i][j][k]);
+        max[k] = std::max(max[k], axes[i][j][k]);
+        min[k] = std::min(min[k], axes[i][j][k]);
       }
     }
   }
@@ -434,23 +435,23 @@ double getSphere(ssystem *sys, double *avg, face **faces, int numfaces, line **l
   for(i = 0; i <  numfaces; i++) {
     for(j = 0; j < faces[i]->numsides; j++) {
       for(k = 0; k < 3; k++) temp[k] = avg[k] - faces[i]->c[j][k];
-      radius = MAX(radius, dot(temp, temp));
+      radius = std::max(radius, dot(temp, temp));
     }
   }
 
   /* loop through all the line points, save the farthest away */
   for(i = 0; i < numlines; i++) {
     for(k = 0; k < 3; k++) temp[k] = avg[k] - lines[i]->to[k];
-    radius = MAX(radius, dot(temp, temp));
+    radius = std::max(radius, dot(temp, temp));
     for(k = 0; k < 3; k++) temp[k] = avg[k] - lines[i]->from[k];
-    radius = MAX(radius, dot(temp, temp));
+    radius = std::max(radius, dot(temp, temp));
   }
 
   /* if axes are specified, they must be included */
   for(i = 0; i < 7 && sys->x_; i++) {
     for(j = 0; j < 2; j++) {
       for(k = 0; k < 3; k++) temp[k] = avg[k] - axes[i][j][k];
-      radius = MAX(radius, dot(temp, temp));
+      radius = std::max(radius, dot(temp, temp));
     }
   }
 
@@ -505,7 +506,7 @@ double getNormal(ssystem *sys, double *normal, double radius, double *avg, doubl
           first = FALSE;
           max_anorm = anorm;
         }
-        else max_anorm = MAX(max_anorm, anorm);
+        else max_anorm = std::max(max_anorm, anorm);
       }
     }
     /*    adjust if too big */

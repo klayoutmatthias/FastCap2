@@ -27,7 +27,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   int i, cond, iter, maxiter = MAXITER, ttliter = 0;
   charge *nq;
   double *q, *p, *r, *ap;
-  double **bp, **bap;
+  double **bp = 0, **bap = 0;
   surface *surf;
 
   /* Allocate space for the capacitance matrix. */
