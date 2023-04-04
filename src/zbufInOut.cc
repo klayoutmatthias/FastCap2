@@ -30,7 +30,6 @@ static void setupLine(double ***axi, int index, double x1, double y1, double z1,
 static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, charge *chglist, int use_density, double *black, double *white)
 {
   int first, i;
-  double dif;
   charge *panel;
 
   /* find the minimum and maximum charge density values */
@@ -53,9 +52,6 @@ static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, cha
       else *black = *white = chgs[panel->index];
     }
     else {
-      if(chgs[panel->index] == 0.0) {
-        dif = 0.0;
-      }
       if(use_density) {
         *black = std::max(*black, chgs[panel->index]/panel->area);
         *white = std::min(*white, chgs[panel->index]/panel->area);
@@ -69,7 +65,7 @@ static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, cha
   }
 
   /* assign the grey levels - 0.0 = white, 1.0 = black */
-  dif = black - white;
+  double dif = *black - *white;
   for(panel = chglist, i = 0; panel != NULL; panel = panel->next) {
     if(panel->dummy) continue;
 
