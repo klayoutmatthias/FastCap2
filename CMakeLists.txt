@@ -76,6 +76,9 @@ add_library(genlib STATIC
   src/distri.cc
 )
 
+# --------------------------------------------------------------
+# cubegen
+
 add_executable(cubegen
   src/cubegen.cc
 )
@@ -85,6 +88,9 @@ target_compile_options(cubegen PRIVATE -Wall -pedantic -Wno-unused-function -Wno
 
 install(TARGETS cubegen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# --------------------------------------------------------------
+# pipedgen
 
 add_executable(pipedgen
   src/pipedgen.cc
@@ -96,6 +102,9 @@ target_compile_options(pipedgen PRIVATE -Wall -pedantic -Wno-unused-function -Wn
 install(TARGETS pipedgen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+# --------------------------------------------------------------
+# teragen
+
 add_executable(teragen
   src/teragen.cc
 )
@@ -106,6 +115,9 @@ target_compile_options(teragen PRIVATE -Wall -pedantic -Wno-unused-function -Wno
 install(TARGETS teragen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+# --------------------------------------------------------------
+# busgen
+
 add_executable(busgen
   src/busgen.cc
 )
@@ -114,4 +126,17 @@ target_link_libraries(busgen m genlib)
 target_compile_options(busgen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
 
 install(TARGETS busgen
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# --------------------------------------------------------------
+# pltcapgen
+
+add_executable(pltcapgen
+  src/pltcapgen.cc
+)
+
+target_link_libraries(pltcapgen m genlib)
+target_compile_options(pltcapgen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+
+install(TARGETS pltcapgen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
