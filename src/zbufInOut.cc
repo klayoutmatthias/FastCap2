@@ -1,5 +1,6 @@
 
 #include "mulGlobal.h"
+#include "mulStruct.h"
 #include "zbufGlobal.h"
 #include "zbufInOut.h"
 #include "zbufSort.h"

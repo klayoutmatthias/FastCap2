@@ -3,6 +3,7 @@
 #include "mulMulti.h"
 #include "mulLocal.h"
 #include "mulDisplay.h"
+#include "mulStruct.h"
 #include <cmath>
 
 void evalFactFac(double **array, int order);

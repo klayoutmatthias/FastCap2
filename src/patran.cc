@@ -8,6 +8,7 @@
 
 **************************************************************************/
 #include "mulGlobal.h"
+#include "mulStruct.h"
 #include "quickif.h"
 #include "patran_f.h"
 #include "quickif.h"

@@ -2,6 +2,7 @@
 #include "mulGlobal.h"
 #include "mulMulti.h"
 #include "mulLocal.h"
+#include "mulStruct.h"
 #include "mulDisplay.h"
 #include <cmath>
 

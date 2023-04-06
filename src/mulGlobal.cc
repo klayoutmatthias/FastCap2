@@ -1,5 +1,6 @@
 
 #include "mulGlobal.h"
+#include "mulStruct.h"
 
 /*
   misc global

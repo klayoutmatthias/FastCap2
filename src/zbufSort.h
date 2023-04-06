@@ -4,6 +4,9 @@
 
 #include <cstdio>
 
+struct ssystem;
+struct face;
+
 void getAdjGraph(ssystem *sys, face **faces, int numfaces, double *view, double rhs, double *normal);
 void dumpCycles(face **faces, int numfaces, FILE *file);
 face **depthSortFaces(ssystem *sys, face **faces, int numfaces);

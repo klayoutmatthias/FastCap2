@@ -14,6 +14,7 @@
 #include "counters.h"
 
 #include <cmath>
+#include <cassert>
 
 static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, double *sqrmat, int *real_index, int maxiter, double tol, charge *chglist);
 static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, double *sqrmat, int *real_index, charge *chglist);
@@ -332,7 +333,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
     /* Apply new rotations. */
     bh[iter][iter] = c[iter] * hi - s[iter] * hip1;
     bh[iter][iter+1] = c[iter] * hip1 + s[iter] * hi;
-    /* ASSERT(g[iter+1] == 0); WHY IS THIS HERE ??? */
+    /* assert(g[iter+1] == 0); WHY IS THIS HERE ??? */
     hi = g[iter];
     g[iter] = c[iter] * hi;
     g[iter+1] = s[iter] * hi;    
@@ -405,8 +406,8 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 {
   int i;
 
-  ASSERT(p == sys->p);
-  ASSERT(q == sys->q);
+  assert(p == sys->p);
+  assert(q == sys->q);
 
   for(i=1; i <= size; i++) p[i] = 0;
 

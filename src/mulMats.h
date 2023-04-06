@@ -2,6 +2,9 @@
 #if !defined(mulMats_H)
 #define mulMats_H
 
+struct ssystem;
+struct charge;
+
 void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_index, int up_size, int eval_size);
 void olmulMatPrecond(ssystem *sys);
 void bdmulMatPrecond(ssystem *sys);

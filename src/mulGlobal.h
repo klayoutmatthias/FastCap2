@@ -5,9 +5,6 @@
 #include <time.h>
 #include <cstdlib>
 
-/* fastcap data structures */
-#include "mulStruct.h"
-
 #define VERSION 2.0
 
 /*****************************************************************************
@@ -15,16 +12,6 @@
 misc. global macros
 
 *****************************************************************************/
-#define NOT !
-#define  ABORT()                                                      \
-{   (void)fflush(stdout);                                             \
-    (void)sys->info("FastCap: panic in file `%s' at line %d.\n",\
-            __FILE__, __LINE__);                                      \
-    (void)fflush(stderr);                                             \
-    abort();                                                          \
-}
-
-#define ASSERT(condition) if(NOT(condition)) ABORT()
 
 #define INNER(pap,p,ap,size) for(pap=0.0,i=1; i<=size; i++) pap += p[i]*ap[i];
 

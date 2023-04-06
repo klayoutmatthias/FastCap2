@@ -2,9 +2,12 @@
 #if !defined(zbufInOut_H)
 #define zbufInOut_H
 
-#include "zbufStruct.h"
-
 #include <cstdio>
+
+struct ssystem;
+struct face;
+struct line;
+struct charge;
 
 void copyBody(FILE *fp);
 void dump_line_as_ps(FILE *fp, char *psline, double x_position, double y_position, double font_size);

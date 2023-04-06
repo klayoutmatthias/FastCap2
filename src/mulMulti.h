@@ -2,6 +2,9 @@
 #if !defined(mulMulti_H)
 #define mulMulti_H
 
+struct ssystem;
+struct charge;
+
 void xyz2sphere(double x, double y, double z, double x0, double y0, double z0, double *rho, double *cosA, double *beta);
 void evalLegendre(double cosA, double *vector, int order);
 

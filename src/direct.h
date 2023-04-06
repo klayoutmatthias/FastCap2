@@ -1,6 +1,11 @@
 
+#include "mulStruct.h"
+
 #if !defined(direct_H)
 #define direct_H
+
+struct ssystem;
+struct charge;
 
 int compressMat(ssystem *sys, double **mat, int size, int *is_dummy, int comp_rows);
 void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_rows);

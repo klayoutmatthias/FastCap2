@@ -1,5 +1,6 @@
 
 #include "mulGlobal.h"
+#include "mulStruct.h"
 #include "calcp.h"
 #include "blkDirect.h"
 #include "resusage.h"
@@ -8,6 +9,7 @@
 #include <cstdio>
 #include <fcntl.h>
 #include <unistd.h>
+#include <cassert>
 
 #define SQRMAT 0                /* for rdMat(), wrMat() */
 #define TRIMAT 1
@@ -506,7 +508,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
   for(i = 0; i < numchgs_wdummy; i++) {
     /* should be that pchgs[i]->index = i + 1 */
     /*  note COULD BE STRANGE DUE TO INDEXING FROM 1 */
-    ASSERT(i == pchgs[i]->index - 1);
+    assert(i == pchgs[i]->index - 1);
     if(!pchgs[i]->dummy) (*real_index)[j++] = i;
   }
   if(j != numchgs) {
@@ -522,13 +524,13 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
 
       for(i = 0; i < numchgs/2; i++) { /* loop on collocation points */
         i_real = (*real_index)[fromp+i];
-        ASSERT(!(ppan = pchgs[i_real])->dummy);
+        assert(!(ppan = pchgs[i_real])->dummy);
 
         for(j = 0; j < numchgs/2; j++) { /* loop on charge panels */
 
           /* real_index should eliminate all direct refs to dummy panels */
           j_real = (*real_index)[fromq+j];
-          ASSERT(!(qpan = qchgs[j_real])->dummy);
+          assert(!(qpan = qchgs[j_real])->dummy);
 
           (*sqrArray)[SQDEX(i, j, numchgs/2)] = calcp(sys, qpan, ppan->x, ppan->y,
                                                       ppan->z, NULL);

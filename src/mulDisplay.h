@@ -2,8 +2,14 @@
 #if !defined(mulDisplay_H)
 #define mulDisplay_H
 
-#include "zbufStruct.h"
 #include <cstdio>
+
+struct ssystem;
+struct charge;
+struct Name;
+struct face;
+struct cube;
+struct line;
 
 void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Name **name_list);
 void dumpConfig(ssystem *sys, FILE *fp, const char *name);

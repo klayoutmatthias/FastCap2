@@ -1,6 +1,7 @@
 
 #include "mulGlobal.h"
 #include "mulDisplay.h"
+#include "mulStruct.h"
 #include "zbufGlobal.h"
 #include "input.h"
 #include "calcp.h"

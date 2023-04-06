@@ -2,8 +2,11 @@
 #if !defined(quickif_H)
 #define quickif_H
 
-#include "mulStruct.h"
 #include <cstdio>
+
+struct ssystem;
+struct Name;
+struct charge;
 
 struct quadl {                  /* quadralateral element */
   int cond;                     /* conductor number */

@@ -1,5 +1,6 @@
 
 #include "mulGlobal.h"
+#include "mulStruct.h"
 #include "zbufGlobal.h"
 #include "zbuf2fastcap.h"
 #include "zbufProj.h"

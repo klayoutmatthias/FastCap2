@@ -10,6 +10,8 @@
 #include "resusage.h"
 #include "counters.h"
 
+#include <cassert>
+
 /*
 MulMatDirect creates the matrices for the piece of the problem that is done
 directly exactly.
@@ -25,7 +27,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
   for(nextc=sys->directlist; nextc != NULL; nextc = nextc->dnext) {
     for(nummats=1, i=0; i < nextc->numnbrs; i++) {
       nextnbr = nextc->nbrs[i];
-      ASSERT(nextnbr->upnumvects > 0);
+      assert(nextnbr->upnumvects > 0);
       nummats++;
     }
 
@@ -98,7 +100,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     starttimer;
     for(nummats=1, i=0; i < nextc->numnbrs; i++) {
       nextnbr = nextc->nbrs[i];
-      ASSERT(nextnbr->upnumvects > 0);
+      assert(nextnbr->upnumvects > 0);
       nextc->directq[nummats] = nextnbr->upvects[0];
       nextc->nbr_is_dummy[nummats] = nextnbr->nbr_is_dummy[0];
       nextc->directnumeles[nummats] = nextnbr->upnumeles[0];
@@ -140,7 +142,7 @@ void bdmulMatPrecond(ssystem *sys)
     for(size=0, i=0; i < nc->numkids; i++) {
       kid = nc->kids[i];
       if(kid != NULL) {
-        ASSERT(kid->level == sys->depth);
+        assert(kid->level == sys->depth);
         size += kid->directnumeles[0];  /* Equals number of charges. */
       }
     }
@@ -197,11 +199,11 @@ void bdmulMatPrecond(ssystem *sys)
             col += kidnbr->directnumeles[0];
           }
         }
-        ASSERT(col == size);
+        assert(col == size);
         row += kidsize;
       }
     }    
-    ASSERT(row == size);
+    assert(row == size);
 
     nc->precond = ludecomp(sys, mat, size, FALSE);
     nc->presize = size;
@@ -292,7 +294,7 @@ void olmulMatPrecond(ssystem *sys)
       if(NEAR(nnbr, nj, nk, nl)) {
         nnsize = nc->directnumeles[k+1];
         nmat = nc->directmats[k+1];
-        ASSERT(nc->directnumeles[k+1] == nnbr->directnumeles[0]);
+        assert(nc->directnumeles[k+1] == nnbr->directnumeles[0]);
         nnbr_dummy = nnbr->nbr_is_dummy[0];
         nnbr_pc = nnbr->chgs;
         if (sys->chkdum) {
@@ -324,11 +326,11 @@ void olmulMatPrecond(ssystem *sys)
               for(m=0; m < nnbr->numnbrs; m++) {
                 if(nnbr->nbrs[m] == nnnbr) break;
               }
-              ASSERT(m < nnbr->numnbrs);
+              assert(m < nnbr->numnbrs);
             }
             nnnsize = nnbr->directnumeles[m+1];
             nmat = nnbr->directmats[m+1];
-            ASSERT(nnbr->directnumeles[m+1] == nnnbr->directnumeles[0]);
+            assert(nnbr->directnumeles[m+1] == nnnbr->directnumeles[0]);
             nnnbr_pc = nnnbr->chgs; /* panels in nnnbr */
             nnnbr_dummy = nnnbr->nbr_is_dummy[0];
             if (sys->chkdum) {
@@ -840,8 +842,8 @@ void mulMatEval(ssystem *sys)
 
   for(nc = sys->directlist; nc != NULL; nc = nc->dnext) {
 
-    ASSERT(nc->level == sys->depth);
-    ASSERT(nc->upnumvects > 0);
+    assert(nc->level == sys->depth);
+    assert(nc->upnumvects > 0);
 
     /* allocate space for evaluation pass vectors; check nc's ancestors */
     /* First count the number of transformations to do. */
@@ -949,7 +951,7 @@ void mulMatDown(ssystem *sys)
   cube *nc, *parent, *ni;
   int depth;
 
-  ASSERT(DNTYPE != NOLOCL);     /* use mulMatEval() alone if NOLOCL */
+  assert(DNTYPE != NOLOCL);     /* use mulMatEval() alone if NOLOCL */
 
   for(depth = 2; depth <= sys->depth; depth++) { /* no locals before level 2 */
     for(nc=sys->locallist[depth]; nc != NULL; nc = nc->lnext) {
@@ -965,7 +967,7 @@ void mulMatDown(ssystem *sys)
       }
 
       parent = nc->parent;
-      ASSERT(parent->loc_exact == FALSE); /* has >= #evals of any of its kids*/
+      assert(parent->loc_exact == FALSE); /* has >= #evals of any of its kids*/
 
       if (sys->dissyn) {
         sys->mm.localcnt[nc->level]++;

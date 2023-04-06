@@ -2,6 +2,9 @@
 #if !defined(mulLocal_H)
 #define mulLocal_H
 
+struct ssystem;
+struct charge;
+
 void evalFacFra(ssystem *sys, double **array, int order);
 void evalSqrtFac(ssystem *sys, double **arrayout, double **arrayin, int order);
 double **mulLocal2P(ssystem *sys, double x, double y, double z, charge **chgs, int numchgs, int order);

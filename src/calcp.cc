@@ -1,5 +1,6 @@
 
 #include "mulGlobal.h"
+#include "mulStruct.h"
 #include "mulMulti.h"
 #include "calcp.h"
 #include "input.h"

@@ -2,10 +2,13 @@
 #include "mulGlobal.h"
 #include "mulSetup.h"
 #include "mulMulti.h"
+#include "mulStruct.h"
 #include "input.h"
 #include "calcp.h"
+
 #include <cstdio>
 #include <cstdlib>
+#include <cassert>
 
 cube *cstack[1024];             /* Stack used in several routines. */
 
@@ -468,7 +471,7 @@ int all_mul_exact, all_loc_exact, p, num_real_panels;
           nc = cubes[i][j][k][l];
           if(nc != NULL) {
             if(i == depth) {
-              ASSERT(nc->upnumvects != 0);
+              assert(nc->upnumvects != 0);
               /* count the number of true panels in this cube */
               num_real_panels = 0;
               for(p = 0; p < nc->upnumeles[0]; p++) {
