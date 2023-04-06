@@ -106,3 +106,12 @@ target_compile_options(teragen PRIVATE -Wall -pedantic -Wno-unused-function -Wno
 install(TARGETS teragen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+add_executable(busgen
+  src/busgen.cc
+)
+
+target_link_libraries(busgen m genlib)
+target_compile_options(busgen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+
+install(TARGETS busgen
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
