@@ -21,7 +21,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
   /* int *real_index: for map btwn condensed/expanded vectors */
 {
   cube *nextc, *nextnbr;
-  int i, nummats, **temp;
+  int i, nummats, **temp = 0;
 
   /* First count the number of matrices to be done directly. */
   for(nextc=sys->directlist; nextc != NULL; nextc = nextc->dnext) {

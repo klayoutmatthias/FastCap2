@@ -186,11 +186,13 @@ void evalLegendre(double cosA, double *vector, int order)
   double sinMA;                 /* becomes sin^m(alpha) in higher order P's */
   double fact;                  /* factorial factor */
 
+  sinMA = -sqrt(1-cosA*cosA);
+
   /* do evaluations of first four functions separately w/o recursions */
   vector[CINDEX(0, 0)] = 1.0;   /* P0^0 */
   if(order > 0) {
     vector[CINDEX(1, 0)] = cosA;        /* P1^0 */
-    vector[CINDEX(1, 1)] = sinMA = -sqrt(1-cosA*cosA); /* P1^1 = -sin(alpha) */
+    vector[CINDEX(1, 1)] = sinMA;       /* P1^1 = -sin(alpha) */
   }
   if(order > 1) vector[CINDEX(2, 1)] = 3*sinMA*cosA; /* P2^1 = -3sin()cos() */
 

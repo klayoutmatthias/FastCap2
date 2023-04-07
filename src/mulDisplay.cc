@@ -1251,7 +1251,7 @@ void dumpQ2PDiag(ssystem *sys, cube *nextc)
   if((fp = fopen("Q2PDiag.mat", "w")) == NULL) {
     sys->error("dumpQ2PDiag: can't open `Q2PDiag.mat' to write\n");
   }
-  if(sizeof(temp) < nextc->upnumeles[0]*nextc->upnumeles[0]) {
+  if(int(sizeof(temp)) < nextc->upnumeles[0]*nextc->upnumeles[0]) {
     sys->error("dumpQ2PDiag: temporary arrays not big enough\n");
   }
 

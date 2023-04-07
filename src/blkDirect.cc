@@ -532,13 +532,15 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
 
       for(i = 0; i < numchgs/2; i++) { /* loop on collocation points */
         i_real = (*real_index)[fromp+i];
-        assert(!(ppan = pchgs[i_real])->dummy);
+        ppan = pchgs[i_real];
+        assert(!ppan->dummy);
 
         for(j = 0; j < numchgs/2; j++) { /* loop on charge panels */
 
           /* real_index should eliminate all direct refs to dummy panels */
           j_real = (*real_index)[fromq+j];
-          assert(!(qpan = qchgs[j_real])->dummy);
+          qpan = qchgs[j_real];
+          assert(!qpan->dummy);
 
           (*sqrArray)[SQDEX(i, j, numchgs/2)] = calcp(sys, qpan, ppan->x, ppan->y,
                                                       ppan->z, NULL);
