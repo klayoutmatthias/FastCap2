@@ -42,8 +42,8 @@ int disTri(FILE *fp, int cond, double edgefrac, int ncells, bool no_discr,
 //  double x1, y1, z1, x2, y2, z2, x3, y3, z3; : 3 corners 
 //  FILE *fp;
 {
-  int lflag, linernum, sinernum, npanels, i;
-  double lside, sside, mside, temp, sedgewid, sinerwid, linerwid;
+  int sinernum, i;
+  double sside, sedgewid, sinerwid;
   double side_dirs[3][3], norm, disc_points[12][3];
   static double lepsilon, uepsilon;
   static int fstflag = 1;

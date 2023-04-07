@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(FastCap2 LANGUAGES CXX)
+set(COMPILE_OPTIONS -Wall -pedantic -fPIC)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# --------------------------------------------------------------
+# corelib
 
-add_executable(fastcap
+add_library(corelib STATIC
   src/blkDirect.h
   src/calcp.h
   src/capsolve.h
@@ -36,7 +36,6 @@ add_executable(fastcap
   src/counters.cc
   src/direct.cc
   src/electric.cc
-  src/fastcap.cc
   src/heap.cc
   src/input.cc
   src/mulDisplay.cc
@@ -57,12 +56,28 @@ add_executable(fastcap
   src/zbufSort.cc
 )
 
-target_link_libraries(fastcap m)
-# target_compile_options(fastcap PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
-target_compile_options(fastcap PRIVATE -Wall -pedantic)
+target_compile_options(corelib PRIVATE ${COMPILE_OPTIONS})
+
+# --------------------------------------------------------------
+# cubegen
+
+project(FastCap2 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_executable(fastcap
+  src/fastcap.cc
+)
+
+target_link_libraries(fastcap m corelib)
+target_compile_options(fastcap PRIVATE ${COMPILE_OPTIONS})
 
 install(TARGETS fastcap
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# --------------------------------------------------------------
+# genlib
 
 add_library(genlib STATIC
   src/epsilon.h
@@ -73,6 +88,8 @@ add_library(genlib STATIC
   src/distri.cc
 )
 
+target_compile_options(genlib PRIVATE ${COMPILE_OPTIONS})
+
 # --------------------------------------------------------------
 # cubegen
 
@@ -81,7 +98,7 @@ add_executable(cubegen
 )
 
 target_link_libraries(cubegen m genlib)
-target_compile_options(cubegen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+target_compile_options(cubegen PRIVATE ${COMPILE_OPTIONS})
 
 install(TARGETS cubegen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -94,7 +111,7 @@ add_executable(pipedgen
 )
 
 target_link_libraries(pipedgen m genlib)
-target_compile_options(pipedgen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+target_compile_options(pipedgen PRIVATE ${COMPILE_OPTIONS})
 
 install(TARGETS pipedgen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -107,7 +124,7 @@ add_executable(teragen
 )
 
 target_link_libraries(teragen m genlib)
-target_compile_options(teragen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+target_compile_options(teragen PRIVATE -Wall ${COMPILE_OPTIONS})
 
 install(TARGETS teragen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -120,7 +137,7 @@ add_executable(busgen
 )
 
 target_link_libraries(busgen m genlib)
-target_compile_options(busgen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+target_compile_options(busgen PRIVATE -Wall ${COMPILE_OPTIONS})
 
 install(TARGETS busgen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -133,7 +150,23 @@ add_executable(pltcapgen
 )
 
 target_link_libraries(pltcapgen m genlib)
-target_compile_options(pltcapgen PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+target_compile_options(pltcapgen PRIVATE ${COMPILE_OPTIONS})
 
 install(TARGETS pltcapgen
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# --------------------------------------------------------------
+# Python module
+
+# This is a stub made for the project.
+# Use setup.py to build the real module.
+
+find_package(PythonLibs REQUIRED)
+
+add_library(fastcap2_core SHARED
+  fastcap2/src/fastcap2.cc
+  # ...
+)
+
+target_link_libraries(fastcap2_core m corelib)
+target_include_directories (fastcap2_core PRIVATE src ${PYTHON_INCLUDE_DIRS})

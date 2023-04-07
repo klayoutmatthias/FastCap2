@@ -123,9 +123,9 @@ static PyTypeObject problem_type = {
 };
 
 static struct PyModuleDef fastcap2_module = {
-    PyModuleDef_HEAD_INIT,
-    .m_name = "fastcap2_core",
-    .m_size = -1
+  PyModuleDef_HEAD_INIT,
+  .m_name = "fastcap2_core",
+  .m_size = -1
 };
 
 PyMODINIT_FUNC
