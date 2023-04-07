@@ -165,6 +165,7 @@ find_package(PythonLibs REQUIRED)
 
 add_library(fastcap2_core SHARED
   fastcap2/src/fastcap2.cc
+  fastcap2/src/problem.cc
   # ...
 )
 

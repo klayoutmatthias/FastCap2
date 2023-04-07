@@ -4,6 +4,7 @@ from setuptools import setup, Extension
 
 core_src=[
   "fastcap2/src/fastcap2.cc",
+  "fastcap2/src/problem.cc",
   "src/blkDirect.cc",
   "src/calcp.cc",
   "src/capsolve.cc",
