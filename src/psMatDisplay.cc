@@ -128,6 +128,7 @@ static void dump_aldus_foot(FILE *fp, int insert_showpage, char *argv[], int arg
 
 }
 
+#if defined(UNUSED)
 /*
   dumps a black filled block xwid wide by ywid tall, 
     with lower left corner (xstart, ystart)
@@ -142,6 +143,7 @@ static void dump_block(FILE *fp, double xstart, double ystart, double xwid, doub
   fprintf(fp, "closepath\n");
   fprintf(fp, " 0 setgray fill\n");
 }
+#endif
 
 /*
   dumps a line of length len with left center (xstart, ystart)

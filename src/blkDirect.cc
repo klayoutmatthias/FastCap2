@@ -30,6 +30,7 @@
 #define LODEX(i, j, siz) (((i)*((i)+1))/2 + (j))
 #define UPDEX(i, j, siz) (((i)*(2*(siz) - (i) - 1))/2 + (j))
 
+#if defined(UNUSED)
 /*
   index into a square siz x siz matrix stored linearly
 */
@@ -38,7 +39,9 @@ static int sqrdex(int i, int j, int siz)
 {
   return(i*siz + j);
 }
+#endif
 
+#if defined(UNUSED)
 /*
   index into a lower triangular (w/diagonal) siz x siz matrix stored linearly
 */
@@ -52,7 +55,9 @@ static int lowdex(ssystem *sys, int i, int j, int siz)
   }
   else return(ret);
 }
+#endif
 
+#if defined(UNUSED)
 /*
   index into an upper triangular (w/diagonal) siz x siz matrix stored linearly
 */
@@ -67,7 +72,9 @@ static int uppdex(ssystem *sys, int i, int j, int siz)
   }
   else return(ret);
 }
+#endif
 
+#if defined(UNUSED)
 /*
   for debug only - dumps upper left corner of a matrix
 */
@@ -97,6 +104,7 @@ static void dumpMatCor(ssystem *sys, double **mat, double *vec, int fsize)
     }
   }
 }
+#endif
 
 /*
   gets the file name from the flag

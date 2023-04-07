@@ -338,6 +338,7 @@ char *hack_path(char *str)
   else return(str);
 }
 
+#if defined(UNUSED)
 /*
   reassigns conductor numbers to a list of panels so that they'll
     be numbered contiguously from 1
@@ -387,7 +388,9 @@ static void reassign_cond_numbers(ssystem *sys, charge *panel_list, NAME *name_l
     }
   }
 }
+#endif
 
+#if defined(UNUSED)
 /*
   negates all the conductor numbers - used to make a panel list's conds unique
     just before renumbering
@@ -407,7 +410,9 @@ static void negate_cond_numbers(charge *panel_list, NAME *name_list)
     cur_name->patch_list->conductor_ID = -cur_name->patch_list->conductor_ID;
   }
 }
+#endif
 
+#if defined(UNUSED)
 /*
   for debug - dumps the iter list
 */
@@ -423,6 +428,7 @@ static int dump_ilist(ssystem *sys)
   sys->msg("\n");
   return(TRUE);
 }
+#endif
 
 /*
   checks if a particular iter is in the list; returns TRUE if it is
@@ -488,9 +494,8 @@ void get_ps_file_base(ssystem *sys)
 static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
-  charge *panel_list = NULL, *cur_panel, *panel_group, *c_panel;
+  charge *panel_list = NULL, *cur_panel, *c_panel;
   surface *cur_surf;
-  NAME *name_group;
   FILE *fp;
   char surf_name[BUFSIZ];
   int patran_file_read;
@@ -519,8 +524,6 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
           = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
                      name_list, num_cond, surf_name);
       patran_file_read = patran_file;
-      panel_group = cur_panel;
-      name_group = sys->start_name;
     }
     else {
       if(cur_surf->prev->end_of_chain) {
@@ -535,11 +538,6 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
       }
       patran_file_read = patran_file;
       cur_panel = cur_panel->next;
-      if(cur_surf->prev->end_of_chain) {
-        /* if previous surface was the end of a chain, set up new group */
-        panel_group = cur_panel;
-        name_group = sys->start_name_this_time; /* not really used anymore */
-      }
     }
     if(strcmp(cur_surf->name, "stdin") != 0) fclose(fp);
 
@@ -598,7 +596,7 @@ static int getUniqueCondNum(char *name, Name *name_list)
 {
   int nlen, cond;
   char name_frag[BUFSIZ], *cur_alias;
-  Name *cur_name, *prev_name;
+  Name *cur_name;
   int i, j, times_in_list;
 
   nlen = strlen(name);
@@ -614,7 +612,6 @@ static int getUniqueCondNum(char *name, Name *name_list)
       times_in_list++;  /* increment times name in list count */
       cond = i;
     }
-    prev_name = cur_name;
   }
 
   /* name can't be dealt with; return appropriate error code */

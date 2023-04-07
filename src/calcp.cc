@@ -739,6 +739,8 @@ static void dp(ssystem *sys, charge *panel)
 
 
 
+#if defined(UNUSED)
+
 #define DIS 2
 #define SCALE 5
 
@@ -767,8 +769,9 @@ static void testCalcp(ssystem *sys, charge *pp)
     }
   }
 }
+#endif
 
-
+#if defined(UNUSED)
 static void fileCorners(charge *pp, FILE *f)
 {
   int i;
@@ -776,8 +779,9 @@ static void fileCorners(charge *pp, FILE *f)
   for(i=0; i < pp->shape; i++)
       fprintf(f, "%g %g\n", pp->corner[i][0], pp->corner[i][1]);
 }
+#endif
 
-
+#if defined(UNUSED)
 /* Test the moment code. */
 static void calcpm(ssystem *sys, double *multi, double x, double y, double z, int origorder, int order)
 {
@@ -799,4 +803,4 @@ static void calcpm(ssystem *sys, double *multi, double x, double y, double z, in
     potential += mat[0][i] * multi[i];
   }
 }
-
+#endif

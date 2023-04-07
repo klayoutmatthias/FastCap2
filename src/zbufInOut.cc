@@ -87,74 +87,6 @@ static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, cha
 }
 
 /*
-  attempt to read charge density information to set panel grey levels
-  file format:
-     (....lines of garbage....)
-     Panel charges, iteration <iter>
-     <chg->index> q/A = <chargedensity> (...garbage...)
-     <chg->index> q/A = <chargedensity> (...garbage...)
-     (...)
-     <chg->index> q/A = <chargedensity> (...garbage...)
-     End panel charges
-     (....lines of garbage....)
-  CHARGE DENSITIES ARE NOW READ DIRECTLY FROM VECTORS IN SYSTEM STRUCTS
-  THIS FUNCTION IS NOT USED
-*/
-static void get_charge_densities(ssystem *sys, double *q, char *file, int iter)
-{
-  int index, linecnt, header_found;
-  char str1[BUFSIZ], str2[BUFSIZ], str3[BUFSIZ], linein[BUFSIZ];
-  double density;
-  FILE *fp;
-
-  if((fp = fopen(file, "r")) == NULL) {
-    sys->error("get_charge_densities: can't open charge file\n  `%s'\nto read\n",
-               file);
-  }
-
-  linecnt = 0;
-  header_found = FALSE;
-  while(fgets(linein, sizeof(linein), fp) != NULL) {
-    linecnt++;
-
-    if(!header_found) {
-      /* look for "Panel charges, iteration <iter>" */
-      if(sscanf(linein, "%s %s %s %d", str1, str2, str3, &index) == 4) {
-        if(!strcmp(str1, "Panel") && !strcmp(str2, "charges,")
-              && !strcmp(str3, "iteration") && index == iter) {
-          header_found = TRUE;
-        }
-      }
-      continue;
-    }
-
-    /* check for q/A line */
-    if(sscanf(linein, "%d %s %s %lf", &index, str1, str2, &density) == 4) {
-      if(!strcmp(str1, "q/A") && !strcmp(str2, "=")) {
-        q[index] = density;
-      }
-    }
-    /* check for end of list line */
-    else if(sscanf(linein, "%s %s %s", str1, str2, str3) == 3) {
-      if(!strcmp(str1, "End") && !strcmp(str2, "panel") 
-         && !strcmp(str3, "charges")) {
-        break;
-      }
-    }
-    else {
-      sys->error("get_charge_densities: bad charge file format, line %d:\n%s\n",
-                 linecnt, linein);
-    }
-  }
-
-  if(!header_found) {
-    sys->error("get_charge_densities: can't find iteration %d data in\n `%s'\n",
-               iter, file);
-  }
-
-}
-
-/*
   figures the corner coordinates in absolute coordinates
 */
 static void getAbsCoord(double *vec, charge *panel, int num)
@@ -165,9 +97,7 @@ static void getAbsCoord(double *vec, charge *panel, int num)
   vec[0] = panel->x + cor[0]*x[0] + cor[1]*y[0] + cor[2]*z[0];
   vec[1] = panel->y + cor[0]*x[1] + cor[1]*y[1] + cor[2]*z[1];
   vec[2] = panel->z + cor[0]*x[2] + cor[1]*y[2] + cor[2]*z[2];
-
 }
-
   
 /*
   transfer fastcap panel info to face structs
@@ -284,7 +214,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
 {
   int flines = 0, fflag = 1;
   int f_;               /* f_ == 1 => ignore face and fill info */
-  char linein[BUFSIZ], **chkp, *chk;
+  char linein[BUFSIZ];
   char readfile[BUFSIZ], tempc[BUFSIZ];
   double arrowsize, dotsize;
   int linewd;
@@ -293,7 +223,6 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
   f_ = 1;                       /* hardwire to take fill/face info as
                                    equivalent to end of file */
 
-  chkp = &chk;                  /* pointers for error checking */
   /* input lines and add to linked list */
   while(fgets(linein, sizeof(linein), fp) != NULL) {
     if(linein[0] == 'e' || linein[0] == '\0') return;
@@ -734,6 +663,7 @@ fprintf(fp, "%s%s%s%s%s", str, str2, str3, str4, str5);
 
 }
 
+#if defined(UNUSED)
 /*
   numbers the faces for checking 
 */
@@ -760,6 +690,7 @@ static void numberFaces(face **faces, int numfaces, FILE *fp)
     fprintf(fp, "[0 0 0 1]\nsts\nvmrs\n");
   }
 }
+#endif
 
 /*
   number a face for checking - used to cover up obscured faces' numbers
@@ -786,6 +717,7 @@ static void numberFace(face *fac, FILE *fp)
 
 }
 
+#if defined(UNUSED)
 /*
   dumps adjacency graph as a ps file - uses both input order and graph order
 */
@@ -855,6 +787,7 @@ static void dumpAdjGraph(face **faces, int numfaces, FILE *fp)
   fprintf(fp, "0 0 32 0 0 (Graph Ordering) ts\n}\n");
   fprintf(fp, "[0 0 0 1]\nsts\nvmrs\n");
 }
+#endif
 
 /*
   dump face graph as a text file

@@ -20,6 +20,7 @@ static int alias_match(Name *cur_name, char *name)
   return(FALSE);
 }
 
+#if defined(UNUSED)
 /*
   tells if any conductor name alias matches a string only up to length(name)
 */
@@ -39,6 +40,7 @@ static int alias_match_name(Name *cur_name, char *name)
   }
   return(FALSE);
 }
+#endif
 
 /*
   adds an alias 
@@ -112,7 +114,7 @@ int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond)
   return(i);
 }
 
-
+#if defined(UNUSED)
 /*
   checks to see if name is present in conductor name list
   - does not add if it isnt present
@@ -133,6 +135,7 @@ static int getConductorNumNoAdd(char *name, Name *name_list)
 
   return(NOTFND);
 }
+#endif
 
 /*
   gets the name (aliases are ignored) corresponding to a conductor number
@@ -152,44 +155,6 @@ char *getConductorName(ssystem *sys, int cond_num, Name **name_list)
   sys->info(
           "getConductorName: conductor no. %d not defined\n", cond_num);
   return(NULL);
-}
-
-/*
-  renames a conductor
-*/
-static int oldrenameConductor(ssystem *sys, char *old_name, char *new_name, Name **name_list, int *num_cond)
-{
-  Name *cur_name, *cur_name2, *prev_name;
-  int i, j;
-
-  /* check to see if old name is present */
-  prev_name = NULL;
-  for(cur_name = *name_list, i = 1; cur_name != NULL;
-      cur_name = cur_name->next, i++) {
-    if(!strcmp(cur_name->name, old_name)) {
-      /* old name is present; check to see if new name is present */
-      for(cur_name2 = *name_list, j = 1; cur_name2 != NULL;
-          cur_name2 = cur_name2->next, j++) {
-        if(!strcmp(cur_name2->name, new_name)) {
-          /* new name already present; just delete old name entry */
-          if(prev_name != NULL) prev_name->next = cur_name->next;
-          else *name_list = cur_name->next;
-          (*num_cond)--;
-          return(TRUE);
-        }
-      }
-      /* substitute the new name */
-      if(strlen(cur_name->name) < strlen(new_name))
-          cur_name->name = sys->heap.alloc<char>(strlen(new_name)+1, AMSC);
-      strcpy(cur_name->name, new_name);
-      return(TRUE);
-    }
-    prev_name = cur_name;
-  }
-
-  /* name not found */
-  sys->info("renameConductor: unknown conductor `%s'\n", old_name);
-  return(FALSE);
 }
 
 /*

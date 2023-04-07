@@ -58,11 +58,8 @@ add_executable(fastcap
 )
 
 target_link_libraries(fastcap m)
-target_compile_options(fastcap PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
-# Alternative solver options
-# target_compile_definitions(fastcap PRIVATE DIRSOL=1 EXPGCR=1)
-# With all diagnostic options:
-# target_compile_definitions(fastcap PRIVATE RAWDAT=1 ITRDAT=1 TIMDAT=1 CFGDAT=1 MULDAT=1 DISSYN=1 DMTCNT=1 NAMDAT=1 DISQ2M=1 DISM2M=1 DISM2P=1 DISL2P=1 DISQ2P=1 DSQ2PD=1 DISQ2L=1 DISM2L=1 DISL2L=1 DALQ2M=1 DALM2P=1 DALL2P=1 DALQ2L=1 DUPVEC=0 DISFAC=1 DPSYSD=1 DILIST=1 DMPELE=1 DMPCHG=1 CKDLST=1 DMPREC=1 CKCLST=1 DUMPPS=1 DPCOMP=1 DPDDIF=1 CHKDUM=1 JACDBG=1)
+# target_compile_options(fastcap PRIVATE -Wall -pedantic -Wno-unused-function -Wno-unused-but-set-variable)
+target_compile_options(fastcap PRIVATE -Wall -pedantic)
 
 install(TARGETS fastcap
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

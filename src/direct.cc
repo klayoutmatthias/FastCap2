@@ -328,7 +328,8 @@ void expandMat(double **mat, int size, int comp_size, int *is_dummy, int exp_row
   }
 }
 
-/* 
+#if defined(UNUSED)
+/*
 Checks to see if the matrix has the M-matrix sign pattern and if
 it is diagonally dominant. 
 */
@@ -353,8 +354,9 @@ static void matcheck(double **mat, int rows, int size)
     }
   }
 }
+#endif
 
-
+#if defined(UNUSED)
 static void matlabDump(double **mat, int size, char *name)
 {
 FILE *foo;
@@ -372,5 +374,5 @@ char fname[100];
   }
   fprintf(foo, "]\n");
 }
-
+#endif
 
