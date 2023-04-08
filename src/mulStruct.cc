@@ -1,6 +1,7 @@
 
 #include "mulStruct.h"
 #include "mulGlobal.h"
+#include "zbufGlobal.h"
 
 #include <cstdarg>
 #include <stdexcept>
@@ -20,7 +21,7 @@ ssystem::ssystem() :
   qpic_num_list(0),
   kq_name_list(0),
   kq_num_list(0),
-  iter_tol(0.0),
+  iter_tol(ABSTOL),
   s_(false),
   n_(false),
   g_(false),
@@ -35,14 +36,14 @@ ssystem::ssystem() :
   m_(false),
   f_(false),
   dd_(false),
-  elevation(0.0),
-  azimuth(0.0),
-  rotation(0.0),
-  distance(0.0),
-  linewd(0.0),
-  scale(0.0),
-  axeslen(0.0),
-  up_axis(0),
+  elevation(DEFELE),
+  azimuth(DEFAZM),
+  rotation(DEFROT),
+  distance(DEFDST),
+  linewd(DEFWID),
+  scale(DEFSCL),
+  axeslen(DEFAXE),
+  up_axis(DEFUAX),
   line_file(0),
   dirsol(false),
   expgcr(false),
@@ -116,12 +117,18 @@ ssystem::ssystem() :
   is_dummy(0),
   is_dielec(0)
 {
+  /* initialize defaults, etc */
+  axes = heap.alloc<double **>(10);
+  for (int i = 0; i < 10; i++) {
+    axes[i] = heap.mat(2, 3);
+  }
+
   for (int i = 0; i < int(sizeof(view) / sizeof(view[0])); ++i) {
-    view[i] = 0;
+    view[i] = 0.0;
   }
-  for (int i = 0; i < int(sizeof(moffset) / sizeof(moffset[0])); ++i) {
-    moffset[i] = 0;
-  }
+
+  moffset[0] = OFFSETX;         /* puts the origin this dist from lower left */
+  moffset[1] = OFFSETY;
 
 #if defined(DIRSOL) && DIRSOL == ON
   dirsol = true;

@@ -696,29 +696,6 @@ static void parse_command_line(ssystem *sys, const char **input_file, const char
   int cmderr, i;
   char **chkp, *chk;
 
-  /* load default parameters */
-  sys->azimuth = DEFAZM;             /* azimuth */
-  sys->elevation = DEFELE;           /* elevation */
-  sys->rotation = DEFROT;            /* rotation relative to image of z axis */
-  sys->distance = DEFDST;            /* distance to view pnt = (1+distance)radius */
-  sys->moffset[0] = OFFSETX;         /* puts the origin this dist from lower left */
-  sys->moffset[1] = OFFSETY;
-  sys->scale = DEFSCL;               /* master scaling - applied to 2d image */
-  sys->linewd = DEFWID;              /* line width used in ps file */
-  sys->axeslen = DEFAXE;             /* length of axes lines in 3d */
-  sys->up_axis = DEFUAX;             /* upward-pointing axis in 2d image */
-  sys->line_file = NULL;             /* file of lines/arrows in .fig format */
-  sys->qpic_num_list = NULL;            /* list of cond nums to get shaded plots for */
-  sys->qpic_name_list = NULL;   /* list of cond names to get shaded plots */
-  sys->kq_num_list = NULL;              /* list of cond nums in shaded plots */
-  sys->kq_name_list = NULL;             /* list of cond names in shaded plots */
-  sys->s_ = sys->n_ = sys->g_ = sys->c_ = sys->x_ = sys->k_ = false;
-  sys->rc_ = sys->rd_ = sys->rb_ = sys->q_ = sys->rk_ = sys->m_ = false;
-  sys->f_ = sys->dd_ = false;
-
-  sys->iter_tol = ABSTOL;
-  sys->kill_num_list = sys->kinp_num_list = NULL;
-  sys->kill_name_list = sys->kinp_name_list = NULL;
   cmderr = FALSE;
   chkp = &chk;                  /* pointers for error checking */
 

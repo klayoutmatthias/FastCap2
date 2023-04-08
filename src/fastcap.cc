@@ -38,7 +38,7 @@ int main_func(int argc, char *argv[])
   sys.argv = (const char **) argv;
   sys.argc = argc;
 
-  int ttliter, i;
+  int ttliter;
   charge *chglist, *nq;
   double **capmat, dirtimesav, mulsetup, initalltime, ttlsetup, ttlsolve;
 
@@ -51,13 +51,8 @@ int main_func(int argc, char *argv[])
   int num_dummy_panels = 0;             /* number of off-panel eval pnt panels */
   int eval_size = 0;                    /* sum of above two (total panel structs) */
 
-  char filename[BUFSIZ];
-
-  /* initialize defaults, etc */
-  sys.axes = sys.heap.alloc<double **>(10);
-  for(i = 0; i < 10; i++) {
-    sys.axes[i] = sys.heap.mat(2, 3);
-  }
+  char dump_filename[BUFSIZ];
+  strcpy(dump_filename, "psmat.ps");
 
   /* get the list of all panels in the problem */
   /* - many command line parameters having to do with the postscript
@@ -139,8 +134,7 @@ int main_func(int argc, char *argv[])
   initalltime += dtime;         /* save initial allocation time */
 
   if (sys.dumpps == DUMPPS_ON || sys.dumpps == DUMPPS_ALL) {
-    strcpy(filename, "psmat.ps");  //  TODO: remove
-    dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, OPEN);
+    dump_ps_mat(&sys, dump_filename, 0, 0, eval_size, eval_size, argv, argc, OPEN);
   }
 
   mulMatDirect(&sys, &trimat, &sqrmat, &real_index, up_size, eval_size);                /* Compute the direct part matrices. */
@@ -182,7 +176,7 @@ int main_func(int argc, char *argv[])
   if (! sys.dirsol) {
 
     if (sys.dumpps == DUMPPS_ON) {
-      dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
+      dump_ps_mat(&sys, dump_filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
     }
 
     starttimer;
@@ -210,7 +204,7 @@ int main_func(int argc, char *argv[])
     dumpnums(&sys, OFF, eval_size);     /* dump num/type of pot. coeff calcs */
 
     if (sys.dumpps == DUMPPS_ALL) {
-      dump_ps_mat(&sys, filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
+      dump_ps_mat(&sys, dump_filename, 0, 0, eval_size, eval_size, argv, argc, CLOSE);
     }
 
     if (sys.dissyn) {
