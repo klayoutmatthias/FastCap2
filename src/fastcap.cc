@@ -38,7 +38,7 @@ int main_func(int argc, char *argv[])
   sys.argv = (const char **) argv;
   sys.argc = argc;
 
-  int ttliter, i, num_cond;
+  int ttliter, i;
   charge *chglist, *nq;
   double **capmat, dirtimesav, mulsetup, initalltime, ttlsetup, ttlsolve;
 
@@ -62,7 +62,7 @@ int main_func(int argc, char *argv[])
   /* get the list of all panels in the problem */
   /* - many command line parameters having to do with the postscript
        file dumping interface are passed back via globals (see mulGlobal.c) */
-  chglist = input_problem(&sys, &num_cond);
+  chglist = input_problem(&sys);
 
   /* if no fastcap run is to be done, just dump the psfile */
   if(sys.capvew && sys.m_) {
@@ -75,8 +75,6 @@ int main_func(int argc, char *argv[])
   mulInit(&sys, chglist);  /* Set up cubes, charges. */
   stoptimer;
   initalltime = dtime;
-
-  sys.num_cond = num_cond;
 
   sys.msg("\nINPUT SUMMARY\n");
 
@@ -112,7 +110,7 @@ int main_func(int argc, char *argv[])
           num_both_panels);
   /*sys.msg("  Number of extra evaluation points: %d\n",
           num_dummy_panels);*/
-  sys.msg("  Number of conductors: %d\n", num_cond);
+  sys.msg("  Number of conductors: %d\n", sys.num_cond);
 
   if (sys.namdat) {
     dumpCondNames(stdout, sys.cond_names);
@@ -226,10 +224,10 @@ int main_func(int argc, char *argv[])
   }
 
   sys.msg("\nITERATION DATA");
-  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, real_index, num_cond);
+  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, real_index);
 
   if (sys.mksdat) {
-    mksCapDump(&sys, capmat, num_cond);
+    mksCapDump(&sys, capmat);
   }
 
   if (sys.timdat) {

@@ -11,7 +11,7 @@ struct face;
 struct cube;
 struct line;
 
-void mksCapDump(ssystem *sys, double **capmat, int numconds);
+void mksCapDump(ssystem *sys, double **capmat);
 void dumpConfig(ssystem *sys, FILE *fp, const char *name);
 void dump_face(FILE *fp, face *fac);
 void dumpCorners(FILE *fp, double **mat, int rows, int cols);

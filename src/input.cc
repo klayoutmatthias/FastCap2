@@ -1155,7 +1155,7 @@ static void remove_conds(ssystem *sys, charge **panels, ITER *num_list, Name **n
   -rc list: no restrictions
   -ri/-rs: can't exhaust all conductors with combination of these lists
 */
-static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list, int num_cond)
+static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list)
 {
   int i, lists_exhaustive;
   ITER *cur_num;
@@ -1179,7 +1179,7 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
 
   /* check that -rs and -ri lists don't exhaust all conductors */
   lists_exhaustive = TRUE;
-  for(i = 1; i <= num_cond; i++) {
+  for(i = 1; i <= sys->num_cond; i++) {
     if(!want_this_iter(rs_num_list, i) && !want_this_iter(ri_num_list, i)) {
       lists_exhaustive = FALSE;
       break;
@@ -1193,7 +1193,7 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
 /*
   main input routine, returns a list of panels in the problem
 */
-charge *input_problem(ssystem *sys, int *num_cond)
+charge *input_problem(ssystem *sys)
 {
   surface *surf_list;
   char infile[BUFSIZ], hostname[BUFSIZ];
@@ -1212,8 +1212,8 @@ charge *input_problem(ssystem *sys, int *num_cond)
           sys->argv[0], VERSION, hostname, infile);
 
   /* input the panels from the surface files */
-  *num_cond = 0;                /* initialize conductor count */
-  chglist = read_panels(sys, surf_list, num_cond);
+  sys->num_cond = 0;                /* initialize conductor count */
+  chglist = read_panels(sys, surf_list, &sys->num_cond);
 
   /* set up the lists of conductors to remove from solve list */
   sys->kill_num_list = get_kill_num_list(sys, sys->cond_names, sys->kill_name_list);
@@ -1229,7 +1229,7 @@ charge *input_problem(ssystem *sys, int *num_cond)
   sys->kq_num_list = get_kill_num_list(sys, sys->cond_names, sys->kq_name_list);
 
   /* check for inconsistencies in kill lists */
-  resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list, *num_cond);
+  resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list);
 
   if (sys->dissrf) {
     dumpSurfDat(sys, surf_list);

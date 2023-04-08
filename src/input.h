@@ -11,6 +11,6 @@ void get_ps_file_base(ssystem *sys);
 char *hack_path(char *str);
 int want_this_iter(ITER *iter_list, int iter_num);
 
-charge *input_problem(ssystem *sys, int *num_cond);
+charge *input_problem(ssystem *sys);
 
 #endif

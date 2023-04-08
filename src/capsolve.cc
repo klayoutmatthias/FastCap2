@@ -21,7 +21,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, double *sqrmat, int *real_index, int maxiter, double tol, charge *chglist);
 
 /* This routine takes the cube data struct and computes capacitances. */
-int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, double *trimat, double *sqrmat, int *real_index, int numconds)
+int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, double *trimat, double *sqrmat, int *real_index)
 /* double ***capmat: pointer to capacitance matrix */
 /* real_size: real_size = total #panels, incl dummies */
 {
@@ -32,7 +32,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   surface *surf;
 
   /* Allocate space for the capacitance matrix. */
-  *capmat = sys->heap.mat(numconds+1, numconds+1);
+  *capmat = sys->heap.mat(sys->num_cond+1, sys->num_cond+1);
 
   /* Allocate space for cg vectors , r=residual and p=projection, ap = Ap. */
   q = sys->heap.alloc<double>(size+1, AMSC);
@@ -53,7 +53,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   ap = sys->p;
 
   /* Loop through all the conductors. */
-  for(cond=1; cond <= numconds; cond++) {
+  for(cond=1; cond <= sys->num_cond; cond++) {
     
     /* skip conductors in the -rs and the -ri kill list */
     if(want_this_iter(sys->kill_num_list, cond)
@@ -126,7 +126,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     /* use the permittivity ratio to get the real surface charge */
     /* NOT IMPLEMENTED: fancy stuff for infinitessimally thin conductors */
     /* (once again, permittivity data is poorly organized, lots of pointing) */
-    for(i=1; i <= numconds; i++) (*capmat)[i][cond] = 0.0;
+    for(i=1; i <= sys->num_cond; i++) (*capmat)[i][cond] = 0.0;
     for(nq = chglist; nq != NULL; nq = nq->next) {
       if(nq->dummy || (surf = nq->surf)->type != CONDTR) continue;
       (*capmat)[nq->cond][cond] += surf->outer_perm * q[nq->index];
@@ -136,7 +136,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
       if(!sys->itrdat) sys->msg("\n");
       sys->msg("cond=%d iters=%d\n", cond, iter);
 
-      for(i=1; i <= numconds; i++) {
+      for(i=1; i <= sys->num_cond; i++) {
         sys->msg("c%d%d=%g  ", i, cond, (*capmat)[i][cond]);
         if(i % 4 == 0) sys->msg("\n");
       }

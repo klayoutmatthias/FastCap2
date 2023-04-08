@@ -910,7 +910,7 @@ static char *spaces(char *str, int num)
   - some attempt to scale (eg pF, nF, uF etc) is made
   - also checks for M-matrix sign pattern, diag dominance
 */
-void mksCapDump(ssystem *sys, double **capmat, int numconds)
+void mksCapDump(ssystem *sys, double **capmat)
 {
   int i, j, toobig, toosmall, maxlen, sigfig, colwidth, i_killed, j_killed;
   int first_offd;
@@ -923,14 +923,14 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds)
                                 /* - in the 1 cond case, assign is still ok */
 
   /* set up symetrized matrix storage */
-  sym_mat = sys->heap.alloc<double*>(numconds+1, AMSC);
-  for(i=1; i <= numconds; i++)  {
-    sym_mat[i] = sys->heap.alloc<double>(numconds+1, AMSC);
+  sym_mat = sys->heap.alloc<double*>(sys->num_cond+1, AMSC);
+  for(i=1; i <= sys->num_cond; i++)  {
+    sym_mat[i] = sys->heap.alloc<double>(sys->num_cond+1, AMSC);
   }
 
   /* get the smallest and largest (absolute value) symmetrized elements */
   /* check for non-M-matrix symmetrized capacitance matrix */
-  for(i = 1; i <= numconds; i++) {
+  for(i = 1; i <= sys->num_cond; i++) {
 
     /* skip conductors removed from input */
     if(want_this_iter(sys->kinp_num_list, i)) continue;
@@ -942,7 +942,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds)
     }
     maxdiag = MAX(maxdiag, fabs(capmat[i][i]));
     rowttl = 0.0;
-    for(j = 1; j <= numconds; j++) {
+    for(j = 1; j <= sys->num_cond; j++) {
 
       /* skip conductors removed from input */
       if(want_this_iter(sys->kinp_num_list, j)) continue;
@@ -1027,7 +1027,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds)
 
   /* get the length of the longest name */
   maxlen = 0;
-  for(i = 1; i <= numconds; i++) {
+  for(i = 1; i <= sys->num_cond; i++) {
     maxlen = MAX(strlen(getConductorName(sys, i)), (size_t)maxlen);
   }
 
@@ -1038,17 +1038,17 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds)
   if(sys->kill_num_list != NULL)
       sys->msg("\nPARTIAL CAPACITANCE MATRIX, %sfarads\n", unit);
   else sys->msg("\nCAPACITANCE MATRIX, %sfarads\n", unit);
-  if(numconds < 10) sys->msg("%s", spaces(unit, maxlen+2));
-  else if(numconds < 100) sys->msg("%s", spaces(unit, maxlen+3));
+  if(sys->num_cond < 10) sys->msg("%s", spaces(unit, maxlen+2));
+  else if(sys->num_cond < 100) sys->msg("%s", spaces(unit, maxlen+3));
   else sys->msg("%s", spaces(unit, maxlen+4));
-  for(j = 1; j <= numconds; j++) { /* column headings */
+  for(j = 1; j <= sys->num_cond; j++) { /* column headings */
     if(want_this_iter(sys->kinp_num_list, j)) continue;
     sprintf(name, "%d ", j);
     sprintf(unit, "%%%ds", colwidth+1);
     sys->msg(unit, name);
   }
   sys->msg("\n");
-  for(i = 1; i <= numconds; i++) { /* rows */
+  for(i = 1; i <= sys->num_cond; i++) { /* rows */
 
     /* skip conductors removed from input */
     if(want_this_iter(sys->kinp_num_list, i)) continue;
@@ -1057,14 +1057,14 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds)
 
     strcpy(cond_name, getConductorName(sys, i));
 
-    if(numconds < 10)
+    if(sys->num_cond < 10)
         sys->msg("%s %1s", padName(name, cond_name, maxlen), unit);
-    else if(numconds < 100)
+    else if(sys->num_cond < 100)
         sys->msg("%s %2s", padName(name, cond_name, maxlen), unit);
     else
         sys->msg("%s %3s", padName(name, cond_name, maxlen), unit);
 
-    for(j = 1; j <= numconds; j++) {
+    for(j = 1; j <= sys->num_cond; j++) {
 
       /* skip conductors removed from input */
       if(want_this_iter(sys->kinp_num_list, j)) continue;
