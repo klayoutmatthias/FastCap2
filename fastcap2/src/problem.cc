@@ -3,6 +3,7 @@
 #include <Python.h>
 
 #include "mulStruct.h"
+#include "zbufGlobal.h"
 
 //  for in-place new
 #include <memory>
@@ -485,6 +486,29 @@ problem_set_ps_rotation(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
+problem_get_ps_upaxis(ProblemObject *self)
+{
+  return PyLong_FromLong ((long) self->sys.up_axis);
+}
+
+static PyObject *
+problem_set_ps_upaxis(ProblemObject *self, PyObject *args)
+{
+  int i = 0;
+  if (!PyArg_ParseTuple(args, "i", &i)) {
+    return NULL;
+  }
+
+  if (i < XI || i > ZI) {
+    PyErr_Format(PyExc_RuntimeError, "'ps_upaxis' value needs to be between %d and %d (but is %d)", XI, ZI, i);
+    return NULL;
+  }
+
+  self->sys.up_axis = i;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
 problem_get_ps_distance(ProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.distance);
@@ -594,6 +618,8 @@ static PyMethodDef problem_methods[] = {
   { "_set_ps_elevation", (PyCFunction) problem_set_ps_elevation, METH_VARARGS, NULL },
   { "_get_ps_rotation", (PyCFunction) problem_get_ps_rotation, METH_NOARGS, NULL },
   { "_set_ps_rotation", (PyCFunction) problem_set_ps_rotation, METH_VARARGS, NULL },
+  { "_get_ps_upaxis", (PyCFunction) problem_get_ps_upaxis, METH_NOARGS, NULL },
+  { "_set_ps_upaxis", (PyCFunction) problem_set_ps_upaxis, METH_VARARGS, NULL },
   { "_get_ps_distance", (PyCFunction) problem_get_ps_distance, METH_NOARGS, NULL },
   { "_set_ps_distance", (PyCFunction) problem_set_ps_distance, METH_VARARGS, NULL },
   { "_get_ps_scale", (PyCFunction) problem_get_ps_scale, METH_NOARGS, NULL },

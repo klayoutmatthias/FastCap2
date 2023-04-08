@@ -214,6 +214,22 @@ class TestProblem(unittest.TestCase):
     problem.ps_distance = 1.75
     self.assertEqual(problem.ps_distance, 1.75)
 
+  def test_ps_upaxis(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_upaxis, fc2.Problem.ZI)
+
+    problem.ps_upaxis = fc2.Problem.YI
+    self.assertEqual(problem.ps_upaxis, fc2.Problem.YI)
+
+    # conductor names must not contain percent characters
+    try:
+      problem.ps_upaxis = 4
+      self.assertEqual(True, False)
+    except RuntimeError as ex:
+      self.assertEqual(str(ex), "'ps_upaxis' value needs to be between 0 and 2 (but is 4)")
+
   def test_ps_scale(self):
 
     problem = fc2.Problem()

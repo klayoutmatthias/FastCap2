@@ -311,13 +311,11 @@ class Problem(_Problem):
     * Problem.YI for y axis
     * Problem.ZI for z axis
     """
-    # @@@
-    pass
+    return super()._get_ps_upaxis();
 
   @ps_upaxis.setter
   def ps_upaxis(self, value: int):
-    # @@@
-    pass
+    super()._set_ps_upaxis(value);
 
   @property
   def ps_distance(self) -> float:
