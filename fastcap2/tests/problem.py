@@ -26,10 +26,10 @@ class TestProblem(unittest.TestCase):
 
     problem = fc2.Problem()
 
-    self.assertEqual(problem.expansion_order, 0)
+    self.assertEqual(problem.expansion_order, 2)
 
-    problem.expansion_order = 25
-    self.assertEqual(problem.expansion_order, 25)
+    problem.expansion_order = 7
+    self.assertEqual(problem.expansion_order, 7)
 
   def test_partitioning_depth(self):
 
