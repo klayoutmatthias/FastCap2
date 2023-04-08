@@ -48,7 +48,7 @@
 <ul class="simple">
 <li><p>Create and configure the problem object</p></li>
 <li><p>Add surfaces to it by either using <a class="reference internal" href="#fastcap2.Problem.load" title="fastcap2.Problem.load"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load()</span></code></a>, <a class="reference internal" href="#fastcap2.Problem.load_list" title="fastcap2.Problem.load_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">load_list()</span></code></a>
-or adding <a class="reference internal" href="#fastcap2.Surface" title="fastcap2.surface.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">fastcap2.surface.Surface</span></code></a> objects using <code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code>.</p></li>
+or adding <a class="reference internal" href="#fastcap2.Surface" title="fastcap2.surface.Surface"><code class="xref py py-class docutils literal notranslate"><span class="pre">fastcap2.surface.Surface</span></code></a> objects using <a class="reference internal" href="#fastcap2.Problem.add" title="fastcap2.Problem.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add()</span></code></a>.</p></li>
 <li><p>Call <a class="reference internal" href="#fastcap2.Problem.solve" title="fastcap2.Problem.solve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve()</span></code></a> to compute the capacitance matrix</p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">fastcap2</span> <span class="k">as</span> <span class="nn">fc2</span>
@@ -61,6 +61,43 @@ or adding <a class="reference internal" href="#fastcap2.Surface" title="fastcap2
 <span class="n">cap_matrix</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
 </pre></div>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="fastcap2.Problem.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcap2.Surface" title="fastcap2.Surface"><span class="pre">fastcap2.Surface</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastcap2.Problem.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a surface object to the problem</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surface</strong> – The surface to add.</p></li>
+<li><p><strong>group</strong> – If specified, a new conductor group is formed or 
+the surface is added to the given group.</p></li>
+<li><p><strong>dx</strong> – Translates the surface in x direction.</p></li>
+<li><p><strong>dy</strong> – Translates the surface in y direction.</p></li>
+<li><p><strong>dz</strong> – Translates the surface in z direction.</p></li>
+<li><p><strong>flipx</strong> – Flips the surface and the yz plane.</p></li>
+<li><p><strong>flipy</strong> – Flips the surface and the xz plane.</p></li>
+<li><p><strong>flipz</strong> – Flips the surface and the xy plane.</p></li>
+<li><p><strong>rotx</strong> – Rotates the surface around the x axis by the given angle.</p></li>
+<li><p><strong>roty</strong> – Rotates the surface around the y axis by the given angle.</p></li>
+<li><p><strong>rotz</strong> – Rotates the surface around the z axis by the given angle.</p></li>
+<li><p><strong>scale</strong> – Scales the surface by the given factor.</p></li>
+</ul>
+</dd>
+</dl>
+<p>A surface can be added multiple times with different
+transformation parameters, so it is easy to form structures
+with multiple conductors.</p>
+<p>The order in which the transformations are applied is:</p>
+<ul class="simple">
+<li><p><cite>scale</cite></p></li>
+<li><p><cite>flipx</cite>, <cite>flipy</cite> and <cite>flipz</cite></p></li>
+<li><p><cite>rotx</cite></p></li>
+<li><p><cite>roty</cite></p></li>
+<li><p><cite>rotz</cite></p></li>
+<li><p><cite>dx</cite>, <cite>dy</cite> and <cite>dz</cite></p></li>
+</ul>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="fastcap2.Problem.conductors">
 <span class="sig-name descname"><span class="pre">conductors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#fastcap2.Problem.conductors" title="Permalink to this definition">¶</a></dt>

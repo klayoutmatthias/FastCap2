@@ -169,6 +169,50 @@ class Problem(_Problem):
     # @@@
     pass
 
+  def add(self, surface: 'fastcap2.Surface', 
+                group: Optional[str] = None, 
+                dx: float = 0.0,
+                dy: float = 0.0,
+                dz: float = 0.0,
+                flipx: bool = False,
+                flipy: bool = False,
+                flipz: bool = False,
+                rotx: float = 0.0,
+                roty: float = 0.0,
+                rotz: float = 0.0,
+                scale: float = 1.0):
+    """Adds a surface object to the problem
+
+    :param surface: The surface to add.
+    :param group: If specified, a new conductor group is formed or 
+                  the surface is added to the given group.
+    :param dx: Translates the surface in x direction.
+    :param dy: Translates the surface in y direction.
+    :param dz: Translates the surface in z direction.
+    :param flipx: Flips the surface and the yz plane.
+    :param flipy: Flips the surface and the xz plane.
+    :param flipz: Flips the surface and the xy plane.
+    :param rotx: Rotates the surface around the x axis by the given angle.
+    :param roty: Rotates the surface around the y axis by the given angle.
+    :param rotz: Rotates the surface around the z axis by the given angle.
+    :param scale: Scales the surface by the given factor.
+
+    A surface can be added multiple times with different
+    transformation parameters, so it is easy to form structures
+    with multiple conductors.
+
+    The order in which the transformations are applied is:
+
+    * `scale`
+    * `flipx`, `flipy` and `flipz`
+    * `rotx`
+    * `roty`
+    * `rotz`
+    * `dx`, `dy` and `dz`
+    """
+    # @@@
+    pass
+
   def solve(self) -> list[ list[float] ]:
     """Solves the problem and returns the capacitance matrix
 
