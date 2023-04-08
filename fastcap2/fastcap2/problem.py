@@ -29,6 +29,15 @@ class Problem(_Problem):
   
   """
 
+  """Specifies 'x axis' for :py:meth:`ps_upaxis`"""
+  XI = 0
+
+  """Specifies 'y axis' for :py:meth:`ps_upaxis`"""
+  YI = 1
+
+  """Specifies 'z axis' for :py:meth:`ps_upaxis`"""
+  ZI = 2
+
   def __init__(self, title: Optional[str] = None):
     kwargs = {}
     if title is not None:
@@ -49,22 +58,20 @@ class Problem(_Problem):
     return super()._set_title(value)
 
   @property
-  def relative_perm(self) -> float:
-    """The relative permittivity
+  def perm_factor(self) -> float:
+    """The permittivity factor
 
-    This value specifies the relative permittivity of 
-    the dielectrics. The default value is 1.0.
+    All dielectric permittivities will be multiplied by this
+    factor. The default value is 1.0.
 
     This property corresponds to option "-p" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_perm_factor()
 
-  @relative_perm.setter
-  def relative_perm(self, value: float):
-    # @@@
-    pass
+  @perm_factor.setter
+  def perm_factor(self, value: float):
+    return super()._set_perm_factor(value)
 
   @property
   def expansion_order(self) -> int:
@@ -72,14 +79,14 @@ class Problem(_Problem):
 
     This property corresponds to option "-o" of the original
     "fastcap" program.
+
+    A value of 0 indicates automatic expansion.
     """
-    # @@@
-    pass
+    return super()._get_expansion_order()
 
   @expansion_order.setter
-  def expansion_order(self, value: float):
-    # @@@
-    pass
+  def expansion_order(self, value: int):
+    return super()._set_expansion_order(value)
 
   @property
   def partitioning_depth(self) -> int:
@@ -138,7 +145,7 @@ class Problem(_Problem):
     This property corresponds to option "-ri" of the original
     "fastcap" program.
 
-    The conductors with the given names will not be considers
+    The conductors with the given names will not be considered
     at all.
     """
     # @@@
@@ -146,6 +153,251 @@ class Problem(_Problem):
 
   @remove_conductors.setter
   def remove_conductors(self, value: list[str]):
+    # @@@
+    pass
+
+  @property
+  def ps_select_q(self) -> list[str]:
+    """PS output: select conductors for at-1V charge distribution .ps pictures
+
+    This property corresponds to option "-q" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_select_q.setter
+  def ps_select_q(self, value: list[str]):
+    # @@@ ('all' option?)
+    pass
+
+  @property
+  def ps_remove_q(self) -> list[str]:
+    """PS output: remove conductors from all charge distribution .ps pictures
+
+    This property corresponds to option "-rc" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_remove_q.setter
+  def ps_remove_q(self, value: list[str]):
+    # @@@
+    pass
+
+  @property
+  def ps_no_key(self) -> bool:
+    """PS output: remove key in shaded .ps picture file (use with `select_q` option)
+
+    This property corresponds to option "-rk" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_no_key.setter
+  def ps_no_key(self, value: bool):
+    # @@@
+    pass
+
+  @property
+  def ps_no_dielectric(self) -> bool:
+    """PS output: remove DIELEC type surfaces from all .ps picture files
+
+    This property corresponds to option "-rd" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_no_dielectric.setter
+  def ps_no_dielectric(self, value: bool):
+    # @@@
+    pass
+
+  @property
+  def ps_total_charges(self) -> bool:
+    """PS output: display total charges in shaded .ps picture file (use with `select_q` option)
+
+    This property corresponds to option "-dc" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_total_charges.setter
+  def ps_total_charges(self, value: bool):
+    # @@@
+    pass
+
+  @property
+  def ps_no_showpage(self) -> bool:
+    """PS output: suppress showpage in all .ps picture files
+
+    This property corresponds to option "-v" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_no_showpage.setter
+  def ps_no_showpage(self, value: bool):
+    # @@@
+    pass
+
+  @property
+  def ps_number_faces(self) -> bool:
+    """PS output: number faces with input order numbers
+
+    This property corresponds to option "-n" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_number_faces.setter
+  def ps_number_faces(self, value: bool):
+    # @@@
+    pass
+
+  @property
+  def ps_show_hidden(self) -> bool:
+    """PS output: do now remove hidden faces
+
+    This property corresponds to option "-f" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_show_hidden.setter
+  def ps_show_hidden(self, value: bool):
+    # @@@
+    pass
+
+  @property
+  def ps_azimuth(self) -> float:
+    """PS output: sets the azimuth angle
+
+    This property corresponds to option "-a" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_azimuth.setter
+  def ps_azimuth(self, value: float):
+    # @@@
+    pass
+
+  @property
+  def ps_elevation(self) -> float:
+    """PS output: sets the elevation angle
+
+    This property corresponds to option "-e" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_elevation.setter
+  def ps_elevation(self, value: float):
+    # @@@
+    pass
+
+  @property
+  def ps_rotation(self) -> float:
+    """PS output: sets the rotation angle
+
+    This property corresponds to option "-r" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_rotation.setter
+  def ps_rotation(self, value: float):
+    # @@@
+    pass
+
+  @property
+  def ps_upaxis(self) -> int:
+    """PS output: specifies the "up" axis
+
+    This property corresponds to option "-u" of the original
+    "fastcap" program.
+
+    Values are:
+    * Problem.XI for x axis
+    * Problem.YI for y axis
+    * Problem.ZI for z axis
+    """
+    # @@@
+    pass
+
+  @ps_upaxis.setter
+  def ps_upaxis(self, value: int):
+    # @@@
+    pass
+
+  @property
+  def ps_distance(self) -> float:
+    """PS output: sets the distance 
+
+    This property corresponds to option "-h" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_distance.setter
+  def ps_distance(self, value: float):
+    # @@@
+    pass
+
+  @property
+  def ps_scale(self) -> float:
+    """PS output: sets the scale 
+
+    This property corresponds to option "-s" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_scale.setter
+  def ps_scale(self, value: float):
+    # @@@
+    pass
+
+  @property
+  def ps_linewidth(self) -> float:
+    """PS output: sets the line width 
+
+    This property corresponds to option "-w" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_linewidth.setter
+  def ps_linewidth(self, value: float):
+    # @@@
+    pass
+
+  @property
+  def ps_axislength(self) -> float:
+    """PS output: sets the axis length
+
+    This property corresponds to option "-x" of the original
+    "fastcap" program.
+    """
+    # @@@
+    pass
+
+  @ps_axislength.setter
+  def ps_axislength(self, value: float):
     # @@@
     pass
 
@@ -230,26 +482,11 @@ class Problem(_Problem):
     # @@@
     pass
 
-"""
-:nodoc
+  def dump_ps(self, filename):
+    """Produces a PS file with the geometries and charges
 
-# PS output options
-problem.ps_select_q = list        # -q
-problem.ps_remove_q = list        # -rc
-problem.ps_no_key = True          # -rk
-problem.ps_no_dielectric = True   # -rd
-problem.ps_total_charges = True   # -dc
-problem.ps_no_showpage = True     # -v
-problem.ps_number_faces = True    # -n
-problem.ps_no_hidden = True       # -f
-problem.ps_azimuth = 0.0          # -a
-problem.ps_elevation = 0.0        # -e
-problem.ps_rotation = 0.0         # -r
-problem.ps_distance = 0.0         # -h
-problem.ps_scale = 1.0            # -s
-problem.ps_linewidth = 0.1        # -w
-problem.ps_upaxis = 0.1           # -u
-problem.ps_axeslength = 10.0      # -x
-"""
-
+    See the manifold ps_... options that configure PS output.
+    """
+    # @@@
+    pass
 

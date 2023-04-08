@@ -77,9 +77,49 @@ problem_set_title(ProblemObject *self, PyObject *value)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+problem_get_perm_factor(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.perm_factor);
+}
+
+static PyObject *
+problem_set_perm_factor(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.perm_factor = d;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_expansion_order(ProblemObject *self)
+{
+  return PyLong_FromLong ((long) self->sys.order);
+}
+
+static PyObject *
+problem_set_expansion_order(ProblemObject *self, PyObject *args)
+{
+  int i = 0;
+  if (!PyArg_ParseTuple(args, "i", &i)) {
+    return NULL;
+  }
+
+  self->sys.order = i;
+  Py_RETURN_NONE;
+}
+
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
   { "_set_title", (PyCFunction) problem_set_title, METH_O, NULL },
+  { "_get_perm_factor", (PyCFunction) problem_get_perm_factor, METH_NOARGS, NULL },
+  { "_set_perm_factor", (PyCFunction) problem_set_perm_factor, METH_VARARGS, NULL },
+  { "_get_expansion_order", (PyCFunction) problem_get_expansion_order, METH_NOARGS, NULL },
+  { "_set_expansion_order", (PyCFunction) problem_set_expansion_order, METH_VARARGS, NULL },
   {NULL}
 };
 

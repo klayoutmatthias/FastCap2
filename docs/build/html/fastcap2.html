@@ -61,6 +61,23 @@ or adding <a class="reference internal" href="#fastcap2.Surface" title="fastcap2
 <span class="n">cap_matrix</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
 </pre></div>
 </div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fastcap2.Problem.XI">
+<span class="sig-name descname"><span class="pre">XI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#fastcap2.Problem.XI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies ‘y axis’ for <a class="reference internal" href="#fastcap2.Problem.ps_upaxis" title="fastcap2.Problem.ps_upaxis"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ps_upaxis()</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fastcap2.Problem.YI">
+<span class="sig-name descname"><span class="pre">YI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#fastcap2.Problem.YI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies ‘z axis’ for <a class="reference internal" href="#fastcap2.Problem.ps_upaxis" title="fastcap2.Problem.ps_upaxis"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ps_upaxis()</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="fastcap2.Problem.ZI">
+<span class="sig-name descname"><span class="pre">ZI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#fastcap2.Problem.ZI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="fastcap2.Problem.add">
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#fastcap2.Surface" title="fastcap2.Surface"><span class="pre">fastcap2.Surface</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flipz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fastcap2.Problem.add" title="Permalink to this definition">¶</a></dt>
@@ -154,6 +171,138 @@ group</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_axislength">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_axislength</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#fastcap2.Problem.ps_axislength" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: sets the axis length</p>
+<p>This property corresponds to option “-x” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_azimuth">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_azimuth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#fastcap2.Problem.ps_azimuth" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: sets the azimuth angle</p>
+<p>This property corresponds to option “-a” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_distance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_distance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#fastcap2.Problem.ps_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: sets the distance</p>
+<p>This property corresponds to option “-h” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_elevation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_elevation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#fastcap2.Problem.ps_elevation" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: sets the elevation angle</p>
+<p>This property corresponds to option “-e” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_linewidth">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_linewidth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#fastcap2.Problem.ps_linewidth" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: sets the line width</p>
+<p>This property corresponds to option “-w” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_no_dielectric">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_no_dielectric</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#fastcap2.Problem.ps_no_dielectric" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: remove DIELEC type surfaces from all .ps picture files</p>
+<p>This property corresponds to option “-rd” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_no_key">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_no_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#fastcap2.Problem.ps_no_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: remove key in shaded .ps picture file (use with <cite>select_q</cite> option)</p>
+<p>This property corresponds to option “-rk” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_no_showpage">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_no_showpage</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#fastcap2.Problem.ps_no_showpage" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: suppress showpage in all .ps picture files</p>
+<p>This property corresponds to option “-v” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_number_faces">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_number_faces</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#fastcap2.Problem.ps_number_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: number faces with input order numbers</p>
+<p>This property corresponds to option “-n” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_remove_q">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_remove_q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fastcap2.Problem.ps_remove_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: remove conductors from all charge distribution .ps pictures</p>
+<p>This property corresponds to option “-rc” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_rotation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_rotation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#fastcap2.Problem.ps_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: sets the rotation angle</p>
+<p>This property corresponds to option “-r” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_scale">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_scale</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#fastcap2.Problem.ps_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: sets the scale</p>
+<p>This property corresponds to option “-s” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_select_q">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_select_q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#fastcap2.Problem.ps_select_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: select conductors for at-1V charge distribution .ps pictures</p>
+<p>This property corresponds to option “-q” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_show_hidden">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_show_hidden</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#fastcap2.Problem.ps_show_hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: do now remove hidden faces</p>
+<p>This property corresponds to option “-f” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_total_charges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_total_charges</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#fastcap2.Problem.ps_total_charges" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: display total charges in shaded .ps picture file (use with <cite>select_q</cite> option)</p>
+<p>This property corresponds to option “-dc” of the original
+“fastcap” program.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="fastcap2.Problem.ps_upaxis">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ps_upaxis</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#fastcap2.Problem.ps_upaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>PS output: specifies the “up” axis</p>
+<p>This property corresponds to option “-u” of the original
+“fastcap” program.</p>
+<p>Values are:
+* Problem.XI for x axis
+* Problem.YI for y axis
+* Problem.ZI for z axis</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="fastcap2.Problem.relative_perm">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relative_perm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#fastcap2.Problem.relative_perm" title="Permalink to this definition">¶</a></dt>
 <dd><p>The relative permittivity</p>
@@ -169,7 +318,7 @@ the dielectrics. The default value is 1.0.</p>
 <dd><p>Removes the given conductors from the input</p>
 <p>This property corresponds to option “-ri” of the original
 “fastcap” program.</p>
-<p>The conductors with the given names will not be considers
+<p>The conductors with the given names will not be considered
 at all.</p>
 </dd></dl>
 
