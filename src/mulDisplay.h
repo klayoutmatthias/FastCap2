@@ -15,7 +15,7 @@ void mksCapDump(ssystem *sys, double **capmat);
 void dumpConfig(ssystem *sys, FILE *fp, const char *name);
 void dump_face(FILE *fp, face *fac);
 void dumpCorners(FILE *fp, double **mat, int rows, int cols);
-void dumpCondNames(FILE *fp, Name *name_list);
+void dumpCondNames(ssystem *sys);
 int has_duplicate_panels(FILE *fp, charge *chglst);
 void dumpMulSet(ssystem *sys);
 void dump_preconditioner(ssystem *sys, charge *chglist, int type);

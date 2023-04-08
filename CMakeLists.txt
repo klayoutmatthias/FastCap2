@@ -13,6 +13,7 @@ add_library(corelib STATIC
   src/direct.h
   src/heap.h
   src/input.h
+  src/fastcap_solve.h
   src/mulDisplay.h
   src/mulDo.h
   src/mulGlobal.h
@@ -38,6 +39,7 @@ add_library(corelib STATIC
   src/electric.cc
   src/heap.cc
   src/input.cc
+  src/fastcap_solve.cc
   src/mulDisplay.cc
   src/mulDo.cc
   src/mulGlobal.cc

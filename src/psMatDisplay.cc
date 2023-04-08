@@ -102,7 +102,7 @@ static void dump_aldus_hdr(FILE *fp, double lowx, double lowy, double upx, doubl
 /*
   dump Aldus Freehand readable trailer
 */
-static void dump_aldus_foot(FILE *fp, int insert_showpage, char *argv[], int argc, int print_cmd_line, char *aux_str)
+static void dump_aldus_foot(FILE *fp, int insert_showpage, const char **argv, int argc, int print_cmd_line, char *aux_str)
 {
   int f;
   char line[BUFSIZ];
@@ -163,7 +163,7 @@ static void dump_line(FILE *fp, double xstart, double ystart, double len)
   - call first with type = OPEN, then on each calcp with type = UPDATE,
     finally with type = CLOSE
 */
-void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, int num_col, char *argv[], int argc, int type)
+void dump_ps_mat(ssystem *sys, char *filename, int row, int col, int num_row, int num_col, const char **argv, int argc, int type)
 {
   static FILE *fp = NULL;
   double widx, widy;

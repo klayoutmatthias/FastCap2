@@ -910,85 +910,47 @@ static char *spaces(char *str, int num)
   - some attempt to scale (eg pF, nF, uF etc) is made
   - also checks for M-matrix sign pattern, diag dominance
 */
-void mksCapDump(ssystem *sys, double **capmat)
+void mksCapDump(ssystem *sys, double **sym_mat)
 {
   int i, j, toobig, toosmall, maxlen, sigfig, colwidth, i_killed, j_killed;
-  int first_offd;
-  double maxdiag = 0.0, minoffd, rowttl, scale = 1.0, **sym_mat;
-  double mat_entry;
+  int first_offd = TRUE;
+  double maxdiag = 0.0, minoffd = 0.0, scale = 1.0;
   char unit[BUFSIZ], name[BUFSIZ], cond_name[BUFSIZ];
-
-  first_offd = TRUE;
-  minoffd = capmat[1][1];       /* this entry is always present */
-                                /* - in the 1 cond case, assign is still ok */
-
-  /* set up symetrized matrix storage */
-  sym_mat = sys->heap.alloc<double*>(sys->num_cond+1, AMSC);
-  for(i=1; i <= sys->num_cond; i++)  {
-    sym_mat[i] = sys->heap.alloc<double>(sys->num_cond+1, AMSC);
-  }
 
   /* get the smallest and largest (absolute value) symmetrized elements */
   /* check for non-M-matrix symmetrized capacitance matrix */
   for(i = 1; i <= sys->num_cond; i++) {
 
     /* skip conductors removed from input */
-    if(want_this_iter(sys->kinp_num_list, i)) continue;
+    if(want_this_iter(sys->kinp_num_list, i)) {
+      continue;
+    }
 
     i_killed = want_this_iter(sys->kill_num_list, i);
 
-    if(capmat[i][i] <= 0.0 && !i_killed) {
-      sys->info("\nmksCapDump: Warning - capacitance matrix has non-positive diagonal\n  row %d\n", i+1);
-    }
-    maxdiag = MAX(maxdiag, fabs(capmat[i][i]));
-    rowttl = 0.0;
+    maxdiag = MAX(maxdiag, fabs(sym_mat[i][i]));
     for(j = 1; j <= sys->num_cond; j++) {
 
-      /* skip conductors removed from input */
-      if(want_this_iter(sys->kinp_num_list, j)) continue;
-
-      if(j == i) {
-        sym_mat[i][i] = capmat[i][i];
+      /* skip conductors removed from input or on diagonal */
+      if (j == i || want_this_iter(sys->kinp_num_list, j)) {
         continue;
       }
 
-      /* if this column was not calculated and neither was the column
-         with the same number as the current row, then symetrized mat has
-         no entry at [i][j], [j][i] */
       j_killed = want_this_iter(sys->kill_num_list, j);
-      if(i_killed && j_killed) continue;
-
-      /* if this column was calculated but column with the same number
-         as the current row wasnt, then symmetrized mat has unaveraged entry 
-         at [i][j], [j][i] */
-      else if(i_killed && !j_killed) mat_entry = capmat[i][j];
-
-      /* if this column was not calculated but column with the same number
-         as the current row was, then symmetrized mat has unaveraged entry 
-         at [i][j], [j][i] */
-      else if(!i_killed && j_killed) mat_entry = capmat[j][i];
-
-      /* if this column was calculated and column with the same number
-         as the current row was also, then symmetrized mat has averaged entry 
-         at [i][j], [j][i] */
-      else mat_entry = (capmat[i][j] + capmat[j][i])/2.0;
-
-      rowttl += mat_entry;
-      if(mat_entry >= 0.0) {
-        sys->info("\nmksCapDump: Warning - capacitance matrix has non-negative off-diagonals\n  row %d col %d\n", i, j);
+      if(i_killed && j_killed) {
+        continue;
       }
+
+      double mat_entry = sym_mat[i][j];
       if(fabs(mat_entry) != 0.0) {
         if(first_offd) {
           minoffd = fabs(mat_entry);
           first_offd = FALSE;
+        } else {
+          minoffd = MIN(minoffd, fabs(mat_entry));
         }
-        else minoffd = MIN(minoffd, fabs(mat_entry));
       }
 
-      sym_mat[i][j] = mat_entry;
-    }
-    if(rowttl + capmat[i][i] <= 0.0 && !i_killed) {
-      sys->info("\nmksCapDump: Warning - capacitance matrix is not strictly diagonally dominant\n  due to row %d\n", i);
     }
   }
 
@@ -1354,17 +1316,17 @@ void chkDummyList(ssystem *sys, charge **panels, int *is_dummy, int n_chgs)
 }
 
 /*
-  print the conductor names to a file
+  print the conductor names
 */
-void dumpCondNames(FILE *fp, Name *name_list)
+void dumpCondNames(ssystem *sys)
 { 
   int i;
   Name *cur_name;
 
-  fprintf(fp, "CONDUCTOR NAMES\n");
-  for(cur_name = name_list, i = 0; cur_name != NULL; 
+  sys->msg("CONDUCTOR NAMES\n");
+  for(cur_name = sys->cond_names, i = 0; cur_name != NULL;
       cur_name = cur_name->next, i++) {
-    fprintf(fp, "  %d `%s'\n", i+1, last_alias(cur_name));
+    sys->msg("  %d `%s'\n", i+1, last_alias(cur_name));
   }
 }
 

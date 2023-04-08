@@ -1197,7 +1197,7 @@ charge *build_charge_list(ssystem *sys)
   /* check for inconsistencies in kill lists */
   resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list);
 
-  if (sys->dissrf) {
+  if (sys->dissrf && sys->log) {
     dumpSurfDat(sys);
   }
 

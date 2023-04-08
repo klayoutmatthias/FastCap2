@@ -6,6 +6,7 @@
 #include "mulGlobal.h"
 #include "input.h"
 #include "zbufGlobal.h"
+#include "fastcap_solve.h"
 
 //  for in-place new
 #include <memory>
@@ -671,6 +672,26 @@ problem_load_list(ProblemObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+problem_solve(ProblemObject *self)
+{
+  double **capmat = 0;
+
+  try {
+    capmat = solve(&self->sys);
+  } catch (std::runtime_error &ex) {
+    return raise_error (ex);
+  }
+
+  if (capmat) {
+
+    // ...
+
+  }
+
+  Py_RETURN_NONE;
+}
+
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
   { "_set_title", (PyCFunction) problem_set_title, METH_O, NULL },
@@ -722,6 +743,7 @@ static PyMethodDef problem_methods[] = {
   { "_set_verbose", (PyCFunction) problem_set_verbose, METH_VARARGS, NULL },
   { "_load", (PyCFunction) problem_load, METH_VARARGS, NULL },
   { "_load_list", (PyCFunction) problem_load_list, METH_VARARGS, NULL },
+  { "_solve", (PyCFunction) problem_solve, METH_NOARGS, NULL },
   {NULL}
 };
 

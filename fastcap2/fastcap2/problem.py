@@ -479,6 +479,10 @@ class Problem(_Problem):
 
     The rows and columns correspond to the conductors 
     returned by the :py:meth:`conductors` method.
+
+    If elements are not computed because the corresponding
+    rows and columns have been dropped from the input, a zero
+    capacitance value is written there.
     """
     # @@@
     pass
