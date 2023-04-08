@@ -267,13 +267,11 @@ class Problem(_Problem):
     This property corresponds to option "-a" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_azimuth();
 
   @ps_azimuth.setter
   def ps_azimuth(self, value: float):
-    # @@@
-    pass
+    super()._set_ps_azimuth(value);
 
   @property
   def ps_elevation(self) -> float:
@@ -282,13 +280,11 @@ class Problem(_Problem):
     This property corresponds to option "-e" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_elevation();
 
   @ps_elevation.setter
   def ps_elevation(self, value: float):
-    # @@@
-    pass
+    super()._set_ps_elevation(value);
 
   @property
   def ps_rotation(self) -> float:
@@ -297,13 +293,11 @@ class Problem(_Problem):
     This property corresponds to option "-r" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_rotation();
 
   @ps_rotation.setter
   def ps_rotation(self, value: float):
-    # @@@
-    pass
+    super()._set_ps_rotation(value);
 
   @property
   def ps_upaxis(self) -> int:
@@ -332,13 +326,11 @@ class Problem(_Problem):
     This property corresponds to option "-h" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_distance();
 
   @ps_distance.setter
   def ps_distance(self, value: float):
-    # @@@
-    pass
+    super()._set_ps_distance(value);
 
   @property
   def ps_scale(self) -> float:
@@ -347,13 +339,11 @@ class Problem(_Problem):
     This property corresponds to option "-s" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_scale();
 
   @ps_scale.setter
   def ps_scale(self, value: float):
-    # @@@
-    pass
+    super()._set_ps_scale(value);
 
   @property
   def ps_linewidth(self) -> float:
@@ -362,13 +352,11 @@ class Problem(_Problem):
     This property corresponds to option "-w" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_linewidth();
 
   @ps_linewidth.setter
   def ps_linewidth(self, value: float):
-    # @@@
-    pass
+    super()._set_ps_linewidth(value);
 
   @property
   def ps_axislength(self) -> float:
@@ -377,13 +365,11 @@ class Problem(_Problem):
     This property corresponds to option "-x" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_axislength();
 
   @ps_axislength.setter
   def ps_axislength(self, value: float):
-    # @@@
-    pass
+    super()._set_ps_axislength(value);
 
   def load(self, file: str, group: Optional[str] = None):
     """Loads a single "quickif"-style geometry file

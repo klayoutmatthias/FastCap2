@@ -178,6 +178,69 @@ class TestProblem(unittest.TestCase):
     problem.ps_show_hidden = True
     self.assertEqual(problem.ps_show_hidden, True)
 
+  def test_ps_azimuth(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_azimuth, 50.0)
+
+    problem.ps_azimuth = 12.5
+    self.assertEqual(problem.ps_azimuth, 12.5)
+
+  def test_ps_elevation(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_elevation, 50.0)
+
+    problem.ps_elevation = 1.5
+    self.assertEqual(problem.ps_elevation, 1.5)
+
+  def test_ps_rotation(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_rotation, 0.0)
+
+    problem.ps_rotation = 45.0
+    self.assertEqual(problem.ps_rotation, 45.0)
+
+  def test_ps_distance(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_distance, 2.0)
+
+    problem.ps_distance = 1.75
+    self.assertEqual(problem.ps_distance, 1.75)
+
+  def test_ps_scale(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_scale, 1.0)
+
+    problem.ps_scale = 0.5
+    self.assertEqual(problem.ps_scale, 0.5)
+
+  def test_ps_linewidth(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_linewidth, 1.0)
+
+    problem.ps_linewidth = 2.5
+    self.assertEqual(problem.ps_linewidth, 2.5)
+
+  def test_ps_axislength(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_axislength, 1.0)
+
+    problem.ps_axislength = 22.5
+    self.assertEqual(problem.ps_axislength, 22.5)
+
 
 if __name__ == '__main__':
     unittest.main()

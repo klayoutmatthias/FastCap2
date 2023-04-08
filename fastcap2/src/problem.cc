@@ -430,7 +430,131 @@ problem_set_ps_show_hidden(ProblemObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+problem_get_ps_azimuth(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.azimuth);
+}
 
+static PyObject *
+problem_set_ps_azimuth(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.azimuth = d;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_elevation(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.elevation);
+}
+
+static PyObject *
+problem_set_ps_elevation(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.elevation = d;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_rotation(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.rotation);
+}
+
+static PyObject *
+problem_set_ps_rotation(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.rotation = d;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_distance(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.distance);
+}
+
+static PyObject *
+problem_set_ps_distance(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.distance = d;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_scale(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.scale);
+}
+
+static PyObject *
+problem_set_ps_scale(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.scale = d;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_linewidth(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.linewd);
+}
+
+static PyObject *
+problem_set_ps_linewidth(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.linewd = d;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_axislength(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.axeslen);
+}
+
+static PyObject *
+problem_set_ps_axislength(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.axeslen = d;
+  Py_RETURN_NONE;
+}
 
 
 static PyMethodDef problem_methods[] = {
@@ -464,6 +588,20 @@ static PyMethodDef problem_methods[] = {
   { "_set_ps_number_faces", (PyCFunction) problem_set_ps_number_faces, METH_VARARGS, NULL },
   { "_get_ps_show_hidden", (PyCFunction) problem_get_ps_show_hidden, METH_NOARGS, NULL },
   { "_set_ps_show_hidden", (PyCFunction) problem_set_ps_show_hidden, METH_VARARGS, NULL },
+  { "_get_ps_azimuth", (PyCFunction) problem_get_ps_azimuth, METH_NOARGS, NULL },
+  { "_set_ps_azimuth", (PyCFunction) problem_set_ps_azimuth, METH_VARARGS, NULL },
+  { "_get_ps_elevation", (PyCFunction) problem_get_ps_elevation, METH_NOARGS, NULL },
+  { "_set_ps_elevation", (PyCFunction) problem_set_ps_elevation, METH_VARARGS, NULL },
+  { "_get_ps_rotation", (PyCFunction) problem_get_ps_rotation, METH_NOARGS, NULL },
+  { "_set_ps_rotation", (PyCFunction) problem_set_ps_rotation, METH_VARARGS, NULL },
+  { "_get_ps_distance", (PyCFunction) problem_get_ps_distance, METH_NOARGS, NULL },
+  { "_set_ps_distance", (PyCFunction) problem_set_ps_distance, METH_VARARGS, NULL },
+  { "_get_ps_scale", (PyCFunction) problem_get_ps_scale, METH_NOARGS, NULL },
+  { "_set_ps_scale", (PyCFunction) problem_set_ps_scale, METH_VARARGS, NULL },
+  { "_get_ps_linewidth", (PyCFunction) problem_get_ps_linewidth, METH_NOARGS, NULL },
+  { "_set_ps_linewidth", (PyCFunction) problem_set_ps_linewidth, METH_VARARGS, NULL },
+  { "_get_ps_axislength", (PyCFunction) problem_get_ps_axislength, METH_NOARGS, NULL },
+  { "_set_ps_axislength", (PyCFunction) problem_set_ps_axislength, METH_VARARGS, NULL },
   {NULL}
 };
 
