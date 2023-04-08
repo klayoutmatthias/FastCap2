@@ -279,13 +279,13 @@ problem_set_remove_conductors(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_select_q_conductors(ProblemObject *self)
+problem_get_ps_select_q(ProblemObject *self)
 {
   return parse_conductor_list(self->sys.qpic_name_list);
 }
 
 static PyObject *
-problem_set_select_q_conductors(ProblemObject *self, PyObject *value)
+problem_set_ps_select_q(ProblemObject *self, PyObject *value)
 {
   char *list = NULL;
   if (Py_IsNone(value)) {
@@ -301,13 +301,13 @@ problem_set_select_q_conductors(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_remove_q_conductors(ProblemObject *self)
+problem_get_ps_remove_q(ProblemObject *self)
 {
   return parse_conductor_list(self->sys.kq_name_list);
 }
 
 static PyObject *
-problem_set_remove_q_conductors(ProblemObject *self, PyObject *value)
+problem_set_ps_remove_q(ProblemObject *self, PyObject *value)
 {
   char *list = NULL;
   if (Py_IsNone(value)) {
@@ -338,10 +338,10 @@ static PyMethodDef problem_methods[] = {
   { "_set_skip_conductors", (PyCFunction) problem_set_skip_conductors, METH_O, NULL },
   { "_get_remove_conductors", (PyCFunction) problem_get_remove_conductors, METH_NOARGS, NULL },
   { "_set_remove_conductors", (PyCFunction) problem_set_remove_conductors, METH_O, NULL },
-  { "_get_select_q_conductors", (PyCFunction) problem_get_select_q_conductors, METH_NOARGS, NULL },
-  { "_set_select_q_conductors", (PyCFunction) problem_set_select_q_conductors, METH_O, NULL },
-  { "_get_remove_q_conductors", (PyCFunction) problem_get_remove_q_conductors, METH_NOARGS, NULL },
-  { "_set_remove_q_conductors", (PyCFunction) problem_set_remove_q_conductors, METH_O, NULL },
+  { "_get_ps_select_q", (PyCFunction) problem_get_ps_select_q, METH_NOARGS, NULL },
+  { "_set_ps_select_q", (PyCFunction) problem_set_ps_select_q, METH_O, NULL },
+  { "_get_ps_remove_q", (PyCFunction) problem_get_ps_remove_q, METH_NOARGS, NULL },
+  { "_set_ps_remove_q", (PyCFunction) problem_set_ps_remove_q, METH_O, NULL },
   {NULL}
 };
 

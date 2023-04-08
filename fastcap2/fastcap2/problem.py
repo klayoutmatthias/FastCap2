@@ -162,11 +162,11 @@ class Problem(_Problem):
     "fastcap" program. A value of 'None' for this property will
     select all conductors.
     """
-    return super()._get_select_q_conductors();
+    return super()._get_ps_select_q();
 
   @ps_select_q.setter
   def ps_select_q(self, value: Optional[list[str]]):
-    super()._set_select_q_conductors(value);
+    super()._set_ps_select_q(value);
 
   @property
   def ps_remove_q(self) -> Optional[list[str]]:
@@ -176,11 +176,11 @@ class Problem(_Problem):
     "fastcap" program. A value of 'None' for this property will enable
     all conductors in the charge distribution picture.
     """
-    return super()._get_remove_q_conductors();
+    return super()._get_ps_remove_q();
 
   @ps_remove_q.setter
   def ps_remove_q(self, value: Optional[list[str]]):
-    super()._set_remove_q_conductors(value);
+    super()._set_ps_remove_q(value);
 
   @property
   def ps_no_key(self) -> bool:
