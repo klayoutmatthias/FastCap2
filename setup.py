@@ -11,6 +11,7 @@ core_src=[
   "src/counters.cc",
   "src/direct.cc",
   "src/electric.cc",
+  "src/fastcap_solve.cc",
   "src/heap.cc",
   "src/input.cc",
   "src/mulDisplay.cc",

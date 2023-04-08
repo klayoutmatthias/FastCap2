@@ -79,10 +79,10 @@
 */
 void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
 {
-  int linecnt, end_of_chain, ref_pnt_is_inside;
+  int linecnt = 0, end_of_chain = TRUE, ref_pnt_is_inside = FALSE;
   FILE *fp;
   char tline[BUFSIZ], file_name[BUFSIZ], plus[BUFSIZ], group_name[BUFSIZ];
-  double outer_perm, inner_perm, tx, ty, tz, rx, ry, rz;
+  double outer_perm = 1.0, inner_perm = 1.0, tx = 0.0, ty = 0.0, tz = 0.0, rx = 0.0, ry = 0.0, rz = 0.0;
   surface *cur_surf = 0;
 
   /* find the end of the current surface list */
@@ -936,7 +936,8 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
     surf_list = sys->heap.alloc<surface>(1, AMSC);
     surf_list->type = CONDTR;   /* only conductors can come in stdin */
     surf_list->name = sys->heap.strdup("stdin");
-    surf_list->outer_perm = sys->perm_factor;
+    //  surf_list->outer_perm = sys->perm_factor;  //  TODO: shouldn't that be 1 because the perm_factor is added later?
+    surf_list->outer_perm = 1.0;
     surf_list->end_of_chain = TRUE;
 
     /* set up group name */
@@ -960,7 +961,8 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
     }
     cur_surf->type = CONDTR;
     cur_surf->name = sys->heap.strdup(input_file);
-    cur_surf->outer_perm = sys->perm_factor;
+    //  cur_surf->outer_perm = sys->perm_factor;    //  TODO: shouldn't that be 1 because the perm_factor is added later?
+    cur_surf->outer_perm = 1.0;
     cur_surf->end_of_chain = TRUE;
 
     /* set up group name */

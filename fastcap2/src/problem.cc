@@ -7,6 +7,7 @@
 #include "input.h"
 #include "zbufGlobal.h"
 #include "fastcap_solve.h"
+#include "quickif.h"
 
 //  for in-place new
 #include <memory>
@@ -640,7 +641,7 @@ problem_load(ProblemObject *self, PyObject *args)
 
   new_surf->type = CONDTR;
   new_surf->name = self->sys.heap.strdup(filename);
-  new_surf->outer_perm = self->sys.perm_factor;
+  new_surf->outer_perm = 1.0;
   new_surf->end_of_chain = TRUE;
 
   //  set up group name
@@ -685,12 +686,57 @@ problem_solve(ProblemObject *self)
 
   if (capmat) {
 
-    // ...
+    int size = self->sys.num_cond;
+    double mult = FPIEPS * self->sys.perm_factor;
+
+    //  NOTE: the cap matrix if 1 based!
+    PyObject *res = PyList_New(size);
+    if (!res) {
+      return NULL;
+    }
+
+    for (int i = 1; i <= size; ++i) {
+      PyObject *row = PyList_New(size);
+      if (! row) {
+        Py_DECREF(res);
+        return NULL;
+      }
+      PyList_SetItem(res, i - 1, row);
+      for (int j = 1; j <= size; ++j) {
+        PyList_SetItem(row, j - 1, PyFloat_FromDouble(mult * capmat[i][j]));
+      }
+    }
+
+    return res;
 
   }
 
   Py_RETURN_NONE;
 }
+
+static PyObject *
+problem_conductors(ProblemObject *self)
+{
+  int size = self->sys.num_cond;
+
+  PyObject *res = PyList_New(size);
+  if (!res) {
+    return NULL;
+  }
+
+  int i = 0;
+  for (Name *cur_name = self->sys.cond_names; cur_name; cur_name = cur_name->next, ++i) {
+    PyObject *name_str = PyUnicode_FromString(last_alias(cur_name));
+    if (!name_str) {
+      Py_DECREF(res);
+      return NULL;
+    }
+    PyList_SetItem(res, i, name_str);
+  }
+
+  return res;
+}
+
 
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
@@ -744,6 +790,7 @@ static PyMethodDef problem_methods[] = {
   { "_load", (PyCFunction) problem_load, METH_VARARGS, NULL },
   { "_load_list", (PyCFunction) problem_load_list, METH_VARARGS, NULL },
   { "_solve", (PyCFunction) problem_solve, METH_NOARGS, NULL },
+  { "_conductors", (PyCFunction) problem_conductors, METH_NOARGS, NULL },
   {NULL}
 };
 

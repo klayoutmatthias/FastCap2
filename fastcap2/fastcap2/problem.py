@@ -74,8 +74,7 @@ class Problem(_Problem):
     factor. The default value is 1.0.
 
     This property corresponds to option "-p" of the original
-    "fastcap" program. It must be set before :py:meth:`load`,
-    :py:meth:`load_list` or :py:meth:`add` is called.
+    "fastcap" program.
     """
     return super()._get_perm_factor()
 
@@ -402,9 +401,6 @@ class Problem(_Problem):
     Note that the files are not loaded immediately, but 
     upon :py:meth:`solve`.
     
-    Also note that :py:meth:`perm_factor` has to be set before this method
-    is called.
-
     By design of the file format, only conductor surfaces can be
     loaded by this method.
     """
@@ -415,17 +411,16 @@ class Problem(_Problem):
 
     This method corresponds to option "-l" in the original
     "fastcap" program.
-
-    Also note that :py:meth:`perm_factor` has to be set before this method
-    is called.
     """
     return super()._load_list(file)
 
   def add(self, surface: 'fastcap2.Surface', 
                 link: bool = True,
                 group: Optional[str] = None, 
-                kind: int = Problem.CONDTR,
+                kind: int = CONDTR,
+                ref_point_inside: bool = True,
                 outside_perm: float = 1.0,
+                inside_perm: float = 1.0,
                 dx: float = 0.0,
                 dy: float = 0.0,
                 dz: float = 0.0,
@@ -443,8 +438,10 @@ class Problem(_Problem):
                   the surface is added to the respective group.
     :param link: If True, links this surface to the previous 
                  conductor.
-    :param kind: The type of the surface (conductor or dielectric or both).
+    :param ref_point_inside: t.b.d.
+    :param kind: The type of the surface (conductor or dielectric or dielectric interface).
     :param outside_perm: The permittivity outside of the surface.
+    :param inside_perm: The permittivity inside of the surface (only for dielectric surfaces).
     :param dx: Translates the surface in x direction.
     :param dy: Translates the surface in y direction.
     :param dz: Translates the surface in z direction.
@@ -484,8 +481,7 @@ class Problem(_Problem):
     rows and columns have been dropped from the input, a zero
     capacitance value is written there.
     """
-    # @@@
-    pass
+    return super()._solve()
 
   def conductors(self) -> list[str]:
     """Returns the effective list of conductors present in the capacitance matrix
@@ -493,13 +489,12 @@ class Problem(_Problem):
     List list corresponds to the rows and columns of the
     capacitance matrix.
     """
-    # @@@
-    pass
+    return super().conductors()
 
   def dump_ps(self, filename):
     """Produces a PS file with the geometries and charges
 
-    See the manifold ps_... options that configure PS output.
+    See the manifold `ps_...` options that configure PS output.
     """
     # @@@
     pass
