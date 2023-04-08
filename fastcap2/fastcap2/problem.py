@@ -189,13 +189,11 @@ class Problem(_Problem):
     This property corresponds to option "-rk" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_no_key();
 
   @ps_no_key.setter
   def ps_no_key(self, value: bool):
-    # @@@
-    pass
+    super()._set_ps_no_key(value);
 
   @property
   def ps_no_dielectric(self) -> bool:
@@ -204,13 +202,11 @@ class Problem(_Problem):
     This property corresponds to option "-rd" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_no_dielectric();
 
   @ps_no_dielectric.setter
   def ps_no_dielectric(self, value: bool):
-    # @@@
-    pass
+    super()._set_ps_no_dielectric(value);
 
   @property
   def ps_total_charges(self) -> bool:
@@ -219,13 +215,11 @@ class Problem(_Problem):
     This property corresponds to option "-dc" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_total_charges();
 
   @ps_total_charges.setter
   def ps_total_charges(self, value: bool):
-    # @@@
-    pass
+    super()._set_ps_total_charges(value);
 
   @property
   def ps_no_showpage(self) -> bool:
@@ -234,13 +228,11 @@ class Problem(_Problem):
     This property corresponds to option "-v" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_no_showpage();
 
   @ps_no_showpage.setter
   def ps_no_showpage(self, value: bool):
-    # @@@
-    pass
+    super()._set_ps_no_showpage(value);
 
   @property
   def ps_number_faces(self) -> bool:
@@ -249,13 +241,11 @@ class Problem(_Problem):
     This property corresponds to option "-n" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_number_faces();
 
   @ps_number_faces.setter
   def ps_number_faces(self, value: bool):
-    # @@@
-    pass
+    super()._set_ps_number_faces(value);
 
   @property
   def ps_show_hidden(self) -> bool:
@@ -264,13 +254,11 @@ class Problem(_Problem):
     This property corresponds to option "-f" of the original
     "fastcap" program.
     """
-    # @@@
-    pass
+    return super()._get_ps_show_hidden();
 
   @ps_show_hidden.setter
   def ps_show_hidden(self, value: bool):
-    # @@@
-    pass
+    super()._set_ps_show_hidden(value);
 
   @property
   def ps_azimuth(self) -> float:

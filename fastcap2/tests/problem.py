@@ -124,7 +124,59 @@ class TestProblem(unittest.TestCase):
     problem.ps_remove_q = None
     self.assertEqual(problem.ps_remove_q, None)
     
+  def test_ps_no_key(self):
 
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_no_key, False)
+
+    problem.ps_no_key = True
+    self.assertEqual(problem.ps_no_key, True)
+
+  def test_ps_no_dielectric(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_no_dielectric, False)
+
+    problem.ps_no_dielectric = True
+    self.assertEqual(problem.ps_no_dielectric, True)
+
+  def test_ps_total_charges(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_total_charges, False)
+
+    problem.ps_total_charges = True
+    self.assertEqual(problem.ps_total_charges, True)
+
+  def test_ps_no_showpage(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_no_showpage, False)
+
+    problem.ps_no_showpage = True
+    self.assertEqual(problem.ps_no_showpage, True)
+
+  def test_ps_number_faces(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_number_faces, False)
+
+    problem.ps_number_faces = True
+    self.assertEqual(problem.ps_number_faces, True)
+
+  def test_ps_show_hidden(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_show_hidden, False)
+
+    problem.ps_show_hidden = True
+    self.assertEqual(problem.ps_show_hidden, True)
 
 
 if __name__ == '__main__':

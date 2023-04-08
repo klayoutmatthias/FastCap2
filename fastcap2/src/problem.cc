@@ -322,6 +322,116 @@ problem_set_ps_remove_q(ProblemObject *self, PyObject *value)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+problem_get_ps_no_key(ProblemObject *self)
+{
+  return PyBool_FromLong (self->sys.rk_);
+}
+
+static PyObject *
+problem_set_ps_no_key(ProblemObject *self, PyObject *args)
+{
+  int b = 0;
+  if (!PyArg_ParseTuple(args, "p", &b)) {
+    return NULL;
+  }
+
+  self->sys.rk_ = b;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_no_dielectric(ProblemObject *self)
+{
+  return PyBool_FromLong (self->sys.rd_);
+}
+
+static PyObject *
+problem_set_ps_no_dielectric(ProblemObject *self, PyObject *args)
+{
+  int b = 0;
+  if (!PyArg_ParseTuple(args, "p", &b)) {
+    return NULL;
+  }
+
+  self->sys.rd_ = b;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_total_charges(ProblemObject *self)
+{
+  return PyBool_FromLong (self->sys.dd_);
+}
+
+static PyObject *
+problem_set_ps_total_charges(ProblemObject *self, PyObject *args)
+{
+  int b = 0;
+  if (!PyArg_ParseTuple(args, "p", &b)) {
+    return NULL;
+  }
+
+  self->sys.dd_ = b;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_no_showpage(ProblemObject *self)
+{
+  return PyBool_FromLong (self->sys.s_);
+}
+
+static PyObject *
+problem_set_ps_no_showpage(ProblemObject *self, PyObject *args)
+{
+  int b = 0;
+  if (!PyArg_ParseTuple(args, "p", &b)) {
+    return NULL;
+  }
+
+  self->sys.s_ = b;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_number_faces(ProblemObject *self)
+{
+  return PyBool_FromLong (self->sys.n_);
+}
+
+static PyObject *
+problem_set_ps_number_faces(ProblemObject *self, PyObject *args)
+{
+  int b = 0;
+  if (!PyArg_ParseTuple(args, "p", &b)) {
+    return NULL;
+  }
+
+  self->sys.n_ = b;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_ps_show_hidden(ProblemObject *self)
+{
+  return PyBool_FromLong (self->sys.f_);
+}
+
+static PyObject *
+problem_set_ps_show_hidden(ProblemObject *self, PyObject *args)
+{
+  int b = 0;
+  if (!PyArg_ParseTuple(args, "p", &b)) {
+    return NULL;
+  }
+
+  self->sys.f_ = b;
+  Py_RETURN_NONE;
+}
+
+
+
 
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
@@ -342,6 +452,18 @@ static PyMethodDef problem_methods[] = {
   { "_set_ps_select_q", (PyCFunction) problem_set_ps_select_q, METH_O, NULL },
   { "_get_ps_remove_q", (PyCFunction) problem_get_ps_remove_q, METH_NOARGS, NULL },
   { "_set_ps_remove_q", (PyCFunction) problem_set_ps_remove_q, METH_O, NULL },
+  { "_get_ps_no_key", (PyCFunction) problem_get_ps_no_key, METH_NOARGS, NULL },
+  { "_set_ps_no_key", (PyCFunction) problem_set_ps_no_key, METH_VARARGS, NULL },
+  { "_get_ps_no_dielectric", (PyCFunction) problem_get_ps_no_dielectric, METH_NOARGS, NULL },
+  { "_set_ps_no_dielectric", (PyCFunction) problem_set_ps_no_dielectric, METH_VARARGS, NULL },
+  { "_get_ps_total_charges", (PyCFunction) problem_get_ps_total_charges, METH_NOARGS, NULL },
+  { "_set_ps_total_charges", (PyCFunction) problem_set_ps_total_charges, METH_VARARGS, NULL },
+  { "_get_ps_no_showpage", (PyCFunction) problem_get_ps_no_showpage, METH_NOARGS, NULL },
+  { "_set_ps_no_showpage", (PyCFunction) problem_set_ps_no_showpage, METH_VARARGS, NULL },
+  { "_get_ps_number_faces", (PyCFunction) problem_get_ps_number_faces, METH_NOARGS, NULL },
+  { "_set_ps_number_faces", (PyCFunction) problem_set_ps_number_faces, METH_VARARGS, NULL },
+  { "_get_ps_show_hidden", (PyCFunction) problem_get_ps_show_hidden, METH_NOARGS, NULL },
+  { "_set_ps_show_hidden", (PyCFunction) problem_set_ps_show_hidden, METH_VARARGS, NULL },
   {NULL}
 };
 
