@@ -25,27 +25,28 @@ class Problem(_Problem):
      # loads a problem from a FastCap2 list file
      problem.load_list("geometry.lst")
 
+     # returns the cap matrix in MKS units
      cap_matrix = problem.solve()
   
   """
 
-  """Specifies 'x axis' for :py:meth:`ps_upaxis`"""
   XI = 0
+  """Specifies 'x axis' for :py:meth:`ps_upaxis`"""
 
-  """Specifies 'y axis' for :py:meth:`ps_upaxis`"""
   YI = 1
+  """Specifies 'y axis' for :py:meth:`ps_upaxis`"""
 
-  """Specifies 'z axis' for :py:meth:`ps_upaxis`"""
   ZI = 2
+  """Specifies 'z axis' for :py:meth:`ps_upaxis`"""
 
-  """Specifies 'conductor' kind for the surface (see :py:meth:`add`)"""
   CONDTR = 0
+  """Specifies 'conductor' kind for the surface (see :py:meth:`add`)"""
 
-  """Specifies 'dielectric interface' kind for the surface (see :py:meth:`add`)"""
   DIELEC = 1
+  """Specifies 'dielectric interface' kind for the surface (see :py:meth:`add`)"""
 
-  """Specifies 'dielectric interaface with very thin conductor on it' kind for the surface (see :py:meth:`add`)"""
   BOTH = 3
+  """Specifies 'dielectric interaface with very thin conductor on it' kind for the surface (see :py:meth:`add`)"""
 
   def __init__(self, title: Optional[str] = None):
     kwargs = {}
@@ -486,7 +487,7 @@ class Problem(_Problem):
   def conductors(self) -> list[str]:
     """Returns the effective list of conductors present in the capacitance matrix
 
-    List list corresponds to the rows and columns of the
+    The list corresponds to the rows and columns of the
     capacitance matrix.
     """
     return super().conductors()
