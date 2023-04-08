@@ -77,7 +77,7 @@
         be renamed; this is helpful when idenifying conductors to omit
         from capacitance calculations using the -k option
 */
-static void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
+void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
 {
   int linecnt, end_of_chain, ref_pnt_is_inside;
   FILE *fp;

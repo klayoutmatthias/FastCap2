@@ -3,6 +3,8 @@
 #include <Python.h>
 
 #include "mulStruct.h"
+#include "mulGlobal.h"
+#include "input.h"
 #include "zbufGlobal.h"
 
 //  for in-place new
@@ -605,6 +607,69 @@ problem_set_verbose(ProblemObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+problem_load(ProblemObject *self, PyObject *args)
+{
+  const char *filename = 0;
+  int link = 0;
+  const char *group = 0;
+  if (!PyArg_ParseTuple(args, "spz", &filename, &link, &group)) {
+    return NULL;
+  }
+
+  //  find end of list
+  surface *eol = self->sys.surf_list;
+  if (link && eol) {
+    for ( ; eol->next; eol = eol->next)
+      ;
+  }
+
+  //  if linked, mark previous object as chained
+  if (eol && link) {
+    eol->end_of_chain = FALSE;
+  }
+
+  //  append new surface element
+  surface *new_surf = self->sys.heap.alloc<surface>(1);
+  if (eol) {
+    eol->next = new_surf;
+  } else {
+    self->sys.surf_list = new_surf;
+  }
+
+  new_surf->type = CONDTR;
+  new_surf->name = self->sys.heap.strdup(filename);
+  new_surf->outer_perm = self->sys.perm_factor;
+  new_surf->end_of_chain = TRUE;
+
+  //  set up group name
+  if (group) {
+    new_surf->group_name = self->sys.heap.strdup(group);
+  } else {
+    char group_name[BUFSIZ];
+    sprintf(group_name, "GROUP%d", ++self->sys.group_cnt);
+    new_surf->group_name = self->sys.heap.strdup(group_name);
+  }
+
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_load_list(ProblemObject *self, PyObject *args)
+{
+  const char *filename = 0;
+  if (!PyArg_ParseTuple(args, "s", &filename)) {
+    return NULL;
+  }
+
+  try {
+    read_list_file (&self->sys, &self->sys.surf_list, filename);
+  } catch (std::runtime_error &ex) {
+    return raise_error (ex);
+  }
+
+  Py_RETURN_NONE;
+}
 
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
@@ -655,6 +720,8 @@ static PyMethodDef problem_methods[] = {
   { "_set_ps_axislength", (PyCFunction) problem_set_ps_axislength, METH_VARARGS, NULL },
   { "_get_verbose", (PyCFunction) problem_get_verbose, METH_NOARGS, NULL },
   { "_set_verbose", (PyCFunction) problem_set_verbose, METH_VARARGS, NULL },
+  { "_load", (PyCFunction) problem_load, METH_VARARGS, NULL },
+  { "_load_list", (PyCFunction) problem_load_list, METH_VARARGS, NULL },
   {NULL}
 };
 

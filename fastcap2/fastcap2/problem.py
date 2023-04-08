@@ -38,6 +38,15 @@ class Problem(_Problem):
   """Specifies 'z axis' for :py:meth:`ps_upaxis`"""
   ZI = 2
 
+  """Specifies 'conductor' kind for the surface (see :py:meth:`add`)"""
+  CONDTR = 0
+
+  """Specifies 'dielectric interface' kind for the surface (see :py:meth:`add`)"""
+  DIELEC = 1
+
+  """Specifies 'dielectric interaface with very thin conductor on it' kind for the surface (see :py:meth:`add`)"""
+  BOTH = 3
+
   def __init__(self, title: Optional[str] = None):
     kwargs = {}
     if title is not None:
@@ -65,7 +74,8 @@ class Problem(_Problem):
     factor. The default value is 1.0.
 
     This property corresponds to option "-p" of the original
-    "fastcap" program.
+    "fastcap" program. It must be set before :py:meth:`load`,
+    :py:meth:`load_list` or :py:meth:`add` is called.
     """
     return super()._get_perm_factor()
 
@@ -379,28 +389,43 @@ class Problem(_Problem):
   def verbose(self, value: bool):
     super()._set_verbose(value)
 
-  def load(self, file: str, group: Optional[str] = None):
+  def load(self, file: str, link: bool = True, group: Optional[str] = None):
     """Loads a single "quickif"-style geometry file
 
     :param file: The file to load
     :param group: If given, a conductor group will be formed or 
                   the surface will be added to the respective 
                   group
+    :param link: If True, links this surface to the previous 
+                 conductor.
+
+    Note that the files are not loaded immediately, but 
+    upon :py:meth:`solve`.
+    
+    Also note that :py:meth:`perm_factor` has to be set before this method
+    is called.
+
+    By design of the file format, only conductor surfaces can be
+    loaded by this method.
     """
-    # @@@
-    pass
+    return super()._load(file, link, group)
 
   def load_list(self, file: str):
     """Loads a "list-style" geometry file
 
     This method corresponds to option "-l" in the original
     "fastcap" program.
+
+    Also note that :py:meth:`perm_factor` has to be set before this method
+    is called.
     """
-    # @@@
-    pass
+    return super()._load_list(file)
 
   def add(self, surface: 'fastcap2.Surface', 
+                link: bool = True,
                 group: Optional[str] = None, 
+                kind: int = Problem.CONDTR,
+                outside_perm: float = 1.0,
                 dx: float = 0.0,
                 dy: float = 0.0,
                 dz: float = 0.0,
@@ -415,7 +440,11 @@ class Problem(_Problem):
 
     :param surface: The surface to add.
     :param group: If specified, a new conductor group is formed or 
-                  the surface is added to the given group.
+                  the surface is added to the respective group.
+    :param link: If True, links this surface to the previous 
+                 conductor.
+    :param kind: The type of the surface (conductor or dielectric or both).
+    :param outside_perm: The permittivity outside of the surface.
     :param dx: Translates the surface in x direction.
     :param dy: Translates the surface in y direction.
     :param dz: Translates the surface in z direction.

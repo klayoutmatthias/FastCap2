@@ -56,9 +56,6 @@ misc. global macros
 #define DIELEC 1                /* dielectric interface surface */
 #define BOTH 3                  /* dielectric i/f w/very thin cond on it */
 
-/* used in input routines */
-#define MAXCON 10000            /* assumes never more conductors than this */
-
 /* used in ps file dump */
 #define OPEN 0                  /* open ps file, print hdr, ignore row/col */
 #define CLOSE 1                 /* print trailer, close ps file */
