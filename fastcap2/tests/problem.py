@@ -40,6 +40,15 @@ class TestProblem(unittest.TestCase):
     problem.partitioning_depth = 25
     self.assertEqual(problem.partitioning_depth, 25)
 
+  def test_iter_tol(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(str(problem.iter_tol), "0.01")
+
+    problem.iter_tol = 0.125
+    self.assertEqual(problem.iter_tol, 0.125)
+
 
 if __name__ == '__main__':
     unittest.main()

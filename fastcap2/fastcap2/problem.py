@@ -114,13 +114,11 @@ class Problem(_Problem):
 
     The default value is 0.01;
     """
-    # @@@
-    pass
+    return super()._get_iter_tol()
 
   @iter_tol.setter
   def iter_tol(self, value: float):
-    # @@@
-    pass
+    super()._set_iter_tol(value)
 
   @property
   def skip_conductors(self) -> list[str]:

@@ -131,6 +131,24 @@ problem_set_partitioning_depth(ProblemObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+problem_get_iter_tol(ProblemObject *self)
+{
+  return PyFloat_FromDouble (self->sys.iter_tol);
+}
+
+static PyObject *
+problem_set_iter_tol(ProblemObject *self, PyObject *args)
+{
+  double d = 1.0;
+  if (!PyArg_ParseTuple(args, "d", &d)) {
+    return NULL;
+  }
+
+  self->sys.iter_tol = d;
+  Py_RETURN_NONE;
+}
+
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
   { "_set_title", (PyCFunction) problem_set_title, METH_O, NULL },
@@ -140,6 +158,8 @@ static PyMethodDef problem_methods[] = {
   { "_set_expansion_order", (PyCFunction) problem_set_expansion_order, METH_VARARGS, NULL },
   { "_get_partitioning_depth", (PyCFunction) problem_get_partitioning_depth, METH_NOARGS, NULL },
   { "_set_partitioning_depth", (PyCFunction) problem_set_partitioning_depth, METH_VARARGS, NULL },
+  { "_get_iter_tol", (PyCFunction) problem_get_iter_tol, METH_NOARGS, NULL },
+  { "_set_iter_tol", (PyCFunction) problem_set_iter_tol, METH_VARARGS, NULL },
   {NULL}
 };
 
