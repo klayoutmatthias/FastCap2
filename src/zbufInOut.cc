@@ -792,19 +792,19 @@ static void dumpAdjGraph(face **faces, int numfaces, FILE *fp)
 /*
   dump face graph as a text file
 */
-void dumpFaceText(face **faces, int numfaces, FILE *fp)
+void dumpFaceText(ssystem *sys, face **faces, int numfaces)
 {
   int f, i, first = 0, k;
 
-  fprintf(fp, "depth order (input order) - lower numbers are deeper\n");
+  sys->msg("depth order (input order) - lower numbers are deeper\n");
   for(f = 0; f < numfaces; f++) {
-    fprintf(fp, "%d (%d):", faces[f]->depth, faces[f]->index);
+    sys->msg("%d (%d):", faces[f]->depth, faces[f]->index);
     for(i = 0; i < faces[f]->numbehind && faces[f]->behind != NULL; i++) {
-      fprintf(fp, " %d (%d)", (faces[f]->behind)[i]->depth,
+      sys->msg(" %d (%d)", (faces[f]->behind)[i]->depth,
               (faces[f]->behind)[i]->index);
-      if(i % 5 == 0 && i != 0) fprintf(fp, "\n");
+      if(i % 5 == 0 && i != 0) sys->msg("\n");
     }
-    if((i-1) % 5 != 0 || i == 1) fprintf(fp, "\n");
+    if((i-1) % 5 != 0 || i == 1) sys->msg("\n");
   }
 
   /* check to see that ordering is consistent with deeper lists */
@@ -813,15 +813,15 @@ void dumpFaceText(face **faces, int numfaces, FILE *fp)
       if(faces[f]->depth >= (faces[f]->behind)[k]->depth) {
         if(first == 0) {
           first = 1;
-          fprintf(fp, "\nVertices whose depth lists are inconsistent\n");
+          sys->msg("\nVertices whose depth lists are inconsistent\n");
         }
-        fprintf(fp, "%d (%d):", faces[f]->depth, faces[f]->index);
+        sys->msg("%d (%d):", faces[f]->depth, faces[f]->index);
         for(i = 0; i < faces[f]->numbehind && faces[f]->behind != NULL; i++) {
-          fprintf(fp, " %d (%d)", (faces[f]->behind)[i]->depth,
+          sys->msg(" %d (%d)", (faces[f]->behind)[i]->depth,
                   (faces[f]->behind)[i]->index);
-          if(i % 5 == 0 && i != 0) fprintf(fp, "\n");
+          if(i % 5 == 0 && i != 0) sys->msg("\n");
         }
-        if((i-1) % 5 != 0 || i == 1) fprintf(fp, "\n");
+        if((i-1) % 5 != 0 || i == 1) sys->msg("\n");
         break;
       }
     }

@@ -8,7 +8,7 @@ struct ssystem;
 struct face;
 
 void getAdjGraph(ssystem *sys, face **faces, int numfaces, double *view, double rhs, double *normal);
-void dumpCycles(face **faces, int numfaces, FILE *file);
+void dumpCycles(ssystem *sys, face **faces, int numfaces);
 face **depthSortFaces(ssystem *sys, face **faces, int numfaces);
 double getPlane(double *normal, double *p1, double *p2, double *p3);
 double dot(double *vec1, double *vec2);

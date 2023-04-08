@@ -265,6 +265,13 @@ ssystem::ssystem() :
 #endif
 }
 
+void ssystem::flush()
+{
+  if (log) {
+    fflush(log);
+  }
+}
+
 void ssystem::msg(const char *fmt, ...)
 {
   if (!log) {

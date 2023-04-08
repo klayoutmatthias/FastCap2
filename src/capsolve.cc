@@ -41,7 +41,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   if (! sys->dirsol) {          /* too much to allocate if not used */
 
     /* allocate for gcr accumulated basis vectors (moved out of loop 30Apr90) */
-    fflush(stdout);             /* so header will be saved if crash occurs */
+    sys->flush();             /* so header will be saved if crash occurs */
 
     bp = sys->heap.alloc<double *>(maxiter+1, AMSC);
     bap = sys->heap.alloc<double *>(maxiter+1, AMSC);
@@ -61,7 +61,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 
     sys->msg("\nStarting on column %d (%s)\n", cond,
             getConductorName(sys, cond));
-    fflush(stdout);
+    sys->flush();
 
     /* Set up the initial residue vector and charge guess. */
     for(i=1; i <= size; i++) r[i] = q[i] = 0.0;
@@ -110,7 +110,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
 
     if (sys->dmpchg == DMPCHG_LAST) {
       sys->msg("\nPanel charges, iteration %d\n", iter);
-      dumpChgDen(stdout, q, chglist);
+      dumpChgDen(sys, q, chglist);
       sys->msg("End panel charges\n");
     }
 
@@ -148,7 +148,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     }
 
   }
-  fflush(stdout);
+  sys->flush();
   return(ttliter);
 }
 
@@ -217,7 +217,7 @@ static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double
       sys->msg("%d ", iter+1);
       if((iter+1) % 15 == 0) sys->msg("\n");
     }
-    fflush(stdout);
+    sys->flush();
     stoptimer;
     counters.conjtime += dtime;
     if(maxnorm < tol) break;
@@ -349,7 +349,7 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
       sys->msg("%d ", iter);
       if((iter) % 15 == 0 && iter != 0) sys->msg("\n");
     }
-    fflush(stdout);
+    sys->flush();
   }
   /* Decrement from the last increment. */
   iter--;
@@ -463,7 +463,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 
     if (sys->dmpchg == DMPCHG_LAST) {
       sys->msg("\nPanel potentials divided by areas\n");
-      dumpChgDen(stdout, p, chglist);
+      dumpChgDen(sys, p, chglist);
       sys->msg("End panel potentials\n");
     }
 

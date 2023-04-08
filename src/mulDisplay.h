@@ -12,11 +12,11 @@ struct cube;
 struct line;
 
 void mksCapDump(ssystem *sys, double **capmat);
-void dumpConfig(ssystem *sys, FILE *fp, const char *name);
-void dump_face(FILE *fp, face *fac);
-void dumpCorners(FILE *fp, double **mat, int rows, int cols);
+void dumpConfig(ssystem *sys, const char *name);
+void dump_face(ssystem *sys, face *fac);
+void dumpCorners(ssystem *sys, double **mat, int rows, int cols);
 void dumpCondNames(ssystem *sys);
-int has_duplicate_panels(FILE *fp, charge *chglst);
+int has_duplicate_panels(ssystem *sys, charge *chglst);
 void dumpMulSet(ssystem *sys);
 void dump_preconditioner(ssystem *sys, charge *chglist, int type);
 void dissys(ssystem *sys);
@@ -37,7 +37,7 @@ void dispM2P(ssystem *sys, double **mat, double x, double y, double z, charge **
 void dispL2P(ssystem *sys, double **mat, double x, double y, double z, charge **chgs, int numchgs, int order);
 void dumpLevOneUpVecs(ssystem *sys);
 int dumpNameList(ssystem *sys, Name *name_list);
-void dumpChgDen(FILE *fp, double *q, charge *chglist);
+void dumpChgDen(ssystem *sys, double *q, charge *chglist);
 void dumpVecs(ssystem *sys, double *dblvec, int *intvec, int size);
 void chkDummyList(ssystem *sys, charge **panels, int *is_dummy, int n_chgs);
 void chkDummy(ssystem *sys, double *vector, int *is_dummy, int size);

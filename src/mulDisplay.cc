@@ -155,16 +155,16 @@ void dumpMat(ssystem *sys, double **mat, int rows, int cols)
 /*
   dumps a rows x cols matrix of doubles; assumes indices from zero 
 */
-void dumpCorners(FILE *fp, double **mat, int rows, int cols)
+void dumpCorners(ssystem *sys, double **mat, int rows, int cols)
 {
   int i, j;
   for(i = 0; i < rows; i++) {
-    fprintf(fp, "  corner%d ", i);
+    sys->msg("  corner%d ", i);
     for(j = 0; j < cols; j++) {
-      if(mat[i][j] < 0.0) fprintf(fp, "%.5e ", mat[i][j]);
-      else fprintf(fp, " %.5e ", mat[i][j]);
+      if(mat[i][j] < 0.0) sys->msg("%.5e ", mat[i][j]);
+      else sys->msg(" %.5e ", mat[i][j]);
     }
-    fprintf(fp, "\n");
+    sys->msg("\n");
   }
 }
 
@@ -523,24 +523,24 @@ void chkLowLev(ssystem *sys, int listtype)
 /*
   dump the contents of a face struct
 */
-void dump_face(FILE *fp, face *fac)
+void dump_face(ssystem *sys, face *fac)
 {
   int i;
   face **behind = fac->behind;
 
-  fprintf(fp, "Face %d, %d sides, depth %d, mark %d, greylev %g\n",
+  sys->msg("Face %d, %d sides, depth %d, mark %d, greylev %g\n",
           fac->index, fac->numsides, fac->depth, fac->mark, fac->greylev);
-  fprintf(fp, "  plane: n = (%g %g %g) rhs = %g\n",
+  sys->msg("  plane: n = (%g %g %g) rhs = %g\n",
           fac->normal[0], fac->normal[1], fac->normal[2], fac->rhs);
-  fprintf(fp, "  behind [depth(index)]:");
+  sys->msg("  behind [depth(index)]:");
   for(i = 0; i < fac->numbehind; i++) {
-    fprintf(fp, " %d(%d)", behind[i]->depth, behind[i]->index);
-    if(i % 10 == 0 && i != 0) fprintf(fp, "\n");
+    sys->msg(" %d(%d)", behind[i]->depth, behind[i]->index);
+    if(i % 10 == 0 && i != 0) sys->msg("\n");
   }
   i--;
-  if(!(i % 10 && i != 0)) fprintf(fp, "\n");
-  fprintf(fp, " Corners\n");
-  dumpCorners(fp, fac->c, fac->numsides, 3);
+  if(!(i % 10 && i != 0)) sys->msg("\n");
+  sys->msg(" Corners\n");
+  dumpCorners(sys, fac->c, fac->numsides, 3);
 }  
 
 /*
@@ -679,21 +679,21 @@ void dumpSynop(ssystem *sys)
 /*
   dumps the Gaussian unit (statcoulombs/meter^2) charge densities on panels
 */
-void dumpChgDen(FILE *fp, double *q, charge *chglist)
+void dumpChgDen(ssystem *sys, double *q, charge *chglist)
 {
   charge *panel;
 
   for(panel = chglist; panel != NULL; panel = panel->next) {
     if(panel->dummy) continue;
-    fprintf(fp, "%d\tq/A = %.5e %g", panel->index,
+    sys->msg("%d\tq/A = %.5e %g", panel->index,
             q[panel->index]/panel->area, panel->area);
-    if(panel->surf->type == CONDTR) fprintf(fp, " CONDTR");
-    if(panel->surf->type == DIELEC) fprintf(fp, " DIELEC");
-    if(panel->surf->type == BOTH) fprintf(fp, " BOTH");
-    fprintf(fp, " (%.3g %.3g %.3g)", panel->x, panel->y, panel->z);
-    fprintf(fp, " cond = %d\n", panel->cond);
+    if(panel->surf->type == CONDTR) sys->msg(" CONDTR");
+    if(panel->surf->type == DIELEC) sys->msg(" DIELEC");
+    if(panel->surf->type == BOTH) sys->msg(" BOTH");
+    sys->msg(" (%.3g %.3g %.3g)", panel->x, panel->y, panel->z);
+    sys->msg(" cond = %d\n", panel->cond);
   }
-  fflush(fp);
+  sys->flush();
 }
 
 /*
@@ -768,109 +768,109 @@ void dumpMatBldCnts(ssystem *sys)
 /* 
   dumps state of important compile flags
 */
-void dumpConfig(ssystem *sys, FILE *fp, const char *name)
+void dumpConfig(ssystem *sys, const char *name)
 {
-  int size = -1;                /* for '#define MAXITER size' case */
+  int size = -1;
 
-  fprintf(fp, "\n%s CONFIGURATION FLAGS:\n", name);
+  sys->msg("\n%s CONFIGURATION FLAGS:\n", name);
 
-  fprintf(fp, " DISCRETIZATION CONFIGURATION\n");
+  sys->msg(" DISCRETIZATION CONFIGURATION\n");
 
-  fprintf(fp, "   WRMETH");
+  sys->msg("   WRMETH");
   if(WRMETH == COLLOC)
-      fprintf(fp, " == COLLOC (point collocation)\n");
+      sys->msg(" == COLLOC (point collocation)\n");
   else if(WRMETH == SUBDOM)
-      fprintf(fp, " == SUBDOM (not implemented - do collocation)\n");
+      sys->msg(" == SUBDOM (not implemented - do collocation)\n");
   else if(WRMETH == GALKIN)
-      fprintf(fp, " == GALKIN (not implemented - do collocation)\n");
-  fprintf(fp, "   ELTYPE");
+      sys->msg(" == GALKIN (not implemented - do collocation)\n");
+  sys->msg("   ELTYPE");
   if(ELTYPE == CONST)
-      fprintf(fp, " == CONST (constant panel densities)\n");
+      sys->msg(" == CONST (constant panel densities)\n");
   else if(ELTYPE == AFFINE)
-      fprintf(fp, " == AFFINE (not implemented - use constant)\n");
+      sys->msg(" == AFFINE (not implemented - use constant)\n");
   else if(ELTYPE == QUADRA)
-      fprintf(fp, " == QUADRA (not implemented - use constant)\n");
+      sys->msg(" == QUADRA (not implemented - use constant)\n");
 
-  fprintf(fp, " MULTIPOLE CONFIGURATION\n");
+  sys->msg(" MULTIPOLE CONFIGURATION\n");
 
-  fprintf(fp, "   DNTYPE");
+  sys->msg("   DNTYPE");
   if(DNTYPE == NOLOCL) 
-      fprintf(fp, " == NOLOCL (no locals in dwnwd pass)\n");
+      sys->msg(" == NOLOCL (no locals in dwnwd pass)\n");
   else if(DNTYPE == NOSHFT) 
-      fprintf(fp, " == NOSHFT (no local2local shift dwnwd pass)\n");
+      sys->msg(" == NOSHFT (no local2local shift dwnwd pass)\n");
   else if(DNTYPE == GRENGD) 
-      fprintf(fp, " == GRENGD (full Greengard dwnwd pass)\n");
-  fprintf(fp, "   MULTI");
-  if(MULTI == ON) fprintf(fp, " == ON (include multipole part of P*q)\n");
-  else fprintf(fp, " == OFF (don't use multipole part of P*q)\n");
-  fprintf(fp, "   RADINTER");
+      sys->msg(" == GRENGD (full Greengard dwnwd pass)\n");
+  sys->msg("   MULTI");
+  if(MULTI == ON) sys->msg(" == ON (include multipole part of P*q)\n");
+  else sys->msg(" == OFF (don't use multipole part of P*q)\n");
+  sys->msg("   RADINTER");
   if(RADINTER == ON) 
-      fprintf(fp," == ON (allow parent level interaction list entries)\n");
+      sys->msg(" == ON (allow parent level interaction list entries)\n");
   else 
-   fprintf(fp," == OFF (use only cube level interaction list entries)\n");
-  fprintf(fp, "   NNBRS == %d (max distance to a nrst neighbor)\n", NNBRS);
-  fprintf(fp, "   ADAPT");
+   sys->msg(" == OFF (use only cube level interaction list entries)\n");
+  sys->msg("   NNBRS == %d (max distance to a nrst neighbor)\n", NNBRS);
+  sys->msg("   ADAPT");
   if(ADAPT == ON) 
-      fprintf(fp, " == ON (adaptive - no expansions in exact cubes)\n");
-  else fprintf(fp, " == OFF (not adaptive - expansions in all cubes)\n");
-  fprintf(fp, "   OPCNT");
+      sys->msg(" == ON (adaptive - no expansions in exact cubes)\n");
+  else sys->msg(" == OFF (not adaptive - expansions in all cubes)\n");
+  sys->msg("   OPCNT");
   if(OPCNT == ON) 
-      fprintf(fp, " == ON (count P*q ops - exit after mat build)\n");
-  else fprintf(fp, " == OFF (no P*q op count - iterate to convergence)\n");
+      sys->msg(" == ON (count P*q ops - exit after mat build)\n");
+  else sys->msg(" == OFF (no P*q op count - iterate to convergence)\n");
 
-  fprintf(fp, "   MAXDEP");
-  fprintf(fp, 
+  sys->msg("   MAXDEP");
+  sys->msg(
           " == %d (assume no more than %d partitioning levels are needed)\n",
           MAXDEP, MAXDEP);
 
-  fprintf(fp, "   NUMDPT");
-  fprintf(fp, 
+  sys->msg("   NUMDPT");
+  sys->msg(
           " == %d (do %d potential evaluations for each dielectric panel)\n",
           NUMDPT, NUMDPT);
 
-  fprintf(fp, " LINEAR SYSTEM SOLUTION CONFIGURATION\n");
+  sys->msg(" LINEAR SYSTEM SOLUTION CONFIGURATION\n");
 
-  fprintf(fp, "   ITRTYP");
+  sys->msg("   ITRTYP");
   if(ITRTYP == GCR)
-      fprintf(fp, " == GCR (generalized conjugate residuals)\n");
+      sys->msg(" == GCR (generalized conjugate residuals)\n");
   else if(ITRTYP == GMRES)
-      fprintf(fp, " == GMRES (generalized minimum residuals)\n");
-  else fprintf(fp, " == %d (not implemented - use GCR)\n", ITRTYP);
+      sys->msg(" == GMRES (generalized minimum residuals)\n");
+  else sys->msg(" == %d (not implemented - use GCR)\n", ITRTYP);
 
-  fprintf(fp, "   PRECOND");
+  sys->msg("   PRECOND");
   if(PRECOND == BD) {
-    fprintf(fp, 
+    sys->msg(
             " == BD (use block diagonal preconditioner)\n");
   }
   else if(PRECOND == OL) {
-    fprintf(fp, 
+    sys->msg(
             " == OL (use overlap preconditioner)\n");
   }
   else if(PRECOND == NONE) {
-    fprintf(fp, 
+    sys->msg(
             " == NONE (no preconditioner)\n");
   }
-  else fprintf(fp, " == %d (not implemented - use BD, OL or NONE)\n", PRECOND);
+  else sys->msg(" == %d (not implemented - use BD, OL or NONE)\n", PRECOND);
 
-  fprintf(fp, "   DIRSOL");
+  sys->msg("   DIRSOL");
   if (sys->dirsol)
-      fprintf(fp, " == ON (do the whole calculation directly)\n");
-  else fprintf(fp, " == OFF (do the calculation iteratively)\n");
+      sys->msg(" == ON (do the whole calculation directly)\n");
+  else sys->msg(" == OFF (do the calculation iteratively)\n");
 
-  fprintf(fp, "   EXPGCR");
+  sys->msg("   EXPGCR");
   if (sys->expgcr)
-      fprintf(fp, " == ON (do all P*q's explicitly w/full matrix)\n");
-  else fprintf(fp, " == OFF (do P*q's with multipole)\n");
+      sys->msg(" == ON (do all P*q's explicitly w/full matrix)\n");
+  else sys->msg(" == OFF (do P*q's with multipole)\n");
 
-  fprintf(fp, "   MAXITER");
+  sys->msg("   MAXITER");
   if(MAXITER < 0) {
-    fprintf(fp, " == size (for n panel system, do at most n iterations)\n");
+    sys->msg(" == size (for n panel system, do at most n iterations)\n");
   }
-  else fprintf(fp, " == %d (stop after %d iterations if not converged)\n", 
+  else sys->msg(" == %d (stop after %d iterations if not converged)\n",
           MAXITER, MAXITER);
 
-  fprintf(fp, "   EXRTSH");
-  fprintf(fp, 
+  sys->msg("   EXRTSH");
+  sys->msg(
           " == %g (exact/ttl cubes > %g on lowest level => stop refinement)\n",
           EXRTSH, EXRTSH);
 }
@@ -1163,7 +1163,7 @@ void dump_preconditioner(ssystem *sys, charge *chglist, int type)
   do an n^2/2 check to see if any panels have the same center points
   (debug only)
 */
-int has_duplicate_panels(FILE *fp, charge *chglst)
+int has_duplicate_panels(ssystem *sys, charge *chglst)
 {
   int no_duplicates;
   charge *cp, *cpinner;
@@ -1174,22 +1174,15 @@ int has_duplicate_panels(FILE *fp, charge *chglst)
       if(cp->x == cpinner->x && cp->y == cpinner->y && cp->z == cpinner->z) {
         no_duplicates = FALSE;
 
-        if(cp->surf->type == CONDTR) fprintf(fp, "Panels %d(CONDTR)",
-                                                cp->index);
-        if(cp->surf->type == DIELEC) fprintf(fp, "Panels %d(DIELEC)",
-                                                cp->index);
-        if(cp->surf->type == BOTH) fprintf(fp, "Panels %d(BOTH)",
-                                              cp->index);
+        if(cp->surf->type == CONDTR) sys->msg("Panels %d(CONDTR)", cp->index);
+        if(cp->surf->type == DIELEC) sys->msg("Panels %d(DIELEC)", cp->index);
+        if(cp->surf->type == BOTH) sys->msg("Panels %d(BOTH)", cp->index);
 
-        if(cpinner->surf->type == CONDTR) fprintf(fp, " and %d(CONDTR)",
-                                                cpinner->index);
-        if(cpinner->surf->type == DIELEC) fprintf(fp, " and %d(DIELEC)",
-                                                cpinner->index);
-        if(cpinner->surf->type == BOTH) fprintf(fp, " and %d(BOTH)",
-                                              cpinner->index);
+        if(cpinner->surf->type == CONDTR) sys->msg(" and %d(CONDTR)", cpinner->index);
+        if(cpinner->surf->type == DIELEC) sys->msg(" and %d(DIELEC)", cpinner->index);
+        if(cpinner->surf->type == BOTH) sys->msg(" and %d(BOTH)", cpinner->index);
 
-        fprintf(fp, " both have center (%.3g %.3g %.3g)\n",
-                cp->x, cp->y, cp->z);
+        sys->msg(" both have center (%.3g %.3g %.3g)\n", cp->x, cp->y, cp->z);
       }
     }
   }

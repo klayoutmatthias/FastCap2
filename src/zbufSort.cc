@@ -451,12 +451,12 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
             "\nis1stFaceDeeper: Warning, face ordering test failure\n");
     sys->info("  alpha_fac, face %d = %g alpha_facref, face %d = %g\n",
             fac->index, alpha_fac, facref->index, alpha_facref);
-    dump_face(stderr, fac);
-    sys->info(" Projected corners\n");
-    dumpCorners(stderr, cproj[0], fac->numsides, 3);
-    dump_face(stderr, facref);
-    sys->info(" Projected corners\n");
-    dumpCorners(stderr, cproj[1], facref->numsides, 3);
+    dump_face(sys, fac);
+    sys->msg(" Projected corners\n");
+    dumpCorners(sys, cproj[0], fac->numsides, 3);
+    dump_face(sys, facref);
+    sys->msg(" Projected corners\n");
+    dumpCorners(sys, cproj[1], facref->numsides, 3);
 
     return(FALSE);              /* inconclusive test */
   }
@@ -558,7 +558,7 @@ static int isThereBoxOverlap(face *fac, face *facref, double *view)
 /*
   recursive guts of below
 */
-static int chkCycle(face *fac, face *ref, FILE *fp)
+static int chkCycle(ssystem *sys, face *fac, face *ref)
 {
   int b;
 
@@ -569,13 +569,13 @@ static int chkCycle(face *fac, face *ref, FILE *fp)
   if(fac->numbehind == 0) return(FALSE);
   else {
     for(b = 0; b < fac->numbehind; b++) {
-      /*fprintf(fp, " %d (%d)", (fac->behind)[b]->depth,
+      /*sys->msg(" %d (%d)", (fac->behind)[b]->depth,
               (fac->behind)[b]->index);
-      if(b % 5 == 0 && b != 0) fprintf(fp, "\n");*/
+      if(b % 5 == 0 && b != 0) sys->msg("\n");*/
       if(fac->behind[b] == ref) return(TRUE);
-      else if(chkCycle(fac->behind[b], ref, fp) == TRUE) return(TRUE);
+      else if(chkCycle(sys, fac->behind[b], ref) == TRUE) return(TRUE);
     }
-/*    if((i-1) % 5 != 0 || i == 1) fprintf(fp, "\n"); */
+/*    if((i-1) % 5 != 0 || i == 1) sys->msg("\n"); */
   }
   return(FALSE);
 }
@@ -583,7 +583,7 @@ static int chkCycle(face *fac, face *ref, FILE *fp)
 /*
   checks for cycles in the depth graph - BROKEN(?)
 */
-void dumpCycles(face **faces, int numfaces, FILE *file)
+void dumpCycles(ssystem *sys, face **faces, int numfaces)
 {
   int f, j, b, cycle = FALSE;
 
@@ -593,15 +593,15 @@ void dumpCycles(face **faces, int numfaces, FILE *file)
 /*    fprintf(file, "%d (%d):", faces[f]->depth, faces[f]->index);*/
     for(j = 0; j < numfaces; j++) faces[j]->mark = FALSE;
     for(b = 0; b < faces[f]->numbehind; b++) {
-      if(chkCycle(faces[f]->behind[b], faces[f], file) == TRUE) {
+      if(chkCycle(sys, faces[f]->behind[b], faces[f]) == TRUE) {
         cycle = TRUE;
         break;
       }
     }
     if(cycle == TRUE) break;
   }
-  if(cycle == FALSE) fprintf(file, "Adjacency graph has no cycles\n");
-  else fprintf(file, "Adjacency graph has cycles\n");
+  if(cycle == FALSE) sys->msg("Adjacency graph has no cycles\n");
+  else sys->msg("Adjacency graph has cycles\n");
   for(j = 0; j < numfaces; j++) faces[j]->mark = FALSE;
 }
 
@@ -690,7 +690,7 @@ void getAdjGraph(ssystem *sys, face **faces, int numfaces, double *view, double 
     }
     if(f % 20 == 0 && f != 0) {
       sys->msg("%d ", f);
-      fflush(stdout);
+      sys->flush();
     }
     if(f % 200 == 0 && f != 0) sys->msg("\n");
   }

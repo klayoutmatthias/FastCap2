@@ -67,7 +67,7 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
 
   /* set up the adjacency graph for the depth sort */
   sys->msg("\nSorting %d faces for %s...", numfaces, str);
-  fflush(stdout);
+  sys->flush();
   getAdjGraph(sys, faces, numfaces, sys->view, rhs, normal);
   sys->msg("done.\n");
 
@@ -82,8 +82,8 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   makePos(sys, sfaces, numfaces, lines, numlines);
   scale2d(sys, sfaces, numfaces, lines, numlines, sys->scale, sys->moffset);
   if(sys->g_) {
-    dumpCycles(sfaces, numfaces, stdout); /* DANGER - doesnt work (?) */
-    dumpFaceText(sfaces, numfaces, stdout);
+    dumpCycles(sys, sfaces, numfaces); /* DANGER - doesnt work (?) */
+    dumpFaceText(sys, sfaces, numfaces);
   }
   else {
     if((fp = fopen(str, "w")) == NULL) {

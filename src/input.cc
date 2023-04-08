@@ -914,7 +914,7 @@ static void parse_command_line(ssystem *sys, const char **input_file, const char
       sys->info("  -ri = remove conductors from input\n");
     }
     sys->info("  <cond list> = [<name>],[<name>],...,[<name>]\n");
-    dumpConfig(sys, stderr, argv[0]);
+    dumpConfig(sys, argv[0]);
     sys->error("Command line parsing failed.");
   }
 }
@@ -1208,7 +1208,7 @@ charge *build_charge_list(ssystem *sys)
   else sys->msg("  Host: ? (gethostname() failure)\n");
 
   if (sys->cfgdat) {
-    dumpConfig(sys, stdout, sys->argv[0]);
+    dumpConfig(sys, sys->argv[0]);
   }
 
   /* return the panels from the surface files */

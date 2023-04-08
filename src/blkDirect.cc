@@ -390,7 +390,7 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
   int i, k;
 
   sys->msg("blkSolve: fwd elimination...");
-  fflush(stdout);
+  sys->flush();
 
   /* forward elimination, solve Ly = b (x becomes y) */
   for(i = 0; i < siz; i++) x[i] = b[i]; /* copy rhs */
@@ -428,7 +428,7 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
   counters.fullsoltime += dtime;
 
   sys->msg("back substitution...");
-  fflush(stdout);
+  sys->flush();
 
   /* back substitute, solve Ux = y (x converted in place from y to x) */
   rdMat(sys, matri, siz/2, UTIL, TRIMAT); /* load lower right U factor */
@@ -466,7 +466,7 @@ void blkSolve(ssystem *sys, double *x, double *b, int siz, double *matri, double
   counters.fullsoltime += dtime;
 
   sys->msg("done.\n\n");
-  fflush(stdout);
+  sys->flush();
 }
 
 /*
@@ -577,8 +577,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
   }
   sys->info("Initial dump to disk complete\n\n");
   sys->msg("Initial dump to disk complete\n\n");
-  fflush(stdout);
-
+  sys->flush();
 }
 
 /*
@@ -610,7 +609,7 @@ void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
 
   sys->info("A11 factorization complete\n\n");
   sys->msg("\nblkLUdecomp: A11 factored...");
-  fflush(stdout);
+  sys->flush();
 
   /* load A12 and solve in place for U12 and write (L11 in position alrdy) */
   rdMat(sys, sqrArray, numchgs/2, U12, SQRMAT);
@@ -624,7 +623,7 @@ void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
 
   sys->info("A12 factorization complete\n\n");
   sys->msg("A12 factored...");
-  fflush(stdout);
+  sys->flush();
 
   /* load A21 and U11, solve in place for L21 and write */
   rdMat(sys, triArray, numchgs/2, U11, TRIMAT);
@@ -639,7 +638,7 @@ void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
 
   sys->info("A21 factorization complete\n\n");
   sys->msg("A21 factored...");
-  fflush(stdout);
+  sys->flush();
 
   /* load A22 and subtract off (L21)(U12) product 1/4 matrix at a time */
   rdMat(sys, sqrArray, numchgs/2, LTIL, SQRMAT);
@@ -658,7 +657,7 @@ void blkLUdecomp(ssystem *sys, double *sqrArray, double *triArray, int numchgs)
 
   sys->info("Block factorization complete\n\n");
   sys->msg("done.\n");
-  fflush(stdout);
+  sys->flush();
 }
 
 /*

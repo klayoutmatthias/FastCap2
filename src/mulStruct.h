@@ -308,6 +308,7 @@ struct ssystem
   void info(const char *fmt, ...);
   void warn(const char *fmt, ...);
   [[noreturn]] void error(const char *fmt, ...);
+  void flush();
 };
 
 #endif
