@@ -89,6 +89,8 @@ ssystem::ssystem() :
   ps_file_base(0),
   axes(0),
   title(0),
+  surf_list(0),
+  group_cnt(1),
   side(0),
   depth(-1),
   order(DEFORD),

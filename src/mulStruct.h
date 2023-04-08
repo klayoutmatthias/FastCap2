@@ -268,6 +268,8 @@ struct ssystem
   char *ps_file_base;           //  pointer to base name for .ps files
   double ***axes;               //  for PS plot
   char *title;                  //  project title
+  surface *surf_list;           //  the list of surface descriptors
+  int group_cnt;                //  next GROUPx number for automatic group numbering
 
   //  problem description
   int side;                     //  # cubes per side on lowest level.

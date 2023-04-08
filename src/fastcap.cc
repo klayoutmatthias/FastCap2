@@ -55,10 +55,13 @@ int main_func(int argc, char *argv[])
   char dump_filename[BUFSIZ];
   strcpy(dump_filename, "psmat.ps");
 
+  /* read the conductor and dielectric interface surface files, parse cmds */
+  populate_from_command_line(&sys);
+
   /* get the list of all panels in the problem */
   /* - many command line parameters having to do with the postscript
        file dumping interface are passed back via globals (see mulGlobal.c) */
-  chglist = input_problem(&sys);
+  chglist = build_charge_list(&sys);
 
   /* if no fastcap run is to be done, just dump the psfile */
   if(sys.capvew && sys.m_) {

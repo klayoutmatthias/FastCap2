@@ -11,6 +11,62 @@
 #include <string>
 #include <cstring>
 
+struct ProblemObject {
+  PyObject_HEAD
+  ssystem sys;
+};
+
+static void
+problem_dealloc(ProblemObject *self)
+{
+  self->sys.~ssystem();
+}
+
+static PyObject *
+problem_new(PyTypeObject *type, PyObject * /*args*/, PyObject * /*kwds*/)
+{
+  ProblemObject *self;
+  self = (ProblemObject *) type->tp_alloc(type, 0);
+  if (self != NULL) {
+    new (&self->sys) ssystem;
+  }
+
+  //  prepare a dummy argument list
+  static const char *arg0 = "Python";
+  static const char *argv[] = { arg0 };
+  self->sys.argc = 1;
+  self->sys.argv = argv;
+
+  return (PyObject *) self;
+}
+
+static int
+problem_init(ProblemObject *self, PyObject *args, PyObject *kwds)
+{
+  static char *kwlist[] = {(char *)"title", NULL};
+  PyObject *title = NULL;
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kwlist,
+                                   &title)) {
+    return -1;
+  }
+
+  if (title) {
+    PyObject *title_str = PyObject_Str(title);
+    if (!title_str) {
+      return -1;
+    }
+    const char *title_utf8str = PyUnicode_AsUTF8(title_str);
+    if (!title_utf8str) {
+      return -1;
+    }
+    self->sys.title = self->sys.heap.strdup(title_utf8str);
+    Py_DECREF(title_str);
+  }
+
+  return 0;
+}
+
 static PyObject *raise_error(std::runtime_error &ex)
 {
   PyErr_SetString(PyExc_RuntimeError, ex.what());
@@ -91,55 +147,6 @@ static PyObject *parse_conductor_list(const char *l)
   }
 
   return list;
-}
-
-struct ProblemObject {
-  PyObject_HEAD
-  ssystem sys;
-};
-
-static void
-problem_dealloc(ProblemObject *self)
-{
-  self->sys.~ssystem();
-}
-
-static PyObject *
-problem_new(PyTypeObject *type, PyObject * /*args*/, PyObject * /*kwds*/)
-{
-  ProblemObject *self;
-  self = (ProblemObject *) type->tp_alloc(type, 0);
-  if (self != NULL) {
-    new (&self->sys) ssystem;
-  }
-  return (PyObject *) self;
-}
-
-static int
-problem_init(ProblemObject *self, PyObject *args, PyObject *kwds)
-{
-  static char *kwlist[] = {(char *)"title", NULL};
-  PyObject *title = NULL;
-
-  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kwlist,
-                                   &title)) {
-    return -1;
-  }
-
-  if (title) {
-    PyObject *title_str = PyObject_Str(title);
-    if (!title_str) {
-      return -1;
-    }
-    const char *title_utf8str = PyUnicode_AsUTF8(title_str);
-    if (!title_utf8str) {
-      return -1;
-    }
-    self->sys.title = self->sys.heap.strdup(title_utf8str);
-    Py_DECREF(title_str);
-  }
-
-  return 0;
 }
 
 static PyObject *

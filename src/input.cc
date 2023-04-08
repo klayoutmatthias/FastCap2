@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
+#include <string>
 
 /*
   reads an input file list file (a list of dielectric i/f and conductor 
@@ -76,9 +77,9 @@
         be renamed; this is helpful when idenifying conductors to omit
         from capacitance calculations using the -k option
 */
-static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, const char *list_file, int read_from_stdin)
+static void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
 {
-  int linecnt, end_of_chain, ref_pnt_is_inside, group_cnt;
+  int linecnt, end_of_chain, ref_pnt_is_inside;
   FILE *fp;
   char tline[BUFSIZ], file_name[BUFSIZ], plus[BUFSIZ], group_name[BUFSIZ];
   double outer_perm, inner_perm, tx, ty, tz, rx, ry, rz;
@@ -98,8 +99,7 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
 
   /* read file names and permittivities, build linked list */
   linecnt = 0;
-  group_cnt = read_from_stdin + 1;
-  sprintf(group_name, "GROUP%d", group_cnt);
+  sprintf(group_name, "GROUP%d", sys->group_cnt);
   while(fgets(tline, sizeof(tline), fp) != NULL) {
     linecnt++;
     if(tline[0] == 'C' || tline[0] == 'c') {
@@ -140,10 +140,9 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
 
       /* update group name if end of chain */
       if(end_of_chain) {
-        sprintf(group_name, "GROUP%d", ++group_cnt);
+        sprintf(group_name, "GROUP%d", ++sys->group_cnt);
       }
 
-      (*num_surf)++;
     }
     else if(tline[0] == 'B' || tline[0] == 'b') {
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf", 
@@ -197,10 +196,9 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
 
       /* update group name if end of chain */
       if(end_of_chain) {
-        sprintf(group_name, "GROUP%d", ++group_cnt);
+        sprintf(group_name, "GROUP%d", ++sys->group_cnt);
       }
 
-      (*num_surf)++;
     }
     else if(tline[0] == 'D' || tline[0] == 'd') {
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf", 
@@ -247,9 +245,8 @@ static void read_list_file(ssystem *sys, surface **surf_list, int *num_surf, con
       cur_surf->group_name = sys->heap.strdup(group_name);
 
       /* update group name (DIELEC surface is always end of chain) */
-      sprintf(group_name, "GROUP%d", ++group_cnt);
+      sprintf(group_name, "GROUP%d", ++sys->group_cnt);
 
-      (*num_surf)++;
     }
     else if(tline[0] == 'G' || tline[0] == 'g') {
       if(sscanf(&(tline[1]), "%s", group_name) != 1) {
@@ -491,7 +488,7 @@ void get_ps_file_base(ssystem *sys)
   align the normals of all the panels in each surface so they point
     towards the same side as where the ref point is (dielectric files only)
 */
-static charge *read_panels(ssystem *sys, surface *surf_list, int *num_cond)
+static charge *read_panels(ssystem *sys, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
   charge *panel_list = NULL, *cur_panel, *c_panel;
@@ -501,7 +498,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, int *num_cond)
   int patran_file_read;
 
   stdin_read = FALSE;
-  for(cur_surf = surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
+  for(cur_surf = sys->surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
     if(!strcmp(cur_surf->name, "stdin")) {
       if(stdin_read) {
         sys->error("read_panels: attempt to read stdin twice\n");
@@ -925,19 +922,16 @@ static void parse_command_line(ssystem *sys, const char **input_file, const char
 /*
   surface information input routine - panels are read by read_panels()
 */
-static surface *read_all_surfaces(ssystem *sys, const char *input_file, const char *surf_list_file, int read_from_stdin, char *infile)
+static surface *read_all_surfaces(ssystem *sys, const char *input_file, const char *surf_list_file, int read_from_stdin, std::string &infiles)
 {
-  int num_surf, i;
   char group_name[BUFSIZ];
   surface *surf_list, *cur_surf;
 
   /* get the surfaces from stdin, the list file or the file on cmd line */
   /* the `- ' option always forces the first cond surf read from stdin */
   /* can also read from stdin if there's no list file and no cmd line file */
-  infile[0] = '\0';
-  num_surf = 0;
   surf_list = NULL;
-  strcpy(group_name, "GROUP1");
+  sprintf(group_name, "GROUP%d", sys->group_cnt);
   if(read_from_stdin || (input_file == NULL && surf_list_file == NULL)) {
     surf_list = sys->heap.alloc<surface>(1, AMSC);
     surf_list->type = CONDTR;   /* only conductors can come in stdin */
@@ -947,12 +941,11 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
 
     /* set up group name */
     surf_list->group_name = sys->heap.strdup(group_name);
-    strcpy(group_name, "GROUP2");
+    sprintf(group_name, "GROUP%d", ++sys->group_cnt);
 
     cur_surf = surf_list;
 
-    strcpy(infile, "stdin");
-    num_surf++;
+    infiles = "stdin";
   }
 
   /* set up to read from command line file, if necessary */
@@ -972,20 +965,21 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
 
     /* set up group name */
     cur_surf->group_name = sys->heap.strdup(group_name);
+    sprintf(group_name, "GROUP%d", ++sys->group_cnt);
 
-    for(i = 0; infile[i] != '\0'; i++);
-    if(infile[0] != '\0') sprintf(&(infile[i]), ", %s", input_file);
-    else sprintf(&(infile[i]), "%s", input_file);
-    num_surf++;
-    read_from_stdin++;
+    if (!infiles.empty()) {
+      infiles += ",";
+    }
+    infiles += input_file;
   }
 
   /* read list file if present */
   if(surf_list_file != NULL) {
-    read_list_file(sys, &surf_list, &num_surf, surf_list_file, read_from_stdin);
-    for(i = 0; infile[i] != '\0'; i++);
-    if(infile[0] != '\0') sprintf(&(infile[i]), ", %s", surf_list_file);
-    else sprintf(&(infile[i]), "%s", surf_list_file);
+    read_list_file(sys, &surf_list, surf_list_file);
+    if (!infiles.empty()) {
+      infiles += ",";
+    }
+    infiles += input_file;
   }
 
   return(surf_list);
@@ -996,10 +990,11 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
   - inputs surfaces (ie file names whose panels are read in read_panels)
   - sets parameters accordingly
 */
-static surface *input_surfaces(ssystem *sys, char *infile)
+void populate_from_command_line(ssystem *sys)
 {
   int read_from_stdin;
   const char *surf_list_file, *input_file;
+  std::string infiles;                  /* comma-separated list of input files */
 
   /* initialize defaults */
   surf_list_file = input_file = NULL;
@@ -1007,22 +1002,24 @@ static surface *input_surfaces(ssystem *sys, char *infile)
 
   parse_command_line(sys, &input_file, &surf_list_file, &read_from_stdin);
 
-  return(read_all_surfaces(sys, input_file, surf_list_file,
-                           read_from_stdin, infile));
+  sys->surf_list = read_all_surfaces(sys, input_file, surf_list_file, read_from_stdin, infiles);
+
+  sys->msg("Running %s %.1f\n  Input: %s\n",
+          sys->argv[0], VERSION, infiles.c_str());
 }
 
 /*
   dump the data associated with the input surfaces
 */
-static void dumpSurfDat(ssystem *sys, surface *surf_list)
+static void dumpSurfDat(ssystem *sys)
 {
   surface *cur_surf;
 
   sys->msg("  Input surfaces:\n");
-  for(cur_surf = surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
+  for(cur_surf = sys->surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
 
     /* possibly write group name */
-    if(cur_surf == surf_list) sys->msg("   %s\n", cur_surf->group_name);
+    if(cur_surf == sys->surf_list) sys->msg("   %s\n", cur_surf->group_name);
     else if(cur_surf->prev->end_of_chain)
         sys->msg("   %s\n", cur_surf->group_name);
 
@@ -1170,27 +1167,19 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
 /*
   main input routine, returns a list of panels in the problem
 */
-charge *input_problem(ssystem *sys)
+charge *build_charge_list(ssystem *sys)
 {
-  surface *surf_list;
-  char infile[BUFSIZ], hostname[BUFSIZ];
+  char hostname[BUFSIZ];
   charge *chglist;
   long clock;
-
-  /* read the conductor and dielectric interface surface files, parse cmds */
-  surf_list = input_surfaces(sys, infile);
 
   if (sys->dirsol || sys->expgcr) {
     sys->depth = 0;                /* put all the charges in first cube */
   }
 
-  strcpy(hostname, "18Sep92");
-  sys->msg("Running %s %.1f (%s)\n  Input: %s\n",
-          sys->argv[0], VERSION, hostname, infile);
-
   /* input the panels from the surface files */
   sys->num_cond = 0;                /* initialize conductor count */
-  chglist = read_panels(sys, surf_list, &sys->num_cond);
+  chglist = read_panels(sys, &sys->num_cond);
 
   /* set up the lists of conductors to remove from solve list */
   sys->kill_num_list = get_kill_num_list(sys, sys->cond_names, sys->kill_name_list);
@@ -1209,7 +1198,7 @@ charge *input_problem(ssystem *sys)
   resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list);
 
   if (sys->dissrf) {
-    dumpSurfDat(sys, surf_list);
+    dumpSurfDat(sys);
   }
 
   time(&clock);
