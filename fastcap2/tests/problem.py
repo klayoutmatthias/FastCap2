@@ -49,6 +49,83 @@ class TestProblem(unittest.TestCase):
     problem.iter_tol = 0.125
     self.assertEqual(problem.iter_tol, 0.125)
 
+  def test_skip_conductors(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.skip_conductors, None)
+
+    problem.skip_conductors = [ "C1", "C2" ]
+    self.assertEqual(problem.skip_conductors, [ "C1", "C2" ])
+
+    problem.skip_conductors = [ "CX" ]
+    self.assertEqual(problem.skip_conductors, [ "CX" ])
+
+    problem.skip_conductors = []
+    self.assertEqual(problem.skip_conductors, [])
+
+    problem.skip_conductors = None
+    self.assertEqual(problem.skip_conductors, None)
+    
+    # conductor names must not be empty strings
+    try:
+      problem.skip_conductors = [ "" ]
+      self.assertEqual(True, False)
+    except RuntimeError as ex:
+      self.assertEqual(str(ex), "A conductor name must not be an empty string")
+      
+    # conductor names must not contain comma characters
+    try:
+      problem.skip_conductors = [ "a,b" ]
+      self.assertEqual(True, False)
+    except RuntimeError as ex:
+      self.assertEqual(str(ex), "'%' or ',' characters are not allowed in this conductor name: 'a,b'")
+      
+    # conductor names must not contain percent characters
+    try:
+      problem.skip_conductors = [ "a%b" ]
+      self.assertEqual(True, False)
+    except RuntimeError as ex:
+      self.assertEqual(str(ex), "'%' or ',' characters are not allowed in this conductor name: 'a%b'")
+      
+  def test_remove_conductors(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.remove_conductors, None)
+
+    problem.remove_conductors = [ "C1", "C2" ]
+    self.assertEqual(problem.remove_conductors, [ "C1", "C2" ])
+
+    problem.remove_conductors = None
+    self.assertEqual(problem.remove_conductors, None)
+    
+  def test_ps_select_q(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_select_q, None)
+
+    problem.ps_select_q = [ "C1", "C2" ]
+    self.assertEqual(problem.ps_select_q, [ "C1", "C2" ])
+
+    problem.ps_select_q = None
+    self.assertEqual(problem.ps_select_q, None)
+    
+  def test_ps_remove_q(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.ps_remove_q, None)
+
+    problem.ps_remove_q = [ "C1", "C2" ]
+    self.assertEqual(problem.ps_remove_q, [ "C1", "C2" ])
+
+    problem.ps_remove_q = None
+    self.assertEqual(problem.ps_remove_q, None)
+    
+
+
 
 if __name__ == '__main__':
     unittest.main()

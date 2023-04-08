@@ -121,70 +121,66 @@ class Problem(_Problem):
     super()._set_iter_tol(value)
 
   @property
-  def skip_conductors(self) -> list[str]:
+  def skip_conductors(self) -> Optional[list[str]]:
     """Skips the given conductors from the solve list
 
     This property corresponds to option "-rs" of the original
     "fastcap" program.
 
     The conductors with the given names will not be present in  
-    the capacitance matrix.
+    the capacitance matrix. A value of 'None' for this property
+    will select all conductors.
     """
-    # @@@
-    pass
+    return super()._get_skip_conductors();
 
   @skip_conductors.setter
-  def skip_conductors(self, value: list[str]):
-    # @@@
-    pass
+  def skip_conductors(self, value: Optional[list[str]]):
+    super()._set_skip_conductors(value);
 
   @property
-  def remove_conductors(self) -> list[str]:
+  def remove_conductors(self) -> Optional[list[str]]:
     """Removes the given conductors from the input
 
     This property corresponds to option "-ri" of the original
     "fastcap" program.
 
     The conductors with the given names will not be considered
-    at all.
+    at all. A value of 'None' for this property will enable all
+    conductors.
     """
-    # @@@
-    pass
+    return super()._get_remove_conductors();
 
   @remove_conductors.setter
-  def remove_conductors(self, value: list[str]):
-    # @@@
-    pass
+  def remove_conductors(self, value: Optional[list[str]]):
+    super()._set_remove_conductors(value);
 
   @property
-  def ps_select_q(self) -> list[str]:
+  def ps_select_q(self) -> Optional[list[str]]:
     """PS output: select conductors for at-1V charge distribution .ps pictures
 
     This property corresponds to option "-q" of the original
-    "fastcap" program.
+    "fastcap" program. A value of 'None' for this property will
+    select all conductors.
     """
-    # @@@
-    pass
+    return super()._get_select_q_conductors();
 
   @ps_select_q.setter
-  def ps_select_q(self, value: list[str]):
-    # @@@ ('all' option?)
-    pass
+  def ps_select_q(self, value: Optional[list[str]]):
+    super()._set_select_q_conductors(value);
 
   @property
-  def ps_remove_q(self) -> list[str]:
+  def ps_remove_q(self) -> Optional[list[str]]:
     """PS output: remove conductors from all charge distribution .ps pictures
 
     This property corresponds to option "-rc" of the original
-    "fastcap" program.
+    "fastcap" program. A value of 'None' for this property will enable
+    all conductors in the charge distribution picture.
     """
-    # @@@
-    pass
+    return super()._get_remove_q_conductors();
 
   @ps_remove_q.setter
-  def ps_remove_q(self, value: list[str]):
-    # @@@
-    pass
+  def ps_remove_q(self, value: Optional[list[str]]):
+    super()._set_remove_q_conductors(value);
 
   @property
   def ps_no_key(self) -> bool:

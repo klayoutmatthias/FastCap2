@@ -6,6 +6,91 @@
 
 //  for in-place new
 #include <memory>
+#include <stdexcept>
+#include <string>
+#include <cstring>
+
+static PyObject *raise_error(std::runtime_error &ex)
+{
+  PyErr_SetString(PyExc_RuntimeError, ex.what());
+  return NULL;
+}
+
+static bool check_conductor_name(const char *name)
+{
+  if (!name || !*name) {
+    PyErr_SetString(PyExc_RuntimeError, "A conductor name must not be an empty string");
+    return false;
+  }
+  for (const char *cp = name; *cp; ++cp) {
+    if (*cp == '%' || *cp == ',') {
+      PyErr_Format(PyExc_RuntimeError, "'%%' or ',' characters are not allowed in this conductor name: '%s'", name);
+      return false;
+    }
+  }
+  return true;
+}
+
+static char *make_conductor_list(ssystem *sys, PyObject *list)
+{
+  if (!PyList_Check(list)) {
+    PyErr_SetString(PyExc_RuntimeError, "Expected a list of conductor name strings for argument");
+    return 0;
+  }
+
+  std::string csl;
+
+  Py_ssize_t n = PyList_Size(list);
+  for (Py_ssize_t i = 0; i < n; ++i) {
+    PyObject *nstr = PyObject_Str(PyList_GetItem(list, i));
+    if (!nstr) {
+      return 0;
+    }
+    const char *nstr_utf8 = PyUnicode_AsUTF8(nstr);
+    if (!nstr_utf8) {
+      return 0;
+    }
+    if (!check_conductor_name (nstr_utf8)) {
+      return 0;
+    }
+    if (i > 0) {
+      csl += ",";
+    }
+    csl += nstr_utf8;
+  }
+
+  return sys->heap.strdup(csl.c_str());
+}
+
+static PyObject *parse_conductor_list(const char *l)
+{
+  if (!l) {
+    Py_RETURN_NONE;
+  }
+
+  PyObject *list = PyList_New(0);
+  if (! list) {
+    return list;
+  }
+
+  const char *cp0 = l;
+  for (const char *cp = l; *cp; ++cp) {
+    if (cp[1] == ',' || !cp[1]) {
+      PyObject *str = PyUnicode_FromStringAndSize(cp0, cp - cp0 + 1);
+      if (!str) {
+        Py_DECREF(list);
+        return NULL;
+      }
+      PyList_Append(list, str);
+      if (cp[1]) {
+        ++cp;
+        cp0 = cp + 1;
+      }
+    }
+  }
+
+  return list;
+}
 
 struct ProblemObject {
   PyObject_HEAD
@@ -149,6 +234,95 @@ problem_set_iter_tol(ProblemObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+problem_get_skip_conductors(ProblemObject *self)
+{
+  return parse_conductor_list(self->sys.kill_name_list);
+}
+
+static PyObject *
+problem_set_skip_conductors(ProblemObject *self, PyObject *value)
+{
+  char *list = NULL;
+  if (Py_IsNone(value)) {
+    //  set list to NULL
+  } else {
+    list = make_conductor_list(&self->sys, value);
+    if (!list) {
+      return NULL;
+    }
+  }
+  self->sys.kill_name_list = list;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_remove_conductors(ProblemObject *self)
+{
+  return parse_conductor_list(self->sys.kinp_name_list);
+}
+
+static PyObject *
+problem_set_remove_conductors(ProblemObject *self, PyObject *value)
+{
+  char *list = NULL;
+  if (Py_IsNone(value)) {
+    //  set list to NULL
+  } else {
+    list = make_conductor_list(&self->sys, value);
+    if (!list) {
+      return NULL;
+    }
+  }
+  self->sys.kinp_name_list = list;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_select_q_conductors(ProblemObject *self)
+{
+  return parse_conductor_list(self->sys.qpic_name_list);
+}
+
+static PyObject *
+problem_set_select_q_conductors(ProblemObject *self, PyObject *value)
+{
+  char *list = NULL;
+  if (Py_IsNone(value)) {
+    //  set list to NULL
+  } else {
+    list = make_conductor_list(&self->sys, value);
+    if (!list) {
+      return NULL;
+    }
+  }
+  self->sys.qpic_name_list = list;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_remove_q_conductors(ProblemObject *self)
+{
+  return parse_conductor_list(self->sys.kq_name_list);
+}
+
+static PyObject *
+problem_set_remove_q_conductors(ProblemObject *self, PyObject *value)
+{
+  char *list = NULL;
+  if (Py_IsNone(value)) {
+    //  set list to NULL
+  } else {
+    list = make_conductor_list(&self->sys, value);
+    if (!list) {
+      return NULL;
+    }
+  }
+  self->sys.kq_name_list = list;
+  Py_RETURN_NONE;
+}
+
+
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
   { "_set_title", (PyCFunction) problem_set_title, METH_O, NULL },
@@ -160,6 +334,14 @@ static PyMethodDef problem_methods[] = {
   { "_set_partitioning_depth", (PyCFunction) problem_set_partitioning_depth, METH_VARARGS, NULL },
   { "_get_iter_tol", (PyCFunction) problem_get_iter_tol, METH_NOARGS, NULL },
   { "_set_iter_tol", (PyCFunction) problem_set_iter_tol, METH_VARARGS, NULL },
+  { "_get_skip_conductors", (PyCFunction) problem_get_skip_conductors, METH_NOARGS, NULL },
+  { "_set_skip_conductors", (PyCFunction) problem_set_skip_conductors, METH_O, NULL },
+  { "_get_remove_conductors", (PyCFunction) problem_get_remove_conductors, METH_NOARGS, NULL },
+  { "_set_remove_conductors", (PyCFunction) problem_set_remove_conductors, METH_O, NULL },
+  { "_get_select_q_conductors", (PyCFunction) problem_get_select_q_conductors, METH_NOARGS, NULL },
+  { "_set_select_q_conductors", (PyCFunction) problem_set_select_q_conductors, METH_O, NULL },
+  { "_get_remove_q_conductors", (PyCFunction) problem_get_remove_q_conductors, METH_NOARGS, NULL },
+  { "_set_remove_q_conductors", (PyCFunction) problem_set_remove_q_conductors, METH_O, NULL },
   {NULL}
 };
 
