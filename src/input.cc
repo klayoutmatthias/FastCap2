@@ -491,7 +491,7 @@ void get_ps_file_base(ssystem *sys)
   align the normals of all the panels in each surface so they point
     towards the same side as where the ref point is (dielectric files only)
 */
-static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, int *num_cond)
+static charge *read_panels(ssystem *sys, surface *surf_list, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
   charge *panel_list = NULL, *cur_panel, *c_panel;
@@ -521,8 +521,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
       /* group names are set up in read_list_file() */
       sprintf(surf_name, "%%%s", cur_surf->group_name);
       panel_list = cur_panel 
-          = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
-                     name_list, num_cond, surf_name);
+          = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans, num_cond, surf_name);
       patran_file_read = patran_file;
     }
     else {
@@ -532,7 +531,7 @@ static charge *read_panels(ssystem *sys, surface *surf_list, Name **name_list, i
       }
       cur_panel->next 
           = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
-                     name_list, num_cond, surf_name);
+                     num_cond, surf_name);
       if(!patran_file && patran_file_read) {
         sys->error("read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
       }
@@ -689,8 +688,7 @@ static ITER *get_kill_num_list(ssystem *sys, Name *name_list, const char *kill_n
 /*
   command line parsing routine
 */
-static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *relperm, int *numMom, int *numLev,
-                               const char **input_file, const char **surf_list_file, int *read_from_stdin)
+static void parse_command_line(ssystem *sys, const char **input_file, const char **surf_list_file, int *read_from_stdin)
 {
   const char **argv = sys->argv;
   int argc = sys->argc;
@@ -727,31 +725,29 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
   for(i = 1; i < argc && cmderr == FALSE; i++) {
     if(argv[i][0] == '-') {
       if(argv[i][1] == 'o') {
-        *numMom = (int) strtol(&(argv[i][2]), chkp, 10);
-        if(*chkp == &(argv[i][2]) || *numMom < 0) {
+        sys->order = (int) strtol(&(argv[i][2]), chkp, 10);
+        if(*chkp == &(argv[i][2]) || sys->order < 0) {
           sys->info("%s: bad expansion order `%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
           break;
         }
-        else *autmom = OFF;
       }
       else if(argv[i][1] == 'd' && argv[i][2] == 'c') {
         sys->dd_ = true;
       }
       else if(argv[i][1] == 'd') {
-        *numLev = (int) strtol(&(argv[i][2]), chkp, 10);
-        if(*chkp == &(argv[i][2]) || *numLev < 0) {
+        sys->depth = (int) strtol(&(argv[i][2]), chkp, 10);
+        if(*chkp == &(argv[i][2]) || sys->depth < 0) {
           sys->info("%s: bad partitioning depth `%s'\n",
                   argv[0], &argv[i][2]);
           cmderr = TRUE;
           break;
         }
-        else *autlev = OFF;
       }
       else if(argv[i][1] == 'p') {
-        if(sscanf(&(argv[i][2]), "%lf", relperm) != 1) cmderr = TRUE;
-        else if(*relperm <= 0.0) cmderr = TRUE;
+        if(sscanf(&(argv[i][2]), "%lf", &sys->perm_factor) != 1) cmderr = TRUE;
+        else if(sys->perm_factor <= 0.0) cmderr = TRUE;
         if(cmderr) {
           sys->info("%s: bad permittivity `%s'\n", argv[0], &argv[i][2]);
           break;
@@ -952,8 +948,7 @@ static void parse_command_line(ssystem *sys, int *autmom, int *autlev, double *r
 /*
   surface information input routine - panels are read by read_panels()
 */
-static surface *read_all_surfaces(ssystem *sys, const char *input_file, const char *surf_list_file, int read_from_stdin, char *infile,
-                                  double relperm)
+static surface *read_all_surfaces(ssystem *sys, const char *input_file, const char *surf_list_file, int read_from_stdin, char *infile)
 {
   int num_surf, i;
   char group_name[BUFSIZ];
@@ -970,7 +965,7 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
     surf_list = sys->heap.alloc<surface>(1, AMSC);
     surf_list->type = CONDTR;   /* only conductors can come in stdin */
     surf_list->name = sys->heap.strdup("stdin");
-    surf_list->outer_perm = relperm;
+    surf_list->outer_perm = sys->perm_factor;
     surf_list->end_of_chain = TRUE;
 
     /* set up group name */
@@ -995,7 +990,7 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
     }
     cur_surf->type = CONDTR;
     cur_surf->name = sys->heap.strdup(input_file);
-    cur_surf->outer_perm = relperm;
+    cur_surf->outer_perm = sys->perm_factor;
     cur_surf->end_of_chain = TRUE;
 
     /* set up group name */
@@ -1024,8 +1019,7 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
   - inputs surfaces (ie file names whose panels are read in read_panels)
   - sets parameters accordingly
 */
-static surface *input_surfaces(ssystem *sys, int *autmom, int *autlev, double *relperm,
-                               int *numMom, int *numLev, char *infile)
+static surface *input_surfaces(ssystem *sys, char *infile)
 {
   int read_from_stdin;
   const char *surf_list_file, *input_file;
@@ -1034,11 +1028,10 @@ static surface *input_surfaces(ssystem *sys, int *autmom, int *autlev, double *r
   surf_list_file = input_file = NULL;
   read_from_stdin = FALSE;
 
-  parse_command_line(sys, autmom, autlev, relperm, numMom, numLev,
-                     &input_file, &surf_list_file, &read_from_stdin);
+  parse_command_line(sys, &input_file, &surf_list_file, &read_from_stdin);
 
   return(read_all_surfaces(sys, input_file, surf_list_file,
-                           read_from_stdin, infile, *relperm));
+                           read_from_stdin, infile));
 }
 
 /*
@@ -1200,8 +1193,7 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
 /*
   main input routine, returns a list of panels in the problem
 */
-charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
-                      int *numMom, int *numLev, Name **name_list, int *num_cond)
+charge *input_problem(ssystem *sys, int *num_cond)
 {
   surface *surf_list;
   char infile[BUFSIZ], hostname[BUFSIZ];
@@ -1209,14 +1201,10 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
   long clock;
 
   /* read the conductor and dielectric interface surface files, parse cmds */
-  surf_list = input_surfaces(sys, autmom, autlev, relperm,
-                             numMom, numLev, infile);
-
-  if(*autmom == ON) *numMom = DEFORD;
+  surf_list = input_surfaces(sys, infile);
 
   if (sys->dirsol || sys->expgcr) {
-    *numLev = 0;                /* put all the charges in first cube */
-    *autlev = OFF;
+    sys->depth = 0;                /* put all the charges in first cube */
   }
 
   strcpy(hostname, "18Sep92");
@@ -1225,20 +1213,20 @@ charge *input_problem(ssystem *sys, int *autmom, int *autlev, double *relperm,
 
   /* input the panels from the surface files */
   *num_cond = 0;                /* initialize conductor count */
-  chglist = read_panels(sys, surf_list, name_list, num_cond);
+  chglist = read_panels(sys, surf_list, num_cond);
 
   /* set up the lists of conductors to remove from solve list */
-  sys->kill_num_list = get_kill_num_list(sys, *name_list, sys->kill_name_list);
+  sys->kill_num_list = get_kill_num_list(sys, sys->cond_names, sys->kill_name_list);
 
   /* remove the panels on specified conductors from input list */
-  sys->kinp_num_list = get_kill_num_list(sys, *name_list, sys->kinp_name_list);
-  remove_conds(sys, &chglist, sys->kinp_num_list, name_list);
+  sys->kinp_num_list = get_kill_num_list(sys, sys->cond_names, sys->kinp_name_list);
+  remove_conds(sys, &chglist, sys->kinp_num_list, &sys->cond_names);
 
   /* set up the lists of conductors to dump shaded plots for */
-  sys->qpic_num_list = get_kill_num_list(sys, *name_list, sys->qpic_name_list);
+  sys->qpic_num_list = get_kill_num_list(sys, sys->cond_names, sys->qpic_name_list);
 
   /* set up the lists of conductors to eliminate from shaded plots */
-  sys->kq_num_list = get_kill_num_list(sys, *name_list, sys->kq_name_list);
+  sys->kq_num_list = get_kill_num_list(sys, sys->cond_names, sys->kq_name_list);
 
   /* check for inconsistencies in kill lists */
   resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list, *num_cond);

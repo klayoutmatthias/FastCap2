@@ -5,6 +5,6 @@
 struct ssystem;
 struct charge;
 
-void mulInit(ssystem *sys, int autom, int depth, int order, charge *charges);
+void mulInit(ssystem *sys, charge *charges);
 
 #endif

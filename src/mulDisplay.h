@@ -11,13 +11,13 @@ struct face;
 struct cube;
 struct line;
 
-void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Name **name_list);
+void mksCapDump(ssystem *sys, double **capmat, int numconds);
 void dumpConfig(ssystem *sys, FILE *fp, const char *name);
 void dump_face(FILE *fp, face *fac);
 void dumpCorners(FILE *fp, double **mat, int rows, int cols);
 void dumpCondNames(FILE *fp, Name *name_list);
 int has_duplicate_panels(FILE *fp, charge *chglst);
-void dumpMulSet(ssystem *sy, int numLev, int order);
+void dumpMulSet(ssystem *sys);
 void dump_preconditioner(ssystem *sys, charge *chglist, int type);
 void dissys(ssystem *sys);
 void chkList(ssystem *sys, int listtype);

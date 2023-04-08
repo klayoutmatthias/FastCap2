@@ -21,7 +21,7 @@ static void computePsi(ssystem *sys, double *q, double *p, int size, int real_si
 static int gcr(ssystem *sys, double *q, double *p, double *r, double *ap, double **bp, double **bap, int size, int real_size, double *sqrmat, int *real_index, int maxiter, double tol, charge *chglist);
 
 /* This routine takes the cube data struct and computes capacitances. */
-int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, double *trimat, double *sqrmat, int *real_index, int numconds, Name *name_list)
+int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real_size, double *trimat, double *sqrmat, int *real_index, int numconds)
 /* double ***capmat: pointer to capacitance matrix */
 /* real_size: real_size = total #panels, incl dummies */
 {
@@ -60,7 +60,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
        || want_this_iter(sys->kinp_num_list, cond)) continue;
 
     sys->msg("\nStarting on column %d (%s)\n", cond,
-            getConductorName(sys, cond, &name_list));
+            getConductorName(sys, cond));
     fflush(stdout);
 
     /* Set up the initial residue vector and charge guess. */

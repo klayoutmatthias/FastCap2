@@ -33,7 +33,7 @@ static void name_data(ssystem *sys, FILE *stream);
 static int if_same_coord(double coord_1[3], double coord_2[3]);
 static int if_same_grid(int ID, GRID *grid_ptr);
 static void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count);
-static charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, int surf_type, char *name_suffix);
+static charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, char *name_suffix);
 static charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conductor_ID);
 
 #define BIG 35000              /* Size of element and node serach table. */
@@ -57,7 +57,7 @@ int first_patch;                /*   reset since the name list must */
 int first_cfeg;                 /*   be preserved as new files are read */
 
 charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
-                 Name **name_list, int *num_cond, char *name_suffix)
+                 int *num_cond, char *name_suffix)
 {
   int *patch_patch_table;
   static char *line = NULL;
@@ -74,7 +74,7 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
   if(line[0] == '0') {
     *file_is_patran_type = FALSE;
     firstq = quickif(sys, stream, line, surf_type, trans_vector,
-                     num_cond, name_list, name_suffix);
+                     num_cond, name_suffix);
   }
   else {
     *file_is_patran_type = TRUE;
@@ -100,7 +100,7 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
       assign_names(sys);
     }
 
-    firstq = make_charges_all_patches(sys, name_list, num_cond, surf_type,
+    firstq = make_charges_all_patches(sys, num_cond, surf_type,
                                       name_suffix);
   }
 
@@ -683,8 +683,7 @@ static char *getPatranName(ssystem *sys, int cond_num)
 
 ****************************************************************************/
 
-charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, int surf_type, char *name_suffix)
-/* Name **name_list: master list of conductor names */
+charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, char *name_suffix)
 /* int *num_cond: master conductor counter */
 {
   CFEG *cfeg_ptr;
@@ -707,7 +706,7 @@ charge *make_charges_all_patches(ssystem *sys, Name **name_list, int *num_cond, 
           if(surf_type == CONDTR || surf_type == BOTH) {
             strcpy(cond_name, getPatranName(sys, patch_ptr->conductor_ID));
             strcat(cond_name, name_suffix);
-            conductor_ID = getConductorNum(sys, cond_name, name_list, num_cond);
+            conductor_ID = getConductorNum(sys, cond_name, num_cond);
           }
           else conductor_ID = 0;
           break;

@@ -94,14 +94,16 @@ class Problem(_Problem):
 
     This property corresponds to option "-d" of the original
     "fastcap" program.
+
+    A negative value indicates automatic depth mode.
+    In automatic mode, :py:meth:`solve` will set the depth
+    actually used.
     """
-    # @@@
-    pass
+    return super()._get_partitioning_depth()
 
   @partitioning_depth.setter
   def partitioning_depth(self, value: float):
-    # @@@
-    pass
+    super()._set_partitioning_depth(value)
 
   @property
   def iter_tol(self) -> float:

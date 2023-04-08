@@ -26,14 +26,11 @@ static void setExact(ssystem *sys, int numterms);
 /*
   sets up the partitioning of space and room for charges and expansions
 */
-void mulInit(ssystem *sys, int autom, int depth, int order, charge *charges)
+void mulInit(ssystem *sys, charge *charges)
 {
   int qindex=1, cindex=1;
 
-  sys->depth = depth;           /* overwritten below if autom = ON */
-  sys->order = order;
-  
-  sys->depth = placeq(autom, sys, charges); /* create cubes, put in charges */
+  sys->depth = placeq(sys->depth < 0, sys, charges); /* create cubes, put in charges */
 
   getrelations(sys);            /* Get all the prnts and kids for each cube. */
 

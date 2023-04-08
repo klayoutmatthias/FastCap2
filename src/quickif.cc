@@ -84,22 +84,22 @@ char *last_alias(Name *cur_name)
 /*
   manages the conductor name list
 */
-int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond)
+int getConductorNum(ssystem *sys, char *name, int *num_cond)
 {
   Name *cur_name = 0, *prev_name = 0;
   int i;
 
   /* if this is the very first name, make and load struct on *name_list */
   if(*num_cond == 0) {
-    *name_list = sys->heap.alloc<Name>(1, AMSC);
-    (*name_list)->name = sys->heap.strdup(name);
-    (*name_list)->next = NULL;
+    sys->cond_names = sys->heap.alloc<Name>(1, AMSC);
+    sys->cond_names->name = sys->heap.strdup(name);
+    sys->cond_names->next = NULL;
     *num_cond = 1;
     return(1);
   }
 
   /* check to see if name is present */
-  for(cur_name = *name_list, i = 1; cur_name != NULL;
+  for(cur_name = sys->cond_names, i = 1; cur_name != NULL;
       cur_name = cur_name->next, i++) {
     if(!strcmp(cur_name->name, name) || alias_match(cur_name, name)) 
         return(i); /* return conductor number */
@@ -140,13 +140,13 @@ static int getConductorNumNoAdd(char *name, Name *name_list)
 /*
   gets the name (aliases are ignored) corresponding to a conductor number
 */
-char *getConductorName(ssystem *sys, int cond_num, Name **name_list)
+char *getConductorName(ssystem *sys, int cond_num)
 {
   Name *cur_name;
   int i;
 
   /* check to see if conductor number is present */
-  for(cur_name = *name_list, i = 1; cur_name != NULL;
+  for(cur_name = sys->cond_names, i = 1; cur_name != NULL;
       cur_name = cur_name->next, i++) {
     if(i == cond_num) return(last_alias(cur_name));
   }
@@ -160,14 +160,14 @@ char *getConductorName(ssystem *sys, int cond_num, Name **name_list)
 /*
   renames a conductor
 */
-static int renameConductor(ssystem *sys, char *old_name, char *new_name, Name **name_list, int *num_cond)
+static int renameConductor(ssystem *sys, char *old_name, char *new_name, int *num_cond)
 {
   Name *cur_name;
   int i;
 
   /* check to see if old name is present in names or their aliases */
   /* if it is, add old name to the alias list */
-  for(cur_name = *name_list, i = 1; cur_name != NULL;
+  for(cur_name = sys->cond_names, i = 1; cur_name != NULL;
       cur_name = cur_name->next, i++) {
     if(!strcmp(cur_name->name, old_name) || alias_match(cur_name, old_name)) {
       /* old name is cur name or old name is an alias */
@@ -192,10 +192,9 @@ static int renameConductor(ssystem *sys, char *old_name, char *new_name, Name **
   N <cond name string> <Rename string>
   * <Comment string>
 */
-charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans, int *num_cond, Name **name_list,
+charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans, int *num_cond,
                 char *name_suffix)
 /* char *name_suffix: suffix for all cond names read */
-/* Name **name_list: name list pointer */
 {
   int linecnt = 2;
   char temp[BUFSIZ], temp2[BUFSIZ], line1[BUFSIZ];
@@ -237,7 +236,7 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
       
       /* load quad struct */
       if(surf_type == CONDTR || surf_type == BOTH)
-          curquad->cond = getConductorNum(sys, condstr, name_list, num_cond);
+          curquad->cond = getConductorNum(sys, condstr, num_cond);
       else curquad->cond = 0;
       curquad->x1 = x1 + trans[0];
       curquad->x2 = x2 + trans[0];
@@ -277,7 +276,7 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
       
       /* load tri struct */
       if(surf_type == CONDTR || surf_type == BOTH)
-          curtri->cond = getConductorNum(sys, condstr, name_list, num_cond);
+          curtri->cond = getConductorNum(sys, condstr, num_cond);
       else curquad->cond = 0;
       curtri->x1 = x1 + trans[0];
       curtri->x2 = x2 + trans[0];
@@ -305,7 +304,7 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
         strcat(condstr, name_suffix);
         strcat(temp2, name_suffix);
 
-        if(renameConductor(sys, condstr, temp2, name_list, num_cond) == FALSE) {
+        if(renameConductor(sys, condstr, temp2, num_cond) == FALSE) {
           sys->error("quickif: error renaming conductor");
         }
       }

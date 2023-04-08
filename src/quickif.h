@@ -43,9 +43,9 @@ typedef struct tri tri;
 
 /* #define MAXCON 10000            assumes never more conductors than this */
 
-int getConductorNum(ssystem *sys, char *name, Name **name_list, int *num_cond);
-char *getConductorName(ssystem *sys, int cond_num, Name **name_list);
+int getConductorNum(ssystem *sys, char *name, int *num_cond);
+char *getConductorName(ssystem *sys, int cond_num);
 char *last_alias(Name *cur_name);
-charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans, int *num_cond, Name **name_list, char *name_suffix);
+charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans, int *num_cond, char *name_suffix);
 
 #endif

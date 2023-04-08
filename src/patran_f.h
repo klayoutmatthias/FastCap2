@@ -7,8 +7,7 @@
 struct ssystem;
 struct Name;
 
-charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
-                 Name **name_list, int *num_cond, char *name_suffix);
+charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector, int *num_cond, char *name_suffix);
 char *delcr(char *str);
 
 #endif

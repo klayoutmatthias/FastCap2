@@ -910,7 +910,7 @@ static char *spaces(char *str, int num)
   - some attempt to scale (eg pF, nF, uF etc) is made
   - also checks for M-matrix sign pattern, diag dominance
 */
-void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Name **name_list)
+void mksCapDump(ssystem *sys, double **capmat, int numconds)
 {
   int i, j, toobig, toosmall, maxlen, sigfig, colwidth, i_killed, j_killed;
   int first_offd;
@@ -994,18 +994,18 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
 
   /* figure the units to use for the matrix entries 
      - set up so smallest element is between 0.1 and 10 */
-  if(minoffd*FPIEPS*relperm*scale > 10.0) toobig = TRUE;
+  if(minoffd*FPIEPS*sys->perm_factor*scale > 10.0) toobig = TRUE;
   else toobig = FALSE;
-  if(minoffd*FPIEPS*relperm*scale < 0.1) toosmall = TRUE;
+  if(minoffd*FPIEPS*sys->perm_factor*scale < 0.1) toosmall = TRUE;
   else toosmall = FALSE;
   while(toobig == TRUE || toosmall == TRUE) {
     if(toobig == TRUE) {
       scale *= 1e-3;
-      if(minoffd*FPIEPS*relperm*scale <= 10.0) break;
+      if(minoffd*FPIEPS*sys->perm_factor*scale <= 10.0) break;
     }
     if(toosmall == TRUE) {
       scale *= 1e+3;
-      if(minoffd*FPIEPS*relperm*scale >= 0.1) break;
+      if(minoffd*FPIEPS*sys->perm_factor*scale >= 0.1) break;
     }
   }
 
@@ -1028,7 +1028,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
   /* get the length of the longest name */
   maxlen = 0;
   for(i = 1; i <= numconds; i++) {
-    maxlen = MAX(strlen(getConductorName(sys, i, name_list)), (size_t)maxlen);
+    maxlen = MAX(strlen(getConductorName(sys, i)), (size_t)maxlen);
   }
 
   /* print the matrix */
@@ -1055,7 +1055,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
 
     sprintf(unit, "%d", i);
 
-    strcpy(cond_name, getConductorName(sys, i, name_list));
+    strcpy(cond_name, getConductorName(sys, i));
 
     if(numconds < 10)
         sys->msg("%s %1s", padName(name, cond_name, maxlen), unit);
@@ -1076,7 +1076,7 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
       }
       else {
         sprintf(unit, " %%%d.%dg", colwidth, sigfig);
-        sys->msg(unit, scale*FPIEPS*relperm*sym_mat[j][i]);
+        sys->msg(unit, scale*FPIEPS*sys->perm_factor*sym_mat[j][i]);
       }
     }
     sys->msg("\n");
@@ -1086,12 +1086,12 @@ void mksCapDump(ssystem *sys, double **capmat, int numconds, double relperm, Nam
 /*
   dumps brief information about multipole set up
 */
-void dumpMulSet(ssystem *sys, int numLev, int order)
+void dumpMulSet(ssystem *sys)
 {
   int numcubes, numsides, i;
 
-  for(numcubes = 1, i = 0; i < numLev; numcubes *= 8, i++);
-  for(numsides = 1, i = 0; i < numLev; numsides *= 2, i++);
+  for(numcubes = 1, i = 0; i < sys->depth; numcubes *= 8, i++);
+  for(numsides = 1, i = 0; i < sys->depth; numsides *= 2, i++);
 
   sys->msg("\nMULTIPOLE SETUP SUMMARY\n");
   sys->msg("Level 0 cube extremal coordinates\n");
@@ -1102,7 +1102,7 @@ void dumpMulSet(ssystem *sys, int numLev, int order)
   sys->msg("  z: %g to %g\n", 
           sys->minz, sys->minz + numsides * (sys->length));
   sys->msg("Level %d (lowest level) cubes\n  %d total\n", 
-          numLev, numcubes);
+          sys->depth, numcubes);
   sys->msg(
           "  side length = %g\n  maximum number of panels in each = %d\n",
           sys->length, sys->mul_maxlq);
@@ -1116,10 +1116,10 @@ void dumpMulSet(ssystem *sys, int numLev, int order)
           sys->max_eval_pnt);
   sys->msg(
           "Maximum number of panels treated exactly = %d (limit = %d)\n",
-          sys->mul_maxq, multerms(order));
+          sys->mul_maxq, multerms(sys->order));
   sys->msg(
    "Maximum number of evaluation points treated exactly = %d (limit = %d)\n",
-          sys->loc_maxq, multerms(order));
+          sys->loc_maxq, multerms(sys->order));
 }
 /*
   dump all the preconditioner matrices in the direct list cubes as one

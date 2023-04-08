@@ -31,6 +31,15 @@ class TestProblem(unittest.TestCase):
     problem.expansion_order = 25
     self.assertEqual(problem.expansion_order, 25)
 
+  def test_partitioning_depth(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.partitioning_depth, -1)
+
+    problem.partitioning_depth = 25
+    self.assertEqual(problem.partitioning_depth, 25)
+
 
 if __name__ == '__main__':
     unittest.main()

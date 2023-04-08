@@ -41,8 +41,6 @@ int main_func(int argc, char *argv[])
   int ttliter, i, num_cond;
   charge *chglist, *nq;
   double **capmat, dirtimesav, mulsetup, initalltime, ttlsetup, ttlsolve;
-  double relperm;
-  int autmom, autlev, numMom, numLev;
 
   double *trimat = 0, *sqrmat = 0;
   int *real_index = 0;
@@ -53,13 +51,9 @@ int main_func(int argc, char *argv[])
   int num_dummy_panels = 0;             /* number of off-panel eval pnt panels */
   int eval_size = 0;                    /* sum of above two (total panel structs) */
 
-  Name *name_list;
-
   char filename[BUFSIZ];
 
   /* initialize defaults, etc */
-  autmom = autlev = ON;
-  relperm = 1.0;
   sys.axes = sys.heap.alloc<double **>(10);
   for(i = 0; i < 10; i++) {
     sys.axes[i] = sys.heap.mat(2, 3);
@@ -68,8 +62,7 @@ int main_func(int argc, char *argv[])
   /* get the list of all panels in the problem */
   /* - many command line parameters having to do with the postscript
        file dumping interface are passed back via globals (see mulGlobal.c) */
-  chglist = input_problem(&sys, &autmom, &autlev, &relperm,
-                          &numMom, &numLev, &name_list, &num_cond);
+  chglist = input_problem(&sys, &num_cond);
 
   /* if no fastcap run is to be done, just dump the psfile */
   if(sys.capvew && sys.m_) {
@@ -79,21 +72,18 @@ int main_func(int argc, char *argv[])
   }
 
   starttimer;
-  mulInit(&sys, autlev, numLev, numMom, chglist);  /* Set up cubes, charges. */
+  mulInit(&sys, chglist);  /* Set up cubes, charges. */
   stoptimer;
   initalltime = dtime;
 
-  numLev = sys.depth;
-
   sys.num_cond = num_cond;
-  sys.cond_names = name_list;
 
   sys.msg("\nINPUT SUMMARY\n");
 
   if (sys.cmddat) {
-    sys.msg("  Expansion order: %d\n", numMom);
-    sys.msg("  Number of partitioning levels: %d\n", numLev);
-    sys.msg("  Overall permittivity factor: %.3g\n", relperm);
+    sys.msg("  Expansion order: %d\n", sys.order);
+    sys.msg("  Number of partitioning levels: %d\n", sys.depth);
+    sys.msg("  Overall permittivity factor: %.3g\n", sys.perm_factor);
   }
 
   /* Figure out number of panels and conductors. */
@@ -125,7 +115,7 @@ int main_func(int argc, char *argv[])
   sys.msg("  Number of conductors: %d\n", num_cond);
 
   if (sys.namdat) {
-    dumpCondNames(stdout, name_list);
+    dumpCondNames(stdout, sys.cond_names);
   }
 
   if(num_both_panels > 0) {
@@ -141,12 +131,12 @@ int main_func(int argc, char *argv[])
   }
 
   if (sys.muldat) {
-    dumpMulSet(&sys, numLev, numMom);
+    dumpMulSet(&sys);
   }
   fflush(stdout);
 
   starttimer;
-  mulMultiAlloc(&sys, MAX(sys.max_eval_pnt, sys.max_panel), numMom, sys.depth);
+  mulMultiAlloc(&sys, MAX(sys.max_eval_pnt, sys.max_panel), sys.order, sys.depth);
   stoptimer;
   initalltime += dtime;         /* save initial allocation time */
 
@@ -236,11 +226,10 @@ int main_func(int argc, char *argv[])
   }
 
   sys.msg("\nITERATION DATA");
-  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, real_index, num_cond,
-                     name_list);
+  ttliter = capsolve(&capmat, &sys, chglist, eval_size, up_size, trimat, sqrmat, real_index, num_cond);
 
   if (sys.mksdat) {
-    mksCapDump(&sys, capmat, num_cond, relperm, &name_list);
+    mksCapDump(&sys, capmat, num_cond);
   }
 
   if (sys.timdat) {
