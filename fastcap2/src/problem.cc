@@ -56,57 +56,31 @@ problem_init(ProblemObject *self, PyObject *args, PyObject *kwds)
   return 0;
 }
 
-/*@@@
 static PyObject *
-problem_name(ProblemObject *self, PyObject *Py_UNUSED(ignored))
-{
-  if (self->first == NULL) {
-    PyErr_SetString(PyExc_AttributeError, "first");
-    return NULL;
-  }
-  if (self->last == NULL) {
-    PyErr_SetString(PyExc_AttributeError, "last");
-    return NULL;
-  }
-  return PyUnicode_FromFormat("%S %S", self->first, self->last);
-}
-@@@*/
-
-static PyMethodDef problem_methods[] = {
-/* @@@
-  {"name", (PyCFunction) Custom_name, METH_NOARGS,
-   "Return the name, combining the first and last name"
-  },
-*/
-  {NULL}
-};
-
-static PyObject*
-problem_title(ProblemObject *self, void *)
+problem_get_title(ProblemObject *self)
 {
   return PyUnicode_FromString(self->sys.title ? self->sys.title : "(null)");
 }
 
-static int
-problem_set_title(ProblemObject *self, PyObject *value, void *)
+static PyObject *
+problem_set_title(ProblemObject *self, PyObject *value)
 {
   PyObject *title_str = PyObject_Str(value);
   if (!title_str) {
-    return -1;
+    return NULL;
   }
   const char *title_utf8str = PyUnicode_AsUTF8(title_str);
   if (!title_utf8str) {
-    return -1;
+    return NULL;
   }
   self->sys.title = self->sys.heap.strdup(title_utf8str);
-  return 0;
+  Py_RETURN_NONE;
 }
 
-static PyGetSetDef problem_getsets[] = {
-  { "title", (getter) problem_title, (setter) problem_set_title,
-    "Sets the project title. This is an arbitrary string.",
-    NULL },
-  //  ...
+static PyMethodDef problem_methods[] = {
+  { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
+  { "_set_title", (PyCFunction) problem_set_title, METH_O, NULL },
+  {NULL}
 };
 
 PyTypeObject problem_type = {
@@ -117,7 +91,6 @@ PyTypeObject problem_type = {
   .tp_dealloc = (destructor) problem_dealloc,
   .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
   .tp_methods = problem_methods,
-  .tp_getset = problem_getsets,
   .tp_init = (initproc) problem_init,
   .tp_new = problem_new,
 };
