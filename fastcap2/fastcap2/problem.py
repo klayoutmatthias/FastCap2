@@ -112,7 +112,7 @@ class Problem(_Problem):
     This property corresponds to option "-i" of the original
     "fastcap" program.
 
-    The default value is 0.01;
+    The default value is 0.01.
     """
     return super()._get_iter_tol()
 
@@ -131,11 +131,11 @@ class Problem(_Problem):
     the capacitance matrix. A value of 'None' for this property
     will select all conductors.
     """
-    return super()._get_skip_conductors();
+    return super()._get_skip_conductors()
 
   @skip_conductors.setter
   def skip_conductors(self, value: Optional[list[str]]):
-    super()._set_skip_conductors(value);
+    super()._set_skip_conductors(value)
 
   @property
   def remove_conductors(self) -> Optional[list[str]]:
@@ -148,11 +148,11 @@ class Problem(_Problem):
     at all. A value of 'None' for this property will enable all
     conductors.
     """
-    return super()._get_remove_conductors();
+    return super()._get_remove_conductors()
 
   @remove_conductors.setter
   def remove_conductors(self, value: Optional[list[str]]):
-    super()._set_remove_conductors(value);
+    super()._set_remove_conductors(value)
 
   @property
   def ps_select_q(self) -> Optional[list[str]]:
@@ -162,11 +162,11 @@ class Problem(_Problem):
     "fastcap" program. A value of 'None' for this property will
     select all conductors.
     """
-    return super()._get_ps_select_q();
+    return super()._get_ps_select_q()
 
   @ps_select_q.setter
   def ps_select_q(self, value: Optional[list[str]]):
-    super()._set_ps_select_q(value);
+    super()._set_ps_select_q(value)
 
   @property
   def ps_remove_q(self) -> Optional[list[str]]:
@@ -176,11 +176,11 @@ class Problem(_Problem):
     "fastcap" program. A value of 'None' for this property will enable
     all conductors in the charge distribution picture.
     """
-    return super()._get_ps_remove_q();
+    return super()._get_ps_remove_q()
 
   @ps_remove_q.setter
   def ps_remove_q(self, value: Optional[list[str]]):
-    super()._set_ps_remove_q(value);
+    super()._set_ps_remove_q(value)
 
   @property
   def ps_no_key(self) -> bool:
@@ -189,11 +189,11 @@ class Problem(_Problem):
     This property corresponds to option "-rk" of the original
     "fastcap" program.
     """
-    return super()._get_ps_no_key();
+    return super()._get_ps_no_key()
 
   @ps_no_key.setter
   def ps_no_key(self, value: bool):
-    super()._set_ps_no_key(value);
+    super()._set_ps_no_key(value)
 
   @property
   def ps_no_dielectric(self) -> bool:
@@ -202,11 +202,11 @@ class Problem(_Problem):
     This property corresponds to option "-rd" of the original
     "fastcap" program.
     """
-    return super()._get_ps_no_dielectric();
+    return super()._get_ps_no_dielectric()
 
   @ps_no_dielectric.setter
   def ps_no_dielectric(self, value: bool):
-    super()._set_ps_no_dielectric(value);
+    super()._set_ps_no_dielectric(value)
 
   @property
   def ps_total_charges(self) -> bool:
@@ -215,11 +215,11 @@ class Problem(_Problem):
     This property corresponds to option "-dc" of the original
     "fastcap" program.
     """
-    return super()._get_ps_total_charges();
+    return super()._get_ps_total_charges()
 
   @ps_total_charges.setter
   def ps_total_charges(self, value: bool):
-    super()._set_ps_total_charges(value);
+    super()._set_ps_total_charges(value)
 
   @property
   def ps_no_showpage(self) -> bool:
@@ -228,11 +228,11 @@ class Problem(_Problem):
     This property corresponds to option "-v" of the original
     "fastcap" program.
     """
-    return super()._get_ps_no_showpage();
+    return super()._get_ps_no_showpage()
 
   @ps_no_showpage.setter
   def ps_no_showpage(self, value: bool):
-    super()._set_ps_no_showpage(value);
+    super()._set_ps_no_showpage(value)
 
   @property
   def ps_number_faces(self) -> bool:
@@ -241,11 +241,11 @@ class Problem(_Problem):
     This property corresponds to option "-n" of the original
     "fastcap" program.
     """
-    return super()._get_ps_number_faces();
+    return super()._get_ps_number_faces()
 
   @ps_number_faces.setter
   def ps_number_faces(self, value: bool):
-    super()._set_ps_number_faces(value);
+    super()._set_ps_number_faces(value)
 
   @property
   def ps_show_hidden(self) -> bool:
@@ -254,11 +254,11 @@ class Problem(_Problem):
     This property corresponds to option "-f" of the original
     "fastcap" program.
     """
-    return super()._get_ps_show_hidden();
+    return super()._get_ps_show_hidden()
 
   @ps_show_hidden.setter
   def ps_show_hidden(self, value: bool):
-    super()._set_ps_show_hidden(value);
+    super()._set_ps_show_hidden(value)
 
   @property
   def ps_azimuth(self) -> float:
@@ -267,11 +267,11 @@ class Problem(_Problem):
     This property corresponds to option "-a" of the original
     "fastcap" program.
     """
-    return super()._get_ps_azimuth();
+    return super()._get_ps_azimuth()
 
   @ps_azimuth.setter
   def ps_azimuth(self, value: float):
-    super()._set_ps_azimuth(value);
+    super()._set_ps_azimuth(value)
 
   @property
   def ps_elevation(self) -> float:
@@ -280,11 +280,11 @@ class Problem(_Problem):
     This property corresponds to option "-e" of the original
     "fastcap" program.
     """
-    return super()._get_ps_elevation();
+    return super()._get_ps_elevation()
 
   @ps_elevation.setter
   def ps_elevation(self, value: float):
-    super()._set_ps_elevation(value);
+    super()._set_ps_elevation(value)
 
   @property
   def ps_rotation(self) -> float:
@@ -293,11 +293,11 @@ class Problem(_Problem):
     This property corresponds to option "-r" of the original
     "fastcap" program.
     """
-    return super()._get_ps_rotation();
+    return super()._get_ps_rotation()
 
   @ps_rotation.setter
   def ps_rotation(self, value: float):
-    super()._set_ps_rotation(value);
+    super()._set_ps_rotation(value)
 
   @property
   def ps_upaxis(self) -> int:
@@ -311,11 +311,11 @@ class Problem(_Problem):
     * Problem.YI for y axis
     * Problem.ZI for z axis
     """
-    return super()._get_ps_upaxis();
+    return super()._get_ps_upaxis()
 
   @ps_upaxis.setter
   def ps_upaxis(self, value: int):
-    super()._set_ps_upaxis(value);
+    super()._set_ps_upaxis(value)
 
   @property
   def ps_distance(self) -> float:
@@ -324,11 +324,11 @@ class Problem(_Problem):
     This property corresponds to option "-h" of the original
     "fastcap" program.
     """
-    return super()._get_ps_distance();
+    return super()._get_ps_distance()
 
   @ps_distance.setter
   def ps_distance(self, value: float):
-    super()._set_ps_distance(value);
+    super()._set_ps_distance(value)
 
   @property
   def ps_scale(self) -> float:
@@ -337,11 +337,11 @@ class Problem(_Problem):
     This property corresponds to option "-s" of the original
     "fastcap" program.
     """
-    return super()._get_ps_scale();
+    return super()._get_ps_scale()
 
   @ps_scale.setter
   def ps_scale(self, value: float):
-    super()._set_ps_scale(value);
+    super()._set_ps_scale(value)
 
   @property
   def ps_linewidth(self) -> float:
@@ -350,11 +350,11 @@ class Problem(_Problem):
     This property corresponds to option "-w" of the original
     "fastcap" program.
     """
-    return super()._get_ps_linewidth();
+    return super()._get_ps_linewidth()
 
   @ps_linewidth.setter
   def ps_linewidth(self, value: float):
-    super()._set_ps_linewidth(value);
+    super()._set_ps_linewidth(value)
 
   @property
   def ps_axislength(self) -> float:
@@ -363,11 +363,21 @@ class Problem(_Problem):
     This property corresponds to option "-x" of the original
     "fastcap" program.
     """
-    return super()._get_ps_axislength();
+    return super()._get_ps_axislength()
 
   @ps_axislength.setter
   def ps_axislength(self, value: float):
-    super()._set_ps_axislength(value);
+    super()._set_ps_axislength(value)
+
+  @property
+  def verbose(self) -> bool:
+    """If true, the solve methods will print information about the problem and the solution
+    """
+    return super()._get_verbose()
+
+  @verbose.setter
+  def verbose(self, value: bool):
+    super()._set_verbose(value)
 
   def load(self, file: str, group: Optional[str] = None):
     """Loads a single "quickif"-style geometry file
@@ -446,6 +456,9 @@ class Problem(_Problem):
 
   def conductors(self) -> list[str]:
     """Returns the effective list of conductors present in the capacitance matrix
+
+    List list corresponds to the rows and columns of the
+    capacitance matrix.
     """
     # @@@
     pass

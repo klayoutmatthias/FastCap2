@@ -580,6 +580,24 @@ problem_set_ps_axislength(ProblemObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+problem_get_verbose(ProblemObject *self)
+{
+  return PyBool_FromLong (self->sys.log != NULL);
+}
+
+static PyObject *
+problem_set_verbose(ProblemObject *self, PyObject *args)
+{
+  int b = 0;
+  if (!PyArg_ParseTuple(args, "p", &b)) {
+    return NULL;
+  }
+
+  self->sys.log = (b ? stdout : NULL);
+  Py_RETURN_NONE;
+}
+
 
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
@@ -628,6 +646,8 @@ static PyMethodDef problem_methods[] = {
   { "_set_ps_linewidth", (PyCFunction) problem_set_ps_linewidth, METH_VARARGS, NULL },
   { "_get_ps_axislength", (PyCFunction) problem_get_ps_axislength, METH_NOARGS, NULL },
   { "_set_ps_axislength", (PyCFunction) problem_set_ps_axislength, METH_VARARGS, NULL },
+  { "_get_verbose", (PyCFunction) problem_get_verbose, METH_NOARGS, NULL },
+  { "_set_verbose", (PyCFunction) problem_set_verbose, METH_VARARGS, NULL },
   {NULL}
 };
 

@@ -257,6 +257,15 @@ class TestProblem(unittest.TestCase):
     problem.ps_axislength = 22.5
     self.assertEqual(problem.ps_axislength, 22.5)
 
+  def test_verbose(self):
+
+    problem = fc2.Problem()
+
+    self.assertEqual(problem.verbose, False)
+
+    problem.verbose = True
+    self.assertEqual(problem.verbose, True)
+
 
 if __name__ == '__main__':
     unittest.main()

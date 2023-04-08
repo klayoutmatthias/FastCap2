@@ -37,6 +37,7 @@ int main_func(int argc, char *argv[])
   ssystem sys;
   sys.argv = (const char **) argv;
   sys.argc = argc;
+  sys.log = stdout;
 
   int ttliter;
   charge *chglist, *nq;

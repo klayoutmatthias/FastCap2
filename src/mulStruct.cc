@@ -9,7 +9,7 @@
 ssystem::ssystem() :
   argv(0),
   argc(0),
-  log(stdout),
+  log(NULL),
   start_name(0),
   current_name(0),
   start_name_this_time(0),
