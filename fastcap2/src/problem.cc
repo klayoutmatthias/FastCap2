@@ -692,7 +692,7 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
 
   //  find end of list
   surface *eol = self->sys.surf_list;
-  if (link && eol) {
+  if (eol) {
     for ( ; eol->next; eol = eol->next)
       ;
   }
