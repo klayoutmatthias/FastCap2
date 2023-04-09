@@ -95,11 +95,12 @@ surface_new(PyTypeObject *type, PyObject * /*args*/, PyObject * /*kwds*/)
 static int
 surface_init(SurfaceObject *self, PyObject *args, PyObject *kwds)
 {
-  static char *kwlist[] = {(char *)"name", NULL};
+  static char *kwlist[] = {(char *)"name", (char *)"title", NULL};
   PyObject *name = NULL;
+  PyObject *title = NULL;
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kwlist,
-                                   &name)) {
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kwlist,
+                                   &name, &title)) {
     return -1;
   }
 
@@ -114,6 +115,19 @@ surface_init(SurfaceObject *self, PyObject *args, PyObject *kwds)
     }
     self->surface.set_name(name_utf8str);
     Py_DECREF(name_str);
+  }
+
+  if (title) {
+    PyObject *title_str = PyObject_Str(title);
+    if (!title_str) {
+      return -1;
+    }
+    const char *title_utf8str = PyUnicode_AsUTF8(title_str);
+    if (!title_utf8str) {
+      return -1;
+    }
+    self->surface.set_title(title_utf8str);
+    Py_DECREF(title_str);
   }
 
   return 0;

@@ -1,5 +1,6 @@
 
 from typing import Optional
+from typing import Tuple
 
 from fastcap2_core import Problem as _Problem
 
@@ -7,7 +8,7 @@ class Problem(_Problem):
 
   """Describes a FastCap2 project (aka 'problem')
 
-  :param title: The optional title string
+  :param title: The optional title string. It is used as the default title for surfaces.
 
   Use this class following these steps:
 
@@ -58,8 +59,8 @@ class Problem(_Problem):
   def title(self) -> str:
     """The title string
 
-    The title string is an arbitrary optional string that describes 
-    the project in the documentation.
+    The title string is an arbitrary optional string. Surfaces will see
+    this title unless they specify their own one.
     """
     return super()._get_title()
 
@@ -396,8 +397,8 @@ class Problem(_Problem):
            ref_point_inside: bool = True,
            outside_perm: float = 1.0,
            inside_perm: float = 1.0,
-           d: (float, float, float) = (0.0, 0.0, 0.0),
-           r: (float, float, float) = (0.0, 0.0, 0.0),
+           d: Tuple[float, float, float] = (0.0, 0.0, 0.0),
+           r: Tuple[float, float, float] = (0.0, 0.0, 0.0),
            flipx: bool = False,
            flipy: bool = False,
            flipz: bool = False,
@@ -472,8 +473,8 @@ class Problem(_Problem):
                 ref_point_inside: bool = True,
                 outside_perm: float = 1.0,
                 inside_perm: float = 1.0,
-                d: (float, float, float) = (0.0, 0.0, 0.0),
-                r: (float, float, float) = (0.0, 0.0, 0.0),
+                d: Tuple[float, float, float] = (0.0, 0.0, 0.0),
+                r: Tuple[float, float, float] = (0.0, 0.0, 0.0),
                 flipx: bool = False,
                 flipy: bool = False,
                 flipz: bool = False,
