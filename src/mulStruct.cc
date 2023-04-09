@@ -90,7 +90,7 @@ ssystem::ssystem() :
   axes(0),
   title(0),
   surf_list(0),
-  group_cnt(1),
+  group_cnt(0),
   side(0),
   depth(-1),
   order(DEFORD),

@@ -70,8 +70,22 @@ class Surface(_Surface):
   def add_quad(self, p1: Tuple[float, float, float], p2: Tuple[float, float, float],
                      p3: Tuple[float, float, float], p4: Tuple[float, float, float]):
     """Adds a quad to the surface"""
+    if type(p1) is list:
+      p1 = tuple(p1)
+    if type(p2) is list:
+      p2 = tuple(p2)
+    if type(p3) is list:
+      p3 = tuple(p3)
+    if type(p4) is list:
+      p4 = tuple(p4)
     return super()._add_quad(p1, p2, p3, p4)
 
   def add_tri(self, p1: Tuple[float, float, float], p2: Tuple[float, float, float], p3: Tuple[float, float, float]):
     """Adds a triangle to the surface"""
+    if type(p1) is list:
+      p1 = tuple(p1)
+    if type(p2) is list:
+      p2 = tuple(p2)
+    if type(p3) is list:
+      p3 = tuple(p3)
     return super()._add_tri(p1, p2, p3)

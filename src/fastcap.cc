@@ -23,6 +23,9 @@ int main(int argc, char *argv[])
 
       /* if no fastcap run is to be done, just dump the psfile */
       charge *chglist = build_charge_list(&sys);
+      if (!chglist) {
+        throw std::runtime_error("No surfaces present - cannot dump to PS");
+      }
 
       std::string ps_file_name = std::string (sys.ps_file_base) + ".ps";
       dump_ps_geometry(&sys, ps_file_name.c_str (), chglist, NULL, sys.dd_);

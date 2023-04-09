@@ -13,6 +13,7 @@
 #include <cstring>
 #include <cassert>
 #include <string>
+#include <sstream>
 
 /*
   reads an input file list file (a list of dielectric i/f and conductor 
@@ -99,7 +100,7 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
 
   /* read file names and permittivities, build linked list */
   linecnt = 0;
-  sprintf(group_name, "GROUP%d", sys->group_cnt);
+  sprintf(group_name, "GROUP%d", ++sys->group_cnt);
   while(fgets(tline, sizeof(tline), fp) != NULL) {
     linecnt++;
     if(tline[0] == 'C' || tline[0] == 'c') {
@@ -546,7 +547,13 @@ static charge *read_panels(ssystem *sys, int *num_cond)
 
       int cond_num = 0;
       if (cur_surf->type == CONDTR || cur_surf->type == BOTH) {
-        cond_num = getConductorNum(sys, cur_surf->surf_data->name, num_cond);
+        std::ostringstream os;
+        if (cur_surf->surf_data->name) {
+          os << cur_surf->surf_data->name;
+        }
+        os << "%";
+        os << cur_surf->group_name;
+        cond_num = getConductorNum(sys, os.str().c_str(), num_cond);
       }
 
       if (cur_surf->surf_data->title) {
@@ -573,7 +580,7 @@ static charge *read_panels(ssystem *sys, int *num_cond)
 
     /* if the surface is a DIELEC, make sure all conductor numbers are zero */
     /* - also link each panel to its surface */
-    for(c_panel = cur_panel; c_panel != NULL; c_panel = c_panel->next) {
+    for(c_panel = cur_panel; c_panel; c_panel = c_panel->next) {
       if(cur_surf->type == DIELEC) c_panel->cond = 0;
       c_panel->surf = cur_surf;
     }
@@ -586,16 +593,19 @@ static charge *read_panels(ssystem *sys, int *num_cond)
 
     /* make cur_panel = last panel in list, count panels */
     num_panels = num_dummies = num_tris = num_quads = 0;
-    for(cur_panel = cur_surf->panels ; ; cur_panel = cur_panel->next) {
+    while (cur_panel) {
       num_panels++;
-      if(cur_panel->dummy) num_dummies++;
-      else if(cur_panel->shape == 3) num_tris++;
-      else if(cur_panel->shape == 4) num_quads++;
+      if (cur_panel->dummy) num_dummies++;
+      else if (cur_panel->shape == 3) num_tris++;
+      else if (cur_panel->shape == 4) num_quads++;
       else {
         sys->error("read_panels: bad panel shape, %d\n",
                    cur_panel->shape);
       }
-      if(cur_panel->next == NULL) break;
+      if (!cur_panel->next) {
+        break;
+      }
+      cur_panel = cur_panel->next;
     }
 
     /*sys->msg("Surface %s has %d quads and %d tris\n",
@@ -958,7 +968,7 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
   /* the `- ' option always forces the first cond surf read from stdin */
   /* can also read from stdin if there's no list file and no cmd line file */
   surf_list = NULL;
-  sprintf(group_name, "GROUP%d", sys->group_cnt);
+  sprintf(group_name, "GROUP%d", ++sys->group_cnt);
   if(read_from_stdin || (input_file == NULL && surf_list_file == NULL)) {
     surf_list = sys->heap.alloc<surface>(1, AMSC);
     surf_list->type = CONDTR;   /* only conductors can come in stdin */

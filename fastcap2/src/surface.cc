@@ -56,7 +56,7 @@ void Surface::add_tri(int cond_num,
 
 void Surface::set_name(const char *n)
 {
-  if (!name) {
+  if (!n) {
     name = 0;
   } else {
     name = heap.strdup(n);
@@ -65,7 +65,7 @@ void Surface::set_name(const char *n)
 
 void Surface::set_title(const char *n)
 {
-  if (!title) {
+  if (!n) {
     title = 0;
   } else {
     title = heap.strdup(n);
@@ -96,38 +96,19 @@ static int
 surface_init(SurfaceObject *self, PyObject *args, PyObject *kwds)
 {
   static char *kwlist[] = {(char *)"name", (char *)"title", NULL};
-  PyObject *name = NULL;
-  PyObject *title = NULL;
+  const char *name = 0;
+  const char *title = 0;
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kwlist,
-                                   &name, &title)) {
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|ss", kwlist, &name, &title)) {
     return -1;
   }
 
   if (name) {
-    PyObject *name_str = PyObject_Str(name);
-    if (!name_str) {
-      return -1;
-    }
-    const char *name_utf8str = PyUnicode_AsUTF8(name_str);
-    if (!name_utf8str) {
-      return -1;
-    }
-    self->surface.set_name(name_utf8str);
-    Py_DECREF(name_str);
+    self->surface.set_name(name);
   }
 
   if (title) {
-    PyObject *title_str = PyObject_Str(title);
-    if (!title_str) {
-      return -1;
-    }
-    const char *title_utf8str = PyUnicode_AsUTF8(title_str);
-    if (!title_utf8str) {
-      return -1;
-    }
-    self->surface.set_title(title_utf8str);
-    Py_DECREF(title_str);
+    self->surface.set_title(title);
   }
 
   return 0;
@@ -147,11 +128,6 @@ surface_add_quad(SurfaceObject *self, PyObject *args)
            PyArg_ParseTuple(p2, "ddd", &x2, &y2, &z2) &&
            PyArg_ParseTuple(p3, "ddd", &x3, &y3, &z3) &&
            PyArg_ParseTuple(p4, "ddd", &x4, &y4, &z4);
-
-  Py_DECREF(p1);
-  Py_DECREF(p2);
-  Py_DECREF(p3);
-  Py_DECREF(p4);
 
   if (! ok) {
     return NULL;
@@ -174,10 +150,6 @@ surface_add_tri(SurfaceObject *self, PyObject *args)
   int ok = PyArg_ParseTuple(p1, "ddd", &x1, &y1, &z1) &&
            PyArg_ParseTuple(p2, "ddd", &x2, &y2, &z2) &&
            PyArg_ParseTuple(p3, "ddd", &x3, &y3, &z3);
-
-  Py_DECREF(p1);
-  Py_DECREF(p2);
-  Py_DECREF(p3);
 
   if (! ok) {
     return NULL;

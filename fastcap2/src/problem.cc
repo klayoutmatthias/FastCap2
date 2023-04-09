@@ -51,24 +51,14 @@ static int
 problem_init(ProblemObject *self, PyObject *args, PyObject *kwds)
 {
   static char *kwlist[] = {(char *)"title", NULL};
-  PyObject *title = NULL;
+  const char *title = 0;
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kwlist,
-                                   &title)) {
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|s", kwlist, &title)) {
     return -1;
   }
 
   if (title) {
-    PyObject *title_str = PyObject_Str(title);
-    if (!title_str) {
-      return -1;
-    }
-    const char *title_utf8str = PyUnicode_AsUTF8(title_str);
-    if (!title_utf8str) {
-      return -1;
-    }
-    self->sys.title = self->sys.heap.strdup(title_utf8str);
-    Py_DECREF(title_str);
+    self->sys.title = self->sys.heap.strdup(title);
   }
 
   return 0;
@@ -677,13 +667,11 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
     }
 
     if (!PyObject_TypeCheck(py_surf, &surface_type)) {
-      Py_DECREF(py_surf);
       PyErr_SetString(PyExc_RuntimeError, "First argument is not of fastcap2.Surface type");
       return NULL;
     }
 
     surf_data = ((SurfaceObject *)py_surf)->surface.clone(self->sys.heap);
-    Py_DECREF(py_surf);
 
     if (!surf_data->name && (kind == CONDTR || kind == BOTH)) {
       PyErr_SetString(PyExc_RuntimeError, "Surface needs to have name for conductor type");
@@ -695,17 +683,12 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
   double dx = 0.0, dy = 0.0, dz = 0.0;
   double rx = 0.0, ry = 0.0, rz = 0.0;
   if (!PyArg_ParseTuple(d, "ddd", &dx, &dy, &dz)) {
-    Py_DECREF(d);
-    Py_DECREF(r);
     return NULL;
   }
-  Py_DECREF(d);
 
   if (!PyArg_ParseTuple(r, "ddd", &rx, &ry, &rz)) {
-    Py_DECREF(r);
     return NULL;
   }
-  Py_DECREF(r);
 
   //  find end of list
   surface *eol = self->sys.surf_list;
@@ -862,6 +845,11 @@ problem_dump_ps(ProblemObject *self, PyObject *args)
 
   //  NOTE: this leaks memory for the charge list because we're using a heap.
   charge *chglist = build_charge_list(&self->sys);
+  if (!chglist) {
+    PyErr_SetString(PyExc_RuntimeError, "Geometry is empty - cannot dump to PS");
+    return NULL;
+  }
+
   dump_ps_geometry(&self->sys, filename, chglist, NULL, self->sys.dd_);
 
   Py_RETURN_NONE;
@@ -923,6 +911,7 @@ static PyMethodDef problem_methods[] = {
   { "_add", (PyCFunction) problem_add, METH_VARARGS, NULL },
   { "_solve", (PyCFunction) problem_solve, METH_NOARGS, NULL },
   { "_conductors", (PyCFunction) problem_conductors, METH_NOARGS, NULL },
+  { "_dump_ps", (PyCFunction) problem_dump_ps, METH_VARARGS, NULL },
   {NULL}
 };
 

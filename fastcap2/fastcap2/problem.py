@@ -431,7 +431,7 @@ class Problem(_Problem):
     super()._set_verbose(value)
 
   def load(self, file: str, 
-           link: bool = True, 
+           link: bool = False, 
            group: Optional[str] = None,
            kind: int = CONDTR,
            ref_point_inside: bool = True,
@@ -507,7 +507,7 @@ class Problem(_Problem):
     return super()._load_list(file)
 
   def add(self, surface: 'fastcap2.Surface', 
-                link: bool = True,
+                link: bool = False,
                 group: Optional[str] = None, 
                 kind: int = CONDTR,
                 ref_point_inside: bool = True,
@@ -577,8 +577,11 @@ class Problem(_Problem):
 
     The list corresponds to the rows and columns of the
     capacitance matrix.
+
+    Note: The list of conductors is only available after a call to :py:meth:`solve`
+    or :py:meth:`dump_ps`.
     """
-    return super().conductors()
+    return super()._conductors()
 
   def dump_ps(self, filename):
     """Produces a PS file with the geometries
@@ -588,5 +591,5 @@ class Problem(_Problem):
     Note: calling this function continuously allocates memory until
     the Problem object is released.
     """
-    super().dump_ps(filename)
+    super()._dump_ps(filename)
 

@@ -126,6 +126,9 @@ double **fastcap_solve(ssystem *sys)
   /* - many command line parameters having to do with the postscript
        file dumping interface are passed back via globals (see mulGlobal.c) */
   chglist = build_charge_list(sys);
+  if (!chglist) {
+    throw std::runtime_error("No surfaces present - cannot compute capacitance matrix");
+  }
 
   if (sys->dissrf && sys->log) {
     dumpSurfDat(sys);

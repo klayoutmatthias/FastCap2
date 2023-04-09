@@ -24,7 +24,6 @@ SurfaceData *SurfaceData::clone(Heap &heap)
   if (name) {
     new_data->name = heap.strdup(name);
   }
-
   if (title) {
     new_data->title = heap.strdup(title);
   }
@@ -37,7 +36,7 @@ SurfaceData *SurfaceData::clone(Heap &heap)
     if (prevq) {
       prevq->next = new_quad;
     } else {
-      quads = new_quad;
+      new_data->quads = new_quad;
     }
     prevq = new_quad;
   }
@@ -50,7 +49,7 @@ SurfaceData *SurfaceData::clone(Heap &heap)
     if (prevt) {
       prevt->next = new_tri;
     } else {
-      tris = new_tri;
+      new_data->tris = new_tri;
     }
     prevt = new_tri;
   }

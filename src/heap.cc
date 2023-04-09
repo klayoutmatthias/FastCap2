@@ -50,9 +50,13 @@ Heap::malloc(size_t n, MemoryType type)
 
 char *Heap::strdup(const char *str, MemoryType type)
 {
-  char *d = this->alloc<char>(strlen(str) + 1, type);
-  strcpy(d, str);
-  return d;
+  if (! str) {
+    return 0;
+  } else {
+    char *d = this->alloc<char>(strlen(str) + 1, type);
+    strcpy(d, str);
+    return d;
+  }
 }
 
 double **Heap::mat(int n, int m, MemoryType type)

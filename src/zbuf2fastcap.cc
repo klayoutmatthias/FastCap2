@@ -18,8 +18,8 @@
 */
 void dump_ps_geometry(ssystem *sys, const char *filename, charge *chglist, double *q, int use_ttl_chg)
 {
-  int numlines, numfaces, use_density;
-  face **faces, **sfaces;
+  int numlines = 0, numfaces = 0, use_density;
+  face **faces = NULL, **sfaces;
   double normal[3], rhs;
   double *avg, radius;
   line **lines;
