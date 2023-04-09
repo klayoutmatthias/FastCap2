@@ -59,7 +59,7 @@ SurfaceData *SurfaceData::clone(Heap &heap)
 /*
   tells if any conductor name alias matches a string
 */
-static int alias_match(Name *cur_name, char *name)
+static int alias_match(Name *cur_name, const char *name)
 {
   Name *cur_alias;
 
@@ -134,7 +134,7 @@ char *last_alias(Name *cur_name)
 /*
   manages the conductor name list
 */
-int getConductorNum(ssystem *sys, char *name, int *num_cond)
+int getConductorNum(ssystem *sys, const char *name, int *num_cond)
 {
   Name *cur_name = 0, *prev_name = 0;
   int i;
@@ -246,15 +246,12 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
                 char *name_suffix)
 /* char *name_suffix: suffix for all cond names read */
 {
+  quadl *fstquad = 0, *curquad = 0;
+  tri *fsttri = 0, *curtri = 0;
   int linecnt = 2;
   char temp[BUFSIZ], temp2[BUFSIZ], line1[BUFSIZ];
   char condstr[BUFSIZ];
   double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
-  quadl *fstquad = 0, *curquad = 0;
-  tri *fsttri = 0, *curtri = 0;
-  charge *chglst, *nq;
-
-  chglst = NULL;
 
   /* save the title, strip leading '0' */
   if (!sys->title) sys->title = sys->heap.strdup(delcr(&line[1]));
@@ -288,18 +285,18 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
       if(surf_type == CONDTR || surf_type == BOTH)
           curquad->cond = getConductorNum(sys, condstr, num_cond);
       else curquad->cond = 0;
-      curquad->x1 = x1 + trans[0];
-      curquad->x2 = x2 + trans[0];
-      curquad->x3 = x3 + trans[0];
-      curquad->x4 = x4 + trans[0];
-      curquad->y1 = y1 + trans[1];
-      curquad->y2 = y2 + trans[1];
-      curquad->y3 = y3 + trans[1];
-      curquad->y4 = y4 + trans[1];
-      curquad->z1 = z1 + trans[2];
-      curquad->z2 = z2 + trans[2];
-      curquad->z3 = z3 + trans[2];
-      curquad->z4 = z4 + trans[2];
+      curquad->x1 = x1;
+      curquad->x2 = x2;
+      curquad->x3 = x3;
+      curquad->x4 = x4;
+      curquad->y1 = y1;
+      curquad->y2 = y2;
+      curquad->y3 = y3;
+      curquad->y4 = y4;
+      curquad->z1 = z1;
+      curquad->z2 = z2;
+      curquad->z3 = z3;
+      curquad->z4 = z4;
 
       linecnt++;
     }
@@ -328,15 +325,15 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
       if(surf_type == CONDTR || surf_type == BOTH)
           curtri->cond = getConductorNum(sys, condstr, num_cond);
       else curquad->cond = 0;
-      curtri->x1 = x1 + trans[0];
-      curtri->x2 = x2 + trans[0];
-      curtri->x3 = x3 + trans[0];
-      curtri->y1 = y1 + trans[1];
-      curtri->y2 = y2 + trans[1];
-      curtri->y3 = y3 + trans[1];
-      curtri->z1 = z1 + trans[2];
-      curtri->z2 = z2 + trans[2];
-      curtri->z3 = z3 + trans[2];
+      curtri->x1 = x1;
+      curtri->x2 = x2;
+      curtri->x3 = x3;
+      curtri->y1 = y1;
+      curtri->y2 = y2;
+      curtri->y3 = y3;
+      curtri->z1 = z1;
+      curtri->z2 = z2;
+      curtri->z3 = z3;
 
       linecnt++;
     }
@@ -368,19 +365,27 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
                  linecnt, line1);
     }
   }
-        
+
+  return quickif2charges(sys, fstquad, fsttri, trans, -1);
+}
+
+charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, double *trans, int cond_num)
+{
+  quadl *curquad = 0;
+  tri *curtri = 0;
+  charge *chglst = 0, *nq = 0;
+
   /* setup tris in charge structs */
-  for(curtri = fsttri; curtri != NULL; curtri = curtri->next) {
+  for (curtri = fsttri; curtri != NULL; curtri = curtri->next) {
 
     /* allocate charge struct to fill in */
-    if(chglst == NULL) {
-      chglst = sys->heap.alloc<charge>(1, AMSC);
-      nq = chglst;
+    charge *c = sys->heap.alloc<charge>(1, AMSC);
+    if (!chglst) {
+      chglst = c;
+    } else {
+      nq->next = c;
     }
-    else {
-      nq->next = sys->heap.alloc<charge>(1, AMSC);
-      nq = nq->next;
-    }
+    nq = c;
 
     /* fill in corners */
     (nq->corner[0])[0] = curtri->x1;
@@ -395,21 +400,20 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
 
     /* fill in remaining */
     nq->shape = 3;
-    nq->cond = curtri->cond;
+    nq->cond = (cond_num >= 0 ? cond_num : curtri->cond);
   }
 
   /* setup quads in charge structs */
-  for(curquad = fstquad; curquad != NULL; curquad = curquad->next) {
+  for (curquad = fstquad; curquad != NULL; curquad = curquad->next) {
 
     /* allocate charge struct to fill in */
-    if(chglst == NULL) {
-      chglst = sys->heap.alloc<charge>(1, AMSC);
-      nq = chglst;
+    charge *c = sys->heap.alloc<charge>(1, AMSC);
+    if (!chglst) {
+      chglst = c;
+    } else {
+      nq->next = c;
     }
-    else {
-      nq->next = sys->heap.alloc<charge>(1, AMSC);
-      nq = nq->next;
-    }
+    nq = c;
 
     /* fill in corners */
     (nq->corner[0])[0] = curquad->x1;
@@ -427,8 +431,18 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
 
     /* fill in remaining */
     nq->shape = 4;
-    nq->cond = curquad->cond;
+    nq->cond = (cond_num >= 0 ? cond_num : curquad->cond);
   }
-  return(chglst);
+
+  /* transform the corners */
+  for (nq = chglst; nq; nq = nq->next) {
+    for (int c = 0; c < nq->shape; ++c) {
+      for (int i = 0; i < 3; ++i) {
+        (nq->corner[c])[i] += trans[i];
+      }
+    }
+  }
+
+  return (chglst);
 }
 

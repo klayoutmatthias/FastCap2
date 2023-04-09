@@ -11,6 +11,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <cassert>
 #include <unistd.h>
 #include <string>
 
@@ -491,55 +492,75 @@ void get_ps_file_base(ssystem *sys)
 static charge *read_panels(ssystem *sys, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
-  charge *panel_list = NULL, *cur_panel, *c_panel;
+  charge *panel_list = NULL, *cur_panel = NULL, *c_panel;
   surface *cur_surf;
   FILE *fp;
   char surf_name[BUFSIZ];
-  int patran_file_read;
+  int patran_file_read = FALSE;
 
   stdin_read = FALSE;
   for(cur_surf = sys->surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
-    if(!strcmp(cur_surf->name, "stdin")) {
-      if(stdin_read) {
-        sys->error("read_panels: attempt to read stdin twice\n");
-      }
-      else {
-        stdin_read = TRUE;
-        fp = stdin;
-      }
-    }
-    else if((fp = fopen(cur_surf->name, "r")) == NULL) {
-      sys->error("read_panels: can't open\n  `%s'\nto read\n",
-                 cur_surf->name);
-    }
 
-    /* input the panel list */
-    if(panel_list == NULL) {
-      /* group names are set up in read_list_file() */
-      sprintf(surf_name, "%%%s", cur_surf->group_name);
-      panel_list = cur_panel 
-          = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans, num_cond, surf_name);
-      patran_file_read = patran_file;
-    }
-    else {
-      if(cur_surf->prev->end_of_chain) {
+    charge *panels_read = NULL;
+
+    if (cur_surf->name) {
+
+      if(!strcmp(cur_surf->name, "stdin")) {
+        if(stdin_read) {
+          sys->error("read_panels: attempt to read stdin twice\n");
+        }
+        else {
+          stdin_read = TRUE;
+          fp = stdin;
+        }
+      }
+      else if((fp = fopen(cur_surf->name, "r")) == NULL) {
+        sys->error("read_panels: can't open\n  `%s'\nto read\n",
+                   cur_surf->name);
+      }
+
+      /* input the panel list */
+
+      if(!cur_surf->prev || cur_surf->prev->end_of_chain) {
         sprintf(surf_name, "%%%s", cur_surf->group_name);
         patran_file_read = FALSE;
       }
-      cur_panel->next 
-          = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans,
-                     num_cond, surf_name);
+
+      panels_read = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans, num_cond, surf_name);
+
       if(!patran_file && patran_file_read) {
         sys->error("read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
       }
       patran_file_read = patran_file;
-      cur_panel = cur_panel->next;
-    }
-    if(strcmp(cur_surf->name, "stdin") != 0) fclose(fp);
 
+      if(fp != stdin) {
+        fclose(fp);
+      }
+
+    } else {
+
+      assert(cur_surf->surf_data);
+      patran_file_read = FALSE;
+
+      int cond_num = 0;
+      if (cur_surf->type == CONDTR || cur_surf->type == BOTH) {
+        cond_num = getConductorNum(sys, cur_surf->surf_data->name, num_cond);
+      }
+
+      panels_read = quickif2charges(sys, cur_surf->surf_data->quads, cur_surf->surf_data->tris, cur_surf->trans, cond_num);
+
+    }
+
+    if (!panel_list) {
+      panel_list = panels_read;
+    } else {
+      cur_panel->next = panels_read;
+    }
+    cur_panel = panels_read;
     cur_surf->panels = cur_panel;
 
     /* save the surface file's title */
+    // @@@ TODO: fix title handling
     cur_surf->title = sys->heap.strdup(sys->title ? sys->title : "");
     sys->title = 0;             /* not sure if needed */
 
@@ -553,8 +574,6 @@ static charge *read_panels(ssystem *sys, int *num_cond)
     /* align the normals and add dummy structs if dielec i/f */
     initcalcp(sys, cur_surf->panels);/* get normals, edges, perpendiculars */
     if(cur_surf->type == DIELEC || cur_surf->type == BOTH) {
-      /* if(patran_file) align_normals(cur_surf->panels);
-      align_normals(cur_surf->panels, cur_surf); */ /* now done in calcp */
       add_dummy_panels(sys, cur_surf->panels); /* add dummy panels for field calc */
     }
 

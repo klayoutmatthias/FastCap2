@@ -629,24 +629,36 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
   double scale = 1.0;
 
   if (load) {
+
     if (!PyArg_ParseTuple(args, "spzipddOOpppdddd", &filename, &link, &group, &kind,
                                                     &ref_point_inside, &outer_perm, &inner_perm,
                                                     &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz, &scale)) {
       return NULL;
     }
+
   } else {
+
     PyObject *py_surf = NULL;
     if (!PyArg_ParseTuple(args, "OpzipddOOpppdddd", &py_surf, &link, &group, &kind,
                                                     &ref_point_inside, &outer_perm, &inner_perm,
                                                     &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz, &scale)) {
       return NULL;
     }
+
     if (!PyObject_TypeCheck(py_surf, &surface_type)) {
       Py_DECREF(py_surf);
       PyErr_SetString(PyExc_RuntimeError, "First argument is not of fastcap2.Surface type");
+      return NULL;
     }
+
     surf_data = ((SurfaceObject *)py_surf)->surface.clone(self->sys.heap);
     Py_DECREF(py_surf);
+
+    if (!surf_data->name && (kind == CONDTR || kind == BOTH)) {
+      PyErr_SetString(PyExc_RuntimeError, "Surface needs to have name for conductor type");
+      return NULL;
+    }
+
   }
 
   double dx = 0.0, dy = 0.0, dz = 0.0;
