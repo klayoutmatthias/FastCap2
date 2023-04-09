@@ -376,6 +376,54 @@ class TestProblem(unittest.TestCase):
 
     self.assertEqual(problem.conductors(), ['ct1%GROUP1', 'ct2%GROUP2', 'cb%GROUP3'])
     
+  def test_add_surface(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_meshed_quad((0, 0, 0), (0, 10, 0), (10, 0, 0), edge_width = 0.2, num = 10)
+
+    problem.add(surface, d = (0, 0, -1.0))
+    problem.add(surface, d = (0, 0, 1.0))
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "800   -559  \n"
+        "-559  800   "
+    )
+
+    self.assertEqual(problem.conductors(), ["C%GROUP1", "C%GROUP2"])
+
+  def test_add_surface_triple(self):
+
+    problem = fc2.Problem()
+
+    b = fc2.Surface(name = "B")
+    b.add_meshed_quad((0, 0, 0), (0, 10, 0), (10, 0, 0), edge_width = 0.2, num = 10)
+
+    t1 = fc2.Surface(name = "T1")
+    t1.add_meshed_quad((0, 0, 0), (0, 10, 0), (4, 0, 0), edge_width = 0.2, num = 5)
+
+    t2 = fc2.Surface(name = "T2")
+    t2.add_meshed_quad((0, 0, 0), (0, 10, 0), (1, 0, 0), edge_width = 0.2, num = 1)
+
+    problem.add(b, d = (0, 0, -1))
+    problem.add(t1, d = (0, 0, 1), group = "TOP")
+    problem.add(t1, d = (6, 0, 1), group = "TOP")
+    problem.add(t2, d = (4.5, 0, 1))
+
+    cap_matrix = problem.solve()
+
+    print(problem.conductors())
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "796   -481  -73   \n"
+        "-481  891   -194  \n"
+        "-73   -194  290   "
+    )
+
+    self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP', 'T2%GROUP2'])
+
 
 if __name__ == '__main__':
     unittest.main()
