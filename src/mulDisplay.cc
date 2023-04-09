@@ -7,8 +7,10 @@
 #include "mulDo.h"
 #include "input.h"
 #include "quickif.h"
+#include "patran.h"
 #include "calcp.h"
 #include "savemat_mod.h"
+
 #include <cmath>
 #include <cstring>
 

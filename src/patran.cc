@@ -12,6 +12,7 @@
 #include "quickif.h"
 #include "patran_f.h"
 #include "quickif.h"
+#include "patran.h"
 
 #include <cstring>
 #include <cmath>

@@ -389,23 +389,73 @@ class Problem(_Problem):
   def verbose(self, value: bool):
     super()._set_verbose(value)
 
-  def load(self, file: str, link: bool = True, group: Optional[str] = None):
+  def load(self, file: str, 
+           link: bool = True, 
+           group: Optional[str] = None,
+           kind: int = CONDTR,
+           ref_point_inside: bool = True,
+           outside_perm: float = 1.0,
+           inside_perm: float = 1.0,
+           d: (float, float, float) = (0.0, 0.0, 0.0),
+           r: (float, float, float) = (0.0, 0.0, 0.0),
+           flipx: bool = False,
+           flipy: bool = False,
+           flipz: bool = False,
+           rotx: float = 0.0,
+           roty: float = 0.0,
+           rotz: float = 0.0,
+           scale: float = 1.0):
     """Loads a single "quickif"-style geometry file
 
     :param file: The file to load
-    :param group: If given, a conductor group will be formed or 
-                  the surface will be added to the respective 
-                  group
     :param link: If True, links this surface to the previous 
                  conductor.
+    :param group: The name of the conductor group to form.
+    :param kind: The type of the surface (conductor or dielectric or dielectric interface).
+    :param outside_perm: The permittivity outside of the surface.
+    :param inside_perm: The permittivity inside of the surface (only for dielectric surfaces).
+    :param d: Translates the surface.
+    :param r: The reference point for surface normalisation. Needed for dielectric surfaces.
+    :param ref_point_inside: True, if the reference point is inside the surface. Needed for dielectric surfaces.
+    :param flipx: Flips the surface at the yz plane.
+    :param flipy: Flips the surface at the xz plane.
+    :param flipz: Flips the surface at the xy plane.
+    :param rotx: Rotates the surface around the x axis by the given angle.
+    :param roty: Rotates the surface around the y axis by the given angle.
+    :param rotz: Rotates the surface around the z axis by the given angle.
+    :param scale: Scales the surface by the given factor.
 
     Note that the files are not loaded immediately, but 
     upon :py:meth:`solve`.
     
     By design of the file format, only conductor surfaces can be
     loaded by this method.
+
+    The :py:meth:`group` name together with the conductor name inside the
+    file will form an effective conductor name of the form 
+    `name%group`. All surfaces with the same effective conductor
+    name become connected. So it is possible to form a connected
+    surface from multiple files or multiple calls of the same file 
+    by giving them the same group name.
+
+    :py:meth:`link` is a similar mechanism than `group`, but will
+    automatically use the group of the surface loaded previously
+    if set to True.
+
+    :py:meth:`link` and :py:meth:`group` are mutually exclusive.
+
+    The order in which the transformations are applied is:
+
+    * Scaling by `scale`
+    * Flipping by `flipx`, `flipy` and `flipz`
+    * Rotation by `rotx`
+    * Rotation by `roty`
+    * Rotation by `rotz`
+    * Translation by `d`
     """
-    return super()._load(file, link, group)
+    return super()._load(file, link, group, kind, ref_point_inside, 
+                         outside_perm, inside_perm, d, r, flipx, flipy, flipz, 
+                         rotx, roty, rotz, scale)
 
   def load_list(self, file: str):
     """Loads a "list-style" geometry file
@@ -422,9 +472,8 @@ class Problem(_Problem):
                 ref_point_inside: bool = True,
                 outside_perm: float = 1.0,
                 inside_perm: float = 1.0,
-                dx: float = 0.0,
-                dy: float = 0.0,
-                dz: float = 0.0,
+                d: (float, float, float) = (0.0, 0.0, 0.0),
+                r: (float, float, float) = (0.0, 0.0, 0.0),
                 flipx: bool = False,
                 flipy: bool = False,
                 flipz: bool = False,
@@ -435,20 +484,17 @@ class Problem(_Problem):
     """Adds a surface object to the problem
 
     :param surface: The surface to add.
-    :param group: If specified, a new conductor group is formed or 
-                  the surface is added to the respective group.
-    :param link: If True, links this surface to the previous 
-                 conductor.
-    :param ref_point_inside: t.b.d.
+    :param group: See :py:meth:`load` for details.
+    :param link: See :py:meth:`load` for details.
     :param kind: The type of the surface (conductor or dielectric or dielectric interface).
     :param outside_perm: The permittivity outside of the surface.
     :param inside_perm: The permittivity inside of the surface (only for dielectric surfaces).
-    :param dx: Translates the surface in x direction.
-    :param dy: Translates the surface in y direction.
-    :param dz: Translates the surface in z direction.
-    :param flipx: Flips the surface and the yz plane.
-    :param flipy: Flips the surface and the xz plane.
-    :param flipz: Flips the surface and the xy plane.
+    :param d: Translates the surface.
+    :param r: The reference point for surface normalisation. Needed for dielectric surfaces.
+    :param ref_point_inside: True, if the reference point is inside the surface. Needed for dielectric surfaces.
+    :param flipx: Flips the surface at the yz plane.
+    :param flipy: Flips the surface at the xz plane.
+    :param flipz: Flips the surface at the xy plane.
     :param rotx: Rotates the surface around the x axis by the given angle.
     :param roty: Rotates the surface around the y axis by the given angle.
     :param rotz: Rotates the surface around the z axis by the given angle.
@@ -460,15 +506,16 @@ class Problem(_Problem):
 
     The order in which the transformations are applied is:
 
-    * `scale`
-    * `flipx`, `flipy` and `flipz`
-    * `rotx`
-    * `roty`
-    * `rotz`
-    * `dx`, `dy` and `dz`
+    * Scaling by `scale`
+    * Flipping by `flipx`, `flipy` and `flipz`
+    * Rotation by `rotx`
+    * Rotation by `roty`
+    * Rotation by `rotz`
+    * Translation by `d`
     """
-    # @@@
-    pass
+    return super()._add(surface, link, group, kind, ref_point_inside, 
+                        outside_perm, inside_perm, d, r, flipx, flipy, flipz, 
+                        rotx, roty, rotz, scale)
 
   def solve(self) -> list[ list[float] ]:
     """Solves the problem and returns the capacitance matrix

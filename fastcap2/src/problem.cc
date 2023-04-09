@@ -2,6 +2,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
+#include "surface.h"
 #include "mulStruct.h"
 #include "mulGlobal.h"
 #include "input.h"
@@ -14,6 +15,8 @@
 #include <stdexcept>
 #include <string>
 #include <cstring>
+
+extern PyTypeObject surface_type;
 
 struct ProblemObject {
   PyObject_HEAD
@@ -610,14 +613,56 @@ problem_set_verbose(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_load(ProblemObject *self, PyObject *args)
+problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
 {
   const char *filename = 0;
+  SurfaceData *surf_data = 0;
   int link = 0;
   const char *group = 0;
-  if (!PyArg_ParseTuple(args, "spz", &filename, &link, &group)) {
+  int kind = 0;
+  int ref_point_inside = 0;
+  double outer_perm = 1.0, inner_perm = 1.0;
+  PyObject *d = NULL;
+  PyObject *r = NULL;
+  int flipx = 0, flipy = 0, flipz = 0;
+  double rotx = 0.0, roty = 0.0, rotz = 0.0;
+  double scale = 1.0;
+
+  if (load) {
+    if (!PyArg_ParseTuple(args, "spzipddOOpppdddd", &filename, &link, &group, &kind,
+                                                    &ref_point_inside, &outer_perm, &inner_perm,
+                                                    &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz, &scale)) {
+      return NULL;
+    }
+  } else {
+    PyObject *py_surf = NULL;
+    if (!PyArg_ParseTuple(args, "OpzipddOOpppdddd", &py_surf, &link, &group, &kind,
+                                                    &ref_point_inside, &outer_perm, &inner_perm,
+                                                    &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz, &scale)) {
+      return NULL;
+    }
+    if (!PyObject_TypeCheck(py_surf, &surface_type)) {
+      Py_DECREF(py_surf);
+      PyErr_SetString(PyExc_RuntimeError, "First argument is not of fastcap2.Surface type");
+    }
+    surf_data = ((SurfaceObject *)py_surf)->surface.clone(self->sys.heap);
+    Py_DECREF(py_surf);
+  }
+
+  double dx = 0.0, dy = 0.0, dz = 0.0;
+  double rx = 0.0, ry = 0.0, rz = 0.0;
+  if (!PyArg_ParseTuple(d, "ddd", &dx, &dy, &dz)) {
+    Py_DECREF(d);
+    Py_DECREF(r);
     return NULL;
   }
+  Py_DECREF(d);
+
+  if (!PyArg_ParseTuple(r, "ddd", &rx, &ry, &rz)) {
+    Py_DECREF(r);
+    return NULL;
+  }
+  Py_DECREF(r);
 
   //  find end of list
   surface *eol = self->sys.surf_list;
@@ -629,6 +674,8 @@ problem_load(ProblemObject *self, PyObject *args)
   //  if linked, mark previous object as chained
   if (eol && link) {
     eol->end_of_chain = FALSE;
+  } else {
+    link = false;
   }
 
   //  append new surface element
@@ -641,11 +688,24 @@ problem_load(ProblemObject *self, PyObject *args)
 
   new_surf->type = CONDTR;
   new_surf->name = self->sys.heap.strdup(filename);
-  new_surf->outer_perm = 1.0;
+  new_surf->surf_data = surf_data;
+  new_surf->outer_perm = outer_perm;
+  new_surf->inner_perm = inner_perm;
+  new_surf->type = kind;
+  new_surf->ref_inside = ref_point_inside;
+  new_surf->ref[0] = rx;
+  new_surf->ref[1] = ry;
+  new_surf->ref[2] = rz;
+  new_surf->trans[0] = dx;
+  new_surf->trans[1] = dy;
+  new_surf->trans[2] = dz;
   new_surf->end_of_chain = TRUE;
+  // @@@ not yet: flip, scale, rot
 
   //  set up group name
-  if (group) {
+  if (link) {
+    new_surf->group_name = eol->group_name;
+  } else if (group) {
     new_surf->group_name = self->sys.heap.strdup(group);
   } else {
     char group_name[BUFSIZ];
@@ -654,6 +714,18 @@ problem_load(ProblemObject *self, PyObject *args)
   }
 
   Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_load(ProblemObject *self, PyObject *args)
+{
+  return problem_load_or_add(self, args, true /*load*/);
+}
+
+static PyObject *
+problem_add(ProblemObject *self, PyObject *args)
+{
+  return problem_load_or_add(self, args, false /*add*/);
 }
 
 static PyObject *
@@ -789,6 +861,7 @@ static PyMethodDef problem_methods[] = {
   { "_set_verbose", (PyCFunction) problem_set_verbose, METH_VARARGS, NULL },
   { "_load", (PyCFunction) problem_load, METH_VARARGS, NULL },
   { "_load_list", (PyCFunction) problem_load_list, METH_VARARGS, NULL },
+  { "_add", (PyCFunction) problem_add, METH_VARARGS, NULL },
   { "_solve", (PyCFunction) problem_solve, METH_NOARGS, NULL },
   { "_conductors", (PyCFunction) problem_conductors, METH_NOARGS, NULL },
   {NULL}

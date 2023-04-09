@@ -3,8 +3,58 @@
 #include "mulStruct.h"
 #include "quickif.h"
 #include "patran_f.h"
+#include "patran.h"
+#include "heap.h"
 
 #include <cstring>
+#include <memory>
+
+// --------------------------------------------------------------------------
+
+SurfaceData::SurfaceData()
+  : name(0), quads(0), tris(0)
+{
+}
+
+SurfaceData *SurfaceData::clone(Heap &heap)
+{
+  SurfaceData *new_data = heap.alloc<SurfaceData>(1);
+  new (new_data) SurfaceData();
+
+  if (name) {
+    new_data->name = heap.strdup(name);
+  }
+
+  quadl *prevq = 0;
+  for (quadl *q = quads; q; q = q->next) {
+    quadl *new_quad = heap.alloc<quadl>(1);
+    *new_quad = *q;
+    new_quad->next = 0;
+    if (prevq) {
+      prevq->next = new_quad;
+    } else {
+      quads = new_quad;
+    }
+    prevq = new_quad;
+  }
+
+  tri *prevt = 0;
+  for (tri *t = tris; t; t = t->next) {
+    tri *new_tri = heap.alloc<tri>(1);
+    *new_tri = *t;
+    new_tri->next = 0;
+    if (prevt) {
+      prevt->next = new_tri;
+    } else {
+      tris = new_tri;
+    }
+    prevt = new_tri;
+  }
+
+  return new_data;
+}
+
+// --------------------------------------------------------------------------
 
 /*
   tells if any conductor name alias matches a string

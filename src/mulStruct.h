@@ -3,9 +3,14 @@
 #define mulStruct_H
 
 #include "heap.h"
-#include "patran.h"             /* for neutral file interface */
+// #include "patran.h"             /* for neutral file interface */
 
 #include <cstdio>
+
+struct SurfaceData;
+struct NAME;
+struct ITER;
+struct Name;
 
 struct surface {                /* a surface file and its permittivities */
   int type;                     /* CONDTR, DIELEC or BOTH */
@@ -15,6 +20,7 @@ struct surface {                /* a surface file and its permittivities */
   int end_of_chain;             /* TRUE=>end o/surf chain all w/same cond#'s */
   char *title;                  /* title inside surface file */
   char *name;                   /* surface file name (neutral or quick fmat) */
+  SurfaceData *surf_data;       /* explicit surface data */
   char *group_name;             /* name of cond group (if any) surf part of */
   double outer_perm;            /* relative permitivity on side n pnts into
                                    (n is taken as the normal to 1st panel) */

@@ -7,6 +7,7 @@
 struct ssystem;
 struct Name;
 struct charge;
+class Heap;
 
 struct quadl {                  /* quadralateral element */
   int cond;                     /* conductor number */
@@ -24,7 +25,6 @@ struct quadl {                  /* quadralateral element */
   double z3;
   double z4;
 };
-typedef struct quadl quadl;
 
 struct tri {                    /* triangular element */
   int cond;                     /* conductor number */
@@ -39,9 +39,21 @@ struct tri {                    /* triangular element */
   double z2;
   double z3;
 };
-typedef struct tri tri;
 
-/* #define MAXCON 10000            assumes never more conductors than this */
+struct SurfaceData
+{
+  SurfaceData();
+
+  const char *name;
+  quadl *quads;
+  tri *tris;
+
+  SurfaceData *clone(Heap &heap);
+
+private:
+  SurfaceData(const SurfaceData &);
+  SurfaceData &operator=(const SurfaceData &);
+};
 
 int getConductorNum(ssystem *sys, char *name, int *num_cond);
 char *getConductorName(ssystem *sys, int cond_num);

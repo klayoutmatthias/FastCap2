@@ -12,58 +12,56 @@
 /* Refer to Chapter 29, Neutral System, of PATRAN manual for explanation.
    The variable names are identical to those that appear in the manual. */
 
-typedef struct node { 
+struct NODE {
   int ID;
   double coord[3];
-} NODE;
+};
 
-typedef struct element { 
+struct ELEMENT {
   int ID, shape, num_nodes;
   int corner[4];
-} ELEMENT;
+};
 
-typedef struct grid {
+struct GRID {
   int ID, *equiv_ID, number_equiv_grids;
   double coord[3];
-  struct grid *next, *prev;
-} GRID;
+  GRID *next, *prev;
+};
 
-typedef struct cfeg {
+struct CFEG {
   int ID, NELS, LPH, LPH_ID, LSHAPE, NODES, ICONF, NDIM;
-  struct cfeg *next, *prev;
+  CFEG *next, *prev;
   int *element_list;
-} CFEG;
+};
 
-typedef struct patch {
+struct PATCH {
   int ID, corner[4], conductor_ID;
-  struct patch *next, *prev;
-} PATCH;
+  PATCH *next, *prev;
+};
 
-typedef struct sm_patch {
+struct SM_PATCH {
   int ID, conductor_ID;
-  struct sm_patch *next;
-} SM_PATCH;
+  SM_PATCH *next;
+};
 
 /* intermediate name struct; used for compatability with patran i/f */
-typedef struct name {
+struct NAME {
   char *name;
   SM_PATCH *patch_list;
-  struct name *next;
-} NAME;
+  NAME *next;
+};
 
 /* used to build linked list of conductor names */
 struct Name {
   char *name;
-  struct Name *next;
-  struct Name *alias_list;
+  Name *next;
+  Name *alias_list;
 };
-typedef struct Name Name;
 
 /* used to make linked lists of iteration or conductor #s */
 struct ITER {
   int iter;
-  struct ITER *next;
+  ITER *next;
 };
-typedef struct ITER ITER;
 
 #endif
