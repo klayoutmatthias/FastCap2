@@ -166,45 +166,98 @@ class Problem(_Problem):
     super()._set_remove_conductors(value)
 
   @property
-  def ps_select_q(self) -> Optional[list[str]]:
-    """PS output: select conductors for at-1V charge distribution .ps pictures
+  def qps_file_base(self) -> Optional[str]:
+    """PS output: select file base for at-1V charge distribution .ps pictures
+
+    If this property is set, charge distribution .ps pictures will be generated
+    during the :py:meth:`solve` call. For each conductor a different .ps file 
+    will be written. The .ps files are named using the value of this property
+    and appending the conductor number and a `.ps` suffix.
+
+    For example, setting this property to `/tmp/charges` will generate .ps files
+    called `/tmp/charges1.ps`, `/tmp/charges2.ps` and so on.
+
+    Setting this property to None (the default) will disable generating the 
+    charge distribution pictures.
+
+    The charge distribution output can be configured further using the
+    :py:meth:`qps_select_q`, :py:meth:`qps_remove_q`, :py:meth:`qps_no_key` and
+    :py:meth:`qps_total_charges` properties.
+
+    Note, that charge distribution pictures are only generated during
+    :py:meth:`solve`, but not by :py:meth:`dump_ps`.
+    """
+    return super()._get_qps_file_base()
+
+  @qps_file_base.setter
+  def qps_file_base(self, value: Optional[str]):
+    super()._set_qps_file_base(value)
+
+  @property
+  def qps_select_q(self) -> Optional[list[str]]:
+    """PS output: select conductors for charge distribution .ps pictures
 
     This property corresponds to option "-q" of the original
     "fastcap" program. A value of 'None' for this property will
     select all conductors.
-    """
-    return super()._get_ps_select_q()
 
-  @ps_select_q.setter
-  def ps_select_q(self, value: Optional[list[str]]):
-    super()._set_ps_select_q(value)
+    This option is effective only if charge distribution pictures are
+    enabled by setting the :py:meth:`qps_file_base` property.
+    """
+    return super()._get_qps_select_q()
+
+  @qps_select_q.setter
+  def qps_select_q(self, value: Optional[list[str]]):
+    super()._set_qps_select_q(value)
 
   @property
-  def ps_remove_q(self) -> Optional[list[str]]:
+  def qps_remove_q(self) -> Optional[list[str]]:
     """PS output: remove conductors from all charge distribution .ps pictures
 
     This property corresponds to option "-rc" of the original
     "fastcap" program. A value of 'None' for this property will enable
     all conductors in the charge distribution picture.
-    """
-    return super()._get_ps_remove_q()
 
-  @ps_remove_q.setter
-  def ps_remove_q(self, value: Optional[list[str]]):
-    super()._set_ps_remove_q(value)
+    This option is effective only if charge distribution pictures are
+    enabled by setting the :py:meth:`qps_file_base` property.
+    """
+    return super()._get_qps_remove_q()
+
+  @qps_remove_q.setter
+  def qps_remove_q(self, value: Optional[list[str]]):
+    super()._set_qps_remove_q(value)
 
   @property
-  def ps_no_key(self) -> bool:
-    """PS output: remove key in shaded .ps picture file (use with `select_q` option)
+  def qps_no_key(self) -> bool:
+    """PS output: remove key from all charge distribution .ps pictures
 
     This property corresponds to option "-rk" of the original
     "fastcap" program.
-    """
-    return super()._get_ps_no_key()
 
-  @ps_no_key.setter
-  def ps_no_key(self, value: bool):
-    super()._set_ps_no_key(value)
+    This option is effective only if charge distribution pictures are
+    enabled by setting the :py:meth:`qps_file_base` property.
+    """
+    return super()._get_qps_no_key()
+
+  @qps_no_key.setter
+  def qps_no_key(self, value: bool):
+    super()._set_qps_no_key(value)
+
+  @property
+  def qps_total_charges(self) -> bool:
+    """PS output: display total charges in charge distribution .ps pictures
+
+    This property corresponds to option "-dc" of the original
+    "fastcap" program.
+
+    This option is effective only if charge distribution pictures are
+    enabled by setting the :py:meth:`qps_file_base` property.
+    """
+    return super()._get_qps_total_charges()
+
+  @qps_total_charges.setter
+  def qps_total_charges(self, value: bool):
+    super()._set_qps_total_charges(value)
 
   @property
   def ps_no_dielectric(self) -> bool:
@@ -218,19 +271,6 @@ class Problem(_Problem):
   @ps_no_dielectric.setter
   def ps_no_dielectric(self, value: bool):
     super()._set_ps_no_dielectric(value)
-
-  @property
-  def ps_total_charges(self) -> bool:
-    """PS output: display total charges in shaded .ps picture file (use with `select_q` option)
-
-    This property corresponds to option "-dc" of the original
-    "fastcap" program.
-    """
-    return super()._get_ps_total_charges()
-
-  @ps_total_charges.setter
-  def ps_total_charges(self, value: bool):
-    super()._set_ps_total_charges(value)
 
   @property
   def ps_no_showpage(self) -> bool:
@@ -260,7 +300,7 @@ class Problem(_Problem):
 
   @property
   def ps_show_hidden(self) -> bool:
-    """PS output: do now remove hidden faces
+    """PS output: do not remove hidden faces
 
     This property corresponds to option "-f" of the original
     "fastcap" program.
@@ -273,7 +313,7 @@ class Problem(_Problem):
 
   @property
   def ps_azimuth(self) -> float:
-    """PS output: sets the azimuth angle
+    """PS output: the azimuth angle
 
     This property corresponds to option "-a" of the original
     "fastcap" program.
@@ -286,7 +326,7 @@ class Problem(_Problem):
 
   @property
   def ps_elevation(self) -> float:
-    """PS output: sets the elevation angle
+    """PS output: the elevation angle
 
     This property corresponds to option "-e" of the original
     "fastcap" program.
@@ -299,7 +339,7 @@ class Problem(_Problem):
 
   @property
   def ps_rotation(self) -> float:
-    """PS output: sets the rotation angle
+    """PS output: the rotation angle
 
     This property corresponds to option "-r" of the original
     "fastcap" program.
@@ -330,7 +370,7 @@ class Problem(_Problem):
 
   @property
   def ps_distance(self) -> float:
-    """PS output: sets the distance 
+    """PS output: the distance 
 
     This property corresponds to option "-h" of the original
     "fastcap" program.
@@ -343,7 +383,7 @@ class Problem(_Problem):
 
   @property
   def ps_scale(self) -> float:
-    """PS output: sets the scale 
+    """PS output: the scale 
 
     This property corresponds to option "-s" of the original
     "fastcap" program.
@@ -356,7 +396,7 @@ class Problem(_Problem):
 
   @property
   def ps_linewidth(self) -> float:
-    """PS output: sets the line width 
+    """PS output: the line width 
 
     This property corresponds to option "-w" of the original
     "fastcap" program.
@@ -369,7 +409,7 @@ class Problem(_Problem):
 
   @property
   def ps_axislength(self) -> float:
-    """PS output: sets the axis length
+    """PS output: the axis length
 
     This property corresponds to option "-x" of the original
     "fastcap" program.
@@ -541,10 +581,12 @@ class Problem(_Problem):
     return super().conductors()
 
   def dump_ps(self, filename):
-    """Produces a PS file with the geometries and charges
+    """Produces a PS file with the geometries
 
     See the manifold `ps_...` options that configure PS output.
+
+    Note: calling this function continuously allocates memory until
+    the Problem object is released.
     """
-    # @@@
-    pass
+    super().dump_ps(filename)
 

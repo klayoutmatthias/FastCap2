@@ -18,4 +18,6 @@ void populate_from_command_line(ssystem *sys);
 charge *build_charge_list(ssystem *sys);
 void read_list_file(ssystem *sys, surface **surf_list, const char *list_file);
 
+void dumpSurfDat(ssystem *sys);
+
 #endif

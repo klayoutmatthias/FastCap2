@@ -12,7 +12,6 @@
 #include <cstdio>
 #include <cstring>
 #include <cassert>
-#include <unistd.h>
 #include <string>
 
 /*
@@ -454,6 +453,8 @@ void get_ps_file_base(ssystem *sys)
   int i, j;
   char temp[BUFSIZ];
 
+  sys->ps_file_base = 0;
+
   /* - if no list file, use input file; otherwise use list file */
   /* - if neither present, use "stdin" */
   /*   check for list file */
@@ -478,7 +479,7 @@ void get_ps_file_base(ssystem *sys)
     }
   }
 
-  if(sys->ps_file_base == NULL) {       /* input must be stdin */
+  if(!sys->ps_file_base) {       /* input must be stdin */
     sys->ps_file_base = sys->heap.strdup("stdin");
   }
 }
@@ -855,7 +856,6 @@ static void parse_command_line(ssystem *sys, const char **input_file, const char
       else if(argv[i][1] == 'c') sys->c_ = true;
       else if(argv[i][1] == 'm') sys->m_ = true;
       else if(argv[i][1] == 'q') {
-        get_ps_file_base(sys); /* set up the output file base */
         sys->qpic_name_list = &(argv[i][2]);
         sys->q_ = true;
       }
@@ -882,6 +882,8 @@ static void parse_command_line(ssystem *sys, const char **input_file, const char
       *input_file = argv[i];
     }
   }
+
+  get_ps_file_base(sys); /* set up the output file base */
 
   if (cmderr == TRUE) {
     if (sys->capvew) {
@@ -1006,7 +1008,7 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
     if (!infiles.empty()) {
       infiles += ",";
     }
-    infiles += input_file;
+    infiles += surf_list_file;
   }
 
   return(surf_list);
@@ -1038,7 +1040,7 @@ void populate_from_command_line(ssystem *sys)
 /*
   dump the data associated with the input surfaces
 */
-static void dumpSurfDat(ssystem *sys)
+void dumpSurfDat(ssystem *sys)
 {
   surface *cur_surf;
 
@@ -1196,9 +1198,7 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
 */
 charge *build_charge_list(ssystem *sys)
 {
-  char hostname[BUFSIZ];
   charge *chglist;
-  long clock;
 
   if (sys->dirsol || sys->expgcr) {
     sys->depth = 0;                /* put all the charges in first cube */
@@ -1223,20 +1223,6 @@ charge *build_charge_list(ssystem *sys)
 
   /* check for inconsistencies in kill lists */
   resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list);
-
-  if (sys->dissrf && sys->log) {
-    dumpSurfDat(sys);
-  }
-
-  time(&clock);
-  sys->msg("  Date: %s", ctime(&clock));
-  if(gethostname(hostname, BUFSIZ) != -1)
-      sys->msg("  Host: %s\n", hostname);
-  else sys->msg("  Host: ? (gethostname() failure)\n");
-
-  if (sys->cfgdat) {
-    dumpConfig(sys, sys->argv[0]);
-  }
 
   /* return the panels from the surface files */
   return(chglist);

@@ -4,6 +4,6 @@
 
 class ssystem;
 
-double **solve(ssystem *sys);
+double **fastcap_solve(ssystem *sys);
 
 #endif

@@ -16,7 +16,7 @@
   - file name used is <ps_file_base><iter>.ps; ps_file_base is either
     the list file base, the input file base or "stdin" (see get_ps_file_info())
 */
-void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int use_ttl_chg)
+void dump_ps_geometry(ssystem *sys, const char *filename, charge *chglist, double *q, int use_ttl_chg)
 {
   int numlines, numfaces, use_density;
   face **faces, **sfaces;
@@ -24,7 +24,6 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   double *avg, radius;
   line **lines;
   FILE *fp;
-  char str[BUFSIZ];
   double black = 0.0, white = 0.0;
 
   /* set up use density flag---not too clean; saves changes in called funcs */
@@ -61,12 +60,8 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
   /* set up all the normals and rhs for the faces (needed for sort) */
   initFaces(faces, numfaces, sys->view);
 
-  /* set up ps file name */
-  if(q == NULL) sprintf(str, "%s.ps", sys->ps_file_base);
-  else sprintf(str, "%s%d.ps", sys->ps_file_base, cond);
-
   /* set up the adjacency graph for the depth sort */
-  sys->msg("\nSorting %d faces for %s...", numfaces, str);
+  sys->msg("\nSorting %d faces for %s ...", numfaces, filename);
   sys->flush();
   getAdjGraph(sys, faces, numfaces, sys->view, rhs, normal);
   sys->msg("done.\n");
@@ -86,10 +81,10 @@ void dump_ps_geometry(ssystem *sys, charge *chglist, double *q, int cond, int us
     dumpFaceText(sys, sfaces, numfaces);
   }
   else {
-    if((fp = fopen(str, "w")) == NULL) {
-      sys->error("dump_ps_geometry: can't open\n `%s'\nto write\n", str);
+    if((fp = fopen(filename, "w")) == NULL) {
+      sys->error("dump_ps_geometry: can't open\n `%s'\nto write\n", filename);
     }
-    sys->msg("Writing %s ...", str);
+    sys->msg("Writing %s ...", filename);
     dumpPs(sys, sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density, black, white);
     sys->msg("done.\n");
     fclose(fp);

@@ -15,6 +15,8 @@
 
 #include <cmath>
 #include <cassert>
+#include <string>
+#include <sstream>
 
 static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, double **bv, double **bh, int size, int real_size, double *sqrmat, int *real_index, int maxiter, double tol, charge *chglist);
 static void computePsi(ssystem *sys, double *q, double *p, int size, int real_size, double *sqrmat, int *real_index, charge *chglist);
@@ -114,11 +116,14 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
       sys->msg("End panel charges\n");
     }
 
-    if (sys->capvew) {
+    if (sys->capvew && sys->ps_file_base) {
       /* dump shaded geometry file if only if this column picture wanted */
       /* (variable names are messed up - iter list now is list of columns) */
       if(want_this_iter(sys->qpic_num_list, cond) || (sys->q_ && sys->qpic_num_list == NULL)) {
-        dump_ps_geometry(sys, chglist, q, cond, sys->dd_);
+        /* set up ps file name */
+        std::ostringstream os;
+        os << sys->ps_file_base << cond << ".ps";
+        dump_ps_geometry(sys, os.str().c_str(), chglist, q, sys->dd_);
       }
     }
 

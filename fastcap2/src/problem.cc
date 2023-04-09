@@ -8,9 +8,9 @@
 #include "input.h"
 #include "zbufGlobal.h"
 #include "fastcap_solve.h"
+#include "zbuf2fastcap.h"
 #include "quickif.h"
 
-//  for in-place new
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -294,13 +294,44 @@ problem_set_remove_conductors(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_ps_select_q(ProblemObject *self)
+problem_get_qps_file_base(ProblemObject *self)
+{
+  if (!self->sys.ps_file_base || !self->sys.q_) {
+    Py_RETURN_NONE;
+  } else {
+    return PyUnicode_FromString(self->sys.ps_file_base);
+  }
+}
+
+static PyObject *
+problem_set_qps_file_base(ProblemObject *self, PyObject *value)
+{
+  if (Py_IsNone(value)) {
+    self->sys.ps_file_base = 0;
+    self->sys.q_ = FALSE;
+  } else {
+    PyObject *qps_file_base_str = PyObject_Str(value);
+    if (!qps_file_base_str) {
+      return NULL;
+    }
+    const char *qps_file_base_utf8str = PyUnicode_AsUTF8(qps_file_base_str);
+    if (!qps_file_base_utf8str) {
+      return NULL;
+    }
+    self->sys.ps_file_base = self->sys.heap.strdup(qps_file_base_utf8str);
+    self->sys.q_ = TRUE;
+  }
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_qps_select_q(ProblemObject *self)
 {
   return parse_conductor_list(self->sys.qpic_name_list);
 }
 
 static PyObject *
-problem_set_ps_select_q(ProblemObject *self, PyObject *value)
+problem_set_qps_select_q(ProblemObject *self, PyObject *value)
 {
   char *list = NULL;
   if (Py_IsNone(value)) {
@@ -316,13 +347,13 @@ problem_set_ps_select_q(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_ps_remove_q(ProblemObject *self)
+problem_get_qps_remove_q(ProblemObject *self)
 {
   return parse_conductor_list(self->sys.kq_name_list);
 }
 
 static PyObject *
-problem_set_ps_remove_q(ProblemObject *self, PyObject *value)
+problem_set_qps_remove_q(ProblemObject *self, PyObject *value)
 {
   char *list = NULL;
   if (Py_IsNone(value)) {
@@ -338,13 +369,13 @@ problem_set_ps_remove_q(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_ps_no_key(ProblemObject *self)
+problem_get_qps_no_key(ProblemObject *self)
 {
   return PyBool_FromLong (self->sys.rk_);
 }
 
 static PyObject *
-problem_set_ps_no_key(ProblemObject *self, PyObject *args)
+problem_set_qps_no_key(ProblemObject *self, PyObject *args)
 {
   int b = 0;
   if (!PyArg_ParseTuple(args, "p", &b)) {
@@ -352,6 +383,24 @@ problem_set_ps_no_key(ProblemObject *self, PyObject *args)
   }
 
   self->sys.rk_ = b;
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_get_qps_total_charges(ProblemObject *self)
+{
+  return PyBool_FromLong (self->sys.dd_);
+}
+
+static PyObject *
+problem_set_qps_total_charges(ProblemObject *self, PyObject *args)
+{
+  int b = 0;
+  if (!PyArg_ParseTuple(args, "p", &b)) {
+    return NULL;
+  }
+
+  self->sys.dd_ = b;
   Py_RETURN_NONE;
 }
 
@@ -370,24 +419,6 @@ problem_set_ps_no_dielectric(ProblemObject *self, PyObject *args)
   }
 
   self->sys.rd_ = b;
-  Py_RETURN_NONE;
-}
-
-static PyObject *
-problem_get_ps_total_charges(ProblemObject *self)
-{
-  return PyBool_FromLong (self->sys.dd_);
-}
-
-static PyObject *
-problem_set_ps_total_charges(ProblemObject *self, PyObject *args)
-{
-  int b = 0;
-  if (!PyArg_ParseTuple(args, "p", &b)) {
-    return NULL;
-  }
-
-  self->sys.dd_ = b;
   Py_RETURN_NONE;
 }
 
@@ -763,7 +794,7 @@ problem_solve(ProblemObject *self)
   double **capmat = 0;
 
   try {
-    capmat = solve(&self->sys);
+    capmat = fastcap_solve(&self->sys);
   } catch (std::runtime_error &ex) {
     return raise_error (ex);
   }
@@ -821,6 +852,20 @@ problem_conductors(ProblemObject *self)
   return res;
 }
 
+static PyObject *
+problem_dump_ps(ProblemObject *self, PyObject *args)
+{
+  const char *filename = 0;
+  if (!PyArg_ParseTuple(args, "s", &filename)) {
+    return NULL;
+  }
+
+  //  NOTE: this leaks memory for the charge list because we're using a heap.
+  charge *chglist = build_charge_list(&self->sys);
+  dump_ps_geometry(&self->sys, filename, chglist, NULL, self->sys.dd_);
+
+  Py_RETURN_NONE;
+}
 
 static PyMethodDef problem_methods[] = {
   { "_get_title", (PyCFunction) problem_get_title, METH_NOARGS, NULL },
@@ -837,16 +882,18 @@ static PyMethodDef problem_methods[] = {
   { "_set_skip_conductors", (PyCFunction) problem_set_skip_conductors, METH_O, NULL },
   { "_get_remove_conductors", (PyCFunction) problem_get_remove_conductors, METH_NOARGS, NULL },
   { "_set_remove_conductors", (PyCFunction) problem_set_remove_conductors, METH_O, NULL },
-  { "_get_ps_select_q", (PyCFunction) problem_get_ps_select_q, METH_NOARGS, NULL },
-  { "_set_ps_select_q", (PyCFunction) problem_set_ps_select_q, METH_O, NULL },
-  { "_get_ps_remove_q", (PyCFunction) problem_get_ps_remove_q, METH_NOARGS, NULL },
-  { "_set_ps_remove_q", (PyCFunction) problem_set_ps_remove_q, METH_O, NULL },
-  { "_get_ps_no_key", (PyCFunction) problem_get_ps_no_key, METH_NOARGS, NULL },
-  { "_set_ps_no_key", (PyCFunction) problem_set_ps_no_key, METH_VARARGS, NULL },
+  { "_get_qps_file_base", (PyCFunction) problem_get_qps_file_base, METH_NOARGS, NULL },
+  { "_set_qps_file_base", (PyCFunction) problem_set_qps_file_base, METH_O, NULL },
+  { "_get_qps_select_q", (PyCFunction) problem_get_qps_select_q, METH_NOARGS, NULL },
+  { "_set_qps_select_q", (PyCFunction) problem_set_qps_select_q, METH_O, NULL },
+  { "_get_qps_remove_q", (PyCFunction) problem_get_qps_remove_q, METH_NOARGS, NULL },
+  { "_set_qps_remove_q", (PyCFunction) problem_set_qps_remove_q, METH_O, NULL },
+  { "_get_qps_no_key", (PyCFunction) problem_get_qps_no_key, METH_NOARGS, NULL },
+  { "_set_qps_no_key", (PyCFunction) problem_set_qps_no_key, METH_VARARGS, NULL },
+  { "_get_qps_total_charges", (PyCFunction) problem_get_qps_total_charges, METH_NOARGS, NULL },
+  { "_set_qps_total_charges", (PyCFunction) problem_set_qps_total_charges, METH_VARARGS, NULL },
   { "_get_ps_no_dielectric", (PyCFunction) problem_get_ps_no_dielectric, METH_NOARGS, NULL },
   { "_set_ps_no_dielectric", (PyCFunction) problem_set_ps_no_dielectric, METH_VARARGS, NULL },
-  { "_get_ps_total_charges", (PyCFunction) problem_get_ps_total_charges, METH_NOARGS, NULL },
-  { "_set_ps_total_charges", (PyCFunction) problem_set_ps_total_charges, METH_VARARGS, NULL },
   { "_get_ps_no_showpage", (PyCFunction) problem_get_ps_no_showpage, METH_NOARGS, NULL },
   { "_set_ps_no_showpage", (PyCFunction) problem_set_ps_no_showpage, METH_VARARGS, NULL },
   { "_get_ps_number_faces", (PyCFunction) problem_get_ps_number_faces, METH_NOARGS, NULL },

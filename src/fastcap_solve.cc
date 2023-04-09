@@ -18,7 +18,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
-
+#include <unistd.h>
 
 double **symmetrize_and_clean(ssystem *sys, double **capmat)
 {
@@ -101,7 +101,7 @@ double **symmetrize_and_clean(ssystem *sys, double **capmat)
   return sym_mat;
 }
 
-double **solve(ssystem *sys)
+double **fastcap_solve(ssystem *sys)
 {
   int ttliter;
   charge *chglist, *nq;
@@ -116,6 +116,9 @@ double **solve(ssystem *sys)
   int num_dummy_panels = 0;             /* number of off-panel eval pnt panels */
   int eval_size = 0;                    /* sum of above two (total panel structs) */
 
+  char hostname[BUFSIZ];
+  long clock;
+
   char dump_filename[BUFSIZ];
   strcpy(dump_filename, "psmat.ps");
 
@@ -124,11 +127,22 @@ double **solve(ssystem *sys)
        file dumping interface are passed back via globals (see mulGlobal.c) */
   chglist = build_charge_list(sys);
 
-  /* if no fastcap run is to be done, just dump the psfile */
-  if(sys->capvew && sys->m_) {
-    if(!sys->q_) get_ps_file_base(sys);
-    dump_ps_geometry(sys, chglist, NULL, 0, sys->dd_);
-    return 0;
+  if (sys->dissrf && sys->log) {
+    dumpSurfDat(sys);
+  }
+
+  if (sys->log) {
+    time(&clock);
+    sys->msg("  Date: %s", ctime(&clock));
+    if (gethostname(hostname, BUFSIZ) != -1) {
+      sys->msg("  Host: %s\n", hostname);
+    } else {
+      sys->msg("  Host: ? (gethostname() failure)\n");
+    }
+  }
+
+  if (sys->cfgdat && sys->log) {
+    dumpConfig(sys, sys->argv[0]);
   }
 
   starttimer;
