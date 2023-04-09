@@ -4,6 +4,7 @@
 #include "mulMulti.h"
 #include "calcp.h"
 #include "input.h"
+#include "heap.h"
 
 #include <cmath>
 #include <cstdio>
@@ -594,6 +595,7 @@ static void ComputeMoments(ssystem *sys, charge *pp)
   int order=MAXORDER;
   int i, j, nside,  N, M, N1, M1, M2, MN1, MN2;
   double dx, dy, dxdy, dydx, SI, *xp, *yp, *xpn, *ypn;
+  static Heap local_heap;
   static double *XP[4], *YP[4], **I;
   static int maxorder = 0;
   static double CS[16] = { 0.0, 1.0, 1.0, 1.5, 1.5, 3.75, 1.0, 3.0, 
@@ -601,11 +603,11 @@ static void ComputeMoments(ssystem *sys, charge *pp)
   /* Allocate temporary storage and initialize arrays. */
   if(order > maxorder) {
     for(i = 0; i < 4; i++) {
-      XP[i] = sys->heap.alloc<double>(order+3, AQ2P);
-      YP[i] = sys->heap.alloc<double>(order+3, AQ2P);
+      XP[i] = local_heap.alloc<double>(order+3, AQ2P);
+      YP[i] = local_heap.alloc<double>(order+3, AQ2P);
     }
     /* Allocate the euclidean moments matrix, Imn. */
-    I = sys->heap.mat(order+1, order+1, AQ2P);
+    I = local_heap.mat(order+1, order+1, AQ2P);
     maxorder = order;
   }
 

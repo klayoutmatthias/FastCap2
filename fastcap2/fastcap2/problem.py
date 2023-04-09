@@ -26,9 +26,15 @@ class Problem(_Problem):
      # loads a problem from a FastCap2 list file
      problem.load_list("geometry.lst")
 
-     # returns the cap matrix in MKS units
+     # solves the problem and returns the cap matrix in MKS units
      cap_matrix = problem.solve()
-  
+
+     # dumps the geometry to a PS file
+     problem.dump_ps("geo.ps")
+
+  Once :py:meth:`solve` or :py:meth:`dump_ps` is called, 
+  the geometry of the problem should not be modified again.
+  Currently this will put the object in an undefined state.
   """
 
   XI = 0

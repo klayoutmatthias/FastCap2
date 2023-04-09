@@ -1,6 +1,13 @@
 
 import unittest
+import tempfile
+import os
+
 import fastcap2 as fc2
+
+def format_cap_matrix(cap_matrix, unit = 1e-12):
+  return "\n".join([ "".join([ "%-6.0f" % (m / unit) for m in row ]) for row in cap_matrix ])
+
 
 class TestProblem(unittest.TestCase):
 
@@ -100,38 +107,38 @@ class TestProblem(unittest.TestCase):
     problem.remove_conductors = None
     self.assertEqual(problem.remove_conductors, None)
     
-  def test_ps_select_q(self):
+  def test_qps_select_q(self):
 
     problem = fc2.Problem()
 
-    self.assertEqual(problem.ps_select_q, None)
+    self.assertEqual(problem.qps_select_q, None)
 
-    problem.ps_select_q = [ "C1", "C2" ]
-    self.assertEqual(problem.ps_select_q, [ "C1", "C2" ])
+    problem.qps_select_q = [ "C1", "C2" ]
+    self.assertEqual(problem.qps_select_q, [ "C1", "C2" ])
 
-    problem.ps_select_q = None
-    self.assertEqual(problem.ps_select_q, None)
+    problem.qps_select_q = None
+    self.assertEqual(problem.qps_select_q, None)
     
-  def test_ps_remove_q(self):
+  def test_qps_remove_q(self):
 
     problem = fc2.Problem()
 
-    self.assertEqual(problem.ps_remove_q, None)
+    self.assertEqual(problem.qps_remove_q, None)
 
-    problem.ps_remove_q = [ "C1", "C2" ]
-    self.assertEqual(problem.ps_remove_q, [ "C1", "C2" ])
+    problem.qps_remove_q = [ "C1", "C2" ]
+    self.assertEqual(problem.qps_remove_q, [ "C1", "C2" ])
 
-    problem.ps_remove_q = None
-    self.assertEqual(problem.ps_remove_q, None)
+    problem.qps_remove_q = None
+    self.assertEqual(problem.qps_remove_q, None)
     
-  def test_ps_no_key(self):
+  def test_qps_no_key(self):
 
     problem = fc2.Problem()
 
-    self.assertEqual(problem.ps_no_key, False)
+    self.assertEqual(problem.qps_no_key, False)
 
-    problem.ps_no_key = True
-    self.assertEqual(problem.ps_no_key, True)
+    problem.qps_no_key = True
+    self.assertEqual(problem.qps_no_key, True)
 
   def test_ps_no_dielectric(self):
 
@@ -142,14 +149,14 @@ class TestProblem(unittest.TestCase):
     problem.ps_no_dielectric = True
     self.assertEqual(problem.ps_no_dielectric, True)
 
-  def test_ps_total_charges(self):
+  def test_qps_total_charges(self):
 
     problem = fc2.Problem()
 
-    self.assertEqual(problem.ps_total_charges, False)
+    self.assertEqual(problem.qps_total_charges, False)
 
-    problem.ps_total_charges = True
-    self.assertEqual(problem.ps_total_charges, True)
+    problem.qps_total_charges = True
+    self.assertEqual(problem.qps_total_charges, True)
 
   def test_ps_no_showpage(self):
 
@@ -266,6 +273,109 @@ class TestProblem(unittest.TestCase):
     problem.verbose = True
     self.assertEqual(problem.verbose, True)
 
+  def test_load_plates(self):
+
+    test_data_path = os.path.join(os.path.dirname(__file__), "data")
+
+    problem = fc2.Problem()
+
+    # cb is a 0.5 thick cap plate 10x10, place at distance 2
+    problem.load(os.path.join(test_data_path, "cb.geo"))
+    problem.load(os.path.join(test_data_path, "cb.geo"), d = (0, 0, 2.5))
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "877   -613  \n"
+        "-613  877   "
+    )
+
+    self.assertEqual(problem.conductors(), ['cb%GROUP1', 'cb%GROUP2'])
+
+  def test_load_plates_with_groups(self):
+
+    test_data_path = os.path.join(os.path.dirname(__file__), "data")
+
+    problem = fc2.Problem()
+
+    # cb is a 0.5 thick cap plate 10x10, place at distance 2
+    problem.load(os.path.join(test_data_path, "cb.geo"), group = "G1")
+    problem.load(os.path.join(test_data_path, "cb.geo"), group = "G2", d = (0, 0, 2.5))
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "877   -613  \n"
+        "-613  877   "
+    )
+
+    self.assertEqual(problem.conductors(), ['cb%G1', 'cb%G2'])
+
+  def test_load_plates_same_groups(self):
+
+    test_data_path = os.path.join(os.path.dirname(__file__), "data")
+
+    problem = fc2.Problem()
+
+    # cb is a 0.5 thick cap plate 10x10, place at distance 2
+    problem.load(os.path.join(test_data_path, "cb.geo"), group = "G")
+    problem.load(os.path.join(test_data_path, "cb.geo"), group = "G", d = (0, 0, 2.5))
+
+    cap_matrix = problem.solve()
+
+    # a single conductor 
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "529   "
+    )
+
+    self.assertEqual(problem.conductors(), ['cb%G'])
+
+  def test_load_plates_linked(self):
+
+    test_data_path = os.path.join(os.path.dirname(__file__), "data")
+
+    problem = fc2.Problem()
+
+    # cb is a 0.5 thick cap plate 10x10, place at distance 2
+    problem.load(os.path.join(test_data_path, "cb.geo"))
+    problem.load(os.path.join(test_data_path, "cb.geo"), d = (0, 0, 2.5), link = True)
+
+    cap_matrix = problem.solve()
+
+    # a single conductor 
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "529   "
+    )
+
+    self.assertEqual(problem.conductors(), ["cb%GROUP1"])
+
+  def test_load_list_file(self):
+
+    test_data_path = os.path.join(os.path.dirname(__file__), "data")
+
+    with open(os.path.join(test_data_path, "all.lst"), "r") as f:
+      data = f.read()
+      
+    data = data.replace("%", os.path.join(test_data_path, ""))
+
+    tmp = tempfile.NamedTemporaryFile()
+    tmp.write(str.encode(data))
+    tmp.flush()
+
+    problem = fc2.Problem()
+    problem.load_list(tmp.name)
+
+    cap_matrix = problem.solve()
+
+    # a single conductor 
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "1565  -1203 -259  \n"
+        "-1203 1565  -259  \n"
+        "-259  -259  817   "
+    )
+
+    self.assertEqual(problem.conductors(), ['ct1%GROUP1', 'ct2%GROUP2', 'cb%GROUP3'])
+    
 
 if __name__ == '__main__':
     unittest.main()

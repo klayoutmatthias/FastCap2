@@ -256,16 +256,19 @@ static int gmres(ssystem *sys, double *q, double *p, double *r, double *ap, doub
   double rnorm, norm;
   double hi, hip1, length;
 
+  static Heap local_heap;
   static double *c=NULL, *s=NULL, *g=NULL, *y=NULL;
+  static int alloc_size = 0;
   
   starttimer;
 
-  /* Allocation first time through. */
-  if(c == NULL) {
-    c = sys->heap.alloc<double>(size+1, AMSC);
-    s = sys->heap.alloc<double>(size+1, AMSC);
-    g = sys->heap.alloc<double>(size+1, AMSC);
-    y = sys->heap.alloc<double>(size+1, AMSC);
+  /* Allocation or reallocation */
+  if (size+1 > alloc_size) {
+    alloc_size = size+1;
+    c = local_heap.alloc<double>(size+1, AMSC);
+    s = local_heap.alloc<double>(size+1, AMSC);
+    g = local_heap.alloc<double>(size+1, AMSC);
+    y = local_heap.alloc<double>(size+1, AMSC);
   }
   
   /* Set up v^1 and g^0. */

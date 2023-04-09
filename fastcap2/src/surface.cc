@@ -2,6 +2,7 @@
 #include "surface.h"
 
 #include <memory>
+#include <sstream>
 
 // --------------------------------------------------------------------------
 
@@ -217,6 +218,78 @@ surface_set_title(SurfaceObject *self, PyObject *value)
   Py_RETURN_NONE;
 }
 
+static double vprod(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3)
+{
+  double xa = x2 - x1;
+  double ya = y2 - y1;
+  double za = z2 - z1;
+  double xb = x3 - x1;
+  double yb = y3 - y1;
+  double zb = z3 - z1;
+  return ((ya * zb) - (za * yb)) - ((xa * zb) - (za * xb)) + ((xa * yb) - (ya * xb));
+}
+
+static PyObject *
+surface_quad_count(SurfaceObject *self)
+{
+  size_t n = 0;
+  for (quadl *q = self->surface.quads; q; q = q->next) {
+    ++n;
+  }
+  return PyLong_FromLong(n);
+}
+
+static PyObject *
+surface_quad_area(SurfaceObject *self)
+{
+  double area = 0;
+  for (quadl *q = self->surface.quads; q; q = q->next) {
+    area += 0.5 * vprod(q->x1, q->y1, q->z1, q->x4, q->y4, q->z4, q->x2, q->y2, q->z2);
+    area += 0.5 * vprod(q->x3, q->y3, q->z3, q->x2, q->y2, q->z2, q->x4, q->y4, q->z4);
+  }
+  return PyFloat_FromDouble(area);
+}
+
+static PyObject *
+surface_tri_count(SurfaceObject *self)
+{
+  size_t n = 0;
+  for (tri *t = self->surface.tris; t; t = t->next) {
+    ++n;
+  }
+  return PyLong_FromLong(n);
+}
+
+static PyObject *
+surface_tri_area(SurfaceObject *self)
+{
+  double area = 0;
+  for (tri *t = self->surface.tris; t; t = t->next) {
+    area += 0.5 * vprod(t->x1, t->y1, t->z1, t->x3, t->y3, t->z3, t->x2, t->y2, t->z2);
+  }
+  return PyFloat_FromDouble(area);
+}
+
+static PyObject *
+surface_to_string(SurfaceObject *self)
+{
+  std::ostringstream os;
+  for (quadl *q = self->surface.quads; q; q = q->next) {
+    os << "Q (" << q->x1 << "," << q->y1 << "," << q->z1 << ")"
+           " (" << q->x2 << "," << q->y2 << "," << q->z2 << ")"
+           " (" << q->x3 << "," << q->y3 << "," << q->z3 << ")"
+           " (" << q->x4 << "," << q->y4 << "," << q->z4 << ")";
+    os << std::endl;
+  }
+  for (tri *t = self->surface.tris; t; t = t->next) {
+    os << "T (" << t->x1 << "," << t->y1 << "," << t->z1 << ")"
+           " (" << t->x2 << "," << t->y2 << "," << t->z2 << ")"
+           " (" << t->x3 << "," << t->y3 << "," << t->z3 << ")";
+    os << std::endl;
+  }
+  return PyUnicode_FromString(os.str().c_str());
+}
+
 static PyMethodDef surface_methods[] = {
   { "_get_name", (PyCFunction) surface_get_name, METH_NOARGS, NULL },
   { "_set_name", (PyCFunction) surface_set_name, METH_O, NULL },
@@ -224,6 +297,12 @@ static PyMethodDef surface_methods[] = {
   { "_set_title", (PyCFunction) surface_set_title, METH_O, NULL },
   { "_add_quad", (PyCFunction) surface_add_quad, METH_VARARGS, NULL },
   { "_add_tri", (PyCFunction) surface_add_tri, METH_VARARGS, NULL },
+  //  for testing:
+  { "_quad_count", (PyCFunction) surface_quad_count, METH_NOARGS, NULL },
+  { "_quad_area", (PyCFunction) surface_quad_area, METH_NOARGS, NULL },
+  { "_tri_count", (PyCFunction) surface_tri_count, METH_NOARGS, NULL },
+  { "_tri_area", (PyCFunction) surface_tri_area, METH_NOARGS, NULL },
+  { "_to_string", (PyCFunction) surface_to_string, METH_NOARGS, NULL },
   {NULL}
 };
 

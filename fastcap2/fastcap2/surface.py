@@ -23,8 +23,28 @@ class Surface(_Surface):
   name/group combination are considered connected. The name mandatory
   for conductor-type surfaces.
 
-  ... TODO: doc.
+  .. code-block:: python
 
+     import fastcap2 as fc2
+
+     # prepares a Surface object
+
+     surface = fc2.Surface()
+     surface.name = "S"
+     surface.add_quad_mesh((0, 0, 0), (1, 0, 0), (0, 1, 0), edge_width = 0.01, num = 10)
+
+     # prepares a problem using the meshed quad two times for cap plates 
+
+     problem = fc2.Problem(title = "A sample problem")
+
+     # lower plate: shifted down
+     problem.add(surface, d = (0, 0, -0.1))
+     # lower plate: shifted up
+     problem.add(surface, d = (0, 0, 0.1))
+
+     # solves the problem and returns the cap matrix in MKS units
+     cap_matrix = problem.solve()
+     print(cap_matrix)
   """
 
   def __init__(self, name: Optional[str] = None, title: Optional[str] = None):

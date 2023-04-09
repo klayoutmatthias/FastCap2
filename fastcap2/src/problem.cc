@@ -763,7 +763,7 @@ problem_load_list(ProblemObject *self, PyObject *args)
   }
 
   try {
-    read_list_file (&self->sys, &self->sys.surf_list, filename);
+    read_list_file(&self->sys, &self->sys.surf_list, filename);
   } catch (std::runtime_error &ex) {
     return raise_error (ex);
   }

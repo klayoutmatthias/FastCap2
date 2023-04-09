@@ -61,10 +61,8 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
                  int *num_cond, char *name_suffix, char **title)
 {
   int *patch_patch_table;
-  static char *line = NULL;
   charge *firstq;
-
-  if(line == NULL) line = sys->heap.alloc<char>(BUFSIZ, AMSC);
+  char line[BUFSIZ];
 
   sys->start_name_this_time = NULL;
   first_grid = first_patch = first_cfeg = TRUE;
