@@ -17,12 +17,12 @@
 #include <cstring>
 #include <cmath>
 
-static void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_vector);
+static void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_vector, char **title);
 static void grid_equiv_check(ssystem *sys);
 static void fill_patch_patch_table(int *patch_patch_table);
 static void assign_conductor(int *patch_patch_table);
 static void assign_names(ssystem *sys);
-static void file_title(ssystem *sys, FILE *stream);
+static void file_title(ssystem *sys, FILE *stream, char **title);
 static void summary_data(ssystem *sys, FILE *stream);
 static void node_data(FILE *stream, double *trans_vector);
 static void element_data(FILE *stream);
@@ -58,7 +58,7 @@ int first_patch;                /*   reset since the name list must */
 int first_cfeg;                 /*   be preserved as new files are read */
 
 charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
-                 int *num_cond, char *name_suffix)
+                 int *num_cond, char *name_suffix, char **title)
 {
   int *patch_patch_table;
   static char *line = NULL;
@@ -75,12 +75,12 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
   if(line[0] == '0') {
     *file_is_patran_type = FALSE;
     firstq = quickif(sys, stream, line, surf_type, trans_vector,
-                     num_cond, name_suffix);
+                     num_cond, name_suffix, title);
   }
   else {
     *file_is_patran_type = TRUE;
 
-    input(sys, stream, line, surf_type, trans_vector);
+    input(sys, stream, line, surf_type, trans_vector, title);
 
     grid_equiv_check(sys);
 
@@ -115,7 +115,7 @@ charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_
 
 ****************************************************************************/
 
-void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_vector)
+void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_vector, char **title)
 {
   int END=0;
 
@@ -134,7 +134,7 @@ void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_
 
     switch (type_number) {
     case 25:
-      file_title(sys, stream);
+      file_title(sys, stream, title);
       break;
     case 26:
       summary_data(sys, stream);
@@ -182,12 +182,12 @@ void waste_line(int num_line, FILE *stream)
 
 /* Save the title of the Neutral file. */
 
-void file_title(ssystem *sys, FILE *stream)
+void file_title(ssystem *sys, FILE *stream, char **title)
 {
   char line[BUFSIZ];
   
   fgets(line, sizeof(line), stream);
-  if (!sys->title) sys->title = sys->heap.strdup(delcr(line));
+  *title = sys->heap.strdup(delcr(line));
 }
 
 

@@ -492,7 +492,7 @@ void get_ps_file_base(ssystem *sys)
 static charge *read_panels(ssystem *sys, int *num_cond)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
-  charge *panel_list = NULL, *cur_panel = NULL, *c_panel;
+  charge *panel_list = 0, *cur_panel = 0, *c_panel;
   surface *cur_surf;
   FILE *fp;
   char surf_name[BUFSIZ];
@@ -501,7 +501,8 @@ static charge *read_panels(ssystem *sys, int *num_cond)
   stdin_read = FALSE;
   for(cur_surf = sys->surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
 
-    charge *panels_read = NULL;
+    charge *panels_read = 0;
+    char *title = 0;
 
     if (cur_surf->name) {
 
@@ -526,7 +527,7 @@ static charge *read_panels(ssystem *sys, int *num_cond)
         patran_file_read = FALSE;
       }
 
-      panels_read = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans, num_cond, surf_name);
+      panels_read = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans, num_cond, surf_name, &title);
 
       if(!patran_file && patran_file_read) {
         sys->error("read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
@@ -547,6 +548,10 @@ static charge *read_panels(ssystem *sys, int *num_cond)
         cond_num = getConductorNum(sys, cur_surf->surf_data->name, num_cond);
       }
 
+      if (cur_surf->surf_data->title) {
+        title = sys->heap.strdup(cur_surf->surf_data->title);
+      }
+
       panels_read = quickif2charges(sys, cur_surf->surf_data->quads, cur_surf->surf_data->tris, cur_surf->trans, cond_num);
 
     }
@@ -560,9 +565,10 @@ static charge *read_panels(ssystem *sys, int *num_cond)
     cur_surf->panels = cur_panel;
 
     /* save the surface file's title */
-    // @@@ TODO: fix title handling
-    cur_surf->title = sys->heap.strdup(sys->title ? sys->title : "");
-    sys->title = 0;             /* not sure if needed */
+    if (! title) {
+      title = sys->heap.strdup(sys->title ? sys->title : "");
+    }
+    cur_surf->title = title;
 
     /* if the surface is a DIELEC, make sure all conductor numbers are zero */
     /* - also link each panel to its surface */
