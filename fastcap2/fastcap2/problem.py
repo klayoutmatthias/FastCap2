@@ -494,6 +494,12 @@ class Problem(_Problem):
     * Rotation by `rotz`
     * Translation by `d`
     """
+
+    if type(d) is list:
+      d = tuple(d)
+    if type(r) is list:
+      r = tuple(r)
+
     return super()._load(file, link, group, kind, ref_point_inside, 
                          outside_perm, inside_perm, d, r, flipx, flipy, flipz, 
                          rotx, roty, rotz, scale)
@@ -554,6 +560,12 @@ class Problem(_Problem):
     * Rotation by `rotz`
     * Translation by `d`
     """
+
+    if type(d) is list:
+      d = tuple(d)
+    if type(r) is list:
+      r = tuple(r)
+
     return super()._add(surface, link, group, kind, ref_point_inside, 
                         outside_perm, inside_perm, d, r, flipx, flipy, flipz, 
                         rotx, roty, rotz, scale)
