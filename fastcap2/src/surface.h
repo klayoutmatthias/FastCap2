@@ -25,6 +25,7 @@ struct Surface
                double x3, double y3, double z3);
 
   void set_name(const char *name);
+  void set_title(const char *title);
 
   Heap heap;
 

@@ -12,7 +12,7 @@
 // --------------------------------------------------------------------------
 
 SurfaceData::SurfaceData()
-  : name(0), quads(0), tris(0)
+  : name(0), title(0), quads(0), tris(0)
 {
 }
 
@@ -23,6 +23,10 @@ SurfaceData *SurfaceData::clone(Heap &heap)
 
   if (name) {
     new_data->name = heap.strdup(name);
+  }
+
+  if (title) {
+    new_data->title = heap.strdup(title);
   }
 
   quadl *prevq = 0;

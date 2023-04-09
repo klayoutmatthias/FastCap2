@@ -45,6 +45,7 @@ struct SurfaceData
   SurfaceData();
 
   const char *name;
+  const char *title;
   quadl *quads;
   tri *tris;
 

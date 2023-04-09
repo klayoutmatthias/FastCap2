@@ -63,6 +63,15 @@ void Surface::set_name(const char *n)
   }
 }
 
+void Surface::set_title(const char *n)
+{
+  if (!title) {
+    title = 0;
+  } else {
+    title = heap.strdup(n);
+  }
+}
+
 // --------------------------------------------------------------------------
 
 static void
@@ -193,9 +202,40 @@ surface_set_name(SurfaceObject *self, PyObject *value)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+surface_get_title(SurfaceObject *self)
+{
+  if (self->surface.title) {
+    return PyUnicode_FromString(self->surface.title);
+  } else {
+    Py_RETURN_NONE;
+  }
+}
+
+static PyObject *
+surface_set_title(SurfaceObject *self, PyObject *value)
+{
+  if (Py_IsNone(value)) {
+    self->surface.set_title(0);
+  } else {
+    PyObject *title_str = PyObject_Str(value);
+    if (!title_str) {
+      return NULL;
+    }
+    const char *title_utf8str = PyUnicode_AsUTF8(title_str);
+    if (!title_utf8str) {
+      return NULL;
+    }
+    self->surface.set_title(title_utf8str);
+  }
+  Py_RETURN_NONE;
+}
+
 static PyMethodDef surface_methods[] = {
   { "_get_name", (PyCFunction) surface_get_name, METH_NOARGS, NULL },
   { "_set_name", (PyCFunction) surface_set_name, METH_O, NULL },
+  { "_get_title", (PyCFunction) surface_get_title, METH_NOARGS, NULL },
+  { "_set_title", (PyCFunction) surface_set_title, METH_O, NULL },
   { "_add_quad", (PyCFunction) surface_add_quad, METH_VARARGS, NULL },
   { "_add_tri", (PyCFunction) surface_add_tri, METH_VARARGS, NULL },
   {NULL}
