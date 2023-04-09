@@ -5,9 +5,8 @@
 #include <cstdio>
 
 struct ssystem;
-struct Name;
+struct charge;
 
-charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector, int *num_cond, char *name_suffix, char **title);
-char *delcr(char *str);
+charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, double *trans_vector, int *num_cond, const char *name_suffix, char **title);
 
 #endif

@@ -51,17 +51,4 @@ struct NAME {
   NAME *next;
 };
 
-/* used to build linked list of conductor names */
-struct Name {
-  char *name;
-  Name *next;
-  Name *alias_list;
-};
-
-/* used to make linked lists of iteration or conductor #s */
-struct ITER {
-  int iter;
-  ITER *next;
-};
-
 #endif

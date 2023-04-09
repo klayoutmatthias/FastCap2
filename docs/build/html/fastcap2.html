@@ -488,11 +488,11 @@ this title unless they specify their own one.</p>
 </dl>
 <p>This object can be used instead of geometry files to specify 
 conductor or dielectric surfaces. Create this object and use it with
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.problem.Problem.add()</span></code> to specify 
+<a class="reference internal" href="#fastcap2.Problem.add" title="fastcap2.Problem.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.Problem.add()</span></code></a> to specify 
 the geometry of the problem to solve.</p>
 <p>Details of the surface such as the kind of surface etc. are specified
-upon <code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.problem.Problem.add()</span></code>.</p>
-<p><a class="reference internal" href="#fastcap2.Surface.name" title="fastcap2.Surface.name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">name()</span></code></a> is a conductor identifier - surfaces with the same
+upon <a class="reference internal" href="#fastcap2.Problem.add" title="fastcap2.Problem.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.Problem.add()</span></code></a>.</p>
+<p><cite>name</cite> is a conductor identifier - surfaces with the same
 name/group combination are considered connected. The name mandatory
 for conductor-type surfaces.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">fastcap2</span> <span class="k">as</span> <span class="nn">fc2</span>
@@ -535,27 +535,25 @@ for conductor-type surfaces.</p>
 </dd>
 </dl>
 <p>The diamond or rectangle is defined by three vectors defining 
-a point (<code class="xref py py-meth docutils literal notranslate"><span class="pre">p0()</span></code>) and the adjacent other points (<code class="xref py py-meth docutils literal notranslate"><span class="pre">p1()</span></code> and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">p2()</span></code>). The forth point is implicitly given by</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">p3</span> <span class="pre">=</span> <span class="pre">p0</span> <span class="pre">+</span> <span class="pre">(p1</span> <span class="pre">-</span> <span class="pre">p0)</span> <span class="pre">+</span> <span class="pre">(p2</span> <span class="pre">-</span> <span class="pre">p0)</span>
-<span class="pre">`</span></code></p>
+a point (<cite>p0</cite>) and the adjacent other points (<cite>p1</cite> and
+<cite>p2</cite>). The forth point is implicitly given by</p>
+<p><cite>p3 = p0 + (p1 - p0) + (p2 - p0)</cite></p>
 <p>The mesh generation supports a number of features:</p>
 <ul class="simple">
 <li><p>The mesh size can be determined by number of maximum element dimension.
-If a number is given (<code class="xref py py-meth docutils literal notranslate"><span class="pre">num()</span></code>) the shorter side of the diamond is divided
+If a number is given (<cite>num</cite>) the shorter side of the diamond is divided
 by this number to determine the mesh size. If a maximum dimension is
-given (<code class="xref py py-meth docutils literal notranslate"><span class="pre">max_dim()</span></code>), the number of tiles is determined such that the size is less
+given (<cite>max_dim</cite>), the number of tiles is determined such that the size is less
 than this dimension.</p></li>
 <li><p>The edge of the figure can be resolved in smaller tiles rendering a thinner
 and more densely meshed corner. The width of the edge can either be given 
-as a fraction of the shorter side (<code class="xref py py-meth docutils literal notranslate"><span class="pre">edge_fraction()</span></code>) or directly
-(<code class="xref py py-meth docutils literal notranslate"><span class="pre">edge_width()</span></code>). Note that the edge width is implemented as 
+as a fraction of the shorter side (<cite>edge_fraction</cite>) or directly
+(<cite>edge_width</cite>). Note that the edge width is implemented as 
 subtracting the corresponding lengths from the sides, so for slanted figures
 the edge width is not corresponding to the width of the edge mesh tiles.</p></li>
 </ul>
-<p>The edge does not contribute in the mesh dimensioning. If neither (<code class="xref py py-meth docutils literal notranslate"><span class="pre">edge_fraction()</span></code>)
-nor (<code class="xref py py-meth docutils literal notranslate"><span class="pre">edge_width()</span></code>) is present, no edge is generated.</p>
+<p>The edge does not contribute in the mesh dimensioning. If neither (<cite>edge_fraction</cite>)
+nor (<cite>edge_width</cite>) is present, no edge is generated.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -576,7 +574,7 @@ nor (<code class="xref py py-meth docutils literal notranslate"><span class="pre
 <dd><p>The name string</p>
 <p>The name string specifies the conductor the surface belongs to.
 A conductor-type surface needs to have a name. Together with the 
-group name (see <code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.problem.Problem.add()</span></code>), the
+group name (see <a class="reference internal" href="#fastcap2.Problem.add" title="fastcap2.Problem.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.Problem.add()</span></code></a>), the
 conductor name formes an identifier. All surfaces with the same
 conductor identifier are considered connected.</p>
 <p>The name must not contain ‘%’ or ‘,’ characters.</p>
@@ -587,7 +585,7 @@ conductor identifier are considered connected.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#fastcap2.Surface.title" title="Permalink to this definition">¶</a></dt>
 <dd><p>The title string</p>
 <p>The title string is an arbitrary optional string. Surfaces will see
-this title or the project title (see <code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.problem.Problem.title()</span></code>)
+this title or the project title (see <a class="reference internal" href="#fastcap2.Problem.title" title="fastcap2.Problem.title"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.Problem.title()</span></code></a>)
 if no title is given for the surface.</p>
 </dd></dl>
 

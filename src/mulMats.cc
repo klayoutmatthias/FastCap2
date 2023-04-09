@@ -235,6 +235,7 @@ void olmulMatPrecond(ssystem *sys)
   int maxsize, nsize, nnsize, nnnsize;
   int nj, nk, nl, offset, noffset;
   int *nc_dummy, *nnbr_dummy, *nnnbr_dummy;
+  static Heap local_heap;
   static int *is_dummy;         /* local dummy flag vector, stays around */
   static int big_mat_size = 0;  /* size of previous mat */
   charge **nnnbr_pc, **nnbr_pc, **nc_pc;
@@ -363,7 +364,7 @@ void olmulMatPrecond(ssystem *sys)
     /* set up the local is_dummy vector for the rows/cols of mat */
     /* THIS COULD BE AVOIDED BY USING CUBE is_dummy's INSIDE invert() */
     if(big_mat_size < offset) { /* allocate only if larger array needed */
-      is_dummy = sys->heap.alloc<int>(offset, AMSC);
+      is_dummy = local_heap.alloc<int>(offset, AMSC);
     }
     /* dump sections of the dummy vector in order cubes appear in nbr lst */
     /* (use fragment of Jacob's loop above) */

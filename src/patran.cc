@@ -34,8 +34,9 @@ static void name_data(ssystem *sys, FILE *stream);
 static int if_same_coord(double coord_1[3], double coord_2[3]);
 static int if_same_grid(int ID, GRID *grid_ptr);
 static void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count);
-static charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, char *name_suffix);
+static charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, const char *name_suffix);
 static charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conductor_ID);
+static char *delcr(char *str);
 
 #define BIG 35000              /* Size of element and node serach table. */
 #define SMALL_NUMBER 0.005     /* See functions if_same_coord() and 
@@ -57,53 +58,40 @@ int first_grid;                 /* note that current_name static is not */
 int first_patch;                /*   reset since the name list must */
 int first_cfeg;                 /*   be preserved as new files are read */
 
-charge *patfront(ssystem *sys, FILE *stream, int *file_is_patran_type, int surf_type, double *trans_vector,
-                 int *num_cond, char *name_suffix, char **title)
+charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, double *trans_vector,
+                 int *num_cond, const char *name_suffix, char **title)
 {
   int *patch_patch_table;
-  charge *firstq;
+
   char line[BUFSIZ];
+  strncpy(line, header, sizeof(line));
 
   sys->start_name_this_time = NULL;
   first_grid = first_patch = first_cfeg = TRUE;
   number_grids = number_patches = 0;
 
-  /* figure out input file type and read it in */
-  fgets(line, BUFSIZ, stream);
-  if(line[0] == '0') {
-    *file_is_patran_type = FALSE;
-    firstq = quickif(sys, stream, line, surf_type, trans_vector,
-                     num_cond, name_suffix, title);
-  }
-  else {
-    *file_is_patran_type = TRUE;
+  input(sys, stream, line, surf_type, trans_vector, title);
 
-    input(sys, stream, line, surf_type, trans_vector, title);
+  grid_equiv_check(sys);
 
-    grid_equiv_check(sys);
+  /*********************************************************************
+    This section of patfront is for assigning conductor numbers to patches
+    depending on their connectivity.                                    */
 
-    /*********************************************************************
-      This section of patfront is for assigning conductor numbers to patches
-      depending on their connectivity.                                    */
+  if(surf_type == CONDTR || surf_type == BOTH) {
 
-    if(surf_type == CONDTR || surf_type == BOTH) {
+    patch_patch_table = sys->heap.alloc<int>(number_patches*number_patches, AMSC);
 
-      patch_patch_table = sys->heap.alloc<int>(number_patches*number_patches, AMSC);
+    fill_patch_patch_table(patch_patch_table);
 
-      fill_patch_patch_table(patch_patch_table);
+    assign_conductor(patch_patch_table);
 
-      assign_conductor(patch_patch_table);
+  /*********************************************************************/
 
-    /*********************************************************************/
-
-      assign_names(sys);
-    }
-
-    firstq = make_charges_all_patches(sys, num_cond, surf_type,
-                                      name_suffix);
+    assign_names(sys);
   }
 
-  return (firstq);
+  return make_charges_all_patches(sys, num_cond, surf_type, name_suffix);
 }
 
 
@@ -503,7 +491,7 @@ int if_same_coord(double coord_1[3], double coord_2[3])
 /*
   makes 1st \n in a string = \0 and then deletes all trail/leading wh space
 */
-char *delcr(char *str)
+static char *delcr(char *str)
 {
   int i, j, k;
   for(k = 0; str[k] != '\0'; k++) if(str[k] == '\n') { str[k] = '\0'; break; }
@@ -682,7 +670,7 @@ static char *getPatranName(ssystem *sys, int cond_num)
 
 ****************************************************************************/
 
-charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, char *name_suffix)
+charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, const char *name_suffix)
 /* int *num_cond: master conductor counter */
 {
   CFEG *cfeg_ptr;

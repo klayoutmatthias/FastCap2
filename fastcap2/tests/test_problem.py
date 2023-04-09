@@ -415,7 +415,6 @@ class TestProblem(unittest.TestCase):
 
     cap_matrix = problem.solve()
 
-    print(problem.conductors())
     self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
         "796   -481  -73   \n"
         "-481  891   -194  \n"

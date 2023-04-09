@@ -3,14 +3,26 @@
 #define mulStruct_H
 
 #include "heap.h"
-// #include "patran.h"             /* for neutral file interface */
 
 #include <cstdio>
 
 struct SurfaceData;
+
+//  used by patran.cc
 struct NAME;
-struct ITER;
-struct Name;
+
+/* used to build linked list of conductor names */
+struct Name {
+  char *name;
+  Name *next;
+  Name *alias_list;
+};
+
+/* used to make linked lists of iteration or conductor #s */
+struct ITER {
+  int iter;
+  ITER *next;
+};
 
 struct surface {                /* a surface file and its permittivities */
   int type;                     /* CONDTR, DIELEC or BOTH */
@@ -174,10 +186,12 @@ struct ssystem
 
   FILE *log;                    //  log stream (0 to turn off output)
 
-  //  misc global
+  //  patran only
   NAME *start_name;             //  conductor name linked list head
   NAME *current_name;           //  conductor name linked list tail
   NAME *start_name_this_time;   //  cond name list for the current surface
+
+  //  misc global
   const char *kill_name_list;   //  cond names whose columns are omitted
   ITER *kill_num_list;          //  cond numbers whose columns are omitted
   const char *kinp_name_list;   //  cond names omitted from input

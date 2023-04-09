@@ -28,9 +28,13 @@ class Problem(_Problem):
 
      # solves the problem and returns the cap matrix in MKS units
      cap_matrix = problem.solve()
+     print(cap_matrix)
 
      # dumps the geometry to a PS file
      problem.dump_ps("geo.ps")
+
+  Dumping the geometry to a PS file comes very handy when
+  debugging the geometry setup.
 
   Once :py:meth:`solve` or :py:meth:`dump_ps` is called, 
   the geometry of the problem should not be modified again.

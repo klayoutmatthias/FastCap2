@@ -256,12 +256,13 @@ void invert(double **mat, int size, int *reorder)
 */
 int compressMat(ssystem *sys, double **mat, int size, int *is_dummy, int comp_rows)
 {
+  static Heap local_heap;
   static int *cur_order;
   static int cur_order_array_size = 0;
   int cur_order_size, i, j, k;
   
   if(cur_order_array_size < size) {
-    cur_order = sys->heap.alloc<int>(size, AMSC);
+    cur_order = local_heap.alloc<int>(size, AMSC);
   }
   
   /* figure the new order vector (cur_order[i] = index of ith row/col) */

@@ -23,7 +23,6 @@ core_src=[
   "src/mulMulti.cc",
   "src/mulSetup.cc",
   "src/mulStruct.cc",
-  "src/patran.cc",
   "src/psMatDisplay.cc",
   "src/quickif.cc",
   "src/savemat_mod.cc",
@@ -36,7 +35,8 @@ core_src=[
 fastcap2_core_module = Extension(
   'fastcap2_core', 
   core_src, 
-  include_dirs=['src']
+  include_dirs=['src'],
+  define_macros=[('BUILD_FASTCAP2_PYMOD',None)]
 )
 
 setup(name='FastCap2',

@@ -5,8 +5,9 @@
 #include "zbufGlobal.h"
 #include "input.h"
 #include "calcp.h"
-#include "patran.h"
-#include "patran_f.h"
+#if !defined(BUILD_FASTCAP2_PYMOD)
+# include "patran_f.h"
+#endif
 #include "quickif.h"
 
 #include <cstdio>
@@ -529,7 +530,23 @@ static charge *read_panels(ssystem *sys, int *num_cond)
         patran_file_read = FALSE;
       }
 
-      panels_read = patfront(sys, fp, &patran_file, cur_surf->type, cur_surf->trans, num_cond, surf_name, &title);
+      /* figure out input file type and read it in */
+      char header[BUFSIZ];
+      fgets(header, BUFSIZ, fp);
+
+      if (header[0] == '0') {
+        patran_file = FALSE;
+        panels_read = quickif(sys, fp, header, cur_surf->type, cur_surf->trans, num_cond, surf_name, &title);
+      } else {
+#if !defined(BUILD_FASTCAP2_PYMOD)
+        patran_file = TRUE;
+        panels_read = patfront(sys, fp, header, cur_surf->type, cur_surf->trans, num_cond, surf_name, &title);
+#else
+        //  The patran reader is not reentrant, so we do not allow this one
+        //  in the context of the Python module
+        sys->error("Only 'quickif' style geometry files are supported in Python module - look for header line starting with '0'. Unsupported file is '%s'", cur_surf->name);
+#endif
+      }
 
       if(!patran_file && patran_file_read) {
         sys->error("read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
@@ -962,12 +979,11 @@ static void parse_command_line(ssystem *sys, const char **input_file, const char
 static surface *read_all_surfaces(ssystem *sys, const char *input_file, const char *surf_list_file, int read_from_stdin, std::string &infiles)
 {
   char group_name[BUFSIZ];
-  surface *surf_list, *cur_surf;
+  surface *surf_list = NULL, *cur_surf = 0;
 
   /* get the surfaces from stdin, the list file or the file on cmd line */
   /* the `- ' option always forces the first cond surf read from stdin */
   /* can also read from stdin if there's no list file and no cmd line file */
-  surf_list = NULL;
   sprintf(group_name, "GROUP%d", ++sys->group_cnt);
   if(read_from_stdin || (input_file == NULL && surf_list_file == NULL)) {
     surf_list = sys->heap.alloc<surface>(1, AMSC);

@@ -14,15 +14,16 @@ class Surface(_Surface):
 
   This object can be used instead of geometry files to specify 
   conductor or dielectric surfaces. Create this object and use it with
-  :py:meth:`fastcap2.problem.Problem.add` to specify 
+  :py:meth:`fastcap2.Problem.add` to specify 
   the geometry of the problem to solve.
 
   Details of the surface such as the kind of surface etc. are specified
-  upon :py:meth:`fastcap2.problem.Problem.add`.
+  upon :py:meth:`fastcap2.Problem.add`.
 
-  :py:meth:`name` is a conductor identifier - surfaces with the same
-  name/group combination are considered connected. The name mandatory
-  for conductor-type surfaces.
+  `name` is a conductor identifier - surfaces with the same
+  name/group combination are considered connected. The name is mandatory
+  for conductor-type surfaces. The group name can be assigned when
+  adding the surface to the Problem object.
 
   .. code-block:: python
 
@@ -61,7 +62,7 @@ class Surface(_Surface):
     """The title string
 
     The title string is an arbitrary optional string. Surfaces will see
-    this title or the project title (see :py:meth:`fastcap2.problem.Problem.title`)
+    this title or the project title (see :py:meth:`fastcap2.Problem.title`)
     if no title is given for the surface.
     """
     return super()._get_title()
@@ -76,7 +77,7 @@ class Surface(_Surface):
 
     The name string specifies the conductor the surface belongs to.
     A conductor-type surface needs to have a name. Together with the 
-    group name (see :py:meth:`fastcap2.problem.Problem.add`), the
+    group name (see :py:meth:`fastcap2.Problem.add`), the
     conductor name formes an identifier. All surfaces with the same
     conductor identifier are considered connected.
 
@@ -130,29 +131,27 @@ class Surface(_Surface):
     :param edge_fraction: the width of the edge as a fraction of the shorter side.
 
     The diamond or rectangle is defined by three vectors defining 
-    a point (:py:meth:`p0`) and the adjacent other points (:py:meth:`p1` and
-    :py:meth:`p2`). The forth point is implicitly given by
+    a point (`p0`) and the adjacent other points (`p1` and
+    `p2`). The forth point is implicitly given by
 
-    ```
-    p3 = p0 + (p1 - p0) + (p2 - p0)
-    ```
+    `p3 = p0 + (p1 - p0) + (p2 - p0)`
 
     The mesh generation supports a number of features:
 
     * The mesh size can be determined by number of maximum element dimension.
-      If a number is given (:py:meth:`num`) the shorter side of the diamond is divided
+      If a number is given (`num`) the shorter side of the diamond is divided
       by this number to determine the mesh size. If a maximum dimension is
-      given (:py:meth:`max_dim`), the number of tiles is determined such that the size is less
+      given (`max_dim`), the number of tiles is determined such that the size is less
       than this dimension.
     * The edge of the figure can be resolved in smaller tiles rendering a thinner
       and more densely meshed corner. The width of the edge can either be given 
-      as a fraction of the shorter side (:py:meth:`edge_fraction`) or directly
-      (:py:meth:`edge_width`). Note that the edge width is implemented as 
+      as a fraction of the shorter side (`edge_fraction`) or directly
+      (`edge_width`). Note that the edge width is implemented as 
       subtracting the corresponding lengths from the sides, so for slanted figures
       the edge width is not corresponding to the width of the edge mesh tiles.
 
-    The edge does not contribute in the mesh dimensioning. If neither (:py:meth:`edge_fraction`)
-    nor (:py:meth:`edge_width`) is present, no edge is generated.
+    The edge does not contribute in the mesh dimensioning. If neither (`edge_fraction`)
+    nor (`edge_width`) is present, no edge is generated.
     """
 
     # TODO: turn this into a faster C++ version

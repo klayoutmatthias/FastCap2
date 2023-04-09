@@ -2,11 +2,10 @@
 #include "mulGlobal.h"
 #include "mulStruct.h"
 #include "quickif.h"
-#include "patran_f.h"
-#include "patran.h"
 #include "heap.h"
 
 #include <cstring>
+#include <cctype>
 #include <memory>
 
 // --------------------------------------------------------------------------
@@ -55,6 +54,30 @@ SurfaceData *SurfaceData::clone(Heap &heap)
   }
 
   return new_data;
+}
+
+// --------------------------------------------------------------------------
+
+/*
+  makes 1st \n in a string = \0 and then deletes all trail/leading wh space
+*/
+static char *simplify(char *str)
+{
+  // skip leading white space
+  while (*str && isspace(*str)) {
+    ++str;
+  }
+
+  // erase trailing whitespace
+  char *s = str + strlen(str);
+  for ( ; s != str; --s) {
+    if (!isspace(s[-1])) {
+      break;
+    }
+  }
+  *s = 0;
+
+  return (str);
 }
 
 // --------------------------------------------------------------------------
@@ -245,8 +268,7 @@ static int renameConductor(ssystem *sys, char *old_name, char *new_name, int *nu
   N <cond name string> <Rename string>
   * <Comment string>
 */
-charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans, int *num_cond,
-                char *name_suffix, char **title)
+charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, double *trans, int *num_cond, const char *name_suffix, char **title)
 /* char *name_suffix: suffix for all cond names read */
 {
   quadl *fstquad = 0, *curquad = 0;
@@ -257,7 +279,7 @@ charge *quickif(ssystem *sys, FILE *fp, char *line, int surf_type, double *trans
   double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
 
   /* save the title, strip leading '0' */
-  *title = sys->heap.strdup(delcr(&line[1]));
+  *title = simplify(sys->heap.strdup(header + 1));
   
   /* read in and load structs */
   while(fgets(line1, sizeof(line1), fp) != NULL) {

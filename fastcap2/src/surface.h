@@ -6,7 +6,6 @@
 
 #include "heap.h"
 #include "quickif.h"
-#include "patran.h"
 
 struct Surface
   : SurfaceData

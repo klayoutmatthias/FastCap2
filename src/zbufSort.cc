@@ -264,6 +264,7 @@ static int face_is_inside(double **corners1, int ccnt1, double **corners2, int c
 static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, double rhs, double *normal)
 {
   int i, j, k, is_overlap, isect_cnt;
+  static Heap local_heap;
   static double ***cproj = NULL;        /* corners of faces in view plane */
   double alpha[2][MAXSIDES];    /* 1 => view point 0 => corner */
   double x[3], y[3];            /* coordinates of x and y in facref plane */
@@ -276,9 +277,9 @@ static int is1stFaceDeeper(ssystem *sys, face *fac, face *facref, double *view, 
 
   /* allocate for local arrays on first call */
   if(cproj == NULL) {
-    cproj = sys->heap.alloc<double **>(2);
+    cproj = local_heap.alloc<double **>(2);
     for(k = 0; k < 2; k++) {
-      cproj[k] = sys->heap.mat(MAXSIDES, 3);
+      cproj[k] = local_heap.mat(MAXSIDES, 3);
     }
   }
 
