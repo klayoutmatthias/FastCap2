@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 
+project(sel LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+enable_testing()
+
+find_package(GTest REQUIRED)
+
 set(COMPILE_OPTIONS -Wall -pedantic -fPIC)
 
 # --------------------------------------------------------------
@@ -61,12 +70,9 @@ add_library(corelib STATIC
 target_compile_options(corelib PRIVATE ${COMPILE_OPTIONS})
 
 # --------------------------------------------------------------
-# cubegen
+# fastcap
 
 project(FastCap2 LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(fastcap
   src/fastcap.cc
@@ -76,6 +82,23 @@ target_link_libraries(fastcap m corelib)
 target_compile_options(fastcap PRIVATE ${COMPILE_OPTIONS})
 
 install(TARGETS fastcap
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+# --------------------------------------------------------------
+# unit tests
+
+project(FastCap2 LANGUAGES CXX)
+
+add_executable(unittests
+  unittests/heap.cc
+)
+target_link_libraries(unittests m corelib GTest::GTest GTest::gtest_main)
+target_compile_options(unittests PRIVATE ${COMPILE_OPTIONS})
+target_include_directories (unittests PRIVATE src)
+
+add_test(fastcap_unittests unittests)
+
+install(TARGETS unittests
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # --------------------------------------------------------------

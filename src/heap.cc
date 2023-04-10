@@ -40,7 +40,7 @@ Heap::malloc(size_t n, MemoryType type)
   char *d = (char *)::malloc(n);
   mp_data->ptrs.push_back (d);
   if (type >= 0 && type < NumTypes) {
-    m_memory[type] += type;
+    m_memory[type] += n;
   }
 
   bzero(d, n);
