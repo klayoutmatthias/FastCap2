@@ -60,11 +60,14 @@ or adding <a class="reference internal" href="#fastcap2.Surface" title="fastcap2
 
 <span class="c1"># solves the problem and returns the cap matrix in MKS units</span>
 <span class="n">cap_matrix</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cap_matrix</span><span class="p">)</span>
 
 <span class="c1"># dumps the geometry to a PS file</span>
 <span class="n">problem</span><span class="o">.</span><span class="n">dump_ps</span><span class="p">(</span><span class="s2">&quot;geo.ps&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Dumping the geometry to a PS file comes very handy when
+debugging the geometry setup.</p>
 <p>Once <a class="reference internal" href="#fastcap2.Problem.solve" title="fastcap2.Problem.solve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">solve()</span></code></a> or <a class="reference internal" href="#fastcap2.Problem.dump_ps" title="fastcap2.Problem.dump_ps"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dump_ps()</span></code></a> is called, 
 the geometry of the problem should not be modified again.
 Currently this will put the object in an undefined state.</p>
@@ -395,6 +398,11 @@ enabled by setting the <a class="reference internal" href="#fastcap2.Problem.qps
 <dt class="sig sig-object py" id="fastcap2.Problem.qps_remove_q">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qps_remove_q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#fastcap2.Problem.qps_remove_q" title="Permalink to this definition">¶</a></dt>
 <dd><p>PS output: remove conductors from all charge distribution .ps pictures</p>
+<p>The argument is a list of group-qualified conductor names
+in the form <cite>name%group</cite>, e.g. <cite>PLATE%GROUP1</cite>.
+Conductors will be identified by matching the leading
+part - e.g. <cite>PLATE%GROUP</cite> will match conductors <cite>PLATE%GROUP1</cite>,
+<cite>PLATE%GROUP2</cite> etc.</p>
 <p>This property corresponds to option “-rc” of the original
 “fastcap” program. A value of ‘None’ for this property will enable
 all conductors in the charge distribution picture.</p>
@@ -406,6 +414,11 @@ enabled by setting the <a class="reference internal" href="#fastcap2.Problem.qps
 <dt class="sig sig-object py" id="fastcap2.Problem.qps_select_q">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qps_select_q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#fastcap2.Problem.qps_select_q" title="Permalink to this definition">¶</a></dt>
 <dd><p>PS output: select conductors for charge distribution .ps pictures</p>
+<p>The argument is a list of group-qualified conductor names
+in the form <cite>name%group</cite>, e.g. <cite>PLATE%GROUP1</cite>.
+Conductors will be identified by matching the leading
+part - e.g. <cite>PLATE%GROUP</cite> will match conductors <cite>PLATE%GROUP1</cite>,
+<cite>PLATE%GROUP2</cite> etc.</p>
 <p>This property corresponds to option “-q” of the original
 “fastcap” program. A value of ‘None’ for this property will
 select all conductors.</p>
@@ -427,22 +440,35 @@ enabled by setting the <a class="reference internal" href="#fastcap2.Problem.qps
 <dt class="sig sig-object py" id="fastcap2.Problem.remove_conductors">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remove_conductors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#fastcap2.Problem.remove_conductors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes the given conductors from the input</p>
+<p>The argument is a list of group-qualified conductor names
+in the form <cite>name%group</cite>, e.g. <cite>PLATE%GROUP1</cite>.
+Conductors will be identified by matching the leading
+part - e.g. <cite>PLATE%GROUP</cite> will match conductors <cite>PLATE%GROUP1</cite>,
+<cite>PLATE%GROUP2</cite> etc.</p>
 <p>This property corresponds to option “-ri” of the original
 “fastcap” program.</p>
 <p>The conductors with the given names will not be considered
-at all. A value of ‘None’ for this property will enable all
-conductors.</p>
+at all and will not be present in the capacitance matrix. 
+A value of ‘None’ for this property will enable all conductors.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="fastcap2.Problem.skip_conductors">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">skip_conductors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#fastcap2.Problem.skip_conductors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Skips the given conductors from the solve list</p>
+<p>The argument is a list of group-qualified conductor names
+in the form <cite>name%group</cite>, e.g. <cite>PLATE%GROUP1</cite>.
+Conductors will be identified by matching the leading
+part - e.g. <cite>PLATE%GROUP</cite> will match conductors <cite>PLATE%GROUP1</cite>,
+<cite>PLATE%GROUP2</cite> etc.</p>
 <p>This property corresponds to option “-rs” of the original
 “fastcap” program.</p>
-<p>The conductors with the given names will not be present in  
-the capacitance matrix. A value of ‘None’ for this property
-will select all conductors.</p>
+<p>A value of ‘None’ for this property will select all conductors.</p>
+<p>The effect of this option is to skip the specified 
+conductors from the evaluation. Skipping conductors
+can speed up the computation as self-capacitances of
+these conductors and capacitances between skipped 
+conductors are not considered.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -493,8 +519,9 @@ the geometry of the problem to solve.</p>
 <p>Details of the surface such as the kind of surface etc. are specified
 upon <a class="reference internal" href="#fastcap2.Problem.add" title="fastcap2.Problem.add"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fastcap2.Problem.add()</span></code></a>.</p>
 <p><cite>name</cite> is a conductor identifier - surfaces with the same
-name/group combination are considered connected. The name mandatory
-for conductor-type surfaces.</p>
+name/group combination are considered connected. The name is mandatory
+for conductor-type surfaces. The group name can be assigned when
+adding the surface to the Problem object.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">fastcap2</span> <span class="k">as</span> <span class="nn">fc2</span>
 
 <span class="c1"># prepares a Surface object</span>

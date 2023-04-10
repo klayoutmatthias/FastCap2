@@ -143,18 +143,16 @@ static void add_to_alias(ssystem *sys, Name *cur_name, char *new_name)
 /*
   return pointer to last alias string (= current name for conductor)
 */
-char *last_alias(Name *cur_name)
+const char *last_alias(const Name *cur_name)
 {
-  Name *cur_alias, *last_alias;
+  const Name *cur_alias, *last_alias;
 
-  last_alias = NULL;
-  for(cur_alias = cur_name->alias_list; cur_alias != NULL;
-      cur_alias = cur_alias->next) {
+  last_alias = cur_name;
+  for (cur_alias = cur_name->alias_list; cur_alias != NULL; cur_alias = cur_alias->next) {
     last_alias = cur_alias;
   }
 
-  if(last_alias == NULL) last_alias = cur_name;
-  return(last_alias->name);
+  return last_alias->name;
 }
 
 /*
@@ -216,9 +214,9 @@ static int getConductorNumNoAdd(char *name, Name *name_list)
 /*
   gets the name (aliases are ignored) corresponding to a conductor number
 */
-char *getConductorName(ssystem *sys, int cond_num)
+const char *getConductorName(const ssystem *sys, int cond_num)
 {
-  Name *cur_name;
+  const Name *cur_name;
   int i;
 
   /* check to see if conductor number is present */
@@ -228,9 +226,9 @@ char *getConductorName(ssystem *sys, int cond_num)
   }
 
   /* number not found */
-  sys->info(
-          "getConductorName: conductor no. %d not defined\n", cond_num);
-  return(NULL);
+  sys->info("getConductorName: conductor no. %d not defined\n", cond_num);
+
+  return NULL;
 }
 
 /*

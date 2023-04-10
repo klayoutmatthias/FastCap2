@@ -322,12 +322,12 @@ struct ssystem
 
   multi_mats mm;
 
-  Heap heap;                    //  allocation heap
+  mutable Heap heap;            //  allocation heap
 
-  void msg(const char *fmt, ...);
-  void info(const char *fmt, ...);
-  void warn(const char *fmt, ...);
-  [[noreturn]] void error(const char *fmt, ...);
+  void msg(const char *fmt, ...) const;
+  void info(const char *fmt, ...) const;
+  void warn(const char *fmt, ...) const;
+  [[noreturn]] void error(const char *fmt, ...) const;
   void flush();
 };
 

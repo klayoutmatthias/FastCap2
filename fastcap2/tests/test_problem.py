@@ -499,7 +499,8 @@ class TestProblem(unittest.TestCase):
 
     self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP', 'T2%GROUP2'])
 
-    problem.skip_conductors = ["B%GROUP1", "T2%GROUP2"]
+    # NOTE: it's sufficient for the leading part to match
+    problem.skip_conductors = ["B%GR", "T2%GROUP2"]
 
     cap_matrix = problem.solve()
 

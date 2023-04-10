@@ -643,30 +643,22 @@ static charge *read_panels(ssystem *sys, int *num_cond)
 */
 static int getUniqueCondNum(char *name, Name *name_list)
 {
-  int nlen, cond;
-  char name_frag[BUFSIZ], *cur_alias;
-  Name *cur_name;
-  int i, j, times_in_list;
+  int cond = NOTFND;
+  size_t nlen = strlen(name);
 
-  nlen = strlen(name);
-  times_in_list = 0;
-
-  /* fish through name list for name---check first nlen chars for match */
-  for(cur_name = name_list, i = 1; cur_name != NULL && times_in_list < 2;
-      cur_name = cur_name->next, i++) {
-    cur_alias = last_alias(cur_name);
-    for(j = 0; j < nlen; j++) name_frag[j] = cur_alias[j];
-    name_frag[j] = '\0';
-    if(!strcmp(name_frag, name)) {
-      times_in_list++;  /* increment times name in list count */
+  /* fish through name list for name - check first nlen chars for match */
+  int i = 1;
+  for (const Name *cur_name = name_list; cur_name != NULL; cur_name = cur_name->next, ++i) {
+    const char *cur_alias = last_alias(cur_name);
+    if (!strncmp(cur_alias, name, nlen)) {
+      if (cond != NOTFND) {
+        return NOTUNI;
+      }
       cond = i;
     }
   }
 
-  /* name can't be dealt with; return appropriate error code */
-  if(times_in_list > 2) return(NOTUNI);
-  else if(times_in_list == 1) return(cond);
-  else return(NOTFND);
+  return cond;
 }
 
 

@@ -272,7 +272,7 @@ void ssystem::flush()
   }
 }
 
-void ssystem::msg(const char *fmt, ...)
+void ssystem::msg(const char *fmt, ...) const
 {
   if (!log) {
     return;
@@ -283,7 +283,7 @@ void ssystem::msg(const char *fmt, ...)
   vfprintf(log, fmt, args);
 }
 
-void ssystem::info(const char *fmt, ...)
+void ssystem::info(const char *fmt, ...) const
 {
   va_list args;
   va_start(args, fmt);
@@ -292,7 +292,7 @@ void ssystem::info(const char *fmt, ...)
   vfprintf(out, fmt, args);
 }
 
-void ssystem::warn(const char *fmt, ...)
+void ssystem::warn(const char *fmt, ...) const
 {
   va_list args;
   va_start(args, fmt);
@@ -302,7 +302,7 @@ void ssystem::warn(const char *fmt, ...)
   vfprintf(out, fmt, args);
 }
 
-void ssystem::error(const char *fmt, ...)
+void ssystem::error(const char *fmt, ...) const
 {
   va_list args;
   va_start(args, fmt);

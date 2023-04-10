@@ -147,6 +147,9 @@ class Problem(_Problem):
 
     The argument is a list of group-qualified conductor names
     in the form `name%group`, e.g. `PLATE%GROUP1`.
+    Conductors will be identified by matching the leading
+    part - e.g. `PLATE%GROUP` will match conductors `PLATE%GROUP1`,
+    `PLATE%GROUP2` etc.
 
     This property corresponds to option "-rs" of the original
     "fastcap" program.
@@ -171,6 +174,9 @@ class Problem(_Problem):
 
     The argument is a list of group-qualified conductor names
     in the form `name%group`, e.g. `PLATE%GROUP1`.
+    Conductors will be identified by matching the leading
+    part - e.g. `PLATE%GROUP` will match conductors `PLATE%GROUP1`,
+    `PLATE%GROUP2` etc.
 
     This property corresponds to option "-ri" of the original
     "fastcap" program.
@@ -217,6 +223,12 @@ class Problem(_Problem):
   def qps_select_q(self) -> Optional[list[str]]:
     """PS output: select conductors for charge distribution .ps pictures
 
+    The argument is a list of group-qualified conductor names
+    in the form `name%group`, e.g. `PLATE%GROUP1`.
+    Conductors will be identified by matching the leading
+    part - e.g. `PLATE%GROUP` will match conductors `PLATE%GROUP1`,
+    `PLATE%GROUP2` etc.
+
     This property corresponds to option "-q" of the original
     "fastcap" program. A value of 'None' for this property will
     select all conductors.
@@ -233,6 +245,12 @@ class Problem(_Problem):
   @property
   def qps_remove_q(self) -> Optional[list[str]]:
     """PS output: remove conductors from all charge distribution .ps pictures
+
+    The argument is a list of group-qualified conductor names
+    in the form `name%group`, e.g. `PLATE%GROUP1`.
+    Conductors will be identified by matching the leading
+    part - e.g. `PLATE%GROUP` will match conductors `PLATE%GROUP1`,
+    `PLATE%GROUP2` etc.
 
     This property corresponds to option "-rc" of the original
     "fastcap" program. A value of 'None' for this property will enable
