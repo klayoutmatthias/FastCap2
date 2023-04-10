@@ -55,14 +55,14 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   ap = sys->p;
 
   /* Loop through all the conductors. */
-  for(cond=1; cond <= sys->num_cond; cond++) {
+  for (cond = 1; cond <= sys->num_cond; cond++) {
     
     /* skip conductors in the -rs and the -ri kill list */
-    if(want_this_iter(sys->kill_num_list, cond)
-       || want_this_iter(sys->kinp_num_list, cond)) continue;
+    if (sys->kill_num_list.find(cond) != sys->kill_num_list.end() || sys->kinp_num_list.find(cond) != sys->kinp_num_list.end()) {
+      continue;
+    }
 
-    sys->msg("\nStarting on column %d (%s)\n", cond,
-            getConductorName(sys, cond));
+    sys->msg("\nStarting on column %d (%s)\n", cond, sys->conductor_name_str(cond));
     sys->flush();
 
     /* Set up the initial residue vector and charge guess. */
@@ -97,12 +97,12 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
       if (ITRTYP == GMRES) {
         if((iter = gmres(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,sys->iter_tol,chglist))
            > maxiter) {
-          sys->error("NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
+          sys->error("NONCONVERGENCE AFTER %d ITERATIONS", maxiter);
         }
       } else {
         if((iter = gcr(sys,q,p,r,ap,bp,bap,size,real_size,sqrmat,real_index,maxiter,sys->iter_tol,chglist))
            > maxiter) {
-          sys->error("NONCONVERGENCE AFTER %d ITERATIONS\n", maxiter);
+          sys->error("NONCONVERGENCE AFTER %d ITERATIONS", maxiter);
         }
       }
 
@@ -119,7 +119,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
     if (sys->capvew && sys->ps_file_base) {
       /* dump shaded geometry file if only if this column picture wanted */
       /* (variable names are messed up - iter list now is list of columns) */
-      if(want_this_iter(sys->qpic_num_list, cond) || (sys->q_ && sys->qpic_num_list == NULL)) {
+      if (sys->qpic_num_list.find(cond) != sys->qpic_num_list.end() || (sys->q_ && sys->qpic_name_list == NULL)) {
         /* set up ps file name */
         std::ostringstream os;
         os << sys->ps_file_base << cond << ".ps";

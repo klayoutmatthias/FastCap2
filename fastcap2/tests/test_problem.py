@@ -434,6 +434,8 @@ class TestProblem(unittest.TestCase):
     problem.add(t1, d = (6, 0, 1), group = "TOP")
     problem.add(t2, d = (4.5, 0, 1))
 
+    self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP', 'T2%GROUP2'])
+
     problem.remove_conductors = ["T1%TOP"]
 
     cap_matrix = problem.solve()
@@ -458,6 +460,59 @@ class TestProblem(unittest.TestCase):
     # back to normal now
 
     problem.remove_conductors = None
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "796   -481  -73   \n"
+        "-481  891   -194  \n"
+        "-73   -194  290   "
+    )
+
+    self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP', 'T2%GROUP2'])
+
+  def test_incremental(self):
+
+    problem = fc2.Problem()
+
+    b = fc2.Surface(name = "B")
+    b.add_meshed_quad((0, 0, 0), (0, 10, 0), (10, 0, 0), edge_width = 0.2, num = 10)
+
+    t1 = fc2.Surface(name = "T1")
+    t1.add_meshed_quad((0, 0, 0), (0, 10, 0), (4, 0, 0), edge_width = 0.2, num = 5)
+
+    t2 = fc2.Surface(name = "T2")
+    t2.add_meshed_quad((0, 0, 0), (0, 10, 0), (1, 0, 0), edge_width = 0.2, num = 1)
+
+    # add first part
+
+    problem.add(b, d = (0, 0, -1))
+
+    self.assertEqual(problem.conductors(), ['B%GROUP1'])
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "405   "
+    )
+
+    # add second part
+
+    problem.add(t1, d = (0, 0, 1), group = "TOP")
+    problem.add(t1, d = (6, 0, 1), group = "TOP")
+
+    self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP'])
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "778   -530  \n"
+        "-530  761   "
+    )
+
+    # add third part
+
+    problem.add(t2, d = (4.5, 0, 1))
 
     cap_matrix = problem.solve()
 

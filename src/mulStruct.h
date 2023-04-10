@@ -5,8 +5,10 @@
 #include "heap.h"
 
 #include <cstdio>
+#include <set>
 
 struct SurfaceData;
+struct ssystem;
 
 //  used by patran.cc
 struct NAME;
@@ -16,6 +18,9 @@ struct Name {
   char *name;
   Name *next;
   Name *alias_list;
+  void add_alias(const ssystem *sys, const char *alias);
+  const char *last_alias() const;
+  bool match(const char *n) const;
 };
 
 /* used to make linked lists of iteration or conductor #s */
@@ -193,13 +198,14 @@ struct ssystem
 
   //  misc global
   const char *kill_name_list;   //  cond names whose columns are omitted
-  ITER *kill_num_list;          //  cond numbers whose columns are omitted
   const char *kinp_name_list;   //  cond names omitted from input
-  ITER *kinp_num_list;          //  cond numbers omitted from input
   const char *qpic_name_list;   //  cond column names that get q picture
-  ITER *qpic_num_list;          //  cond column names that get q picture
   const char *kq_name_list;     //  cond names removed from q picture
-  ITER *kq_num_list;            //  cond numbers removed from q picture
+
+  std::set<int> kill_num_list;  //  corresponding number lists (cached)
+  std::set<int> kinp_num_list;
+  std::set<int> qpic_num_list;
+  std::set<int> kq_num_list;
 
   double iter_tol;              //  iterative loop tolerence on ||r||
 
@@ -324,11 +330,24 @@ struct ssystem
 
   mutable Heap heap;            //  allocation heap
 
+  std::set<int> get_conductor_number_set(const char *names) const;
+  int get_conductor_number(const char *name);
+  bool rename_conductor(const char *old_name, const char *new_name);
+  int number_of(const Name *) const;
+  Name *conductor_name(int i);
+  const Name *conductor_name(int i) const;
+  const char *conductor_name_str(int i) const;
+
+  void reset_read();
+
   void msg(const char *fmt, ...) const;
   void info(const char *fmt, ...) const;
   void warn(const char *fmt, ...) const;
   [[noreturn]] void error(const char *fmt, ...) const;
   void flush();
+
+private:
+  int get_unique_cond_num(const char *name, size_t nlen) const;
 };
 
 #endif

@@ -91,6 +91,7 @@ project(FastCap2 LANGUAGES CXX)
 
 add_executable(unittests
   unittests/heap.cc
+  unittests/mulStruct.cc
 )
 target_link_libraries(unittests m corelib GTest::GTest GTest::gtest_main)
 target_compile_options(unittests PRIVATE ${COMPILE_OPTIONS})

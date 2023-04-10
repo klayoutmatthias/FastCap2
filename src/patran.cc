@@ -34,7 +34,7 @@ static void name_data(ssystem *sys, FILE *stream);
 static int if_same_coord(double coord_1[3], double coord_2[3]);
 static int if_same_grid(int ID, GRID *grid_ptr);
 static void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count);
-static charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, const char *name_suffix);
+static charge *make_charges_all_patches(ssystem *sys, int surf_type, const char *name_suffix);
 static charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conductor_ID);
 static char *delcr(char *str);
 
@@ -59,7 +59,7 @@ int first_patch;                /*   reset since the name list must */
 int first_cfeg;                 /*   be preserved as new files are read */
 
 charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, double *trans_vector,
-                 int *num_cond, const char *name_suffix, char **title)
+                 const char *name_suffix, char **title)
 {
   int *patch_patch_table;
 
@@ -91,7 +91,7 @@ charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, 
     assign_names(sys);
   }
 
-  return make_charges_all_patches(sys, num_cond, surf_type, name_suffix);
+  return make_charges_all_patches(sys, surf_type, name_suffix);
 }
 
 
@@ -427,7 +427,7 @@ void name_data(ssystem *sys, FILE *stream)
     }
   }
   if(patch_cnt == 0) {
-    sys->error("name_data: conductor '%s'\n  has no patch - redo naming so that one is included.\n",
+    sys->error("name_data: conductor '%s'\n  has no patch - redo naming so that one is included.",
                sys->current_name->name);
   }
 }
@@ -670,7 +670,7 @@ static char *getPatranName(ssystem *sys, int cond_num)
 
 ****************************************************************************/
 
-charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, const char *name_suffix)
+charge *make_charges_all_patches(ssystem *sys, int surf_type, const char *name_suffix)
 /* int *num_cond: master conductor counter */
 {
   CFEG *cfeg_ptr;
@@ -693,7 +693,7 @@ charge *make_charges_all_patches(ssystem *sys, int *num_cond, int surf_type, con
           if(surf_type == CONDTR || surf_type == BOTH) {
             strcpy(cond_name, getPatranName(sys, patch_ptr->conductor_ID));
             strcat(cond_name, name_suffix);
-            conductor_ID = getConductorNum(sys, cond_name, num_cond);
+            conductor_ID = sys->get_conductor_number(cond_name);
           }
           else conductor_ID = 0;
           break;
@@ -795,7 +795,7 @@ static void assign_names(ssystem *sys)
   NAME *cur_name = sys->start_name_this_time;
 
   if(sys->start_name_this_time == NULL) {
-    sys->error("assign_names: no conductor names specified\n");
+    sys->error("assign_names: no conductor names specified");
   }
 
   /* for each name struct, find cond no of each patch (can be n^2 loop) */
@@ -812,14 +812,14 @@ static void assign_names(ssystem *sys)
             current_conductor = current_patch->conductor_ID;
           }
           else if(current_conductor != current_patch->conductor_ID) {
-            sys->error("assign_names: alleged conductor '%s'\n  has patches from more than one conductor - rename more carefully\n", cur_name->name);
+            sys->error("assign_names: alleged conductor '%s'\n  has patches from more than one conductor - rename more carefully", cur_name->name);
           }
           quit = 1;
         }
         current_patch = current_patch->next;
       }
       if(quit == 0) {
-        sys->error("assign_names: in conductor '%s'\n  can't find named patch in master list\n", cur_name->name);
+        sys->error("assign_names: in conductor '%s'\n  can't find named patch in master list", cur_name->name);
       }
       current_name_patch = current_name_patch->next;
     }
@@ -829,11 +829,11 @@ static void assign_names(ssystem *sys)
 
   /* check to see if all conductors have a name and if too many names */
   if(cnt < conductor_count - 1) {
-    sys->error("assign_names: %d conductors have no names\n",
+    sys->error("assign_names: %d conductors have no names",
                conductor_count - 1 - cnt);
   }
   if(cnt > conductor_count - 1) {
-    sys->error("assign_names: %d names given for %d conductors\n",
+    sys->error("assign_names: %d names given for %d conductors",
                cnt, conductor_count - 1);
   }
 

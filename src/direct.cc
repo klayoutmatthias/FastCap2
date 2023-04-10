@@ -133,7 +133,7 @@ double **ludecomp(ssystem *sys, double **matin, int size, int allocate)
 
   for(k = 0; k < size-1; k++) { /* loop on rows */
     if(mat[k][k] == 0.0) {
-      sys->error("ludecomp: zero piovt\n");
+      sys->error("ludecomp: zero piovt");
     }
     for(i = k+1; i < size; i++) { /* loop on remaining rows */
       factor = (mat[i][k] /= mat[k][k]);

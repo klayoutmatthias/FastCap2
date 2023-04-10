@@ -95,8 +95,7 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
   
   /* attempt to open file list file */
   if((fp = fopen(list_file, "r")) == NULL) {
-    sys->error("read_list_file: can't open list file\n  `%s'\nto read\n",
-               list_file);
+    sys->error("read_list_file: can't open list file\n  `%s'\nto read", list_file);
   }
 
   /* read file names and permittivities, build linked list */
@@ -107,7 +106,7 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
     if(tline[0] == 'C' || tline[0] == 'c') {
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf", 
                 file_name, &outer_perm, &tx, &ty, &tz) != 5) {
-        sys->error("read_list_file: bad conductor surface format, tline %d:\n%s\n",
+        sys->error("read_list_file: bad conductor surface format, tline %d:\n%s",
                    linecnt, tline);
       }
 
@@ -150,7 +149,7 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf", 
                 file_name, &outer_perm, &inner_perm, &tx, &ty, &tz,
                 &rx, &ry, &rz) != 9) {
-        sys->error("read_list_file: bad thin conductor on dielectric interface surface format, line %d:\n%s\n",
+        sys->error("read_list_file: bad thin conductor on dielectric interface surface format, line %d:\n%s",
                    linecnt, tline);
       }
 
@@ -206,7 +205,7 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
       if(sscanf(&(tline[1]), "%s %lf %lf %lf %lf %lf %lf %lf %lf", 
                 file_name, &outer_perm, &inner_perm, &tx, &ty, &tz,
                 &rx, &ry, &rz) != 9) {
-        sys->error("read_list_file: bad dielectric interface surface format, line %d:\n%s\n",
+        sys->error("read_list_file: bad dielectric interface surface format, line %d:\n%s",
                    linecnt, tline);
       }
 
@@ -252,14 +251,14 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
     }
     else if(tline[0] == 'G' || tline[0] == 'g') {
       if(sscanf(&(tline[1]), "%s", group_name) != 1) {
-        sys->error("read_list_file: bad group name format, line %d:\n%s\n",
+        sys->error("read_list_file: bad group name format, line %d:\n%s",
                    linecnt, tline);
       }
     }
     else if(tline[0] == '%' || tline[0] == '*' ||
             tline[0] == '#'); /* ignore comments */
     else {
-      sys->error("read_list_file: bad line format, line %d:\n%s\n",
+      sys->error("read_list_file: bad line format, line %d:\n%s",
                  linecnt, tline);
     }
   }
@@ -430,21 +429,6 @@ static int dump_ilist(ssystem *sys)
 #endif
 
 /*
-  checks if a particular iter is in the list; returns TRUE if it is
-*/
-int want_this_iter(ITER *iter_list, int iter_num)
-{
-  ITER *cur_iter;
-
-  for(cur_iter = iter_list; cur_iter != NULL; cur_iter = cur_iter->next) {
-    if(cur_iter->iter == iter_num) {
-      return(TRUE);
-    }
-  }
-
-  return(FALSE);
-}
-/*
   sets up the ps file base string
 */
 void get_ps_file_base(ssystem *sys)
@@ -492,7 +476,7 @@ void get_ps_file_base(ssystem *sys)
   align the normals of all the panels in each surface so they point
     towards the same side as where the ref point is (dielectric files only)
 */
-static charge *read_panels(ssystem *sys, int *num_cond)
+static charge *read_panels(ssystem *sys)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
   charge *panel_list = 0, *cur_panel = 0, *c_panel;
@@ -500,6 +484,9 @@ static charge *read_panels(ssystem *sys, int *num_cond)
   FILE *fp;
   char surf_name[BUFSIZ];
   int patran_file_read = FALSE;
+
+  sys->num_cond = 0;
+  sys->cond_names = NULL;
 
   stdin_read = FALSE;
   for(cur_surf = sys->surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {
@@ -511,7 +498,7 @@ static charge *read_panels(ssystem *sys, int *num_cond)
 
       if(!strcmp(cur_surf->name, "stdin")) {
         if(stdin_read) {
-          sys->error("read_panels: attempt to read stdin twice\n");
+          sys->error("read_panels: attempt to read stdin twice");
         }
         else {
           stdin_read = TRUE;
@@ -519,7 +506,7 @@ static charge *read_panels(ssystem *sys, int *num_cond)
         }
       }
       else if((fp = fopen(cur_surf->name, "r")) == NULL) {
-        sys->error("read_panels: can't open\n  `%s'\nto read\n",
+        sys->error("read_panels: can't open\n  `%s'\nto read",
                    cur_surf->name);
       }
 
@@ -536,11 +523,11 @@ static charge *read_panels(ssystem *sys, int *num_cond)
 
       if (header[0] == '0') {
         patran_file = FALSE;
-        panels_read = quickif(sys, fp, header, cur_surf->type, cur_surf->trans, num_cond, surf_name, &title);
+        panels_read = quickif(sys, fp, header, cur_surf->type, cur_surf->trans, surf_name, &title);
       } else {
 #if !defined(BUILD_FASTCAP2_PYMOD)
         patran_file = TRUE;
-        panels_read = patfront(sys, fp, header, cur_surf->type, cur_surf->trans, num_cond, surf_name, &title);
+        panels_read = patfront(sys, fp, header, cur_surf->type, cur_surf->trans, surf_name, &title);
 #else
         //  The patran reader is not reentrant, so we do not allow this one
         //  in the context of the Python module
@@ -549,7 +536,7 @@ static charge *read_panels(ssystem *sys, int *num_cond)
       }
 
       if(!patran_file && patran_file_read) {
-        sys->error("read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group---reorder list file entries\n", cur_surf->name);
+        sys->error("read_panels: generic format file\n  `%s'\nread after neutral file(s) in same group - reorder list file entries", cur_surf->name);
       }
       patran_file_read = patran_file;
 
@@ -570,7 +557,7 @@ static charge *read_panels(ssystem *sys, int *num_cond)
         }
         os << "%";
         os << cur_surf->group_name;
-        cond_num = getConductorNum(sys, os.str().c_str(), num_cond);
+        cond_num = sys->get_conductor_number(os.str().c_str());
       }
 
       if (cur_surf->surf_data->title) {
@@ -616,8 +603,7 @@ static charge *read_panels(ssystem *sys, int *num_cond)
       else if (cur_panel->shape == 3) num_tris++;
       else if (cur_panel->shape == 4) num_quads++;
       else {
-        sys->error("read_panels: bad panel shape, %d\n",
-                   cur_panel->shape);
+        sys->error("read_panels: bad panel shape, %d", cur_panel->shape);
       }
       if (!cur_panel->next) {
         break;
@@ -632,99 +618,8 @@ static charge *read_panels(ssystem *sys, int *num_cond)
     cur_surf->num_dummies = num_dummies;
 
   }
+
   return(panel_list);
-}
-
-/*
-  returns either conductor number or one of two error codes
-  NOTUNI => no group name given and name by itself is not unique
-  NOTFND => neither name by itself nor with group name is not in list
-  - any unique leading part of the name%group_name string may be specified 
-*/
-static int getUniqueCondNum(char *name, Name *name_list)
-{
-  int cond = NOTFND;
-  size_t nlen = strlen(name);
-
-  /* fish through name list for name - check first nlen chars for match */
-  int i = 1;
-  for (const Name *cur_name = name_list; cur_name != NULL; cur_name = cur_name->next, ++i) {
-    const char *cur_alias = last_alias(cur_name);
-    if (!strncmp(cur_alias, name, nlen)) {
-      if (cond != NOTFND) {
-        return NOTUNI;
-      }
-      cond = i;
-    }
-  }
-
-  return cond;
-}
-
-
-/*
-  called after all conductor names have been resolved to get list
-    of conductor numbers that whose columns will not be calculated
-  parses the conductor kill list spec from command line arg saved before
-  (conds that get no solve); puts result in kill_num_list
-  list string format: 
-  [<cond name>[%<group name>]],[<cond name>[%<group name>]]...
-  - no spaces; group name may be omitted if conductor name is unique
-    across all groups
-  - conductor names can't have any %'s
-  - redundant names are detected as errors
-*/
-static ITER *get_kill_num_list(ssystem *sys, Name *name_list, const char *kill_name_list)
-{
-  int i, j, start_token, end_token, cond;
-  char name[BUFSIZ];
-  ITER *kill_num_list;
-  ITER *cur_cond;
-
-  /* check for no name list given */
-  if(kill_name_list == NULL) return(NULL);
-
-  start_token = 0;
-  kill_num_list = NULL;
-  while(kill_name_list[start_token] != '\0') {
-
-    /* loop until next comma or end of list */
-    for(i = start_token; kill_name_list[i] != '\0' && kill_name_list[i] != ',';
-        i++);
-    end_token = i;
-
-    /* extract the name%group_name string */
-    /*   copy the name */
-    for(i = start_token, j = 0; i < end_token; i++, j++) 
-        name[j] = kill_name_list[i];
-    name[j] = '\0';
-
-    /* attempt to get conductor number from name and group_name */
-    cond = getUniqueCondNum(name, name_list);
-    if(cond == NOTUNI) {
-      sys->error("get_kill_num_list: cannot find unique conductor name starting `%s'\n",
-                 name);
-    }
-    else if(cond == NOTFND) {
-      sys->error("get_kill_num_list: cannot find conductor name starting `%s'\n",
-                 name);
-    }
-
-    /* add conductor name to list of conductors to omit */
-    if(kill_num_list == NULL) {
-      kill_num_list = sys->heap.alloc<ITER>(1, AMSC);
-      cur_cond = kill_num_list;
-    }
-    else {
-      cur_cond->next = sys->heap.alloc<ITER>(1, AMSC);
-      cur_cond = cur_cond->next;
-    }
-    cur_cond->iter = cond;
-      
-    if(kill_name_list[end_token] == ',') start_token = end_token+1;
-    else start_token = end_token;
-  }
-  return(kill_num_list);
 }
 
 /*
@@ -1090,7 +985,7 @@ void dumpSurfDat(ssystem *sys)
               cur_surf->inner_perm, cur_surf->outer_perm);
     }
     else {
-      sys->error("dumpSurfDat: bad surface type\n");
+      sys->error("dumpSurfDat: bad surface type");
     }
     sys->msg("      number of panels: %d\n",
             cur_surf->num_panels - cur_surf->num_dummies);
@@ -1103,69 +998,57 @@ void dumpSurfDat(ssystem *sys)
 }
 
 /*
-  replaces name (and all aliases) corresponding to "num" with unique string
+  replaces name (and all aliases) corresponding to one from "num_list" with unique (ugly) string
 */
-static void remove_name(ssystem *sys, Name **name_list, int num)
+static void remove_names(ssystem *sys, const std::set<int> &num_list)
 {
-  static char str[] = "%`_^#$REMOVED";
-  Name *cur_name, *cur_alias;
-  int i, slen;
+  static char str[] = "%`_^#$REMOVED";   //  TODO: why not empty?
 
-  slen = strlen(str);
-
-  for(i = 1, cur_name = *name_list; cur_name != NULL; 
-      cur_name = cur_name->next, i++) {
-    if(i == num) {
-
-      /* overwrite name */
-      if(strlen(cur_name->name) < (size_t)slen) {
-        cur_name->name = sys->heap.alloc<char>(slen+1, AMSC);
-      }
-      strcpy(cur_name->name, str);
-
-      /* overwrite aliases */
-      for(cur_alias = cur_name->alias_list; cur_alias != NULL;
-          cur_alias = cur_alias->next) {
-        if(strlen(cur_alias->name) < (size_t)slen) {
-          cur_alias->name = sys->heap.alloc<char>(slen+1, AMSC);
-        }
-        strcpy(cur_alias->name, str);
+  for (auto i = num_list.begin(); i != num_list.end(); ++i) {
+    Name *name = sys->conductor_name(*i);
+    if (name) {
+      name->name = sys->heap.strdup(str);
+      for (Name *a = name->alias_list; a; a = a->next) {
+        a->name = sys->heap.strdup(str);
       }
     }
   }
-
 }
         
 /*
   removes (unlinks from linked list) panels that are on conductors to delete
 */
-static void remove_conds(ssystem *sys, charge **panels, ITER *num_list, Name **name_list)
+static void remove_conds(ssystem *sys, charge **panels, const std::set<int> &num_list, Name **name_list)
 {
-  ITER *cur_num;
   charge *cur_panel, *prev_panel;
 
-  for(cur_panel = prev_panel = *panels; cur_panel != NULL; 
-      cur_panel = cur_panel->next) {
-    if(cur_panel->dummy) continue;
-    if(cur_panel->surf->type == CONDTR || cur_panel->surf->type == BOTH) {
-      if(want_this_iter(num_list, cur_panel->cond)) {
-        /* panel's conductor is to be removed, so unlink the panel */
-        /* - if panel to be removed is first panel, rewrite head pointer */
-        if(cur_panel == *panels) *panels = cur_panel->next;
-        /* - otherwise bypass cur_panel with next pointers */
-        else prev_panel->next = cur_panel->next;
+  for (cur_panel = prev_panel = *panels; cur_panel; cur_panel = cur_panel->next) {
+    if (cur_panel->dummy) {
+      continue;
+    }
+    if (cur_panel->surf->type == CONDTR || cur_panel->surf->type == BOTH) {
+      if (num_list.find(cur_panel->cond) != num_list.end()) {
+        //  panel's conductor is to be removed, so unlink the panel
+        //  - if panel to be removed is first panel, rewrite head pointer
+        if (cur_panel == *panels) {
+          *panels = cur_panel->next;
+        } else {
+          //  - otherwise bypass cur_panel with next pointers
+          prev_panel->next = cur_panel->next;
+        }
+      } else {
+        prev_panel = cur_panel;
       }
-      else prev_panel = cur_panel;
     }
   }
 
-  /* remove all -ri'd conductor names from master name list
-     - required to get rid of references in capsolve()
-     - actually, name and all its aliases are replaced by ugly string
-       (not the cleanest thing) */
-  for(cur_num = num_list; cur_num != NULL; cur_num = cur_num->next) {
-    remove_name(sys, name_list, cur_num->iter);
-  }
+  //  TODO: appears to be working without this ...
+
+  //  remove all -ri'd conductor names from master name list
+  //  - required to get rid of references in capsolve()
+  //  - actually, name and all its aliases are replaced by ugly string
+  //    (not the cleanest thing)
+  remove_names(sys, num_list);
 }
 
 /*
@@ -1175,38 +1058,34 @@ static void remove_conds(ssystem *sys, charge **panels, ITER *num_list, Name **n
   -rc list: no restrictions
   -ri/-rs: can't exhaust all conductors with combination of these lists
 */
-static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list, ITER *ri_num_list)
+static void resolve_kill_lists(const ssystem *sys, const std::set<int> &rs_num_list, const std::set<int> &q_num_list, const std::set<int> &ri_num_list)
 {
-  int i, lists_exhaustive;
-  ITER *cur_num;
-
-  /* check for anything in -rs list in -ri list */
-  for(cur_num = ri_num_list; cur_num != NULL; cur_num = cur_num->next) {
-    if(want_this_iter(rs_num_list, cur_num->iter)) {
-      sys->error("resolve_kill_lists: a conductor removed with -ri is in the -rs list\n");
+  //  check for anything in -rs list in -ri list
+  for (auto i = ri_num_list.begin(); i != ri_num_list.end(); ++i) {
+    if (rs_num_list.find(*i) != rs_num_list.end()) {
+      sys->error("resolve_kill_lists: a conductor removed with -ri is in the -rs list");
     }
   }
 
-  /* check for anything in -q list in -ri or -rs list
-     - recall that -q by itself means plot for all active, 
-       so null q_num_list always ok */
-  for(cur_num = q_num_list; cur_num != NULL; cur_num = cur_num->next) {
-    if(want_this_iter(rs_num_list, cur_num->iter)
-       || want_this_iter(ri_num_list, cur_num->iter)) {
-      sys->error("resolve_kill_lists: a conductor removed with -ri or -rs is in the -q list\n");
+  //  check for anything in -q list in -ri or -rs list
+  //  - recall that -q by itself means plot for all active,
+  //    so null q_num_list always ok
+  for (auto i = q_num_list.begin(); i != q_num_list.end(); ++i) {
+    if(rs_num_list.find(*i) != rs_num_list.end() || ri_num_list.find(*i) != ri_num_list.end()) {
+      sys->error("resolve_kill_lists: a conductor removed with -ri or -rs is in the -q list");
     }
   }
 
-  /* check that -rs and -ri lists don't exhaust all conductors */
-  lists_exhaustive = TRUE;
-  for(i = 1; i <= sys->num_cond; i++) {
-    if(!want_this_iter(rs_num_list, i) && !want_this_iter(ri_num_list, i)) {
-      lists_exhaustive = FALSE;
+  //  check that -rs and -ri lists don't exhaust all conductors
+  bool lists_exhaustive = true;
+  for (int i = 1; i <= sys->num_cond; i++) {
+    if (rs_num_list.find(i) == rs_num_list.end() && ri_num_list.find(i) == ri_num_list.end()) {
+      lists_exhaustive = false;
       break;
     }
   }
-  if(lists_exhaustive && !sys->m_) {
-    sys->error("resolve_kill_lists: all conductors either in -ri or -rs list\n");
+  if (lists_exhaustive && !sys->m_) {
+    sys->error("resolve_kill_lists: all conductors either in -ri or -rs list");
   }
 }
 
@@ -1215,32 +1094,28 @@ static void resolve_kill_lists(ssystem *sys, ITER *rs_num_list, ITER *q_num_list
 */
 charge *build_charge_list(ssystem *sys)
 {
-  charge *chglist;
-
-  if (sys->dirsol || sys->expgcr) {
-    sys->depth = 0;                /* put all the charges in first cube */
+  //  used cached panels if possible
+  if (sys->panels) {
+    return sys->panels;
   }
 
-  /* input the panels from the surface files */
-  sys->num_cond = 0;                /* initialize conductor count */
-  chglist = read_panels(sys, &sys->num_cond);
+  //  input the panels from the surface files
+  //  as a side effect this will fill the conductor name list
+  charge *chglist = read_panels(sys);
 
-  /* set up the lists of conductors to remove from solve list */
-  sys->kill_num_list = get_kill_num_list(sys, sys->cond_names, sys->kill_name_list);
+  //  build the selector lists by number
+  sys->kinp_num_list = sys->get_conductor_number_set(sys->kinp_name_list);
+  sys->kill_num_list = sys->get_conductor_number_set(sys->kill_name_list);
+  sys->qpic_num_list = sys->get_conductor_number_set(sys->qpic_name_list);
+  sys->kq_num_list = sys->get_conductor_number_set(sys->kq_name_list);
 
-  /* remove the panels on specified conductors from input list */
-  sys->kinp_num_list = get_kill_num_list(sys, sys->cond_names, sys->kinp_name_list);
+  //  remove the panels on specified conductors from input list
   remove_conds(sys, &chglist, sys->kinp_num_list, &sys->cond_names);
 
-  /* set up the lists of conductors to dump shaded plots for */
-  sys->qpic_num_list = get_kill_num_list(sys, sys->cond_names, sys->qpic_name_list);
-
-  /* set up the lists of conductors to eliminate from shaded plots */
-  sys->kq_num_list = get_kill_num_list(sys, sys->cond_names, sys->kq_name_list);
-
-  /* check for inconsistencies in kill lists */
+  //  check for inconsistencies in kill lists on this occasion
   resolve_kill_lists(sys, sys->kill_num_list, sys->qpic_num_list, sys->kinp_num_list);
 
-  /* return the panels from the surface files */
-  return(chglist);
+  //  return the panels from the surface files
+  sys->panels = chglist;
+  return chglist;
 }

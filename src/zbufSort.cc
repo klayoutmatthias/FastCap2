@@ -658,7 +658,7 @@ face **depthSortFaces(ssystem *sys, face **faces, int numfaces)
       }
     }
     if(facefound == FALSE) {
-      sys->error("depthSortFaces: can't find depth %d face\n", f);
+      sys->error("depthSortFaces: can't find depth %d face", f);
     }
   }
   return(rfaces);

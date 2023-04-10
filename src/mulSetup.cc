@@ -30,6 +30,10 @@ void mulInit(ssystem *sys, charge *charges)
 {
   int qindex=1, cindex=1;
 
+  if (sys->dirsol || sys->expgcr) {
+    sys->depth = 0;                //  put all the charges in first cube
+  }
+
   sys->depth = placeq(sys->depth < 0, sys, charges); /* create cubes, put in charges */
 
   getrelations(sys);            /* Get all the prnts and kids for each cube. */
@@ -158,7 +162,7 @@ static int placeq(int flag, ssystem *sys, charge *charges)
     for(isexact = FALSE; isexact == FALSE; side *= 2, i++) {
 
       if(i > MAXDEP) {
-        sys->error("placeq: out of cube pntr space - increase MAXDEP == %d\n",
+        sys->error("placeq: out of cube pntr space - increase MAXDEP == %d",
                    MAXDEP);
       }
 

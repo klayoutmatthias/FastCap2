@@ -7,6 +7,6 @@
 struct ssystem;
 struct charge;
 
-charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, double *trans_vector, int *num_cond, const char *name_suffix, char **title);
+charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, double *trans_vector, const char *name_suffix, char **title);
 
 #endif

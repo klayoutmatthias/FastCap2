@@ -82,20 +82,6 @@ static char *simplify(char *str)
 
 // --------------------------------------------------------------------------
 
-/*
-  tells if any conductor name alias matches a string
-*/
-static int alias_match(Name *cur_name, const char *name)
-{
-  Name *cur_alias;
-
-  for(cur_alias = cur_name->alias_list; cur_alias != NULL;
-      cur_alias = cur_alias->next) {
-    if(!strcmp(name, cur_alias->name)) return(TRUE);
-  }
-  return(FALSE);
-}
-
 #if defined(UNUSED)
 /*
   tells if any conductor name alias matches a string only up to length(name)
@@ -119,146 +105,6 @@ static int alias_match_name(Name *cur_name, char *name)
 #endif
 
 /*
-  adds an alias 
-*/
-static void add_to_alias(ssystem *sys, Name *cur_name, char *new_name)
-{
-  Name *last_alias = NULL, *cur_alias;
-
-  for(cur_alias = cur_name->alias_list; cur_alias != NULL;
-      cur_alias = cur_alias->next) {
-    last_alias = cur_alias;
-  }
-
-  if(last_alias == NULL) {
-    cur_name->alias_list = sys->heap.alloc<Name>(1, AMSC);
-    cur_name->alias_list->name = sys->heap.strdup(new_name);
-  }
-  else {
-    last_alias = sys->heap.alloc<Name>(1, AMSC);
-    last_alias->name = sys->heap.strdup(new_name);
-  }
-}
-
-/*
-  return pointer to last alias string (= current name for conductor)
-*/
-const char *last_alias(const Name *cur_name)
-{
-  const Name *cur_alias, *last_alias;
-
-  last_alias = cur_name;
-  for (cur_alias = cur_name->alias_list; cur_alias != NULL; cur_alias = cur_alias->next) {
-    last_alias = cur_alias;
-  }
-
-  return last_alias->name;
-}
-
-/*
-  manages the conductor name list
-*/
-int getConductorNum(ssystem *sys, const char *name, int *num_cond)
-{
-  Name *cur_name = 0, *prev_name = 0;
-  int i;
-
-  /* if this is the very first name, make and load struct on *name_list */
-  if(*num_cond == 0) {
-    sys->cond_names = sys->heap.alloc<Name>(1, AMSC);
-    sys->cond_names->name = sys->heap.strdup(name);
-    sys->cond_names->next = NULL;
-    *num_cond = 1;
-    return(1);
-  }
-
-  /* check to see if name is present */
-  for(cur_name = sys->cond_names, i = 1; cur_name != NULL;
-      cur_name = cur_name->next, i++) {
-    if(!strcmp(cur_name->name, name) || alias_match(cur_name, name)) 
-        return(i); /* return conductor number */
-    prev_name = cur_name;
-  }
-
-  /* add the new name to the list */
-  prev_name->next = sys->heap.alloc<Name>(1, AMSC);
-  prev_name->next->name = sys->heap.strdup(name);
-  prev_name->next->next = NULL;
-  *num_cond = i;
-  return(i);
-}
-
-#if defined(UNUSED)
-/*
-  checks to see if name is present in conductor name list
-  - does not add if it isnt present
-  - returns NOTFND if name not found
-  - name must have group name appended
-*/
-static int getConductorNumNoAdd(char *name, Name *name_list)
-{
-  Name *cur_name;
-  int i;
-
-  /* check to see if name is present */
-  for(cur_name = name_list, i = 1; cur_name != NULL;
-      cur_name = cur_name->next, i++) {
-    if(!strcmp(cur_name->name, name) || alias_match(cur_name, name)) 
-        return(i); /* return conductor number */
-  }
-
-  return(NOTFND);
-}
-#endif
-
-/*
-  gets the name (aliases are ignored) corresponding to a conductor number
-*/
-const char *getConductorName(const ssystem *sys, int cond_num)
-{
-  const Name *cur_name;
-  int i;
-
-  /* check to see if conductor number is present */
-  for(cur_name = sys->cond_names, i = 1; cur_name != NULL;
-      cur_name = cur_name->next, i++) {
-    if(i == cond_num) return(last_alias(cur_name));
-  }
-
-  /* number not found */
-  sys->info("getConductorName: conductor no. %d not defined\n", cond_num);
-
-  return NULL;
-}
-
-/*
-  renames a conductor
-*/
-static int renameConductor(ssystem *sys, char *old_name, char *new_name, int *num_cond)
-{
-  Name *cur_name;
-  int i;
-
-  /* check to see if old name is present in names or their aliases */
-  /* if it is, add old name to the alias list */
-  for(cur_name = sys->cond_names, i = 1; cur_name != NULL;
-      cur_name = cur_name->next, i++) {
-    if(!strcmp(cur_name->name, old_name) || alias_match(cur_name, old_name)) {
-      /* old name is cur name or old name is an alias */
-      /* if new name isn't in alias list, add it to alias list */
-      if(!alias_match(cur_name, new_name)) 
-          add_to_alias(sys, cur_name, new_name);
-      return(TRUE);
-    }
-  }
-
-  /* old name not found in entire list */
-  sys->info("renameConductor: unknown conductor `%s'\n", old_name);
-  return(FALSE);
-
-}
-
-/*
   returns list of charge structs derived from quick input format:
   0 <Title string>       (must be first line, others in any order OK)
   Q <cond name string> X1 Y1 Z1 X2 Y2 Z2 X3 Y3 Z3 X4 Y4 Z4
@@ -266,7 +112,7 @@ static int renameConductor(ssystem *sys, char *old_name, char *new_name, int *nu
   N <cond name string> <Rename string>
   * <Comment string>
 */
-charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, double *trans, int *num_cond, const char *name_suffix, char **title)
+charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, double *trans, const char *name_suffix, char **title)
 /* char *name_suffix: suffix for all cond names read */
 {
   quadl *fstquad = 0, *curquad = 0;
@@ -287,7 +133,7 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, doubl
                 temp, condstr, 
                 &x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3, &x4, &y4, &z4)
          != 14) {
-        sys->error("quickif: bad quad format, line %d:\n%s\n",
+        sys->error("quickif: bad quad format, line %d:\n%s",
                    linecnt, line1);
       }
 
@@ -306,7 +152,7 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, doubl
       
       /* load quad struct */
       if(surf_type == CONDTR || surf_type == BOTH)
-          curquad->cond = getConductorNum(sys, condstr, num_cond);
+          curquad->cond = sys->get_conductor_number(condstr);
       else curquad->cond = 0;
       curquad->x1 = x1;
       curquad->x2 = x2;
@@ -327,7 +173,7 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, doubl
       if(sscanf(line1, "%s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf",
                 temp, condstr, &x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3) 
          != 11) {
-        sys->error("quickif: bad tri format, line %d:\n%s\n",
+        sys->error("quickif: bad tri format, line %d:\n%s",
                    linecnt, line1);
       }
 
@@ -346,7 +192,7 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, doubl
       
       /* load tri struct */
       if(surf_type == CONDTR || surf_type == BOTH)
-          curtri->cond = getConductorNum(sys, condstr, num_cond);
+          curtri->cond = sys->get_conductor_number(condstr);
       else curquad->cond = 0;
       curtri->x1 = x1;
       curtri->x2 = x2;
@@ -362,7 +208,7 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, doubl
     }
     else if(line1[0] == 'N' || line1[0] == 'n') {
       if(sscanf(line1, "%s %s %s", temp, condstr, temp2) != 3) {
-        sys->error("quickif: bad rename format, line %d:\n%s\n",
+        sys->error("quickif: bad rename format, line %d:\n%s",
                    linecnt, line1);
       }
 
@@ -374,7 +220,7 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, doubl
         strcat(condstr, name_suffix);
         strcat(temp2, name_suffix);
 
-        if(renameConductor(sys, condstr, temp2, num_cond) == FALSE) {
+        if(!sys->rename_conductor(condstr, temp2)) {
           sys->error("quickif: error renaming conductor");
         }
       }
@@ -384,7 +230,7 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, doubl
     else if(line1[0] == '%' || line1[0] == '*' ||
             line1[0] == '#') linecnt++; /* ignore comments */
     else {
-      sys->error("quickif: bad line format, line %d:\n%s\n",
+      sys->error("quickif: bad line format, line %d:\n%s",
                  linecnt, line1);
     }
   }

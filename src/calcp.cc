@@ -183,7 +183,7 @@ void initcalcp(ssystem *sys, charge *panel_list)
       pq->corner[i][YI] = vtemp[YI];
       pq->corner[i][ZI] = vtemp[ZI];
       if(fabs(pq->corner[i][ZI]) > (EQUIV_TOL * pq->min_diag)) {
-        sys->error("FATAL PROGRAM ERROR: renormalized z=%g\n", pq->corner[i][ZI]);
+        sys->error("FATAL PROGRAM ERROR: renormalized z=%g", pq->corner[i][ZI]);
       }
       pq->corner[i][ZI] = 0.0;
     }

@@ -4,7 +4,54 @@
 #include "zbufGlobal.h"
 
 #include <cstdarg>
+#include <cstring>
 #include <stdexcept>
+
+// -----------------------------------------------------------------------
+
+void
+Name::add_alias(const ssystem *sys, const char *alias)
+{
+  Name **al = &alias_list;
+  while (*al) {
+    al = &((*al)->next);
+  }
+
+  *al = sys->heap.alloc<Name>(1, AMSC);
+  (*al)->name = sys->heap.strdup(alias);
+}
+
+const char *
+Name::last_alias() const
+{
+  if (! alias_list) {
+    return name;
+  } else {
+    const Name *al;
+    for (al = alias_list; al->next; al = al->next)
+      ;
+    return al->name;
+  }
+}
+
+/**
+ *  @brief Returns true if the given name matches either the direct name or an alias
+ */
+bool
+Name::match(const char *n) const
+{
+  if (!strcmp(n, name)) {
+    return true;
+  }
+  for (const Name *a = alias_list; a; a = a->next) {
+    if (!strcmp(n, a->name)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// -----------------------------------------------------------------------
 
 ssystem::ssystem() :
   argv(0),
@@ -14,13 +61,9 @@ ssystem::ssystem() :
   current_name(0),
   start_name_this_time(0),
   kill_name_list(0),
-  kill_num_list(0),
   kinp_name_list(0),
-  kinp_num_list(0),
   qpic_name_list(0),
-  qpic_num_list(0),
   kq_name_list(0),
-  kq_num_list(0),
   iter_tol(ABSTOL),
   s_(false),
   n_(false),
@@ -263,6 +306,194 @@ ssystem::ssystem() :
 #if defined(JACDBG) && JACDBG == ON
   jacdbg = true;
 #endif
+}
+
+/**
+ *  @brief returns either conductor number from a name or one of two error codes
+ *
+ *  Error codes are:
+ *  * NOTUNI -> no group name given and name by itself is not unique
+ *  * NOTFND -> neither name by itself nor with group name is not in list
+ *
+ *  Any unique leading part of the name%group_name string may be specified
+ *
+ *  The return value
+ */
+int
+ssystem::get_unique_cond_num(const char *name, size_t nlen) const
+{
+  int cond = NOTFND;
+
+  //  fish through name list for name - check first nlen chars for match
+  int i = 1;
+  for (const Name *cur_name = this->cond_names; cur_name; cur_name = cur_name->next, ++i) {
+    const char *cur_alias = cur_name->last_alias();
+    if (!strncmp(cur_alias, name, nlen)) {
+      if (cond != NOTFND) {
+        return NOTUNI;
+      }
+      cond = i;
+    }
+  }
+
+  return cond;
+}
+
+/**
+ *  @brief called after all conductor names have been resolved to get list of conductor numbers from a comma separated list
+ *
+ *  "names" string format:
+ *
+ *  [<cond name>[%<group name>]],[<cond name>[%<group name>]]...
+ *  - no spaces; group name may be omitted if conductor name is unique
+ *    across all groups
+ *  - conductor names can't have any %'s
+ *  - redundant names are detected as errors
+ *
+ *  The return value is a set of conductor numbers (1 based) that correspond to
+ *  list entries.
+ */
+std::set<int>
+ssystem::get_conductor_number_set(const char *names) const
+{
+  std::set<int> result;
+
+  //  shortcut for no names given
+  if (!names) {
+    return result;
+  }
+
+  size_t start_token = 0;
+  size_t end_token;
+
+  while (names[start_token]) {
+
+    //  loop until next comma or end of list
+    for (end_token = start_token; names[end_token] && names[end_token] != ','; ++end_token)
+      ;
+
+    //  attempt to get conductor number from name and group_name
+    int cond = get_unique_cond_num(names + start_token, end_token - start_token);
+
+    //  error handling
+    if (cond == NOTUNI || cond == NOTFND) {
+      std::string s (names + start_token, end_token - start_token);
+      if (cond == NOTUNI) {
+        error("Cannot find unique conductor name starting with '%s'", s.c_str());
+      } else if (cond == NOTFND) {
+        error("Cannot find conductor name starting with '%s'", s.c_str());
+      }
+    } else {
+      result.insert(cond);
+    }
+
+    if (names[end_token] == ',') {
+      ++end_token;
+    }
+    start_token = end_token;
+
+  }
+
+  return result;
+}
+
+/**
+ *  @brief Gets the conductor number for a given name
+ *
+ *  If required (i.e. the name is not found), a new conductor is generated.
+ *  The conductor number is 1-based.
+ */
+int
+ssystem::get_conductor_number(const char *name)
+{
+  int i = 1;
+  Name *prev_name = 0;
+
+  //  check to see if name is present
+  for (Name *cur_name = cond_names; cur_name; cur_name = cur_name->next, ++i) {
+    if (cur_name->match(name)) {
+      return i;   //  return conductor number
+    }
+    prev_name = cur_name;
+  }
+
+  //  create a new item
+  Name *new_name = heap.alloc<Name>(1, AMSC);
+  new_name->name = heap.strdup(name);
+  new_name->next = 0;
+
+  //  add the new name to the list
+  if (!prev_name) {
+    cond_names = new_name;
+  } else {
+    prev_name->next = new_name;
+  }
+
+  num_cond = i;
+  return i;
+}
+
+bool ssystem::rename_conductor(const char *old_name, const char *new_name)
+{
+  //  check to see if name is present
+  for (Name *cur_name = cond_names; cur_name; cur_name = cur_name->next) {
+    if (cur_name->match(old_name)) {
+      cur_name->add_alias(this, new_name);
+      return true;
+    }
+  }
+
+  warn("rename_conductor: Unknown conductor '%s'\n", old_name);
+  return false;
+}
+
+int ssystem::number_of(const Name *nn) const
+{
+  int i = 1;
+  for (const Name *n = cond_names; n; n = n->next, ++i) {
+    if (n == nn) {
+      return i;
+    }
+  }
+  return NOTFND;
+}
+
+Name *ssystem::conductor_name(int i)
+{
+  Name *n;
+  for (n = cond_names; i > 1 && n; n = n->next, --i)
+    ;
+  if (!n) {
+    warn("conductor_name: Conductor no. %d not defined\n", i);
+  }
+  return n;
+}
+
+const Name *ssystem::conductor_name(int i) const
+{
+  const Name *n;
+  for (n = cond_names; i > 1 && n; n = n->next, --i)
+    ;
+  if (!n) {
+    warn("conductor_name: Conductor no. %d not defined\n", i);
+  }
+  return n;
+}
+
+const char *ssystem::conductor_name_str(int i) const
+{
+  const Name *n = conductor_name(i);
+  return n ? n->last_alias() : 0;
+}
+
+/**
+ *  @brief Will force a re-read on the next build_charge_list call
+ */
+void ssystem::reset_read()
+{
+  num_cond = 0;
+  cond_names = NULL;
+  panels = NULL;
 }
 
 void ssystem::flush()

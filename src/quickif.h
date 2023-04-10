@@ -56,10 +56,7 @@ private:
   SurfaceData &operator=(const SurfaceData &);
 };
 
-int getConductorNum(ssystem *sys, const char *name, int *num_cond);
-const char *getConductorName(const ssystem *sys, int cond_num);
-const char *last_alias(const Name *cur_name);
-charge *quickif(ssystem *sys, FILE *fp, const char *line, int surf_type, double *trans, int *num_cond, const char *name_suffix, char **title);
+charge *quickif(ssystem *sys, FILE *fp, const char *line, int surf_type, double *trans, const char *name_suffix, char **title);
 charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, double *trans, int cond_num);
 
 #endif

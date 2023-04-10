@@ -62,7 +62,7 @@ double iPwr(ssystem *sys, int e)
 {
   if(e == 0) return(1.0);
   if(e % 2 != 0) {
-    sys->error("iPwr: odd exponent %d\n", e);
+    sys->error("iPwr: odd exponent %d", e);
   }
   else {
     e = e/2;                    /* get power of negative 1 */
@@ -79,7 +79,7 @@ double fact(ssystem *sys, int x)
   double ret = 1.0;
   if(x == 0 || x == 1) return(1.0);
   else if(x < 0) {
-    sys->error("fact: attempt to take factorial of neg no. %d\n", x);
+    sys->error("fact: attempt to take factorial of neg no. %d", x);
   }
   else {
     while(x > 1) {

@@ -82,7 +82,7 @@ void dump_ps_geometry(ssystem *sys, const char *filename, charge *chglist, doubl
   }
   else {
     if((fp = fopen(filename, "w")) == NULL) {
-      sys->error("dump_ps_geometry: can't open\n `%s'\nto write\n", filename);
+      sys->error("dump_ps_geometry: can't open\n `%s'\nto write", filename);
     }
     sys->msg("Writing %s ...", filename);
     dumpPs(sys, sfaces, numfaces, lines, numlines, fp, sys->argv, sys->argc, use_density, black, white);

@@ -21,13 +21,13 @@
 #include <cassert>
 #include <unistd.h>
 
-int capmatrix_size(ssystem *sys)
+int capmatrix_size(const ssystem *sys)
 {
   int valid_conductors = 0;
 
   /* count the actual number of conductors */
   for (int i = 1; i <= sys->num_cond; i++) {
-    if (!want_this_iter(sys->kinp_num_list, i)) {
+    if (sys->kinp_num_list.find(i) == sys->kinp_num_list.end()) {
       ++valid_conductors;
     }
   }
@@ -61,11 +61,11 @@ double **symmetrize_and_clean(ssystem *sys, double **capmat)
   for (i = 1, ii = 1; i <= sys->num_cond; i++) {
 
     /* skip conductors removed from input */
-    if (want_this_iter(sys->kinp_num_list, i)) {
+    if (sys->kinp_num_list.find(i) != sys->kinp_num_list.end()) {
       continue;
     }
 
-    i_killed = want_this_iter(sys->kill_num_list, i);
+    i_killed = (sys->kill_num_list.find(i) != sys->kill_num_list.end());
 
     if (capmat[i][i] <= 0.0 && !i_killed) {
       sys->info("\nmksCapDump: Warning - capacitance matrix has non-positive diagonal\n  row %d\n", i+1);
@@ -77,7 +77,7 @@ double **symmetrize_and_clean(ssystem *sys, double **capmat)
     for (j = 1, jj = 1; j <= sys->num_cond; j++) {
 
       /* skip conductors removed from input */
-      if (want_this_iter(sys->kinp_num_list, j)) {
+      if (sys->kinp_num_list.find(j) != sys->kinp_num_list.end()) {
         continue;
       }
 
@@ -91,7 +91,7 @@ double **symmetrize_and_clean(ssystem *sys, double **capmat)
         /* if this column was not calculated and neither was the column
            with the same number as the current row, then symetrized mat has
            no entry at [i][j], [j][i] */
-        j_killed = want_this_iter(sys->kill_num_list, j);
+        j_killed = (sys->kill_num_list.find(j) != sys->kill_num_list.end());
 
         if (i_killed && j_killed) mat_entry = 0.0;
 
@@ -229,13 +229,13 @@ double **fastcap_solve(ssystem *sys)
   }
 
   if (num_both_panels > 0) {
-    sys->error("Thin cond panels on dielectric interfaces not supported\n");
+    sys->error("Thin cond panels on dielectric interfaces not supported");
   }
 
   if (sys->ckclst) {
     sys->msg("Checking panels...");
     if(has_duplicate_panels(sys, chglist)) {
-      sys->error("charge list has duplicates\n");
+      sys->error("charge list has duplicates");
     }
     sys->msg("no duplicates\n");
   }

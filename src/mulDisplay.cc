@@ -443,7 +443,7 @@ void chkList(ssystem *sys, int listtype)
     else if(listtype == LOCAL) nc = nc->lnext;
     else if(listtype == EVAL) nc = nc->enext;
     else {
-      sys->error("chkList: bad flag\n");
+      sys->error("chkList: bad flag");
     }
   }
   if(listtype == DIRECT) sys->msg("\nDirect ");
@@ -880,11 +880,10 @@ void dumpConfig(ssystem *sys, const char *name)
 /*
   pads a string on the right up to a given length, truncates if too long
 */
-static char *padName(char *tostr, char *frstr, int len)
+static char *padName(char *tostr, const char *frstr, int len)
 {
   int i;
-
-  for(i = 0; frstr[i] != '\0'; i++) tostr[i] = frstr[i];
+  for(i = 0; frstr && frstr[i] != '\0'; i++) tostr[i] = frstr[i];
   if(i > len) tostr[len] = '\0';                /* truncate */
   else {                        /* pad */
     for(; i < len; i++) tostr[i] = ' ';
@@ -917,29 +916,29 @@ void mksCapDump(ssystem *sys, double **sym_mat)
   int first_offd = TRUE;
   double maxdiag = 0.0, minoffd = 0.0, scale = 1.0;
   int scale_mag = 0;
-  char unit[BUFSIZ], name[BUFSIZ], cond_name[BUFSIZ];
+  char unit[BUFSIZ], name[BUFSIZ];
 
   /* get the smallest and largest (absolute value) symmetrized elements */
   /* check for non-M-matrix symmetrized capacitance matrix */
   for (i = 1, ii = 1; i <= sys->num_cond; i++) {
 
     /* skip conductors removed from input */
-    if (want_this_iter(sys->kinp_num_list, i)) {
+    if (sys->kinp_num_list.find(i) != sys->kinp_num_list.end()) {
       continue;
     }
 
-    i_killed = want_this_iter(sys->kill_num_list, i);
+    i_killed = (sys->kill_num_list.find(i) != sys->kill_num_list.end());
 
     maxdiag = MAX(maxdiag, fabs(sym_mat[ii][ii]));
 
     for (j = 1, jj = 1; j <= sys->num_cond; j++) {
 
       /* skip conductors removed from input */
-      if (want_this_iter(sys->kinp_num_list, j)) {
+      if (sys->kinp_num_list.find(j) != sys->kinp_num_list.end()) {
         continue;
       }
 
-      j_killed = want_this_iter(sys->kill_num_list, j);
+      j_killed = (sys->kill_num_list.find(j) != sys->kill_num_list.end());
       if (j != i && ! (i_killed && j_killed)) {
 
         double mat_entry = sym_mat[ii][jj];
@@ -1022,8 +1021,8 @@ void mksCapDump(ssystem *sys, double **sym_mat)
   /* get the length of the longest name */
   maxlen = 0;
   for(i = 1; i <= sys->num_cond; i++) {
-    if (!want_this_iter(sys->kinp_num_list, i)) {
-      maxlen = MAX(strlen(getConductorName(sys, i)), (size_t)maxlen);
+    if (sys->kinp_num_list.find(i) == sys->kinp_num_list.end()) {
+      maxlen = MAX(strlen(sys->conductor_name_str(i)), (size_t)maxlen);
     }
   }
 
@@ -1035,7 +1034,7 @@ void mksCapDump(ssystem *sys, double **sym_mat)
     sys->msg("\n");
   }
 
-  if (sys->kill_num_list != NULL) {
+  if (sys->kill_name_list != NULL) {
     sys->msg("\nPARTIAL CAPACITANCE MATRIX, %sfarads\n", unit);
   } else {
     sys->msg("\nCAPACITANCE MATRIX, %sfarads\n", unit);
@@ -1050,7 +1049,7 @@ void mksCapDump(ssystem *sys, double **sym_mat)
   }
 
   for (j = 1; j <= sys->num_cond; j++) { /* column headings */
-    if (!want_this_iter(sys->kinp_num_list, j)) {
+    if (sys->kinp_num_list.find(j) == sys->kinp_num_list.end()) {
       sprintf(name, "%d ", j);
       sprintf(unit, "%%%ds", colwidth+1);
       sys->msg(unit, name);
@@ -1062,12 +1061,12 @@ void mksCapDump(ssystem *sys, double **sym_mat)
   for (i = 1, ii = 1; i <= sys->num_cond; i++) { /* rows */
 
     /* skip conductors removed from input */
-    if (want_this_iter(sys->kinp_num_list, i)) {
+    if (sys->kinp_num_list.find(i) != sys->kinp_num_list.end()) {
       continue;
     }
 
     sprintf(unit, "%d", i);
-    strcpy(cond_name, getConductorName(sys, i));
+    const char *cond_name = sys->conductor_name_str(i);
 
     if (sys->num_cond < 10) {
       sys->msg("%s %1s", padName(name, cond_name, maxlen), unit);
@@ -1080,12 +1079,11 @@ void mksCapDump(ssystem *sys, double **sym_mat)
     for(j = 1, jj = 1; j <= sys->num_cond; j++) {
 
       /* skip conductors removed from input */
-      if (want_this_iter(sys->kinp_num_list, j)) {
+      if (sys->kinp_num_list.find(j) != sys->kinp_num_list.end()) {
         continue;
       }
 
-      if (want_this_iter(sys->kill_num_list, i)
-          && want_this_iter(sys->kill_num_list, j)) {
+      if (sys->kill_num_list.find(i) != sys->kill_num_list.end() && sys->kill_num_list.find(j) != sys->kill_num_list.end()) {
         /* print a blank if capacitance was not calculated */
         sys->msg("%s", spaces(unit, colwidth+1));
       } else {
@@ -1162,7 +1160,7 @@ void dump_preconditioner(ssystem *sys, charge *chglist, int type)
 
   /* open the output file */
   if((fp = fopen("prec.mat","w")) == NULL) {
-    sys->error("dump_preconditioner: can't open `prec.mat'\n");
+    sys->error("dump_preconditioner: can't open `prec.mat'");
   }
 
   if(type == 1 || type == 3) {
@@ -1199,7 +1197,7 @@ void dump_preconditioner(ssystem *sys, charge *chglist, int type)
         if(pp->index == j) break;
       }
       if(pp == NULL) {
-        sys->error("dump_preconditioner: no charge with index %d\n", j);
+        sys->error("dump_preconditioner: no charge with index %d", j);
       }
       for(i = 0; i < num_panels+1; i++) sys->p[i] = 0.0;
       /* find the column---influence of q_j on potentials at each q_i */
@@ -1263,10 +1261,10 @@ void dumpQ2PDiag(ssystem *sys, cube *nextc)
   /* dump the diag matrix to a matlab file along with its dummy vector */
   /*   must complie on sobolev with /usr/local/matlab/loadsave/savemat.o */
   if((fp = fopen("Q2PDiag.mat", "w")) == NULL) {
-    sys->error("dumpQ2PDiag: can't open `Q2PDiag.mat' to write\n");
+    sys->error("dumpQ2PDiag: can't open `Q2PDiag.mat' to write");
   }
   if(int(sizeof(temp)) < nextc->upnumeles[0]*nextc->upnumeles[0]) {
-    sys->error("dumpQ2PDiag: temporary arrays not big enough\n");
+    sys->error("dumpQ2PDiag: temporary arrays not big enough");
   }
 
   /* incorporate the electric field evaluation into the matrix */
@@ -1378,7 +1376,7 @@ void dumpCondNames(ssystem *sys)
   sys->msg("CONDUCTOR NAMES\n");
   for(cur_name = sys->cond_names, i = 0; cur_name != NULL;
       cur_name = cur_name->next, i++) {
-    sys->msg("  %d `%s'\n", i+1, last_alias(cur_name));
+    sys->msg("  %d `%s'\n", i+1, cur_name->last_alias());
   }
 }
 

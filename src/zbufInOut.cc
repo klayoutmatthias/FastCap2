@@ -40,7 +40,7 @@ static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, cha
 
     /* skip if panel is on conductor in q picture kill list */
     if(panel->surf->type == CONDTR || panel->surf->type == BOTH) {
-      if(want_this_iter(sys->kq_num_list, panel->cond)) continue;
+      if(sys->kq_num_list.find(panel->cond) == sys->kq_num_list.end()) continue;
     }
 
     /* skip if removing DIELEC's and panel is on dielectric i/f
@@ -72,7 +72,7 @@ static void figure_grey_levels(ssystem *sys, face **face_list, double *chgs, cha
 
     /* skip if panel is on conductor in q picture kill list */
     if(panel->surf->type == CONDTR || panel->surf->type == BOTH) {
-      if(want_this_iter(sys->kq_num_list, panel->cond)) continue;
+      if(sys->kq_num_list.find(panel->cond) == sys->kq_num_list.end()) continue;
     }
 
     /* skip if removing DIELEC's and panel is on dielectric i/f
@@ -130,7 +130,7 @@ face **fastcap2faces(ssystem *sys, int *numfaces, charge *chglist, double *q, in
 
     /* skip if panel is on conductor in q picture kill list */
     if(chgp->surf->type == CONDTR || chgp->surf->type == BOTH) {
-      if(want_this_iter(sys->kq_num_list, chgp->cond)) continue;
+      if(sys->kq_num_list.find(chgp->cond) != sys->kq_num_list.end()) continue;
     }
 
     /* skip if removing DIELEC's and panel is on dielectric i/f
@@ -228,10 +228,10 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
     if(linein[0] == 'e' || linein[0] == '\0') return;
     if(linein[0] == 'r') {      /* do a recursive read */
       if(sscanf(linein, "%s %s", tempc, readfile) != 2) {
-        sys->error("readLines: bad recursive read line format:\n%s\n", linein);
+        sys->error("readLines: bad recursive read line format:\n%s", linein);
       }
       if((fpin = fopen(readfile, "r")) == NULL) {
-        sys->error("readLines: can't open recursive read file\n `%s'\nto read\n",
+        sys->error("readLines: can't open recursive read file\n `%s'\nto read",
                    readfile);
       }
       readLines(sys, fpin, head, tail, numlines);
@@ -240,7 +240,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
     }
     if(linein[0] == 'F') {
       if(f_ == 0) {
-        sys->error("readLines: attempt to input faces with a recursive read\n");
+        sys->error("readLines: attempt to input faces with a recursive read");
       }
       else {
         return;
@@ -249,7 +249,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
     if(linein[0] == '#') continue;
     if(linein[0] == 'f') {
       if(f_ == 0) {
-        sys->error("readLines: attempt to input fills with a recursive read\n");
+        sys->error("readLines: attempt to input fills with a recursive read");
       }
       else {
         return;
@@ -270,7 +270,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
       }
       if(sscanf(linein,"%lf %lf %lf",&((*tail)->from[0]), &((*tail)->from[1]), 
                 &((*tail)->from[2])) != 3) {
-        sys->error("readLines: from line %d bad, '%s'\n",flines+1,linein);
+        sys->error("readLines: from line %d bad, '%s'",flines+1,linein);
       }
       (*tail)->index = *numlines;
       fflag = 0;
@@ -288,7 +288,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
                     &((*tail)->to[1]), &((*tail)->to[2]), &linewd) != 4) {
             if(sscanf(linein, "%lf %lf %lf", &((*tail)->to[0]), 
                       &((*tail)->to[1]), &((*tail)->to[2])) != 3) {
-              sys->error("readLines: to line %d bad, '%s'\n",flines+1, linein);
+              sys->error("readLines: to line %d bad, '%s'",flines+1, linein);
             }
             linewd = LINE;
           }
@@ -305,7 +305,7 @@ static void readLines(ssystem *sys, FILE *fp, line **head, line **tail, int *num
     }
   }
   if(fflag == 0) {
-    sys->error("readLines: file ended with unmatched from line\n");
+    sys->error("readLines: file ended with unmatched from line");
   }
 }
 
@@ -323,7 +323,7 @@ line **getLines(ssystem *sys, const char *line_file, int *numlines)
   if(line_file == NULL) return(NULL);
 
   if((fp = fopen(line_file, "r")) == NULL) {
-    sys->error("getLines: can't open .fig file\n `%s'\nto read\n",
+    sys->error("getLines: can't open .fig file\n `%s'\nto read",
                line_file);
   }
 
@@ -952,7 +952,7 @@ static void dumpLines(ssystem *sys, FILE *fp, line **lines, int numlines)
   double temp[3], temp1[3], x, y;
 
   if(fp == NULL) {
-    sys->error("dumpLines: null ps file pointer\n");
+    sys->error("dumpLines: null ps file pointer");
   }
 
   w_ = 0;                       /* hardwire for no width override */

@@ -158,12 +158,12 @@ static void wrMat(ssystem *sys, double *mat, int siz, int file, int type)
   if(type == TRIMAT) realsiz = ds*siz*(siz+1)/2;
   else if(type == SQRMAT || type == COLMAT) realsiz = sizeof(double)*siz*siz;
   else {
-    sys->error("wrMat: bad type flag %d\n", type);
+    sys->error("wrMat: bad type flag %d", type);
   }
 
   /* figure name of file and create, open to write */
   if((fdis = creat(getName(file, name), PMODE)) == -1) {
-    sys->error("wrMat: can't creat '%s'\n", name);
+    sys->error("wrMat: can't creat '%s'", name);
   }
 
   sys->info("Writing %s...", name);
@@ -171,7 +171,7 @@ static void wrMat(ssystem *sys, double *mat, int siz, int file, int type)
   /* write the data and close */
   if(type == COLMAT) transpose(mat, siz);       /* store columnwise */
   if((actsiz = write(fdis, (char *)mat, realsiz)) != realsiz) {
-    sys->error("wrMat: buffer write error to '%s,' wrote %d of %d dbls\n",
+    sys->error("wrMat: buffer write error to '%s,' wrote %d of %d dbls",
                name, actsiz/ds, realsiz/ds);
   }
   close(fdis);
@@ -193,19 +193,19 @@ static void rdMat(ssystem *sys, double *mat, int siz, int file, int type)
   if(type == TRIMAT) realsiz = sizeof(double)*siz*(siz+1)/2;
   else if(type == SQRMAT) realsiz = sizeof(double)*siz*siz;
   else {
-    sys->error("rdMat: bad type flag %d\n", type);
+    sys->error("rdMat: bad type flag %d", type);
   }
 
   /* figure name of file and open to read */
   if((fdis = open(getName(file, name), 0)) == -1) {
-    sys->error("rdMat: can't open '%s'\n", name);
+    sys->error("rdMat: can't open '%s'", name);
   }
 
   sys->info("Reading %s...", name);
 
   /* read the data and close */
   if(realsiz != read(fdis, (char *)mat, realsiz)) {
-    sys->error("rdMat: read error to '%s'\n", name);
+    sys->error("rdMat: read error to '%s'", name);
   }
   close(fdis);
 
@@ -236,7 +236,7 @@ static void matXfer(ssystem *sys, double *matsq, double *matri, int siz, int typ
     }
   }
   else {
-    sys->error("matXfer: bad type %d\n", type);
+    sys->error("matXfer: bad type %d", type);
   }
 }  
 
@@ -278,7 +278,7 @@ static void blkMatsolve(ssystem *sys, double *matsq, double *matri, int siz, int
     sys->info("\n");
   }
   else {
-    sys->error("blkMatsolve: bad type %d\n", type);
+    sys->error("blkMatsolve: bad type %d", type);
   }
 
 }
@@ -306,25 +306,25 @@ static void subInnerProd(ssystem *sys, double *matsq, double *matri, int siz, in
   /* matri always holds rows from matl; matri1 holds columns from matu */
   /* open the relvant files */
   if((fdl = open(getName(matl, name), 0)) == -1) {
-    sys->error("subInnerProd: can't open '%s'\n", name);
+    sys->error("subInnerProd: can't open '%s'", name);
   }
 
   /* for each matl chunk, read in all chunks of matu and do inner products */
   for(froml = 0; froml < siz; froml += rowliml) { /* loop on rows in l part */
     readl = read(fdl, (char *)matri, rowliml*siz*ds);
     if(readl % (siz*ds) != 0) { /* must read in row size chunks */
-      sys->error("subInnerProd: read error from '%s'\n",
+      sys->error("subInnerProd: read error from '%s'",
                  getName(matl, name));
     }
     readl /= (siz*ds);
     if((fdu = open(getName(matu, name), 0)) == -1) { /* (re)open u part */
-      sys->error("subInnerProd: can't open '%s'\n", name);
+      sys->error("subInnerProd: can't open '%s'", name);
     }
     for(fromu = 0; fromu < siz; fromu += colimu) { /* loop on cols in u part */
       sys->info("%d-%d ", froml, fromu);
       readu = read(fdu, (char *)matriu, colimu*siz*ds);
       if(readu % (siz*ds) != 0) {       /* must read in col size chunks */
-        sys->error("subInnerProd: read error from '%s'\n",
+        sys->error("subInnerProd: read error from '%s'",
                    getName(matu, name));
       }
       readu /= (siz*ds);
@@ -366,7 +366,7 @@ static void blkLudecomp(ssystem *sys, double *mat, int size)
 
   for(k = 0; k < size-1; k++) { /* loop on rows */
     if(mat[SQDEX(k, k, size)] == 0.0) {
-      sys->error("blkLudecomp: zero piovt\n");
+      sys->error("blkLudecomp: zero piovt");
     }
     sys->info("%d ", k);
     for(i = k+1; i < size; i++) { /* loop on remaining rows */
@@ -498,7 +498,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
     *real_index = sys->heap.alloc<int>(numchgs, AMSC);
   }
   else {
-    sys->error("blkQ2Pfull: can't handle an odd number of panels\n");
+    sys->error("blkQ2Pfull: can't handle an odd number of panels");
   }
 
   /* load the matrix in the style of Q2P() - no attempt to exploit symmetry */
@@ -506,7 +506,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
   /* the block implementation MUST have all the charges in 1st dlist entry */
   pp = pq = directlist;
   if(pp == NULL || pp->dnext != NULL || pp->upnumeles[0] != numchgs_wdummy) {
-    sys->error("blkQ2Pfull: bad directlist, must run with depth 0\n");
+    sys->error("blkQ2Pfull: bad directlist, must run with depth 0");
   }
 
   pchgs = qchgs = pp->chgs;
@@ -520,7 +520,7 @@ void blkQ2Pfull(ssystem *sys, cube *directlist, int numchgs, int numchgs_wdummy,
     if(!pchgs[i]->dummy) (*real_index)[j++] = i;
   }
   if(j != numchgs) {
-    sys->error("blkQ2Pfull: panel count and given #panels don't match\n");
+    sys->error("blkQ2Pfull: panel count and given #panels don't match");
   }
 
   /* dump the four matrix sections */
@@ -713,8 +713,7 @@ void blkCompressVector(ssystem *sys, double *vec, int num_panels, int real_size,
   }
 
   if(j != real_size) {
-    sys->error("blkCompressVector: number of real panels not right, %d\n",
-               j);
+    sys->error("blkCompressVector: number of real panels not right, %d", j);
   }
 }
 

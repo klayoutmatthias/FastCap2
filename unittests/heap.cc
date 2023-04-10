@@ -13,6 +13,7 @@ TEST(heap, basic)
 
   EXPECT_EQ(heap.memory(AMSC), sizeof(unsigned int) * 3);
   EXPECT_EQ(heap.memory(AQ2M), size_t(0));
+  EXPECT_EQ(heap.total_memory(), sizeof(unsigned int) * 3);
 
   //  memory is zeroed
   EXPECT_EQ(ui[0], 0);
@@ -29,6 +30,7 @@ TEST(heap, strdup)
 
   EXPECT_EQ(heap.memory(AMSC), size_t(0));
   EXPECT_EQ(heap.memory(AQ2M), strlen(buf) + 1);
+  EXPECT_EQ(heap.total_memory(), strlen(buf) + 1);
 
   //  copy is a copy
   buf[0] = 'A';
@@ -42,6 +44,7 @@ TEST(heap, mat)
   double **mat = heap.mat(3, 3);
 
   EXPECT_EQ(heap.memory(AMSC), sizeof(double) * 9 + sizeof(double *) * 3);
+  EXPECT_EQ(heap.total_memory(), sizeof(double) * 9 + sizeof(double *) * 3);
 
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {

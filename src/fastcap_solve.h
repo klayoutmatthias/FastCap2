@@ -5,6 +5,6 @@
 class ssystem;
 
 double **fastcap_solve(ssystem *sys);
-int capmatrix_size(ssystem *sys);
+int capmatrix_size(const ssystem *sys);
 
 #endif

@@ -56,7 +56,7 @@ void mulMatDirect(ssystem *sys, double **trimat, double **sqrmat, int **real_ind
     if (sys->dirsol || sys->expgcr) {
       if(nextc == sys->directlist) {
         if(eval_size < MAXSIZ) {
-          sys->error("mulMatDirect: non-block direct methods not supported\n");
+          sys->error("mulMatDirect: non-block direct methods not supported");
         }
         else blkQ2Pfull(sys, sys->directlist, up_size, eval_size,
                         trimat, sqrmat, real_index, sys->is_dummy);

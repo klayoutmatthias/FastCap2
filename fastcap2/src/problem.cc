@@ -155,6 +155,8 @@ problem_get_title(ProblemObject *self)
 static PyObject *
 problem_set_title(ProblemObject *self, PyObject *value)
 {
+  self->sys.reset_read();
+
   PyObject *title_str = PyObject_Str(value);
   if (!title_str) {
     return NULL;
@@ -248,6 +250,8 @@ problem_get_skip_conductors(ProblemObject *self)
 static PyObject *
 problem_set_skip_conductors(ProblemObject *self, PyObject *value)
 {
+  self->sys.reset_read();
+
   char *list = NULL;
   if (Py_IsNone(value)) {
     //  set list to NULL
@@ -270,6 +274,8 @@ problem_get_remove_conductors(ProblemObject *self)
 static PyObject *
 problem_set_remove_conductors(ProblemObject *self, PyObject *value)
 {
+  self->sys.reset_read();
+
   char *list = NULL;
   if (Py_IsNone(value)) {
     //  set list to NULL
@@ -323,6 +329,8 @@ problem_get_qps_select_q(ProblemObject *self)
 static PyObject *
 problem_set_qps_select_q(ProblemObject *self, PyObject *value)
 {
+  self->sys.reset_read();
+
   char *list = NULL;
   if (Py_IsNone(value)) {
     //  set list to NULL
@@ -345,6 +353,8 @@ problem_get_qps_remove_q(ProblemObject *self)
 static PyObject *
 problem_set_qps_remove_q(ProblemObject *self, PyObject *value)
 {
+  self->sys.reset_read();
+
   char *list = NULL;
   if (Py_IsNone(value)) {
     //  set list to NULL
@@ -649,6 +659,8 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
   double rotx = 0.0, roty = 0.0, rotz = 0.0;
   double scale = 1.0;
 
+  self->sys.reset_read();
+
   if (load) {
 
     if (!PyArg_ParseTuple(args, "spzipddOOpppdddd", &filename, &link, &group, &kind,
@@ -762,6 +774,8 @@ problem_load_list(ProblemObject *self, PyObject *args)
     return NULL;
   }
 
+  self->sys.reset_read();
+
   try {
     read_list_file(&self->sys, &self->sys.surf_list, filename);
   } catch (std::runtime_error &ex) {
@@ -821,12 +835,19 @@ problem_conductors(ProblemObject *self)
     return NULL;
   }
 
+  //  building or updating the conductor list is a side effect of this function:
+  try {
+    build_charge_list(&self->sys);
+  } catch (std::runtime_error &ex) {
+    raise_error(ex);
+  }
+
   int i = 0;
   for (Name *cur_name = self->sys.cond_names; cur_name; cur_name = cur_name->next, ++i) {
-    if(want_this_iter(self->sys.kinp_num_list, i + 1)) {
+    if (self->sys.kinp_num_list.find(i + 1) != self->sys.kinp_num_list.end()) {
       continue;
     }
-    PyObject *name_str = PyUnicode_FromString(last_alias(cur_name));
+    PyObject *name_str = PyUnicode_FromString(cur_name->last_alias ());
     if (!name_str) {
       Py_DECREF(res);
       return NULL;
@@ -845,14 +866,19 @@ problem_dump_ps(ProblemObject *self, PyObject *args)
     return NULL;
   }
 
-  //  NOTE: this leaks memory for the charge list because we're using a heap.
-  charge *chglist = build_charge_list(&self->sys);
-  if (!chglist) {
-    PyErr_SetString(PyExc_RuntimeError, "Geometry is empty - cannot dump to PS");
-    return NULL;
-  }
+  try {
 
-  dump_ps_geometry(&self->sys, filename, chglist, NULL, self->sys.dd_);
+    charge *chglist = build_charge_list(&self->sys);
+    if (!chglist) {
+      PyErr_SetString(PyExc_RuntimeError, "Geometry is empty - cannot dump to PS");
+      return NULL;
+    }
+
+    dump_ps_geometry(&self->sys, filename, chglist, NULL, self->sys.dd_);
+
+  } catch (std::runtime_error &ex) {
+    raise_error(ex);
+  }
 
   Py_RETURN_NONE;
 }
