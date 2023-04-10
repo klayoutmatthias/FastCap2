@@ -145,12 +145,19 @@ class Problem(_Problem):
   def skip_conductors(self) -> Optional[list[str]]:
     """Skips the given conductors from the solve list
 
+    The argument is a list of group-qualified conductor names
+    in the form `name%group`, e.g. `PLATE%GROUP1`.
+
     This property corresponds to option "-rs" of the original
     "fastcap" program.
 
-    The conductors with the given names will not be present in  
-    the capacitance matrix. A value of 'None' for this property
-    will select all conductors.
+    A value of 'None' for this property will select all conductors.
+
+    The effect of this option is to skip the specified 
+    conductors from the evaluation. Skipping conductors
+    can speed up the computation as self-capacitances of
+    these conductors and capacitances between skipped 
+    conductors are not considered.
     """
     return super()._get_skip_conductors()
 
@@ -162,12 +169,15 @@ class Problem(_Problem):
   def remove_conductors(self) -> Optional[list[str]]:
     """Removes the given conductors from the input
 
+    The argument is a list of group-qualified conductor names
+    in the form `name%group`, e.g. `PLATE%GROUP1`.
+
     This property corresponds to option "-ri" of the original
     "fastcap" program.
 
     The conductors with the given names will not be considered
-    at all. A value of 'None' for this property will enable all
-    conductors.
+    at all and will not be present in the capacitance matrix. 
+    A value of 'None' for this property will enable all conductors.
     """
     return super()._get_remove_conductors()
 

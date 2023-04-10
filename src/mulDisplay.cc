@@ -913,136 +913,194 @@ static char *spaces(char *str, int num)
 */
 void mksCapDump(ssystem *sys, double **sym_mat)
 {
-  int i, j, toobig, toosmall, maxlen, sigfig, colwidth, i_killed, j_killed;
+  int i, j, ii, jj, maxlen, sigfig, colwidth, i_killed, j_killed;
   int first_offd = TRUE;
   double maxdiag = 0.0, minoffd = 0.0, scale = 1.0;
+  int scale_mag = 0;
   char unit[BUFSIZ], name[BUFSIZ], cond_name[BUFSIZ];
 
   /* get the smallest and largest (absolute value) symmetrized elements */
   /* check for non-M-matrix symmetrized capacitance matrix */
-  for(i = 1; i <= sys->num_cond; i++) {
+  for (i = 1, ii = 1; i <= sys->num_cond; i++) {
 
     /* skip conductors removed from input */
-    if(want_this_iter(sys->kinp_num_list, i)) {
+    if (want_this_iter(sys->kinp_num_list, i)) {
       continue;
     }
 
     i_killed = want_this_iter(sys->kill_num_list, i);
 
-    maxdiag = MAX(maxdiag, fabs(sym_mat[i][i]));
-    for(j = 1; j <= sys->num_cond; j++) {
+    maxdiag = MAX(maxdiag, fabs(sym_mat[ii][ii]));
 
-      /* skip conductors removed from input or on diagonal */
-      if (j == i || want_this_iter(sys->kinp_num_list, j)) {
+    for (j = 1, jj = 1; j <= sys->num_cond; j++) {
+
+      /* skip conductors removed from input */
+      if (want_this_iter(sys->kinp_num_list, j)) {
         continue;
       }
 
       j_killed = want_this_iter(sys->kill_num_list, j);
-      if(i_killed && j_killed) {
-        continue;
+      if (j != i && ! (i_killed && j_killed)) {
+
+        double mat_entry = sym_mat[ii][jj];
+        if (mat_entry != 0.0) {
+          if (first_offd) {
+            minoffd = fabs(mat_entry);
+            first_offd = FALSE;
+          } else {
+            minoffd = MIN(minoffd, fabs(mat_entry));
+          }
+        }
+
       }
 
-      double mat_entry = sym_mat[i][j];
-      if(fabs(mat_entry) != 0.0) {
-        if(first_offd) {
-          minoffd = fabs(mat_entry);
-          first_offd = FALSE;
-        } else {
-          minoffd = MIN(minoffd, fabs(mat_entry));
-        }
-      }
+      ++jj;
 
     }
+
+    ++ii;
+
   }
 
   /* figure the units to use for the matrix entries 
      - set up so smallest element is between 0.1 and 10 */
-  if(minoffd*FPIEPS*sys->perm_factor*scale > 10.0) toobig = TRUE;
-  else toobig = FALSE;
-  if(minoffd*FPIEPS*sys->perm_factor*scale < 0.1) toosmall = TRUE;
-  else toosmall = FALSE;
-  while(toobig == TRUE || toosmall == TRUE) {
-    if(toobig == TRUE) {
-      scale *= 1e-3;
-      if(minoffd*FPIEPS*sys->perm_factor*scale <= 10.0) break;
-    }
-    if(toosmall == TRUE) {
-      scale *= 1e+3;
-      if(minoffd*FPIEPS*sys->perm_factor*scale >= 0.1) break;
-    }
+  while(minoffd*FPIEPS*sys->perm_factor*scale > 10.0) {
+    scale *= 1e-3;
+    scale_mag += 3;
+  }
+  while(minoffd*FPIEPS*sys->perm_factor*scale < 0.1) {
+    scale *= 1e+3;
+    scale_mag -= 3;
   }
 
   /* get the appropriate unit string */
-  if(scale == 1e-18) strcpy(unit, "exa");
-  else if(scale == 1e-15) strcpy(unit, "peta");
-  else if(scale == 1e-12) strcpy(unit, "tera");
-  else if(scale == 1e-9) strcpy(unit, "giga");
-  else if(scale == 1e-6) strcpy(unit, "mega");
-  else if(scale == 1e-3) strcpy(unit, "kilo");
-  else if(scale == 1.0) strcpy(unit, "");
-  else if(scale == 1e+3) strcpy(unit, "milli");
-  else if(scale == 1e+6) strcpy(unit, "micro");
-  else if(scale == 1e+9) strcpy(unit, "nano");
-  else if(scale == 1e+12) strcpy(unit, "pico");
-  else if(scale == 1e+15) strcpy(unit, "femto");
-  else if(scale == 1e+18) strcpy(unit, "atto");
-  else sprintf(unit, "every unit is %g ", 1/scale);
+  switch (scale_mag) {
+  case 18:
+    strcpy(unit, "exa");
+    break;
+  case 15:
+    strcpy(unit, "peta");
+    break;
+  case 12:
+    strcpy(unit, "tera");
+    break;
+  case 9:
+    strcpy(unit, "giga");
+    break;
+  case 6:
+    strcpy(unit, "mega");
+    break;
+  case 3:
+    strcpy(unit, "kilo");
+    break;
+  case 0:
+    strcpy(unit, "");
+    break;
+  case -3:
+    strcpy(unit, "milli");
+    break;
+  case -6:
+    strcpy(unit, "micro");
+    break;
+  case -9:
+    strcpy(unit, "nano");
+    break;
+  case -12:
+    strcpy(unit, "pico");
+    break;
+  case -15:
+    strcpy(unit, "femto");
+    break;
+  case -18:
+    strcpy(unit, "atto");
+    break;
+  default:
+    sprintf(unit, "every unit is %g ", 1 / scale);
+    break;
+  }
 
   /* get the length of the longest name */
   maxlen = 0;
   for(i = 1; i <= sys->num_cond; i++) {
-    maxlen = MAX(strlen(getConductorName(sys, i)), (size_t)maxlen);
+    if (!want_this_iter(sys->kinp_num_list, i)) {
+      maxlen = MAX(strlen(getConductorName(sys, i)), (size_t)maxlen);
+    }
   }
 
   /* print the matrix */
   sigfig = 2+log10(1.0/sys->iter_tol);  /* get no. significant figs to prnt */
   colwidth = sigfig+6;          /* field width for cap mat columns */
-  if(!sys->itrdat) sys->msg("\n");
-  if(sys->kill_num_list != NULL)
-      sys->msg("\nPARTIAL CAPACITANCE MATRIX, %sfarads\n", unit);
-  else sys->msg("\nCAPACITANCE MATRIX, %sfarads\n", unit);
-  if(sys->num_cond < 10) sys->msg("%s", spaces(unit, maxlen+2));
-  else if(sys->num_cond < 100) sys->msg("%s", spaces(unit, maxlen+3));
-  else sys->msg("%s", spaces(unit, maxlen+4));
-  for(j = 1; j <= sys->num_cond; j++) { /* column headings */
-    if(want_this_iter(sys->kinp_num_list, j)) continue;
-    sprintf(name, "%d ", j);
-    sprintf(unit, "%%%ds", colwidth+1);
-    sys->msg(unit, name);
+
+  if (!sys->itrdat) {
+    sys->msg("\n");
   }
+
+  if (sys->kill_num_list != NULL) {
+    sys->msg("\nPARTIAL CAPACITANCE MATRIX, %sfarads\n", unit);
+  } else {
+    sys->msg("\nCAPACITANCE MATRIX, %sfarads\n", unit);
+  }
+
+  if (sys->num_cond < 10) {
+    sys->msg("%s", spaces(unit, maxlen+2));
+  } else if(sys->num_cond < 100) {
+    sys->msg("%s", spaces(unit, maxlen+3));
+  } else {
+    sys->msg("%s", spaces(unit, maxlen+4));
+  }
+
+  for (j = 1; j <= sys->num_cond; j++) { /* column headings */
+    if (!want_this_iter(sys->kinp_num_list, j)) {
+      sprintf(name, "%d ", j);
+      sprintf(unit, "%%%ds", colwidth+1);
+      sys->msg(unit, name);
+    }
+  }
+
   sys->msg("\n");
-  for(i = 1; i <= sys->num_cond; i++) { /* rows */
+
+  for (i = 1, ii = 1; i <= sys->num_cond; i++) { /* rows */
 
     /* skip conductors removed from input */
-    if(want_this_iter(sys->kinp_num_list, i)) continue;
+    if (want_this_iter(sys->kinp_num_list, i)) {
+      continue;
+    }
 
     sprintf(unit, "%d", i);
-
     strcpy(cond_name, getConductorName(sys, i));
 
-    if(sys->num_cond < 10)
-        sys->msg("%s %1s", padName(name, cond_name, maxlen), unit);
-    else if(sys->num_cond < 100)
-        sys->msg("%s %2s", padName(name, cond_name, maxlen), unit);
-    else
-        sys->msg("%s %3s", padName(name, cond_name, maxlen), unit);
+    if (sys->num_cond < 10) {
+      sys->msg("%s %1s", padName(name, cond_name, maxlen), unit);
+    } else if (sys->num_cond < 100) {
+      sys->msg("%s %2s", padName(name, cond_name, maxlen), unit);
+    } else {
+      sys->msg("%s %3s", padName(name, cond_name, maxlen), unit);
+    }
 
-    for(j = 1; j <= sys->num_cond; j++) {
+    for(j = 1, jj = 1; j <= sys->num_cond; j++) {
 
       /* skip conductors removed from input */
-      if(want_this_iter(sys->kinp_num_list, j)) continue;
+      if (want_this_iter(sys->kinp_num_list, j)) {
+        continue;
+      }
 
-      if(want_this_iter(sys->kill_num_list, i)
-         && want_this_iter(sys->kill_num_list, j)) {
+      if (want_this_iter(sys->kill_num_list, i)
+          && want_this_iter(sys->kill_num_list, j)) {
         /* print a blank if capacitance was not calculated */
         sys->msg("%s", spaces(unit, colwidth+1));
-      }
-      else {
+      } else {
         sprintf(unit, " %%%d.%dg", colwidth, sigfig);
-        sys->msg(unit, scale*FPIEPS*sys->perm_factor*sym_mat[j][i]);
+        sys->msg(unit, scale*FPIEPS*sys->perm_factor*sym_mat[jj][ii]);
       }
+
+      ++jj;
+
     }
+
     sys->msg("\n");
+
+    ++ii;
+
   }
 }
 

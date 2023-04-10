@@ -18,84 +18,119 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
+#include <cassert>
 #include <unistd.h>
+
+int capmatrix_size(ssystem *sys)
+{
+  int valid_conductors = 0;
+
+  /* count the actual number of conductors */
+  for (int i = 1; i <= sys->num_cond; i++) {
+    if (!want_this_iter(sys->kinp_num_list, i)) {
+      ++valid_conductors;
+    }
+  }
+
+  return valid_conductors;
+}
 
 double **symmetrize_and_clean(ssystem *sys, double **capmat)
 {
-  int i, j, i_killed, j_killed;
+  int i, j, ii, jj, i_killed, j_killed, actual_count;
   double rowttl, **sym_mat;
   double mat_entry;
 
+  actual_count = capmatrix_size(sys);
+
   /* set up symetrized matrix storage */
-  sym_mat = sys->heap.alloc<double*>(sys->num_cond+1, AMSC);
-  for(i=1; i <= sys->num_cond; i++)  {
-    sym_mat[i] = sys->heap.alloc<double>(sys->num_cond+1, AMSC);
+  /* NOTE: one element more as the conductor indexes are 1-based */
+  sym_mat = sys->heap.alloc<double*>(actual_count+1, AMSC);
+  for (i=1; i <= actual_count; i++)  {
+    sym_mat[i] = sys->heap.alloc<double>(actual_count+1, AMSC);
   }
 
-  for(i = 1; i <= sys->num_cond; i++) {
-    for(j = 1; j <= sys->num_cond; j++) {
+  for (i = 1; i <= actual_count; i++) {
+    for (j = 1; j <= actual_count; j++) {
       sym_mat[i][j] = 0.0;
     }
   }
 
   /* get the smallest and largest (absolute value) symmetrized elements */
   /* check for non-M-matrix symmetrized capacitance matrix */
-  for(i = 1; i <= sys->num_cond; i++) {
+  for (i = 1, ii = 1; i <= sys->num_cond; i++) {
 
     /* skip conductors removed from input */
-    if(want_this_iter(sys->kinp_num_list, i)) {
+    if (want_this_iter(sys->kinp_num_list, i)) {
       continue;
     }
 
     i_killed = want_this_iter(sys->kill_num_list, i);
 
-    if(capmat[i][i] <= 0.0 && !i_killed) {
+    if (capmat[i][i] <= 0.0 && !i_killed) {
       sys->info("\nmksCapDump: Warning - capacitance matrix has non-positive diagonal\n  row %d\n", i+1);
     }
+
     rowttl = 0.0;
-    for(j = 1; j <= sys->num_cond; j++) {
+    assert(ii <= actual_count);
+
+    for (j = 1, jj = 1; j <= sys->num_cond; j++) {
 
       /* skip conductors removed from input */
-      if(want_this_iter(sys->kinp_num_list, j)) {
+      if (want_this_iter(sys->kinp_num_list, j)) {
         continue;
       }
 
-      if(j == i) {
-        sym_mat[i][i] = capmat[i][i];
-        continue;
+      if (j == i) {
+
+        assert(ii == jj);
+        sym_mat[ii][ii] = capmat[i][i];
+
+      } else {
+
+        /* if this column was not calculated and neither was the column
+           with the same number as the current row, then symetrized mat has
+           no entry at [i][j], [j][i] */
+        j_killed = want_this_iter(sys->kill_num_list, j);
+
+        if (i_killed && j_killed) mat_entry = 0.0;
+
+        /* if this column was calculated but column with the same number
+           as the current row wasnt, then symmetrized mat has unaveraged entry
+           at [i][j], [j][i] */
+        else if(i_killed && !j_killed) mat_entry = capmat[i][j];
+
+        /* if this column was not calculated but column with the same number
+           as the current row was, then symmetrized mat has unaveraged entry
+           at [i][j], [j][i] */
+        else if(!i_killed && j_killed) mat_entry = capmat[j][i];
+
+        /* if this column was calculated and column with the same number
+           as the current row was also, then symmetrized mat has averaged entry
+           at [i][j], [j][i] */
+        else mat_entry = (capmat[i][j] + capmat[j][i])/2.0;
+
+        rowttl += mat_entry;
+
+        if (!(i_killed && j_killed) && mat_entry >= 0.0) {
+          sys->info("\nmksCapDump: Warning - capacitance matrix has non-negative off-diagonals\n  row %d col %d\n", i, j);
+        }
+
+        assert(jj <= actual_count);
+        sym_mat[ii][jj] = mat_entry;
+
       }
 
-      /* if this column was not calculated and neither was the column
-         with the same number as the current row, then symetrized mat has
-         no entry at [i][j], [j][i] */
-      j_killed = want_this_iter(sys->kill_num_list, j);
-      if(i_killed && j_killed) continue;
+      ++jj;
 
-      /* if this column was calculated but column with the same number
-         as the current row wasnt, then symmetrized mat has unaveraged entry
-         at [i][j], [j][i] */
-      else if(i_killed && !j_killed) mat_entry = capmat[i][j];
-
-      /* if this column was not calculated but column with the same number
-         as the current row was, then symmetrized mat has unaveraged entry
-         at [i][j], [j][i] */
-      else if(!i_killed && j_killed) mat_entry = capmat[j][i];
-
-      /* if this column was calculated and column with the same number
-         as the current row was also, then symmetrized mat has averaged entry
-         at [i][j], [j][i] */
-      else mat_entry = (capmat[i][j] + capmat[j][i])/2.0;
-
-      rowttl += mat_entry;
-      if(mat_entry >= 0.0) {
-        sys->info("\nmksCapDump: Warning - capacitance matrix has non-negative off-diagonals\n  row %d col %d\n", i, j);
-      }
-
-      sym_mat[i][j] = mat_entry;
     }
-    if(rowttl + capmat[i][i] <= 0.0 && !i_killed) {
+
+    if (rowttl + capmat[i][i] <= 0.0 && !i_killed) {
       sys->info("\nmksCapDump: Warning - capacitance matrix is not strictly diagonally dominant\n  due to row %d\n", i);
     }
+
+    ++ii;
+
   }
 
   return sym_mat;

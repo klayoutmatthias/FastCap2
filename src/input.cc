@@ -984,7 +984,6 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
   /* get the surfaces from stdin, the list file or the file on cmd line */
   /* the `- ' option always forces the first cond surf read from stdin */
   /* can also read from stdin if there's no list file and no cmd line file */
-  sprintf(group_name, "GROUP%d", ++sys->group_cnt);
   if(read_from_stdin || (input_file == NULL && surf_list_file == NULL)) {
     surf_list = sys->heap.alloc<surface>(1, AMSC);
     surf_list->type = CONDTR;   /* only conductors can come in stdin */
@@ -994,8 +993,8 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
     surf_list->end_of_chain = TRUE;
 
     /* set up group name */
-    surf_list->group_name = sys->heap.strdup(group_name);
     sprintf(group_name, "GROUP%d", ++sys->group_cnt);
+    surf_list->group_name = sys->heap.strdup(group_name);
 
     cur_surf = surf_list;
 
@@ -1019,8 +1018,8 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
     cur_surf->end_of_chain = TRUE;
 
     /* set up group name */
-    cur_surf->group_name = sys->heap.strdup(group_name);
     sprintf(group_name, "GROUP%d", ++sys->group_cnt);
+    cur_surf->group_name = sys->heap.strdup(group_name);
 
     if (!infiles.empty()) {
       infiles += ",";

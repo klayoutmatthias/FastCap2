@@ -86,14 +86,7 @@ class TestProblem(unittest.TestCase):
       problem.skip_conductors = [ "a,b" ]
       self.assertEqual(True, False)
     except RuntimeError as ex:
-      self.assertEqual(str(ex), "'%' or ',' characters are not allowed in this conductor name: 'a,b'")
-      
-    # conductor names must not contain percent characters
-    try:
-      problem.skip_conductors = [ "a%b" ]
-      self.assertEqual(True, False)
-    except RuntimeError as ex:
-      self.assertEqual(str(ex), "'%' or ',' characters are not allowed in this conductor name: 'a%b'")
+      self.assertEqual(str(ex), "',' character is not allowed in this conductor name: 'a,b'")
       
   def test_remove_conductors(self):
 
@@ -419,6 +412,101 @@ class TestProblem(unittest.TestCase):
         "796   -481  -73   \n"
         "-481  891   -194  \n"
         "-73   -194  290   "
+    )
+
+    self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP', 'T2%GROUP2'])
+
+  def test_remove_conductors_from_input(self):
+
+    problem = fc2.Problem()
+
+    b = fc2.Surface(name = "B")
+    b.add_meshed_quad((0, 0, 0), (0, 10, 0), (10, 0, 0), edge_width = 0.2, num = 10)
+
+    t1 = fc2.Surface(name = "T1")
+    t1.add_meshed_quad((0, 0, 0), (0, 10, 0), (4, 0, 0), edge_width = 0.2, num = 5)
+
+    t2 = fc2.Surface(name = "T2")
+    t2.add_meshed_quad((0, 0, 0), (0, 10, 0), (1, 0, 0), edge_width = 0.2, num = 1)
+
+    problem.add(b, d = (0, 0, -1))
+    problem.add(t1, d = (0, 0, 1), group = "TOP")
+    problem.add(t1, d = (6, 0, 1), group = "TOP")
+    problem.add(t2, d = (4.5, 0, 1))
+
+    problem.remove_conductors = ["T1%TOP"]
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "528   -165  \n"
+        "-165  221   "
+    )
+
+    self.assertEqual(problem.conductors(), ['B%GROUP1', 'T2%GROUP2'])
+
+    problem.remove_conductors = ["B%GROUP1", "T2%GROUP2"]
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "397   "
+    )
+
+    self.assertEqual(problem.conductors(), [ 'T1%TOP'])
+
+    # back to normal now
+
+    problem.remove_conductors = None
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "796   -481  -73   \n"
+        "-481  891   -194  \n"
+        "-73   -194  290   "
+    )
+
+    self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP', 'T2%GROUP2'])
+
+  def test_skip_conductors(self):
+
+    problem = fc2.Problem()
+
+    b = fc2.Surface(name = "B")
+    b.add_meshed_quad((0, 0, 0), (0, 10, 0), (10, 0, 0), edge_width = 0.2, num = 10)
+
+    t1 = fc2.Surface(name = "T1")
+    t1.add_meshed_quad((0, 0, 0), (0, 10, 0), (4, 0, 0), edge_width = 0.2, num = 5)
+
+    t2 = fc2.Surface(name = "T2")
+    t2.add_meshed_quad((0, 0, 0), (0, 10, 0), (1, 0, 0), edge_width = 0.2, num = 1)
+
+    problem.add(b, d = (0, 0, -1))
+    problem.add(t1, d = (0, 0, 1), group = "TOP")
+    problem.add(t1, d = (6, 0, 1), group = "TOP")
+    problem.add(t2, d = (4.5, 0, 1))
+
+    problem.skip_conductors = ["T1%TOP"]
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "796   -481  -73   \n"
+        "-481  0     -194  \n"
+        "-73   -194  290   "
+    )
+
+    self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP', 'T2%GROUP2'])
+
+    problem.skip_conductors = ["B%GROUP1", "T2%GROUP2"]
+
+    cap_matrix = problem.solve()
+
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "0     -481  0     \n"
+        "-481  891   -194  \n"
+        "0     -194  0     "
     )
 
     self.assertEqual(problem.conductors(), ['B%GROUP1', 'T1%TOP', 'T2%GROUP2'])

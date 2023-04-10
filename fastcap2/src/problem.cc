@@ -77,8 +77,8 @@ static bool check_conductor_name(const char *name)
     return false;
   }
   for (const char *cp = name; *cp; ++cp) {
-    if (*cp == '%' || *cp == ',') {
-      PyErr_Format(PyExc_RuntimeError, "'%%' or ',' characters are not allowed in this conductor name: '%s'", name);
+    if (*cp == ',') {
+      PyErr_Format(PyExc_RuntimeError, "',' character is not allowed in this conductor name: '%s'", name);
       return false;
     }
   }
@@ -784,7 +784,8 @@ problem_solve(ProblemObject *self)
 
   if (capmat) {
 
-    int size = self->sys.num_cond;
+    int size = capmatrix_size(&self->sys);
+
     double mult = FPIEPS * self->sys.perm_factor;
 
     //  NOTE: the cap matrix if 1 based!
@@ -815,21 +816,22 @@ problem_solve(ProblemObject *self)
 static PyObject *
 problem_conductors(ProblemObject *self)
 {
-  int size = self->sys.num_cond;
-
-  PyObject *res = PyList_New(size);
+  PyObject *res = PyList_New(0);
   if (!res) {
     return NULL;
   }
 
   int i = 0;
   for (Name *cur_name = self->sys.cond_names; cur_name; cur_name = cur_name->next, ++i) {
+    if(want_this_iter(self->sys.kinp_num_list, i + 1)) {
+      continue;
+    }
     PyObject *name_str = PyUnicode_FromString(last_alias(cur_name));
     if (!name_str) {
       Py_DECREF(res);
       return NULL;
     }
-    PyList_SetItem(res, i, name_str);
+    PyList_Append(res, name_str);
   }
 
   return res;
