@@ -10,10 +10,10 @@ Welcome to FastCap2's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   introduction
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

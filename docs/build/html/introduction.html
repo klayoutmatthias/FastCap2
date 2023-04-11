@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Introduction &#8212; FastCap2  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h1>
+<p>FastCap2 is a venerable state-of-the art tool to compute the
+capacitance matrix from an arrangement of (ideal) conductors
+and dielectric surfaces in the quasi-static case.</p>
+<p>“fastcap2” is a Python module that provides the functionality
+of the FastCap2 tool for integration into Python scripts.</p>
+<p>Using the command-line tool is well described in the
+FastCap2 documentation. The tool takes input files describing
+the geometry in two different formats. The most commonly and
+easiest to use format is the “quickif” format.</p>
+<p>TODO: more.</p>
+<section id="building-and-installing">
+<h2>Building and installing<a class="headerlink" href="#building-and-installing" title="Permalink to this heading">¶</a></h2>
+<p>For building the command line tool, a CMake file is provided.</p>
+<p>For building the Python module, a <cite>setup.py</cite> script is provided.</p>
+<p>You can install the Python module from pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">fastcap2</span>
+</pre></div>
+</div>
+</section>
+<section id="using-the-command-line-tool">
+<h2>Using the command line tool<a class="headerlink" href="#using-the-command-line-tool" title="Permalink to this heading">¶</a></h2>
+<p>The following sample code assumes that <cite>fastcap</cite> and the generator
+tools (<cite>cubegen</cite>, <cite>pltcapgen</cite> etc.) are in the path and you
+changed to the samples directory of the source package:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">samples</span>
+</pre></div>
+</div>
+<p>Running fastcap with a list file (a geometry collection file)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fastcap</span> <span class="o">-</span><span class="n">lall</span><span class="o">.</span><span class="n">lst</span>
+</pre></div>
+</div>
+<p>This will produce:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CAPACITANCE</span> <span class="n">MATRIX</span><span class="p">,</span> <span class="n">nanofarads</span>
+                   <span class="mi">1</span>          <span class="mi">2</span>          <span class="mi">3</span>
+<span class="n">ct1</span><span class="o">%</span><span class="n">GROUP1</span> <span class="mi">1</span>      <span class="mf">1.565</span>     <span class="o">-</span><span class="mf">1.203</span>     <span class="o">-</span><span class="mf">0.259</span>
+<span class="n">ct2</span><span class="o">%</span><span class="n">GROUP2</span> <span class="mi">2</span>     <span class="o">-</span><span class="mf">1.203</span>      <span class="mf">1.565</span>    <span class="o">-</span><span class="mf">0.2591</span>
+<span class="n">cb</span><span class="o">%</span><span class="n">GROUP3</span>  <span class="mi">3</span>     <span class="o">-</span><span class="mf">0.259</span>    <span class="o">-</span><span class="mf">0.2591</span>     <span class="mf">0.8168</span>
+</pre></div>
+</div>
+<p>The arrangement in <cite>all.lst</cite> consists of a bottom plate and
+two conductors, resolved into four interdigitated stripes each:</p>
+<p>TODO: image</p>
+<p><cite>all.lst</cite> combines three files, describing the bottom plate
+and one strip each for the different conductors (<cite>cb.geo</cite>,
+<cite>ct1.geo</cite> and <cite>ct2.geo</cite>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">*</span> <span class="n">Interdigit</span> <span class="n">mesh</span>
+<span class="n">C</span> <span class="n">ct1</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">1.25</span> <span class="mf">0.0</span> <span class="mf">2.5</span> <span class="o">+</span>
+<span class="n">C</span> <span class="n">ct1</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">3.25</span> <span class="mf">0.0</span> <span class="mf">2.5</span> <span class="o">+</span>
+<span class="n">C</span> <span class="n">ct1</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">5.25</span> <span class="mf">0.0</span> <span class="mf">2.5</span> <span class="o">+</span>
+<span class="n">C</span> <span class="n">ct1</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">7.25</span> <span class="mf">0.0</span> <span class="mf">2.5</span>
+<span class="n">C</span> <span class="n">ct2</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">2.25</span> <span class="mf">0.0</span> <span class="mf">2.5</span> <span class="o">+</span>
+<span class="n">C</span> <span class="n">ct2</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">4.25</span> <span class="mf">0.0</span> <span class="mf">2.5</span> <span class="o">+</span>
+<span class="n">C</span> <span class="n">ct2</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">6.25</span> <span class="mf">0.0</span> <span class="mf">2.5</span> <span class="o">+</span>
+<span class="n">C</span> <span class="n">ct2</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">8.25</span> <span class="mf">0.0</span> <span class="mf">2.5</span>
+<span class="n">C</span> <span class="n">cb</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>You can use fastcap with the provided geometry generators:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pltcapgen</span> <span class="o">|</span> <span class="n">fastcap</span>
+</pre></div>
+</div>
+<p>which produces:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CAPACITANCE</span> <span class="n">MATRIX</span><span class="p">,</span> <span class="n">picofarads</span>
+                   <span class="mi">1</span>          <span class="mi">2</span>
+<span class="mi">1</span><span class="o">%</span><span class="n">GROUP1</span> <span class="mi">1</span>      <span class="mf">120.1</span>     <span class="o">-</span><span class="mf">98.28</span>
+<span class="mi">2</span><span class="o">%</span><span class="n">GROUP1</span> <span class="mi">2</span>     <span class="o">-</span><span class="mf">98.28</span>      <span class="mf">120.1</span>
+</pre></div>
+</div>
+<p>To generate postfile pictures of the geometry, use:</p>
+<blockquote>
+<div><p>pltcapgen | fastcap -m</p>
+</div></blockquote>
+<p><cite>fastcap</cite> has a number of options, most of which configure
+postscript output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="s1">&#39;fastcap [-o&lt;expansion order&gt;] [-d&lt;partitioning depth&gt;] [&lt;input file&gt;]</span>
+                <span class="p">[</span><span class="o">-</span><span class="n">p</span><span class="o">&lt;</span><span class="n">permittivity</span> <span class="n">factor</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">rs</span><span class="o">&lt;</span><span class="n">cond</span> <span class="nb">list</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ri</span><span class="o">&lt;</span><span class="n">cond</span> <span class="nb">list</span><span class="o">&gt;</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">-</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="o">&lt;</span><span class="nb">list</span> <span class="n">file</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">t</span><span class="o">&lt;</span><span class="nb">iter</span> <span class="n">tol</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">a</span><span class="o">&lt;</span><span class="n">azimuth</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">e</span><span class="o">&lt;</span><span class="n">elevation</span><span class="o">&gt;</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">-</span><span class="n">r</span><span class="o">&lt;</span><span class="n">rotation</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="o">&lt;</span><span class="n">distance</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span><span class="o">&lt;</span><span class="n">scale</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span><span class="o">&lt;</span><span class="n">linewidth</span><span class="o">&gt;</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">-</span><span class="n">u</span><span class="o">&lt;</span><span class="n">upaxis</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">q</span><span class="o">&lt;</span><span class="n">cond</span> <span class="nb">list</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">rc</span><span class="o">&lt;</span><span class="n">cond</span> <span class="nb">list</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">x</span><span class="o">&lt;</span><span class="n">axeslength</span><span class="o">&gt;</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">-</span><span class="n">b</span><span class="o">&lt;.</span><span class="n">figfile</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">rk</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">rd</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dc</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">f</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">g</span><span class="p">]</span>
+<span class="n">DEFAULT</span> <span class="n">VALUES</span><span class="p">:</span>
+  <span class="n">expansion</span> <span class="n">order</span> <span class="o">=</span> <span class="mi">2</span>
+  <span class="n">partitioning</span> <span class="n">depth</span> <span class="o">=</span> <span class="nb">set</span> <span class="n">automatically</span>
+  <span class="n">permittivity</span> <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+  <span class="n">iterative</span> <span class="n">loop</span> <span class="o">||</span><span class="n">r</span><span class="o">||</span> <span class="n">tolerance</span> <span class="o">=</span> <span class="mf">0.01</span>
+  <span class="n">azimuth</span> <span class="o">=</span> <span class="mi">50</span>
+  <span class="n">elevation</span> <span class="o">=</span> <span class="mi">50</span>
+  <span class="n">rotation</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">distance</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">(</span><span class="mi">0</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="nb">object</span> <span class="n">radius</span> <span class="n">away</span> <span class="kn">from</span> <span class="nn">center</span><span class="p">)</span>
+  <span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="n">upaxis</span> <span class="o">=</span> <span class="n">z</span>
+  <span class="n">axeslength</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">OPTIONS</span><span class="p">:</span>
+  <span class="o">-</span>   <span class="o">=</span> <span class="n">force</span> <span class="n">conductor</span> <span class="n">surface</span> <span class="n">file</span> <span class="n">read</span> <span class="kn">from</span> <span class="nn">stdin</span>
+  <span class="o">-</span><span class="n">rs</span> <span class="o">=</span> <span class="n">remove</span> <span class="n">conductors</span> <span class="kn">from</span> <span class="nn">solve</span> <span class="nb">list</span>
+  <span class="o">-</span><span class="n">ri</span> <span class="o">=</span> <span class="n">remove</span> <span class="n">conductors</span> <span class="kn">from</span> <span class="nn">input</span>
+  <span class="o">-</span><span class="n">q</span>  <span class="o">=</span> <span class="n">select</span> <span class="n">conductors</span> <span class="k">for</span> <span class="n">at</span><span class="o">-</span><span class="mi">1</span><span class="n">V</span> <span class="n">charge</span> <span class="n">distribution</span> <span class="o">.</span><span class="n">ps</span> <span class="n">pictures</span>
+  <span class="o">-</span><span class="n">rc</span> <span class="o">=</span> <span class="n">remove</span> <span class="n">conductors</span> <span class="kn">from</span> <span class="nn">all</span> <span class="n">charge</span> <span class="n">distribution</span> <span class="o">.</span><span class="n">ps</span> <span class="n">pictures</span>
+  <span class="o">-</span><span class="n">b</span>  <span class="o">=</span> <span class="n">superimpose</span> <span class="n">lines</span><span class="p">,</span> <span class="n">arrows</span> <span class="ow">and</span> <span class="n">dots</span> <span class="ow">in</span> <span class="o">.</span><span class="n">figfile</span> <span class="n">on</span> <span class="nb">all</span> <span class="o">.</span><span class="n">ps</span> <span class="n">pictures</span>
+  <span class="o">-</span><span class="n">m</span>  <span class="o">=</span> <span class="n">switch</span> <span class="n">to</span> <span class="n">dump</span><span class="o">-</span><span class="n">ps</span><span class="o">-</span><span class="n">picture</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">only</span> <span class="n">mode</span>
+  <span class="o">-</span><span class="n">rk</span> <span class="o">=</span> <span class="n">remove</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">shaded</span> <span class="o">.</span><span class="n">ps</span> <span class="n">picture</span> <span class="n">file</span> <span class="p">(</span><span class="n">use</span> <span class="k">with</span> <span class="o">-</span><span class="n">q</span> <span class="n">option</span><span class="p">)</span>
+  <span class="o">-</span><span class="n">rd</span> <span class="o">=</span> <span class="n">remove</span> <span class="n">DIELEC</span> <span class="nb">type</span> <span class="n">surfaces</span> <span class="kn">from</span> <span class="nn">all</span> <span class="o">.</span><span class="n">ps</span> <span class="n">picture</span> <span class="n">files</span>
+  <span class="o">-</span><span class="n">dc</span> <span class="o">=</span> <span class="n">display</span> <span class="n">total</span> <span class="n">charges</span> <span class="ow">in</span> <span class="n">shaded</span> <span class="o">.</span><span class="n">ps</span> <span class="n">picture</span> <span class="n">file</span> <span class="p">(</span><span class="n">use</span> <span class="k">with</span> <span class="o">-</span><span class="n">q</span> <span class="n">option</span><span class="p">)</span>
+  <span class="o">-</span><span class="n">c</span>  <span class="o">=</span> <span class="nb">print</span> <span class="n">command</span> <span class="n">line</span> <span class="ow">in</span> <span class="o">.</span><span class="n">ps</span> <span class="n">picture</span> <span class="n">file</span>
+  <span class="o">-</span><span class="n">v</span>  <span class="o">=</span> <span class="n">suppress</span> <span class="n">showpage</span> <span class="ow">in</span> <span class="nb">all</span> <span class="o">.</span><span class="n">ps</span> <span class="n">picture</span> <span class="n">files</span>
+  <span class="o">-</span><span class="n">n</span>  <span class="o">=</span> <span class="n">number</span> <span class="n">faces</span> <span class="k">with</span> <span class="nb">input</span> <span class="n">order</span> <span class="n">numbers</span>
+  <span class="o">-</span><span class="n">f</span>  <span class="o">=</span> <span class="n">do</span> <span class="ow">not</span> <span class="n">fill</span> <span class="ow">in</span> <span class="n">faces</span> <span class="p">(</span><span class="n">don</span><span class="s1">&#39;t rmv hidden lines)</span>
+  <span class="o">-</span><span class="n">g</span>  <span class="o">=</span> <span class="n">dump</span> <span class="n">depth</span> <span class="n">graph</span> <span class="ow">and</span> <span class="n">quit</span>
+  <span class="o">&lt;</span><span class="n">cond</span> <span class="nb">list</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">[</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">],[</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">],</span><span class="o">...</span><span class="p">,[</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>For details please see the original documentation.</p>
+</section>
+<section id="using-the-python-module">
+<h2>Using the Python module<a class="headerlink" href="#using-the-python-module" title="Permalink to this heading">¶</a></h2>
+<p>The <cite>fastcap2</cite> module provides a basic class to describe
+a FastCap2 project. In the convention of FastCap2, the
+project is called a “Problem” (to solve):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">fastcap2</span> <span class="k">as</span> <span class="nn">fc2</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Problem</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To prepare and solve a problem - hence computing the
+capacitance matrix - three steps are required:</p>
+<ul class="simple">
+<li><p>Configure the <cite>Problem</cite> object</p></li>
+<li><p>Set up the geometry</p></li>
+<li><p>Call <cite>solve</cite> to compute the capacitance matrix</p></li>
+</ul>
+<p>Configuration is optional and may involve
+tweaking solver parameters such as <cite>partitioning_depth</cite>,
+<cite>expansion_order</cite> etc. or setting a title string
+which is used as the default description text for
+surfaces.</p>
+<p>The geometry can be set up by loading geometry files
+(list files or multiple individual geometry files).
+Only “quickif” style geometry files are supported
+inside the Python module.</p>
+<p>Here is an example for using the mentioned list file
+from the <cite>samples</cite> directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">fastcap2</span> <span class="k">as</span> <span class="nn">fc2</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Problem</span><span class="p">()</span>
+
+<span class="n">problem</span><span class="o">.</span><span class="n">load_list</span><span class="p">(</span><span class="s2">&quot;all.lst&quot;</span><span class="p">)</span>
+
+<span class="n">cap_matrix</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Capacitance Matrix:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">cap_matrix</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;List of conductors:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">problem</span><span class="o">.</span><span class="n">conductors</span><span class="p">()))</span>
+</pre></div>
+</div>
+<p>The result is somewhat ugly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Capacitance</span> <span class="n">Matrix</span><span class="p">:</span>
+<span class="p">[[</span><span class="mf">1.5648896512731681e-09</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.2032493588890681e-09</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5896004955919144e-10</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.2032493588890681e-09</span><span class="p">,</span> <span class="mf">1.5648923641682211e-09</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.591220453278022e-10</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">2.5896004955919144e-10</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.591220453278022e-10</span><span class="p">,</span> <span class="mf">8.167767219682793e-10</span><span class="p">]]</span>
+<span class="n">List</span> <span class="n">of</span> <span class="n">conductors</span><span class="p">:</span>
+<span class="p">[</span><span class="s1">&#39;ct1</span><span class="si">%G</span><span class="s1">ROUP1&#39;</span><span class="p">,</span> <span class="s1">&#39;ct2</span><span class="si">%G</span><span class="s1">ROUP2&#39;</span><span class="p">,</span> <span class="s1">&#39;cb</span><span class="si">%G</span><span class="s1">ROUP3&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Some pretty-printing code is this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">format_cap_matrix</span><span class="p">(</span><span class="n">cap_matrix</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="mf">1e-12</span><span class="p">):</span>
+  <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="s2">&quot;  &quot;</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="s2">&quot;</span><span class="si">%-8.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">m</span> <span class="o">/</span> <span class="n">unit</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">row</span> <span class="p">])</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cap_matrix</span> <span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Capacitance Matrix (pF):</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">format_cap_matrix</span><span class="p">(</span><span class="n">cap_matrix</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;List of conductors:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;  &quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">problem</span><span class="o">.</span><span class="n">conductors</span><span class="p">()))</span>
+</pre></div>
+</div>
+<p>Which renders:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Capacitance</span> <span class="n">Matrix</span> <span class="p">(</span><span class="n">pF</span><span class="p">):</span>
+  <span class="mf">1564.9</span>  <span class="o">-</span><span class="mf">1203.2</span> <span class="o">-</span><span class="mf">259.0</span>
+  <span class="o">-</span><span class="mf">1203.2</span> <span class="mf">1564.9</span>  <span class="o">-</span><span class="mf">259.1</span>
+  <span class="o">-</span><span class="mf">259.0</span>  <span class="o">-</span><span class="mf">259.1</span>  <span class="mf">816.8</span>
+<span class="n">List</span> <span class="n">of</span> <span class="n">conductors</span><span class="p">:</span>
+  <span class="n">ct1</span><span class="o">%</span><span class="n">GROUP1</span><span class="p">,</span> <span class="n">ct2</span><span class="o">%</span><span class="n">GROUP2</span><span class="p">,</span> <span class="n">cb</span><span class="o">%</span><span class="n">GROUP3</span>
+</pre></div>
+</div>
+<p>Instead of setting up the geometry from a file, it is possible
+to generate the geometry by code. For this, the <cite>Surface</cite> object
+is provided.</p>
+<p>A surface is a collection of faces describing a material interface.
+A surface can wrap a volume of describe parts of a volume surface.</p>
+<p><cite>Surface</cite> objects are created and added to the <cite>Problem</cite> object to
+build the geometry. A single surface can be used multiple times
+with different transformations (translation usually) and in different
+contexts - i.e. as dielectric interface or conductor surface.</p>
+<p>Surfaces can be populated by adding individual triangle or quad
+faces or by using the <cite>add_meshed_quad</cite> helper function which
+creates single quad resolved into multiple discrete faces
+(discretization is important to improve accuracy). A finer
+mesh can be selected for the edges.</p>
+<p>Here is a thin two-plate capacitor build from a single surface
+placed two times with a vertical (z axis) displacement:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">problem</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Problem</span><span class="p">()</span>
+
+<span class="n">surface</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;C&quot;</span><span class="p">)</span>
+<span class="n">surface</span><span class="o">.</span><span class="n">add_meshed_quad</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">edge_width</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">))</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+
+<span class="n">cap_matrix</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The dimensions are given in MKS units (i.e. meters). The resulting capacitor
+therefore is 10 x 10 meters with a 2 meter plate distance. That gives a
+capacitance matrix of</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">800</span>   <span class="o">-</span><span class="mi">559</span>
+<span class="o">-</span><span class="mi">559</span>  <span class="mi">800</span>
+</pre></div>
+</div>
+<p>picofarads.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">FastCap2</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;See LICENSE file.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/introduction.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
