@@ -657,24 +657,26 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
   PyObject *r = NULL;
   int flipx = 0, flipy = 0, flipz = 0;
   double rotx = 0.0, roty = 0.0, rotz = 0.0;
-  double scale = 1.0;
+  double scalex = 1.0, scaley = 1.0, scalez = 1.0;
 
   self->sys.reset_read();
 
   if (load) {
 
-    if (!PyArg_ParseTuple(args, "spzipddOOpppdddd", &filename, &link, &group, &kind,
+    if (!PyArg_ParseTuple(args, "spzipddOOpppdddddd", &filename, &link, &group, &kind,
                                                     &ref_point_inside, &outer_perm, &inner_perm,
-                                                    &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz, &scale)) {
+                                                    &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz,
+                                                    &scalex, &scaley, &scalez)) {
       return NULL;
     }
 
   } else {
 
     PyObject *py_surf = NULL;
-    if (!PyArg_ParseTuple(args, "OpzipddOOpppdddd", &py_surf, &link, &group, &kind,
+    if (!PyArg_ParseTuple(args, "OpzipddOOpppdddddd", &py_surf, &link, &group, &kind,
                                                     &ref_point_inside, &outer_perm, &inner_perm,
-                                                    &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz, &scale)) {
+                                                    &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz,
+                                                    &scalex, &scaley, &scalez)) {
       return NULL;
     }
 

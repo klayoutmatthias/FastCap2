@@ -483,7 +483,10 @@ class Problem(_Problem):
            rotx: float = 0.0,
            roty: float = 0.0,
            rotz: float = 0.0,
-           scale: float = 1.0):
+           scale: float = 1.0,
+           scalex: float = 1.0,
+           scaley: float = 1.0,
+           scalez: float = 1.0):
     """Loads a single "quickif"-style geometry file
 
     :param file: The file to load
@@ -503,6 +506,9 @@ class Problem(_Problem):
     :param roty: Rotates the surface around the y axis by the given angle.
     :param rotz: Rotates the surface around the z axis by the given angle.
     :param scale: Scales the surface by the given factor.
+    :param scalex: Scales the surface by the given factor in x direction.
+    :param scaley: Scales the surface by the given factor in y direction.
+    :param scalez: Scales the surface by the given factor in z direction.
 
     Note that the files are not loaded immediately, but 
     upon :py:meth:`solve`.
@@ -510,18 +516,47 @@ class Problem(_Problem):
     By design of the file format, only conductor surfaces can be
     loaded by this method.
 
-    The :py:meth:`group` name together with the conductor name inside the
+    The `group` name together with the conductor name inside the
     file will form an effective conductor name of the form 
     `name%group`. All surfaces with the same effective conductor
     name become connected. So it is possible to form a connected
     surface from multiple files or multiple calls of the same file 
     by giving them the same group name.
 
-    :py:meth:`link` is a similar mechanism than `group`, but will
+    `link` is a similar mechanism than `group`, but will
     automatically use the group of the surface loaded previously
     if set to True.
 
-    :py:meth:`link` and :py:meth:`group` are mutually exclusive.
+    `link` and `group` are mutually exclusive.
+
+    `kind` specifies which type of surface is given. The surface
+    can be:
+
+    * a conductive surface (value :py:meth:`Problem.CONDTR`)
+    * a dielectric surface separating two different dielectrics (value :py:meth:`Problem.DIELEC`) 
+    * or a thin conducting surface separating two dielectrics (value :py:meth:`Problem.BOTH`)
+
+    `outside_perm` specifies the permittivity outside of the 
+    conductor or dielectric surface.
+    `inside_perm` specifies the permittivity inside the surface for 
+    `DIELEC` or `BOTH` type.
+
+    In order to tell inside from outside halfspace and to properly orient the faces, 
+    a reference point needs to be given that does not lie on the surface.
+    This is mandatory for types `DIELEC` and `BOTH`. For `CONDTR` type, this 
+    specification is not required - "outside" refers to both sides of the surface.
+    Specify the reference point with the `r` parameter which is a triple of x, y and z values.
+
+    By default, the reference point is taken to be inside the surface. 
+    By using `ref_point_inside = False`, the reference point is taken to be outside
+    the surface.
+
+    Additional transformations can be applied to the surface before using it:
+
+    * A displacement (translation) - `d` parameter
+    * Rotation around different axes - `rotx`, `roty` and `rotz` parameters
+    * Mirroring in x, y or z direction - `flipx`, `flipy` and `flipz` parameters
+    * Scaling (isotropic or single direction) - `scale`, `scalex`, `scaley` and `scalez` parameters
 
     The order in which the transformations are applied is:
 
@@ -540,7 +575,7 @@ class Problem(_Problem):
 
     return super()._load(file, link, group, kind, ref_point_inside, 
                          outside_perm, inside_perm, d, r, flipx, flipy, flipz, 
-                         rotx, roty, rotz, scale)
+                         rotx, roty, rotz, scale * scalex, scale * scaley, scale * scalez)
 
   def load_list(self, file: str):
     """Loads a "list-style" geometry file
@@ -565,38 +600,38 @@ class Problem(_Problem):
                 rotx: float = 0.0,
                 roty: float = 0.0,
                 rotz: float = 0.0,
-                scale: float = 1.0):
+                scale: float = 1.0,
+                scalex: float = 1.0,
+                scaley: float = 1.0,
+                scalez: float = 1.0):
     """Adds a surface object to the problem
 
     :param surface: The surface to add.
     :param group: See :py:meth:`load` for details.
     :param link: See :py:meth:`load` for details.
-    :param kind: The type of the surface (conductor or dielectric or dielectric interface).
-    :param outside_perm: The permittivity outside of the surface.
-    :param inside_perm: The permittivity inside of the surface (only for dielectric surfaces).
-    :param d: Translates the surface.
-    :param r: The reference point for surface normalisation. Needed for dielectric surfaces.
-    :param ref_point_inside: True, if the reference point is inside the surface. Needed for dielectric surfaces.
-    :param flipx: Flips the surface at the yz plane.
-    :param flipy: Flips the surface at the xz plane.
-    :param flipz: Flips the surface at the xy plane.
-    :param rotx: Rotates the surface around the x axis by the given angle.
-    :param roty: Rotates the surface around the y axis by the given angle.
-    :param rotz: Rotates the surface around the z axis by the given angle.
-    :param scale: Scales the surface by the given factor.
+    :param kind: The type of the surface (conductor or dielectric or dielectric interface). See :py:meth:`load` for details.
+    :param outside_perm: The permittivity outside of the surface. See :py:meth:`load` for details.
+    :param inside_perm: The permittivity inside of the surface (only for dielectric surfaces). See :py:meth:`load` for details.
+    :param d: Translates the surface. See :py:meth:`load` for details.
+    :param r: The reference point for surface normalisation. Needed for dielectric surfaces. See :py:meth:`load` for details.
+    :param ref_point_inside: True, if the reference point is inside the surface. Needed for dielectric surfaces. See :py:meth:`load` for details.
+    :param flipx: Flips the surface at the yz plane. See :py:meth:`load` for details.
+    :param flipy: Flips the surface at the xz plane. See :py:meth:`load` for details.
+    :param flipz: Flips the surface at the xy plane. See :py:meth:`load` for details.
+    :param rotx: Rotates the surface around the x axis by the given angle. See :py:meth:`load` for details.
+    :param roty: Rotates the surface around the y axis by the given angle. See :py:meth:`load` for details.
+    :param rotz: Rotates the surface around the z axis by the given angle. See :py:meth:`load` for details.
+    :param scale: Scales the surface by the given factor. See :py:meth:`load` for details.
+    :param scalex: Scales the surface by the given factor in x direction. See :py:meth:`load` for details.
+    :param scaley: Scales the surface by the given factor in y direction. See :py:meth:`load` for details.
+    :param scalez: Scales the surface by the given factor in z direction. See :py:meth:`load` for details.
 
     A surface can be added multiple times with different
     transformation parameters, so it is easy to form structures
     with multiple conductors.
 
-    The order in which the transformations are applied is:
-
-    * Scaling by `scale`
-    * Flipping by `flipx`, `flipy` and `flipz`
-    * Rotation by `rotx`
-    * Rotation by `roty`
-    * Rotation by `rotz`
-    * Translation by `d`
+    The other parameters are explained in the description
+    of the :py:meth:`load` function.
     """
 
     if type(d) is list:
@@ -606,7 +641,7 @@ class Problem(_Problem):
 
     return super()._add(surface, link, group, kind, ref_point_inside, 
                         outside_perm, inside_perm, d, r, flipx, flipy, flipz, 
-                        rotx, roty, rotz, scale)
+                        rotx, roty, rotz, scale * scalex, scale * scaley, scale * scalez)
 
   def solve(self) -> list[ list[float] ]:
     """Solves the problem and returns the capacitance matrix
