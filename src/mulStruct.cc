@@ -9,6 +9,10 @@
 
 // -----------------------------------------------------------------------
 
+Name::Name()
+  : name(0), next(0), alias_list(0)
+{ }
+
 void
 Name::add_alias(const ssystem *sys, const char *alias)
 {

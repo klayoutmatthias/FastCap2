@@ -15,6 +15,7 @@ struct NAME;
 
 /* used to build linked list of conductor names */
 struct Name {
+  Name();
   char *name;
   Name *next;
   Name *alias_list;

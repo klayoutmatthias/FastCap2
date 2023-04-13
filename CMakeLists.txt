@@ -21,6 +21,8 @@ add_library(corelib STATIC
   src/counters.h
   src/direct.h
   src/heap.h
+  src/matrix.h
+  src/vector.h
   src/input.h
   src/fastcap_solve.h
   src/mulDisplay.h
@@ -47,6 +49,8 @@ add_library(corelib STATIC
   src/direct.cc
   src/electric.cc
   src/heap.cc
+  src/matrix.cc
+  src/vector.cc
   src/input.cc
   src/fastcap_solve.cc
   src/mulDisplay.cc
@@ -91,6 +95,7 @@ project(FastCap2 LANGUAGES CXX)
 
 add_executable(unittests
   unittests/heap.cc
+  unittests/vector.cc
   unittests/mulStruct.cc
 )
 target_link_libraries(unittests m corelib GTest::GTest GTest::gtest_main)
