@@ -154,19 +154,10 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, const
       if(surf_type == CONDTR || surf_type == BOTH)
           curquad->cond = sys->get_conductor_number(condstr);
       else curquad->cond = 0;
-      curquad->x1 = x1;
-      curquad->x2 = x2;
-      curquad->x3 = x3;
-      curquad->x4 = x4;
-      curquad->y1 = y1;
-      curquad->y2 = y2;
-      curquad->y3 = y3;
-      curquad->y4 = y4;
-      curquad->z1 = z1;
-      curquad->z2 = z2;
-      curquad->z3 = z3;
-      curquad->z4 = z4;
-
+      curquad->p1 = Vector3d(x1, y1, z1);
+      curquad->p2 = Vector3d(x2, y2, z2);
+      curquad->p3 = Vector3d(x3, y3, z3);
+      curquad->p4 = Vector3d(x4, y4, z4);
       linecnt++;
     }
     else if(line1[0] == 'T' || line1[0] == 't') {
@@ -194,15 +185,9 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, const
       if(surf_type == CONDTR || surf_type == BOTH)
           curtri->cond = sys->get_conductor_number(condstr);
       else curquad->cond = 0;
-      curtri->x1 = x1;
-      curtri->x2 = x2;
-      curtri->x3 = x3;
-      curtri->y1 = y1;
-      curtri->y2 = y2;
-      curtri->y3 = y3;
-      curtri->z1 = z1;
-      curtri->z2 = z2;
-      curtri->z3 = z3;
+      curquad->p1 = Vector3d(x1, y1, z1);
+      curquad->p2 = Vector3d(x2, y2, z2);
+      curquad->p3 = Vector3d(x3, y3, z3);
 
       linecnt++;
     }
@@ -257,15 +242,15 @@ charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, const Matrix3
     nq = c;
 
     /* fill in corners */
-    (nq->corner[0])[0] = curtri->x1;
-    (nq->corner[0])[1] = curtri->y1;
-    (nq->corner[0])[2] = curtri->z1;
-    (nq->corner[1])[0] = curtri->x2;
-    (nq->corner[1])[1] = curtri->y2;
-    (nq->corner[1])[2] = curtri->z2;
-    (nq->corner[2])[0] = curtri->x3;
-    (nq->corner[2])[1] = curtri->y3;
-    (nq->corner[2])[2] = curtri->z3;
+    for (int i = 0; i < 3; ++i) {
+      (nq->corner[0])[i] = curtri->p1[i];
+    }
+    for (int i = 0; i < 3; ++i) {
+      (nq->corner[1])[i] = curtri->p2[i];
+    }
+    for (int i = 0; i < 3; ++i) {
+      (nq->corner[2])[i] = curtri->p3[i];
+    }
 
     /* fill in remaining */
     nq->shape = 3;
@@ -285,18 +270,18 @@ charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, const Matrix3
     nq = c;
 
     /* fill in corners */
-    (nq->corner[0])[0] = curquad->x1;
-    (nq->corner[0])[1] = curquad->y1;
-    (nq->corner[0])[2] = curquad->z1;
-    (nq->corner[1])[0] = curquad->x2;
-    (nq->corner[1])[1] = curquad->y2;
-    (nq->corner[1])[2] = curquad->z2;
-    (nq->corner[2])[0] = curquad->x3;
-    (nq->corner[2])[1] = curquad->y3;
-    (nq->corner[2])[2] = curquad->z3;
-    (nq->corner[3])[0] = curquad->x4;
-    (nq->corner[3])[1] = curquad->y4;
-    (nq->corner[3])[2] = curquad->z4;
+    for (int i = 0; i < 3; ++i) {
+      (nq->corner[0])[i] = curquad->p1[i];
+    }
+    for (int i = 0; i < 3; ++i) {
+      (nq->corner[1])[i] = curquad->p2[i];
+    }
+    for (int i = 0; i < 3; ++i) {
+      (nq->corner[2])[i] = curquad->p3[i];
+    }
+    for (int i = 0; i < 3; ++i) {
+      (nq->corner[3])[i] = curquad->p4[i];
+    }
 
     /* fill in remaining */
     nq->shape = 4;

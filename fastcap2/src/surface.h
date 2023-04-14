@@ -13,15 +13,15 @@ struct PySurface
   PySurface();
 
   void add_quad(int cond_num,
-                double x1, double y1, double z1,
-                double x2, double y2, double z2,
-                double x3, double y3, double z3,
-                double x4, double y4, double z4);
+                const Vector3d &p1,
+                const Vector3d &p2,
+                const Vector3d &p3,
+                const Vector3d &p4);
 
   void add_tri(int cond_num,
-               double x1, double y1, double z1,
-               double x2, double y2, double z2,
-               double x3, double y3, double z3);
+               const Vector3d &p1,
+               const Vector3d &p2,
+               const Vector3d &p3);
 
   void set_name(const char *name);
   void set_title(const char *title);

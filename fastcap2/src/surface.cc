@@ -12,45 +12,31 @@ PySurface::PySurface()
 }
 
 void PySurface::add_quad(int cond_num,
-                         double x1, double y1, double z1,
-                         double x2, double y2, double z2,
-                         double x3, double y3, double z3,
-                         double x4, double y4, double z4)
+                         const Vector3d &p1,
+                         const Vector3d &p2,
+                         const Vector3d &p3,
+                         const Vector3d &p4)
 {
   quadl *new_quad = heap.alloc<quadl>(1);
   new_quad->cond = cond_num;
-  new_quad->x1 = x1;
-  new_quad->y1 = y1;
-  new_quad->z1 = z1;
-  new_quad->x2 = x2;
-  new_quad->y2 = y2;
-  new_quad->z2 = z2;
-  new_quad->x3 = x3;
-  new_quad->y3 = y3;
-  new_quad->z3 = z3;
-  new_quad->x4 = x4;
-  new_quad->y4 = y4;
-  new_quad->z4 = z4;
+  new_quad->p1 = p1;
+  new_quad->p2 = p2;
+  new_quad->p3 = p3;
+  new_quad->p4 = p4;
   new_quad->next = quads;
   quads = new_quad;
 }
 
 void PySurface::add_tri(int cond_num,
-                        double x1, double y1, double z1,
-                        double x2, double y2, double z2,
-                        double x3, double y3, double z3)
+                         const Vector3d &p1,
+                         const Vector3d &p2,
+                         const Vector3d &p3)
 {
   tri *new_tri = heap.alloc<tri>(1);
   new_tri->cond = cond_num;
-  new_tri->x1 = x1;
-  new_tri->y1 = y1;
-  new_tri->z1 = z1;
-  new_tri->x2 = x2;
-  new_tri->y2 = y2;
-  new_tri->z2 = z2;
-  new_tri->x3 = x3;
-  new_tri->y3 = y3;
-  new_tri->z3 = z3;
+  new_tri->p1 = p1;
+  new_tri->p2 = p2;
+  new_tri->p3 = p3;
   new_tri->next = tris;
   tris = new_tri;
 }
@@ -115,6 +101,18 @@ surface_init(PySurfaceObject *self, PyObject *args, PyObject *kwds)
   return 0;
 }
 
+static bool
+parse_vector(PyObject *arg, Vector3d &v)
+{
+  double x, y, z;
+  if (!PyArg_ParseTuple(arg, "ddd", &x, &y, &z)) {
+    return false;
+  } else {
+    v = Vector3d(x, y, z);
+    return true;
+  }
+}
+
 static PyObject *
 surface_add_quad(PySurfaceObject *self, PyObject *args)
 {
@@ -123,17 +121,17 @@ surface_add_quad(PySurfaceObject *self, PyObject *args)
     return NULL;
   }
 
-  double x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
+  Vector3d c1, c2, c3, c4;
 
-  int ok = PyArg_ParseTuple(p1, "ddd", &x1, &y1, &z1) &&
-           PyArg_ParseTuple(p2, "ddd", &x2, &y2, &z2) &&
-           PyArg_ParseTuple(p3, "ddd", &x3, &y3, &z3) &&
-           PyArg_ParseTuple(p4, "ddd", &x4, &y4, &z4);
+  int ok = parse_vector(p1, c1) &&
+           parse_vector(p2, c2) &&
+           parse_vector(p3, c3) &&
+           parse_vector(p4, c4);
 
   if (! ok) {
     return NULL;
   } else {
-    self->surface.add_quad(0, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4);
+    self->surface.add_quad(0, c1, c2, c3, c4);
     Py_RETURN_NONE;
   }
 }
@@ -146,16 +144,16 @@ surface_add_tri(PySurfaceObject *self, PyObject *args)
     return NULL;
   }
 
-  double x1, y1, z1, x2, y2, z2, x3, y3, z3;
+  Vector3d c1, c2, c3;
 
-  int ok = PyArg_ParseTuple(p1, "ddd", &x1, &y1, &z1) &&
-           PyArg_ParseTuple(p2, "ddd", &x2, &y2, &z2) &&
-           PyArg_ParseTuple(p3, "ddd", &x3, &y3, &z3);
+  int ok = parse_vector(p1, c1) &&
+           parse_vector(p2, c2) &&
+           parse_vector(p3, c3);
 
   if (! ok) {
     return NULL;
   } else {
-    self->surface.add_tri(0, x1, y1, z1, x2, y2, z2, x3, y3, z3);
+    self->surface.add_tri(0, c1, c2, c3);
     Py_RETURN_NONE;
   }
 }
@@ -218,17 +216,6 @@ surface_set_title(PySurfaceObject *self, PyObject *value)
   Py_RETURN_NONE;
 }
 
-static double vprod(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3)
-{
-  double xa = x2 - x1;
-  double ya = y2 - y1;
-  double za = z2 - z1;
-  double xb = x3 - x1;
-  double yb = y3 - y1;
-  double zb = z3 - z1;
-  return ((ya * zb) - (za * yb)) - ((xa * zb) - (za * xb)) + ((xa * yb) - (ya * xb));
-}
-
 static PyObject *
 surface_quad_count(PySurfaceObject *self)
 {
@@ -244,8 +231,8 @@ surface_quad_area(PySurfaceObject *self)
 {
   double area = 0;
   for (quadl *q = self->surface.quads; q; q = q->next) {
-    area += 0.5 * vprod(q->x1, q->y1, q->z1, q->x4, q->y4, q->z4, q->x2, q->y2, q->z2);
-    area += 0.5 * vprod(q->x3, q->y3, q->z3, q->x2, q->y2, q->z2, q->x4, q->y4, q->z4);
+    area += 0.5 * cross_prod(q->p4 - q->p1, q->p2 - q->p1).norm();
+    area += 0.5 * cross_prod(q->p2 - q->p3, q->p4 - q->p3).norm();
   }
   return PyFloat_FromDouble(area);
 }
@@ -265,7 +252,7 @@ surface_tri_area(PySurfaceObject *self)
 {
   double area = 0;
   for (tri *t = self->surface.tris; t; t = t->next) {
-    area += 0.5 * vprod(t->x1, t->y1, t->z1, t->x3, t->y3, t->z3, t->x2, t->y2, t->z2);
+    area += 0.5 * cross_prod(t->p3 - t->p1, t->p2 - t->p1).norm();
   }
   return PyFloat_FromDouble(area);
 }
@@ -275,16 +262,16 @@ surface_to_string(PySurfaceObject *self)
 {
   std::ostringstream os;
   for (quadl *q = self->surface.quads; q; q = q->next) {
-    os << "Q (" << q->x1 << "," << q->y1 << "," << q->z1 << ")"
-           " (" << q->x2 << "," << q->y2 << "," << q->z2 << ")"
-           " (" << q->x3 << "," << q->y3 << "," << q->z3 << ")"
-           " (" << q->x4 << "," << q->y4 << "," << q->z4 << ")";
+    os << "Q (" << q->p1.x() << "," << q->p1.y() << "," << q->p1.z() << ")"
+           " (" << q->p2.x() << "," << q->p2.y() << "," << q->p2.z() << ")"
+           " (" << q->p3.x() << "," << q->p3.y() << "," << q->p3.z() << ")"
+           " (" << q->p4.x() << "," << q->p4.y() << "," << q->p4.z() << ")";
     os << std::endl;
   }
   for (tri *t = self->surface.tris; t; t = t->next) {
-    os << "T (" << t->x1 << "," << t->y1 << "," << t->z1 << ")"
-           " (" << t->x2 << "," << t->y2 << "," << t->z2 << ")"
-           " (" << t->x3 << "," << t->y3 << "," << t->z3 << ")";
+    os << "T (" << t->p1.x() << "," << t->p1.y() << "," << t->p1.z() << ")"
+           " (" << t->p2.x() << "," << t->p2.y() << "," << t->p2.z() << ")"
+           " (" << t->p3.x() << "," << t->p3.y() << "," << t->p3.z() << ")";
     os << std::endl;
   }
   return PyUnicode_FromString(os.str().c_str());

@@ -15,32 +15,13 @@ class Heap;
 struct quadl {                  /* quadralateral element */
   int cond;                     /* conductor number */
   struct quadl *next;           /* linked list pntr */
-  double x1;                    /* four corner coordinates */
-  double x2;
-  double x3;
-  double x4;
-  double y1;  
-  double y2;
-  double y3;
-  double y4;
-  double z1;  
-  double z2;
-  double z3;
-  double z4;
+  Vector3d p1, p2, p3, p4;      /* four corner coordinates */
 };
 
 struct tri {                    /* triangular element */
   int cond;                     /* conductor number */
   struct tri *next;             /* linked list pntr */
-  double x1;                    /* three corner coordinates */
-  double x2;
-  double x3;
-  double y1;  
-  double y2;
-  double y3;
-  double z1;  
-  double z2;
-  double z3;
+  Vector3d p1, p2, p3;          /* three corner coordinates */
 };
 
 struct SurfaceData
