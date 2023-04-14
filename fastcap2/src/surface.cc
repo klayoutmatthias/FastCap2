@@ -262,16 +262,16 @@ surface_to_string(PySurfaceObject *self)
 {
   std::ostringstream os;
   for (quadl *q = self->surface.quads; q; q = q->next) {
-    os << "Q (" << q->p1.x() << "," << q->p1.y() << "," << q->p1.z() << ")"
-           " (" << q->p2.x() << "," << q->p2.y() << "," << q->p2.z() << ")"
-           " (" << q->p3.x() << "," << q->p3.y() << "," << q->p3.z() << ")"
-           " (" << q->p4.x() << "," << q->p4.y() << "," << q->p4.z() << ")";
+    os << "Q " << q->p1.to_string() <<
+           " " << q->p2.to_string() <<
+           " " << q->p3.to_string() <<
+           " " << q->p4.to_string();
     os << std::endl;
   }
   for (tri *t = self->surface.tris; t; t = t->next) {
-    os << "T (" << t->p1.x() << "," << t->p1.y() << "," << t->p1.z() << ")"
-           " (" << t->p2.x() << "," << t->p2.y() << "," << t->p2.z() << ")"
-           " (" << t->p3.x() << "," << t->p3.y() << "," << t->p3.z() << ")";
+    os << "T " << t->p1.to_string() <<
+           " " << t->p2.to_string() <<
+           " " << t->p3.to_string();
     os << std::endl;
   }
   return PyUnicode_FromString(os.str().c_str());
