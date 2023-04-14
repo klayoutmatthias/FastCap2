@@ -18,6 +18,16 @@ public:
     }
   }
 
+  vector(double x, double y = 0.0, double z = 0.0)
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      m_v[i] = 0.0;
+    }
+    set(0, x);
+    set(1, y);
+    set(2, z);
+  }
+
   vector(const vector<N> &other)
   {
     for (unsigned int i = 0; i < N; ++i) {
@@ -32,6 +42,32 @@ public:
         m_v[i] = other.m_v[i];
       }
     }
+    return *this;
+  }
+
+  bool operator==(const vector<N> &other) const
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      if (m_v[i] != other.m_v[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool operator!=(const vector<N> &other) const
+  {
+    return !operator==(other);
+  }
+
+  bool operator<(const vector<N> &other) const
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      if (m_v[i] != other.m_v[i]) {
+        return m_v[i] < other.m_v[i];
+      }
+    }
+    return false;
   }
 
   double &operator[] (unsigned int n)
@@ -39,9 +75,16 @@ public:
     return m_v[n];
   }
 
+  void set(unsigned int n, double v)
+  {
+    if (n < N) {
+      m_v[n] = v;
+    }
+  }
+
   double operator[] (unsigned int n) const
   {
-    return m_v[n];
+    return n < N ? m_v[n] : 0.0;
   }
 
   double norm_sq() const
@@ -67,16 +110,57 @@ public:
     return s;
   }
 
-  vector<N> operator*(double &s) const
+  vector<N> operator*(double s) const
   {
-    vector<N> v;
-    for (unsigned int i = 0; i < N; ++i) {
-      v.m_v[i] = m_v[i] * s;
-    }
+    vector<N> v = *this;
+    v *= s;
     return v;
   }
 
-  std::string to_string() const
+  vector<N> &operator*=(double s)
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      m_v[i] *= s;
+    }
+    return *this;
+  }
+
+  vector<N> operator+(const vector<N> &other) const
+  {
+    vector<N> res(*this);
+    res += other;
+    return res;
+  }
+
+  vector<N> &operator+=(const vector<N> &other)
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      m_v[i] += other.m_v[i];
+    }
+    return *this;
+  }
+
+  vector<N> operator-(const vector<N> &other) const
+  {
+    vector<N> res(*this);
+    res -= other;
+    return res;
+  }
+
+  vector<N> &operator-=(const vector<N> &other)
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      m_v[i] -= other.m_v[i];
+    }
+    return *this;
+  }
+
+  vector<N> operator-() const
+  {
+    return *this * -1.0;
+  }
+
+  std::string to_string(double epsilon = 1e-12) const
   {
     std::ostringstream os;
     os << std::setprecision(12) << "(";
@@ -84,40 +168,32 @@ public:
       if (i > 0) {
         os << ",";
       }
-      os << m_v[i];
+      double v = m_v[i];
+      os << (fabs(v) < epsilon ? 0.0 : v);
     }
     os << ")";
     return os.str();
   }
 
+  double x() const { return this->operator[](0); }
+  double y() const { return this->operator[](1); }
+  double z() const { return this->operator[](2); }
+
 private:
   double m_v[N];
 };
 
-class Vector3d
-  : public vector<3>
-{
-public:
-  Vector3d(double x, double y, double z)
-    : vector<3>()
-  {
-    this->operator[](0) = x;
-    this->operator[](1) = y;
-    this->operator[](2) = z;
-  }
+typedef vector<4> Vector4d;
+typedef vector<3> Vector3d;
+typedef vector<2> Vector2d;
 
-  double x() const { return this->operator[](0); }
-  double y() const { return this->operator[](1); }
-  double z() const { return this->operator[](2); }
-};
-
-template <int N>
-vector<N> operator*(double s, const vector<N> &v)
+template <unsigned int N>
+inline vector<N> operator*(double s, const vector<N> &v)
 {
   return v * s;
 }
 
-Vector3d cross_prod(const Vector3d &a, const Vector3d &b)
+inline Vector3d cross_prod(const Vector3d &a, const Vector3d &b)
 {
   double x =  a.y() * b.z() - a.z() * b.y();
   double y = -a.x() * b.z() + a.z() * b.x();
