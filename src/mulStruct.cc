@@ -57,6 +57,18 @@ Name::match(const char *n) const
 
 // -----------------------------------------------------------------------
 
+Surface::Surface()
+  : type(0), trans(), rot(unity<3>()), ref(),
+    ref_inside(FALSE), end_of_chain(FALSE),
+    title(0), name(0), surf_data(0), group_name(0),
+    outer_perm(1.0), inner_perm(1.0),
+    panels(0), num_panels(0), num_dummies(0),
+    next(0), prev(0)
+{
+}
+
+// -----------------------------------------------------------------------
+
 ssystem::ssystem() :
   argv(0),
   argc(0),

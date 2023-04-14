@@ -28,6 +28,13 @@ public:
     set(2, z);
   }
 
+  vector(double *a)
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      m_v[i] = a[i];
+    }
+  }
+
   vector(const vector<N> &other)
   {
     for (unsigned int i = 0; i < N; ++i) {

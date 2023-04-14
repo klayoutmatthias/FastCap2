@@ -217,9 +217,10 @@ int flip_normal(ssystem *sys, charge *panel)
 {
   double x, y, z;
   double norm, norm_sq;
-  surface *surf = panel->surf;
+  const Surface *surf = panel->surf;
   int ref_inside = surf->ref_inside, flip_normal;
-  double *ref = surf->ref, *normal, angle, norm_n;
+  const Vector3d &ref = surf->ref;
+  double *normal, angle, norm_n;
   char *surf_name = surf->name;
 
   if(surf->type != DIELEC && surf->type != BOTH) return(FALSE);

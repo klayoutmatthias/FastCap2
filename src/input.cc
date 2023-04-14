@@ -79,13 +79,13 @@
         be renamed; this is helpful when idenifying conductors to omit
         from capacitance calculations using the -k option
 */
-void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
+void read_list_file(ssystem *sys, Surface **surf_list, const char *list_file)
 {
   int linecnt = 0, end_of_chain = TRUE, ref_pnt_is_inside = FALSE;
   FILE *fp;
   char tline[BUFSIZ], file_name[BUFSIZ], plus[BUFSIZ], group_name[BUFSIZ];
   double outer_perm = 1.0, inner_perm = 1.0, tx = 0.0, ty = 0.0, tz = 0.0, rx = 0.0, ry = 0.0, rz = 0.0;
-  surface *cur_surf = 0;
+  Surface *cur_surf = 0;
 
   /* find the end of the current surface list */
   if(*surf_list != NULL) {
@@ -119,11 +119,11 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
-        *surf_list = sys->heap.alloc<surface>(1, AMSC);
+        *surf_list = sys->heap.create<Surface>(AMSC);
         cur_surf = *surf_list;
       }
       else {
-        cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
+        cur_surf->next = sys->heap.create<Surface>(AMSC);
         cur_surf->next->prev = cur_surf;
         cur_surf = cur_surf->next;
       }
@@ -170,11 +170,11 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
-        *surf_list = sys->heap.alloc<surface>(1, AMSC);
+        *surf_list = sys->heap.create<Surface>(AMSC);
         cur_surf = *surf_list;
       }
       else {
-        cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
+        cur_surf->next = sys->heap.create<Surface>(AMSC);
         cur_surf->next->prev = cur_surf;
         cur_surf = cur_surf->next;
       }
@@ -220,11 +220,11 @@ void read_list_file(ssystem *sys, surface **surf_list, const char *list_file)
 
       /* allocate and load surface struct */
       if(*surf_list == NULL) {
-        *surf_list = sys->heap.alloc<surface>(1, AMSC);
+        *surf_list = sys->heap.create<Surface>(AMSC);
         cur_surf = *surf_list;
       }
       else {
-        cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
+        cur_surf->next = sys->heap.create<Surface>(AMSC);
         cur_surf->next->prev = cur_surf;
         cur_surf = cur_surf->next;
       }
@@ -480,7 +480,7 @@ static charge *read_panels(ssystem *sys)
 {
   int patran_file, num_panels, stdin_read, num_dummies, num_quads, num_tris;
   charge *panel_list = 0, *cur_panel = 0, *c_panel;
-  surface *cur_surf;
+  Surface *cur_surf;
   FILE *fp;
   char surf_name[BUFSIZ];
   int patran_file_read = FALSE;
@@ -523,11 +523,11 @@ static charge *read_panels(ssystem *sys)
 
       if (header[0] == '0') {
         patran_file = FALSE;
-        panels_read = quickif(sys, fp, header, cur_surf->type, cur_surf->trans, surf_name, &title);
+        panels_read = quickif(sys, fp, header, cur_surf->type, cur_surf->rot, cur_surf->trans, surf_name, &title);
       } else {
 #if !defined(BUILD_FASTCAP2_PYMOD)
         patran_file = TRUE;
-        panels_read = patfront(sys, fp, header, cur_surf->type, cur_surf->trans, surf_name, &title);
+        panels_read = patfront(sys, fp, header, cur_surf->type, cur_surf->rot, cur_surf->trans, surf_name, &title);
 #else
         //  The patran reader is not reentrant, so we do not allow this one
         //  in the context of the Python module
@@ -564,7 +564,7 @@ static charge *read_panels(ssystem *sys)
         title = sys->heap.strdup(cur_surf->surf_data->title);
       }
 
-      panels_read = quickif2charges(sys, cur_surf->surf_data->quads, cur_surf->surf_data->tris, cur_surf->trans, cond_num);
+      panels_read = quickif2charges(sys, cur_surf->surf_data->quads, cur_surf->surf_data->tris, cur_surf->rot, cur_surf->trans, cond_num);
 
     }
 
@@ -863,16 +863,16 @@ static void parse_command_line(ssystem *sys, const char **input_file, const char
 /*
   surface information input routine - panels are read by read_panels()
 */
-static surface *read_all_surfaces(ssystem *sys, const char *input_file, const char *surf_list_file, int read_from_stdin, std::string &infiles)
+static Surface *read_all_surfaces(ssystem *sys, const char *input_file, const char *surf_list_file, int read_from_stdin, std::string &infiles)
 {
   char group_name[BUFSIZ];
-  surface *surf_list = NULL, *cur_surf = 0;
+  Surface *surf_list = NULL, *cur_surf = 0;
 
   /* get the surfaces from stdin, the list file or the file on cmd line */
   /* the `- ' option always forces the first cond surf read from stdin */
   /* can also read from stdin if there's no list file and no cmd line file */
   if(read_from_stdin || (input_file == NULL && surf_list_file == NULL)) {
-    surf_list = sys->heap.alloc<surface>(1, AMSC);
+    surf_list = sys->heap.create<Surface>(AMSC);
     surf_list->type = CONDTR;   /* only conductors can come in stdin */
     surf_list->name = sys->heap.strdup("stdin");
     //  surf_list->outer_perm = sys->perm_factor;  //  TODO: shouldn't that be 1 because the perm_factor is added later?
@@ -891,11 +891,11 @@ static surface *read_all_surfaces(ssystem *sys, const char *input_file, const ch
   /* set up to read from command line file, if necessary */
   if(input_file != NULL) {
     if(surf_list == NULL) {
-      surf_list = sys->heap.alloc<surface>(1, AMSC);
+      surf_list = sys->heap.create<Surface>(AMSC);
       cur_surf = surf_list;
     }
     else {
-      cur_surf->next = sys->heap.alloc<surface>(1, AMSC);
+      cur_surf->next = sys->heap.create<Surface>(AMSC);
       cur_surf = cur_surf->next;
     }
     cur_surf->type = CONDTR;
@@ -954,7 +954,7 @@ void populate_from_command_line(ssystem *sys)
 */
 void dumpSurfDat(ssystem *sys)
 {
-  surface *cur_surf;
+  Surface *cur_surf;
 
   sys->msg("  Input surfaces:\n");
   for(cur_surf = sys->surf_list; cur_surf != NULL; cur_surf = cur_surf->next) {

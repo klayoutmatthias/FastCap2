@@ -112,7 +112,7 @@ static int alias_match_name(Name *cur_name, char *name)
   N <cond name string> <Rename string>
   * <Comment string>
 */
-charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, double *trans, const char *name_suffix, char **title)
+charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, const Matrix3d &rot, const Vector3d &trans, const char *name_suffix, char **title)
 /* char *name_suffix: suffix for all cond names read */
 {
   quadl *fstquad = 0, *curquad = 0;
@@ -235,10 +235,10 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, doubl
     }
   }
 
-  return quickif2charges(sys, fstquad, fsttri, trans, -1);
+  return quickif2charges(sys, fstquad, fsttri, rot, trans, -1);
 }
 
-charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, double *trans, int cond_num)
+charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, const Matrix3d &rot, const Vector3d &trans, int cond_num)
 {
   quadl *curquad = 0;
   tri *curtri = 0;
@@ -306,8 +306,9 @@ charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, double *trans
   /* transform the corners */
   for (nq = chglst; nq; nq = nq->next) {
     for (int c = 0; c < nq->shape; ++c) {
+      Vector3d new_coord = rot * Vector3d(nq->corner[c]) + trans;
       for (int i = 0; i < 3; ++i) {
-        (nq->corner[c])[i] += trans[i];
+        (nq->corner[c])[i] = new_coord[i];
       }
     }
   }

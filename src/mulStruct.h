@@ -3,6 +3,8 @@
 #define mulStruct_H
 
 #include "heap.h"
+#include "vector.h"
+#include "matrix.h"
 
 #include <cstdio>
 #include <set>
@@ -30,10 +32,12 @@ struct ITER {
   ITER *next;
 };
 
-struct surface {                /* a surface file and its permittivities */
+struct Surface {                /* a surface file and its permittivities */
+  Surface();
   int type;                     /* CONDTR, DIELEC or BOTH */
-  double trans[3];              /* translation vector applied to surface */
-  double ref[3];                /* reference point for normal alignment */
+  Vector3d trans;               /* translation vector applied to surface */
+  Matrix3d rot;                 /* Rotation/scale/flip matrix */
+  Vector3d ref;                 /* reference point for normal alignment */
   int ref_inside;               /* TRUE=>ref point inside (on - side of) surf*/
   int end_of_chain;             /* TRUE=>end o/surf chain all w/same cond#'s */
   char *title;                  /* title inside surface file */
@@ -47,8 +51,8 @@ struct surface {                /* a surface file and its permittivities */
   struct charge *panels;        /* linked list of panels on this surface */
   int num_panels;               /* number of panels (incl dummies) this surf */
   int num_dummies;              /* number of dummy panels on this surf */
-  struct surface *next;         /* linked list pointers */
-  struct surface *prev;
+  struct Surface *next;         /* linked list pointers */
+  struct Surface *prev;
 };
 
 struct charge {                 /* point charge */
@@ -68,7 +72,7 @@ struct charge {                 /* point charge */
   int order;                    /* Multipole order. */
   /* things needed to do electric field evaluation by divided difference */
   int dummy;                    /* TRUE => dummy panel for elec field eval */
-  struct surface *surf;         /* surface that contains this panel */
+  struct Surface *surf;         /* surface that contains this panel */
   struct charge *pos_dummy;     /* eval pnt w/pos displacement from x,y,z */
   struct charge *neg_dummy;     /* eval pnt w/neg displacement from x,y,z */
 };
@@ -295,7 +299,7 @@ struct ssystem
   char *ps_file_base;           //  pointer to base name for .ps files
   double ***axes;               //  for PS plot
   char *title;                  //  project title
-  surface *surf_list;           //  the list of surface descriptors
+  Surface *surf_list;           //  the list of surface descriptors
   int group_cnt;                //  next GROUPx number for automatic group numbering
 
   //  problem description

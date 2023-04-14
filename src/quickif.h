@@ -4,6 +4,9 @@
 
 #include <cstdio>
 
+#include "vector.h"
+#include "matrix.h"
+
 struct ssystem;
 struct Name;
 struct charge;
@@ -56,7 +59,7 @@ private:
   SurfaceData &operator=(const SurfaceData &);
 };
 
-charge *quickif(ssystem *sys, FILE *fp, const char *line, int surf_type, double *trans, const char *name_suffix, char **title);
-charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, double *trans, int cond_num);
+charge *quickif(ssystem *sys, FILE *fp, const char *line, int surf_type, const Matrix3d &rot, const Vector3d &trans, const char *name_suffix, char **title);
+charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, const Matrix3d &rot, const Vector3d &trans, int cond_num);
 
 #endif

@@ -7,10 +7,10 @@
 #include "heap.h"
 #include "quickif.h"
 
-struct Surface
+struct PySurface
   : SurfaceData
 {
-  Surface();
+  PySurface();
 
   void add_quad(int cond_num,
                 double x1, double y1, double z1,
@@ -29,13 +29,13 @@ struct Surface
   Heap heap;
 
 private:
-  Surface(const Surface &);
-  Surface &operator=(const Surface &);
+  PySurface(const PySurface &);
+  PySurface &operator=(const PySurface &);
 };
 
-struct SurfaceObject {
+struct PySurfaceObject {
   PyObject_HEAD
-  Surface surface;
+  PySurface surface;
 };
 
 #endif

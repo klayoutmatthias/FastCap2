@@ -16,7 +16,7 @@ void compute_electric_fields(ssystem *sys, charge *chglist)
 {
   charge *cp, *dummy;
   double flux_density, *panel_voltages, *panel_charges;
-  surface *surf;
+  Surface *surf;
 
   /* for each dielectric panel, do two divided differences to get the */
   /*    gradient of the potential in the normal and anti-normal directions */

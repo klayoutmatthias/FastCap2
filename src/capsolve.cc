@@ -31,7 +31,7 @@ int capsolve(double ***capmat, ssystem *sys, charge *chglist, int size, int real
   charge *nq;
   double *q, *p, *r, *ap;
   double **bp = 0, **bap = 0;
-  surface *surf;
+  Surface *surf;
 
   /* Allocate space for the capacitance matrix. */
   *capmat = sys->heap.mat(sys->num_cond+1, sys->num_cond+1);

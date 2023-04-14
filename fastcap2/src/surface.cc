@@ -6,16 +6,16 @@
 
 // --------------------------------------------------------------------------
 
-Surface::Surface()
+PySurface::PySurface()
   : SurfaceData(), heap()
 {
 }
 
-void Surface::add_quad(int cond_num,
-                       double x1, double y1, double z1,
-                       double x2, double y2, double z2,
-                       double x3, double y3, double z3,
-                       double x4, double y4, double z4)
+void PySurface::add_quad(int cond_num,
+                         double x1, double y1, double z1,
+                         double x2, double y2, double z2,
+                         double x3, double y3, double z3,
+                         double x4, double y4, double z4)
 {
   quadl *new_quad = heap.alloc<quadl>(1);
   new_quad->cond = cond_num;
@@ -35,10 +35,10 @@ void Surface::add_quad(int cond_num,
   quads = new_quad;
 }
 
-void Surface::add_tri(int cond_num,
-                      double x1, double y1, double z1,
-                      double x2, double y2, double z2,
-                      double x3, double y3, double z3)
+void PySurface::add_tri(int cond_num,
+                        double x1, double y1, double z1,
+                        double x2, double y2, double z2,
+                        double x3, double y3, double z3)
 {
   tri *new_tri = heap.alloc<tri>(1);
   new_tri->cond = cond_num;
@@ -55,7 +55,7 @@ void Surface::add_tri(int cond_num,
   tris = new_tri;
 }
 
-void Surface::set_name(const char *n)
+void PySurface::set_name(const char *n)
 {
   if (!n) {
     name = 0;
@@ -64,7 +64,7 @@ void Surface::set_name(const char *n)
   }
 }
 
-void Surface::set_title(const char *n)
+void PySurface::set_title(const char *n)
 {
   if (!n) {
     title = 0;
@@ -76,25 +76,25 @@ void Surface::set_title(const char *n)
 // --------------------------------------------------------------------------
 
 static void
-surface_dealloc(SurfaceObject *self)
+surface_dealloc(PySurfaceObject *self)
 {
-  self->surface.~Surface();
+  self->surface.~PySurface();
 }
 
 static PyObject *
 surface_new(PyTypeObject *type, PyObject * /*args*/, PyObject * /*kwds*/)
 {
-  SurfaceObject *self;
-  self = (SurfaceObject *) type->tp_alloc(type, 0);
+  PySurfaceObject *self;
+  self = (PySurfaceObject *) type->tp_alloc(type, 0);
   if (self != NULL) {
-    new (&self->surface) Surface;
+    new (&self->surface) PySurface;
   }
 
   return (PyObject *) self;
 }
 
 static int
-surface_init(SurfaceObject *self, PyObject *args, PyObject *kwds)
+surface_init(PySurfaceObject *self, PyObject *args, PyObject *kwds)
 {
   static char *kwlist[] = {(char *)"name", (char *)"title", NULL};
   const char *name = 0;
@@ -116,7 +116,7 @@ surface_init(SurfaceObject *self, PyObject *args, PyObject *kwds)
 }
 
 static PyObject *
-surface_add_quad(SurfaceObject *self, PyObject *args)
+surface_add_quad(PySurfaceObject *self, PyObject *args)
 {
   PyObject *p1, *p2, *p3, *p4;
   if (!PyArg_ParseTuple(args, "OOOO", &p1, &p2, &p3, &p4)) {
@@ -139,7 +139,7 @@ surface_add_quad(SurfaceObject *self, PyObject *args)
 }
 
 static PyObject *
-surface_add_tri(SurfaceObject *self, PyObject *args)
+surface_add_tri(PySurfaceObject *self, PyObject *args)
 {
   PyObject *p1, *p2, *p3;
   if (!PyArg_ParseTuple(args, "OOO", &p1, &p2, &p3)) {
@@ -161,7 +161,7 @@ surface_add_tri(SurfaceObject *self, PyObject *args)
 }
 
 static PyObject *
-surface_get_name(SurfaceObject *self)
+surface_get_name(PySurfaceObject *self)
 {
   if (self->surface.name) {
     return PyUnicode_FromString(self->surface.name);
@@ -171,7 +171,7 @@ surface_get_name(SurfaceObject *self)
 }
 
 static PyObject *
-surface_set_name(SurfaceObject *self, PyObject *value)
+surface_set_name(PySurfaceObject *self, PyObject *value)
 {
   if (Py_IsNone(value)) {
     self->surface.set_name(0);
@@ -190,7 +190,7 @@ surface_set_name(SurfaceObject *self, PyObject *value)
 }
 
 static PyObject *
-surface_get_title(SurfaceObject *self)
+surface_get_title(PySurfaceObject *self)
 {
   if (self->surface.title) {
     return PyUnicode_FromString(self->surface.title);
@@ -200,7 +200,7 @@ surface_get_title(SurfaceObject *self)
 }
 
 static PyObject *
-surface_set_title(SurfaceObject *self, PyObject *value)
+surface_set_title(PySurfaceObject *self, PyObject *value)
 {
   if (Py_IsNone(value)) {
     self->surface.set_title(0);
@@ -230,7 +230,7 @@ static double vprod(double x1, double y1, double z1, double x2, double y2, doubl
 }
 
 static PyObject *
-surface_quad_count(SurfaceObject *self)
+surface_quad_count(PySurfaceObject *self)
 {
   size_t n = 0;
   for (quadl *q = self->surface.quads; q; q = q->next) {
@@ -240,7 +240,7 @@ surface_quad_count(SurfaceObject *self)
 }
 
 static PyObject *
-surface_quad_area(SurfaceObject *self)
+surface_quad_area(PySurfaceObject *self)
 {
   double area = 0;
   for (quadl *q = self->surface.quads; q; q = q->next) {
@@ -251,7 +251,7 @@ surface_quad_area(SurfaceObject *self)
 }
 
 static PyObject *
-surface_tri_count(SurfaceObject *self)
+surface_tri_count(PySurfaceObject *self)
 {
   size_t n = 0;
   for (tri *t = self->surface.tris; t; t = t->next) {
@@ -261,7 +261,7 @@ surface_tri_count(SurfaceObject *self)
 }
 
 static PyObject *
-surface_tri_area(SurfaceObject *self)
+surface_tri_area(PySurfaceObject *self)
 {
   double area = 0;
   for (tri *t = self->surface.tris; t; t = t->next) {
@@ -271,7 +271,7 @@ surface_tri_area(SurfaceObject *self)
 }
 
 static PyObject *
-surface_to_string(SurfaceObject *self)
+surface_to_string(PySurfaceObject *self)
 {
   std::ostringstream os;
   for (quadl *q = self->surface.quads; q; q = q->next) {
@@ -309,7 +309,7 @@ static PyMethodDef surface_methods[] = {
 PyTypeObject surface_type = {
   PyVarObject_HEAD_INIT(NULL, 0)
   .tp_name = "fastcap2_core.Surface",
-  .tp_basicsize = sizeof(SurfaceObject),
+  .tp_basicsize = sizeof(PySurfaceObject),
   .tp_itemsize = 0,
   .tp_dealloc = (destructor) surface_dealloc,
   .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,

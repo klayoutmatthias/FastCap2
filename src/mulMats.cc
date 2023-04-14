@@ -451,7 +451,7 @@ void find_flux_density_row(ssystem *sys, double **to_mat, double **from_mat, int
   int dindex, j;
   double factor;
   charge *dp;
-  surface *surf = eval_panels[eval_row]->surf;
+  Surface *surf = eval_panels[eval_row]->surf;
 
   /* do divided difference w/ three rows to get dielectric row */
   if (NUMDPT == 3) {

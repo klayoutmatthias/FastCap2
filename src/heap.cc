@@ -9,12 +9,19 @@ struct HeapPrivate
   HeapPrivate () { }
   ~HeapPrivate ()
   {
+    for (auto d = destructors.begin(); d != destructors.end(); ++d) {
+      (*d)->destroy();
+      delete *d;
+    }
+    destructors.clear();
     for (auto p = ptrs.begin(); p != ptrs.end(); ++p) {
       ::free(*p);
     }
+    ptrs.clear();
   }
 
   std::vector<char *> ptrs;
+  std::vector<Heap::DestructorBase *> destructors;
 };
 
 Heap::Heap()
@@ -35,7 +42,7 @@ void *
 Heap::malloc(size_t n, MemoryType type)
 {
   if (! mp_data) {
-    mp_data = new HeapPrivate ();
+    mp_data = new HeapPrivate();
   }
   char *d = (char *)::malloc(n);
   mp_data->ptrs.push_back (d);
@@ -46,6 +53,14 @@ Heap::malloc(size_t n, MemoryType type)
   bzero(d, n);
 
   return d;
+}
+
+void Heap::register_destructor(DestructorBase *destructor)
+{
+  if (! mp_data) {
+    mp_data = new HeapPrivate();
+  }
+  mp_data->destructors.push_back(destructor);
 }
 
 char *Heap::strdup(const char *str, MemoryType type)

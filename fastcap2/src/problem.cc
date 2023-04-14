@@ -10,21 +10,23 @@
 #include "fastcap_solve.h"
 #include "zbuf2fastcap.h"
 #include "quickif.h"
+#include "matrix.h"
 
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <cstring>
 
+
 extern PyTypeObject surface_type;
 
-struct ProblemObject {
+struct PyProblemObject {
   PyObject_HEAD
   ssystem sys;
 };
 
 static void
-problem_dealloc(ProblemObject *self)
+problem_dealloc(PyProblemObject *self)
 {
   self->sys.~ssystem();
 }
@@ -32,8 +34,8 @@ problem_dealloc(ProblemObject *self)
 static PyObject *
 problem_new(PyTypeObject *type, PyObject * /*args*/, PyObject * /*kwds*/)
 {
-  ProblemObject *self;
-  self = (ProblemObject *) type->tp_alloc(type, 0);
+  PyProblemObject *self;
+  self = (PyProblemObject *) type->tp_alloc(type, 0);
   if (self != NULL) {
     new (&self->sys) ssystem;
   }
@@ -48,7 +50,7 @@ problem_new(PyTypeObject *type, PyObject * /*args*/, PyObject * /*kwds*/)
 }
 
 static int
-problem_init(ProblemObject *self, PyObject *args, PyObject *kwds)
+problem_init(PyProblemObject *self, PyObject *args, PyObject *kwds)
 {
   static char *kwlist[] = {(char *)"title", NULL};
   const char *title = 0;
@@ -147,13 +149,13 @@ static PyObject *parse_conductor_list(const char *l)
 }
 
 static PyObject *
-problem_get_title(ProblemObject *self)
+problem_get_title(PyProblemObject *self)
 {
   return PyUnicode_FromString(self->sys.title ? self->sys.title : "(null)");
 }
 
 static PyObject *
-problem_set_title(ProblemObject *self, PyObject *value)
+problem_set_title(PyProblemObject *self, PyObject *value)
 {
   self->sys.reset_read();
 
@@ -170,13 +172,13 @@ problem_set_title(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_perm_factor(ProblemObject *self)
+problem_get_perm_factor(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.perm_factor);
 }
 
 static PyObject *
-problem_set_perm_factor(ProblemObject *self, PyObject *args)
+problem_set_perm_factor(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -188,13 +190,13 @@ problem_set_perm_factor(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_expansion_order(ProblemObject *self)
+problem_get_expansion_order(PyProblemObject *self)
 {
   return PyLong_FromLong ((long) self->sys.order);
 }
 
 static PyObject *
-problem_set_expansion_order(ProblemObject *self, PyObject *args)
+problem_set_expansion_order(PyProblemObject *self, PyObject *args)
 {
   int i = 0;
   if (!PyArg_ParseTuple(args, "i", &i)) {
@@ -206,13 +208,13 @@ problem_set_expansion_order(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_partitioning_depth(ProblemObject *self)
+problem_get_partitioning_depth(PyProblemObject *self)
 {
   return PyLong_FromLong ((long) self->sys.depth);
 }
 
 static PyObject *
-problem_set_partitioning_depth(ProblemObject *self, PyObject *args)
+problem_set_partitioning_depth(PyProblemObject *self, PyObject *args)
 {
   int i = 0;
   if (!PyArg_ParseTuple(args, "i", &i)) {
@@ -224,13 +226,13 @@ problem_set_partitioning_depth(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_iter_tol(ProblemObject *self)
+problem_get_iter_tol(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.iter_tol);
 }
 
 static PyObject *
-problem_set_iter_tol(ProblemObject *self, PyObject *args)
+problem_set_iter_tol(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -242,13 +244,13 @@ problem_set_iter_tol(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_skip_conductors(ProblemObject *self)
+problem_get_skip_conductors(PyProblemObject *self)
 {
   return parse_conductor_list(self->sys.kill_name_list);
 }
 
 static PyObject *
-problem_set_skip_conductors(ProblemObject *self, PyObject *value)
+problem_set_skip_conductors(PyProblemObject *self, PyObject *value)
 {
   self->sys.reset_read();
 
@@ -266,13 +268,13 @@ problem_set_skip_conductors(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_remove_conductors(ProblemObject *self)
+problem_get_remove_conductors(PyProblemObject *self)
 {
   return parse_conductor_list(self->sys.kinp_name_list);
 }
 
 static PyObject *
-problem_set_remove_conductors(ProblemObject *self, PyObject *value)
+problem_set_remove_conductors(PyProblemObject *self, PyObject *value)
 {
   self->sys.reset_read();
 
@@ -290,7 +292,7 @@ problem_set_remove_conductors(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_qps_file_base(ProblemObject *self)
+problem_get_qps_file_base(PyProblemObject *self)
 {
   if (!self->sys.ps_file_base || !self->sys.q_) {
     Py_RETURN_NONE;
@@ -300,7 +302,7 @@ problem_get_qps_file_base(ProblemObject *self)
 }
 
 static PyObject *
-problem_set_qps_file_base(ProblemObject *self, PyObject *value)
+problem_set_qps_file_base(PyProblemObject *self, PyObject *value)
 {
   if (Py_IsNone(value)) {
     self->sys.ps_file_base = 0;
@@ -321,13 +323,13 @@ problem_set_qps_file_base(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_qps_select_q(ProblemObject *self)
+problem_get_qps_select_q(PyProblemObject *self)
 {
   return parse_conductor_list(self->sys.qpic_name_list);
 }
 
 static PyObject *
-problem_set_qps_select_q(ProblemObject *self, PyObject *value)
+problem_set_qps_select_q(PyProblemObject *self, PyObject *value)
 {
   self->sys.reset_read();
 
@@ -345,13 +347,13 @@ problem_set_qps_select_q(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_qps_remove_q(ProblemObject *self)
+problem_get_qps_remove_q(PyProblemObject *self)
 {
   return parse_conductor_list(self->sys.kq_name_list);
 }
 
 static PyObject *
-problem_set_qps_remove_q(ProblemObject *self, PyObject *value)
+problem_set_qps_remove_q(PyProblemObject *self, PyObject *value)
 {
   self->sys.reset_read();
 
@@ -369,13 +371,13 @@ problem_set_qps_remove_q(ProblemObject *self, PyObject *value)
 }
 
 static PyObject *
-problem_get_qps_no_key(ProblemObject *self)
+problem_get_qps_no_key(PyProblemObject *self)
 {
   return PyBool_FromLong (self->sys.rk_);
 }
 
 static PyObject *
-problem_set_qps_no_key(ProblemObject *self, PyObject *args)
+problem_set_qps_no_key(PyProblemObject *self, PyObject *args)
 {
   int b = 0;
   if (!PyArg_ParseTuple(args, "p", &b)) {
@@ -387,13 +389,13 @@ problem_set_qps_no_key(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_qps_total_charges(ProblemObject *self)
+problem_get_qps_total_charges(PyProblemObject *self)
 {
   return PyBool_FromLong (self->sys.dd_);
 }
 
 static PyObject *
-problem_set_qps_total_charges(ProblemObject *self, PyObject *args)
+problem_set_qps_total_charges(PyProblemObject *self, PyObject *args)
 {
   int b = 0;
   if (!PyArg_ParseTuple(args, "p", &b)) {
@@ -405,13 +407,13 @@ problem_set_qps_total_charges(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_no_dielectric(ProblemObject *self)
+problem_get_ps_no_dielectric(PyProblemObject *self)
 {
   return PyBool_FromLong (self->sys.rd_);
 }
 
 static PyObject *
-problem_set_ps_no_dielectric(ProblemObject *self, PyObject *args)
+problem_set_ps_no_dielectric(PyProblemObject *self, PyObject *args)
 {
   int b = 0;
   if (!PyArg_ParseTuple(args, "p", &b)) {
@@ -423,13 +425,13 @@ problem_set_ps_no_dielectric(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_no_showpage(ProblemObject *self)
+problem_get_ps_no_showpage(PyProblemObject *self)
 {
   return PyBool_FromLong (self->sys.s_);
 }
 
 static PyObject *
-problem_set_ps_no_showpage(ProblemObject *self, PyObject *args)
+problem_set_ps_no_showpage(PyProblemObject *self, PyObject *args)
 {
   int b = 0;
   if (!PyArg_ParseTuple(args, "p", &b)) {
@@ -441,13 +443,13 @@ problem_set_ps_no_showpage(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_number_faces(ProblemObject *self)
+problem_get_ps_number_faces(PyProblemObject *self)
 {
   return PyBool_FromLong (self->sys.n_);
 }
 
 static PyObject *
-problem_set_ps_number_faces(ProblemObject *self, PyObject *args)
+problem_set_ps_number_faces(PyProblemObject *self, PyObject *args)
 {
   int b = 0;
   if (!PyArg_ParseTuple(args, "p", &b)) {
@@ -459,13 +461,13 @@ problem_set_ps_number_faces(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_show_hidden(ProblemObject *self)
+problem_get_ps_show_hidden(PyProblemObject *self)
 {
   return PyBool_FromLong (self->sys.f_);
 }
 
 static PyObject *
-problem_set_ps_show_hidden(ProblemObject *self, PyObject *args)
+problem_set_ps_show_hidden(PyProblemObject *self, PyObject *args)
 {
   int b = 0;
   if (!PyArg_ParseTuple(args, "p", &b)) {
@@ -477,13 +479,13 @@ problem_set_ps_show_hidden(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_azimuth(ProblemObject *self)
+problem_get_ps_azimuth(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.azimuth);
 }
 
 static PyObject *
-problem_set_ps_azimuth(ProblemObject *self, PyObject *args)
+problem_set_ps_azimuth(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -495,13 +497,13 @@ problem_set_ps_azimuth(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_elevation(ProblemObject *self)
+problem_get_ps_elevation(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.elevation);
 }
 
 static PyObject *
-problem_set_ps_elevation(ProblemObject *self, PyObject *args)
+problem_set_ps_elevation(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -513,13 +515,13 @@ problem_set_ps_elevation(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_rotation(ProblemObject *self)
+problem_get_ps_rotation(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.rotation);
 }
 
 static PyObject *
-problem_set_ps_rotation(ProblemObject *self, PyObject *args)
+problem_set_ps_rotation(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -531,13 +533,13 @@ problem_set_ps_rotation(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_upaxis(ProblemObject *self)
+problem_get_ps_upaxis(PyProblemObject *self)
 {
   return PyLong_FromLong ((long) self->sys.up_axis);
 }
 
 static PyObject *
-problem_set_ps_upaxis(ProblemObject *self, PyObject *args)
+problem_set_ps_upaxis(PyProblemObject *self, PyObject *args)
 {
   int i = 0;
   if (!PyArg_ParseTuple(args, "i", &i)) {
@@ -554,13 +556,13 @@ problem_set_ps_upaxis(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_distance(ProblemObject *self)
+problem_get_ps_distance(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.distance);
 }
 
 static PyObject *
-problem_set_ps_distance(ProblemObject *self, PyObject *args)
+problem_set_ps_distance(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -572,13 +574,13 @@ problem_set_ps_distance(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_scale(ProblemObject *self)
+problem_get_ps_scale(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.scale);
 }
 
 static PyObject *
-problem_set_ps_scale(ProblemObject *self, PyObject *args)
+problem_set_ps_scale(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -590,13 +592,13 @@ problem_set_ps_scale(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_linewidth(ProblemObject *self)
+problem_get_ps_linewidth(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.linewd);
 }
 
 static PyObject *
-problem_set_ps_linewidth(ProblemObject *self, PyObject *args)
+problem_set_ps_linewidth(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -608,13 +610,13 @@ problem_set_ps_linewidth(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_ps_axislength(ProblemObject *self)
+problem_get_ps_axislength(PyProblemObject *self)
 {
   return PyFloat_FromDouble (self->sys.axeslen);
 }
 
 static PyObject *
-problem_set_ps_axislength(ProblemObject *self, PyObject *args)
+problem_set_ps_axislength(PyProblemObject *self, PyObject *args)
 {
   double d = 1.0;
   if (!PyArg_ParseTuple(args, "d", &d)) {
@@ -626,13 +628,13 @@ problem_set_ps_axislength(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_get_verbose(ProblemObject *self)
+problem_get_verbose(PyProblemObject *self)
 {
   return PyBool_FromLong (self->sys.log != NULL);
 }
 
 static PyObject *
-problem_set_verbose(ProblemObject *self, PyObject *args)
+problem_set_verbose(PyProblemObject *self, PyObject *args)
 {
   int b = 0;
   if (!PyArg_ParseTuple(args, "p", &b)) {
@@ -643,8 +645,41 @@ problem_set_verbose(ProblemObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+static Matrix3d
+build_transformation(int flipx, int flipy, int flipz,
+                     double rotx, double roty, double rotz,
+                     double scalex, double scaley, double scalez)
+{
+  Matrix3d res = unity<3>();
+  res.set(0, 0, scalex * (flipx ? -1.0 : 1.0));
+  res.set(1, 1, scaley * (flipy ? -1.0 : 1.0));
+  res.set(2, 2, scalez * (flipz ? -1.0 : 1.0));
+
+  double rotn[3] = { rotx, roty, rotz };
+
+  for (unsigned int n = 0; n < 3; ++n) {
+
+    unsigned int n1 = (n + 1) % 3;
+    unsigned int n2 = (n + 2) % 3;
+
+    double a = rotn[n] / 180.0 * M_PI;
+
+    Matrix3d rot;
+    rot.set(n, n, 1.0);
+    rot.set(n1, n1, cos(a));
+    rot.set(n1, n2, sin(a));
+    rot.set(n2, n1, -sin(a));
+    rot.set(n2, n2, cos(a));
+
+    res = res * rot;
+
+  }
+
+  return res;
+}
+
 static PyObject *
-problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
+problem_load_or_add(PyProblemObject *self, PyObject *args, bool load)
 {
   const char *filename = 0;
   SurfaceData *surf_data = 0;
@@ -685,7 +720,7 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
       return NULL;
     }
 
-    surf_data = ((SurfaceObject *)py_surf)->surface.clone(self->sys.heap);
+    surf_data = ((PySurfaceObject *)py_surf)->surface.clone(self->sys.heap);
 
     if (!surf_data->name && (kind == CONDTR || kind == BOTH)) {
       PyErr_SetString(PyExc_RuntimeError, "Surface needs to have name for conductor type");
@@ -705,7 +740,7 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
   }
 
   //  find end of list
-  surface *eol = self->sys.surf_list;
+  Surface *eol = self->sys.surf_list;
   if (eol) {
     for ( ; eol->next; eol = eol->next)
       ;
@@ -719,12 +754,14 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
   }
 
   //  append new surface element
-  surface *new_surf = self->sys.heap.alloc<surface>(1);
+  Surface *new_surf = self->sys.heap.create<Surface>(AMSC);
   if (eol) {
     eol->next = new_surf;
   } else {
     self->sys.surf_list = new_surf;
   }
+
+  Matrix3d m = build_transformation(flipx, flipy, flipz, rotx, roty, rotz, scalex, scaley, scalez);
 
   new_surf->type = CONDTR;
   new_surf->name = self->sys.heap.strdup(filename);
@@ -757,19 +794,19 @@ problem_load_or_add(ProblemObject *self, PyObject *args, bool load)
 }
 
 static PyObject *
-problem_load(ProblemObject *self, PyObject *args)
+problem_load(PyProblemObject *self, PyObject *args)
 {
   return problem_load_or_add(self, args, true /*load*/);
 }
 
 static PyObject *
-problem_add(ProblemObject *self, PyObject *args)
+problem_add(PyProblemObject *self, PyObject *args)
 {
   return problem_load_or_add(self, args, false /*add*/);
 }
 
 static PyObject *
-problem_load_list(ProblemObject *self, PyObject *args)
+problem_load_list(PyProblemObject *self, PyObject *args)
 {
   const char *filename = 0;
   if (!PyArg_ParseTuple(args, "s", &filename)) {
@@ -788,7 +825,7 @@ problem_load_list(ProblemObject *self, PyObject *args)
 }
 
 static PyObject *
-problem_solve(ProblemObject *self)
+problem_solve(PyProblemObject *self)
 {
   double **capmat = 0;
 
@@ -830,7 +867,7 @@ problem_solve(ProblemObject *self)
 }
 
 static PyObject *
-problem_conductors(ProblemObject *self)
+problem_conductors(PyProblemObject *self)
 {
   PyObject *res = PyList_New(0);
   if (!res) {
@@ -861,7 +898,7 @@ problem_conductors(ProblemObject *self)
 }
 
 static PyObject *
-problem_dump_ps(ProblemObject *self, PyObject *args)
+problem_dump_ps(PyProblemObject *self, PyObject *args)
 {
   const char *filename = 0;
   if (!PyArg_ParseTuple(args, "s", &filename)) {
@@ -948,7 +985,7 @@ static PyMethodDef problem_methods[] = {
 PyTypeObject problem_type = {
   PyVarObject_HEAD_INIT(NULL, 0)
   .tp_name = "fastcap2_core.Problem",
-  .tp_basicsize = sizeof(ProblemObject),
+  .tp_basicsize = sizeof(PyProblemObject),
   .tp_itemsize = 0,
   .tp_dealloc = (destructor) problem_dealloc,
   .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,

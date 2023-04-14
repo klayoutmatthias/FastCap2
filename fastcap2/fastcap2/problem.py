@@ -560,7 +560,7 @@ class Problem(_Problem):
 
     The order in which the transformations are applied is:
 
-    * Scaling by `scale`
+    * Scaling by `scale`, `scalex`, `scaley` and `scalez`
     * Flipping by `flipx`, `flipy` and `flipz`
     * Rotation by `rotx`
     * Rotation by `roty`

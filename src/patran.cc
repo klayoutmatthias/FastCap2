@@ -13,20 +13,22 @@
 #include "patran_f.h"
 #include "quickif.h"
 #include "patran.h"
+#include "vector.h"
+#include "matrix.h"
 
 #include <cstring>
 #include <cmath>
 
-static void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_vector, char **title);
+static void input(ssystem *sys, FILE *stream, char *line, int surf_type, const Matrix3d &rot, const Vector3d &trans, char **title);
 static void grid_equiv_check(ssystem *sys);
 static void fill_patch_patch_table(int *patch_patch_table);
 static void assign_conductor(int *patch_patch_table);
 static void assign_names(ssystem *sys);
 static void file_title(ssystem *sys, FILE *stream, char **title);
 static void summary_data(ssystem *sys, FILE *stream);
-static void node_data(FILE *stream, double *trans_vector);
+static void node_data(FILE *stream, const Matrix3d &rot, const Vector3d &trans);
 static void element_data(FILE *stream);
-static void grid_data(ssystem *sys, FILE *stream, double *trans_vector);
+static void grid_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &trans);
 static void patch_data(ssystem *sys, FILE *stream);
 static void CFEG_table(ssystem *sys, FILE *stream);
 static void waste_line(int num_line, FILE *stream);
@@ -58,7 +60,7 @@ int first_grid;                 /* note that current_name static is not */
 int first_patch;                /*   reset since the name list must */
 int first_cfeg;                 /*   be preserved as new files are read */
 
-charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, double *trans_vector,
+charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, const Matrix3d &rot, const Vector3d &trans,
                  const char *name_suffix, char **title)
 {
   int *patch_patch_table;
@@ -70,7 +72,7 @@ charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, 
   first_grid = first_patch = first_cfeg = TRUE;
   number_grids = number_patches = 0;
 
-  input(sys, stream, line, surf_type, trans_vector, title);
+  input(sys, stream, line, surf_type, rot, trans, title);
 
   grid_equiv_check(sys);
 
@@ -101,7 +103,7 @@ charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, 
 
 ****************************************************************************/
 
-void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_vector, char **title)
+void input(ssystem *sys, FILE *stream, char *line, int surf_type, const Matrix3d &rot, const Vector3d &trans, char **title)
 {
   int END=0;
 
@@ -126,13 +128,13 @@ void input(ssystem *sys, FILE *stream, char *line, int surf_type, double *trans_
       summary_data(sys, stream);
       break;
     case 1:
-      node_data(stream, trans_vector);
+      node_data(stream, rot, trans);
       break;
     case 2:
       element_data(stream);
       break;
     case 31:
-      grid_data(sys, stream, trans_vector);
+      grid_data(sys, stream, rot, trans);
       break;
     case 33:
       patch_data(sys, stream);
@@ -199,16 +201,17 @@ void summary_data(ssystem *sys, FILE *stream)
    node array, list_nodes, which is preallocated by summary_data function. 
    Node_search_table is sorted by node ID to make indexing of a node easier. */
 
-void node_data(FILE *stream, double *trans_vector)
+void node_data(FILE *stream, const Matrix3d &rot, const Vector3d &trans)
 {
   double tmp_coord[3];
   int i;
 
   fscanf(stream,"%lf %lf %lf",tmp_coord,tmp_coord+1,tmp_coord+2);  
   waste_line(1,stream);
-  
+
+  Vector3d new_coord = rot * Vector3d(tmp_coord) + trans;
   for (i=0; i<3; i++) 
-      current_node->coord[i] = tmp_coord[i] + trans_vector[i];
+      current_node->coord[i] = new_coord[i];
   node_search_table[ID] = current_node;
   current_node++;
 }
@@ -248,7 +251,7 @@ void element_data(FILE *stream)
    structure.  Start_grid is the global variable that points to the very 
    first GRID structure created.  */
 
-void grid_data(ssystem *sys, FILE *stream, double *trans_vector)
+void grid_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &trans)
 {
   static GRID *prev_grid=0;
   GRID *current_grid;
@@ -267,7 +270,10 @@ void grid_data(ssystem *sys, FILE *stream, double *trans_vector)
   if (prev_grid) prev_grid->next = current_grid;
 
   fscanf(stream, "%lf %lf %lf", coord, coord+1, coord+2);
-  for (i=0; i<3; i++) current_grid->coord[i] = coord[i] + trans_vector[i];
+  Vector3d new_coord = rot * Vector3d(coord) + trans;
+  for (i=0; i<3; i++) {
+    current_grid->coord[i] = new_coord[i];
+  }
   prev_grid = current_grid;    
   current_grid->next=0;
   number_grids++;

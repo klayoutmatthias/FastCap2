@@ -3,6 +3,7 @@
 #define heap_H
 
 #include <cstdlib>
+#include <memory>
 
 //  types of memory usage by multipole matrix type
 enum MemoryType
@@ -32,6 +33,31 @@ struct HeapPrivate;
  */
 class Heap
 {
+private:
+  class DestructorBase
+  {
+  public:
+    virtual void destroy() = 0;
+  };
+
+  template<class T>
+  class destructor_impl : public DestructorBase
+  {
+  public:
+    destructor_impl(T *t) : DestructorBase(), mp_t(t) { }
+
+    virtual void destroy()
+    {
+      if (mp_t) {
+        mp_t->~T();
+      }
+      mp_t = 0;
+    }
+
+  private:
+    T *mp_t;
+  };
+
 public:
   Heap();
   ~Heap();
@@ -40,6 +66,15 @@ public:
   T *alloc(size_t n, MemoryType type = AMSC)
   {
     return (T *)malloc(n * sizeof(T), type);
+  }
+
+  template <class T>
+  T *create(MemoryType type = AMSC)
+  {
+    void *t = malloc(sizeof(T), type);
+    new (t) T();
+    register_destructor(new destructor_impl<T>((T *)t));
+    return (T *)t;
   }
 
   void *malloc(size_t n, MemoryType type = AMSC);
@@ -51,8 +86,12 @@ public:
   size_t total_memory() const;
 
 private:
+  friend class HeapPrivate;
+
   HeapPrivate *mp_data;
   size_t m_memory [NumTypes];
+
+  void register_destructor(DestructorBase *);
 
   Heap(const Heap &);
   Heap &operator=(const Heap &);
