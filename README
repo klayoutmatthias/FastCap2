@@ -12,6 +12,12 @@ This project includes some major refactoring with following goals:
 * Remove global and static variables to enable concurrent execution
 * Programmatic geometry generation API
 
+
+New documentation:
+
+  docs/build/html/index.html
+
+
 Files and file structure:
 
   CMakeLists.txt  - CMake build script (command-line tools)
