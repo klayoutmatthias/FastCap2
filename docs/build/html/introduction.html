@@ -42,7 +42,11 @@ of the FastCap2 tool for integration into Python scripts.</p>
 FastCap2 documentation. The tool takes input files describing
 the geometry in two different formats. The most commonly and
 easiest to use format is the “generic file” format.</p>
-<p>TODO: more.</p>
+<p>It is also possible to generate geometry from Python
+by building surfaces from triangles and quads. These
+surfaces are then combined into a conductor/dielectrics geometry.
+With such a geometry, the Python module allows computing the
+capacitance matrix inside Python.</p>
 <section id="building-and-installing">
 <h2>Building and installing<a class="headerlink" href="#building-and-installing" title="Permalink to this heading">¶</a></h2>
 <p>For building the command line tool, a CMake file is provided.</p>
@@ -226,9 +230,7 @@ tweaking solver parameters such as <cite>partitioning_depth</cite>,
 which is used as the default description text for
 surfaces.</p>
 <p>The geometry can be set up by loading geometry files
-(list files or multiple individual geometry files).
-Only “generic file” style geometry files are supported
-inside the Python module currently.</p>
+(list files or multiple individual geometry files).</p>
 <p>Here is an example for using the mentioned list file
 from the <cite>samples/sample1</cite> directory:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">fastcap2</span> <span class="k">as</span> <span class="nn">fc2</span>

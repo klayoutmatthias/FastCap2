@@ -21,13 +21,13 @@
 
 static void input(ssystem *sys, FILE *stream, char *line, int surf_type, const Matrix3d &rot, const Vector3d &trans, char **title);
 static void grid_equiv_check(ssystem *sys);
-static void fill_patch_patch_table(int *patch_patch_table);
-static void assign_conductor(int *patch_patch_table);
+static void fill_patch_patch_table(ssystem *sys, int *patch_patch_table);
+static void assign_conductor(ssystem *sys, int *patch_patch_table);
 static void assign_names(ssystem *sys);
 static void file_title(ssystem *sys, FILE *stream, char **title);
 static void summary_data(ssystem *sys, FILE *stream);
-static void node_data(FILE *stream, const Matrix3d &rot, const Vector3d &trans);
-static void element_data(FILE *stream);
+static void node_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &trans);
+static void element_data(ssystem *sys, FILE *stream);
 static void grid_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &trans);
 static void patch_data(ssystem *sys, FILE *stream);
 static void CFEG_table(ssystem *sys, FILE *stream);
@@ -35,7 +35,7 @@ static void waste_line(int num_line, FILE *stream);
 static void name_data(ssystem *sys, FILE *stream);
 static int if_same_coord(double coord_1[3], double coord_2[3]);
 static int if_same_grid(int ID, GRID *grid_ptr);
-static void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count);
+static void depth_search(ssystem *sys, int *patch_patch_table, int *current_table_ptr, int conductor_count);
 static charge *make_charges_all_patches(ssystem *sys, int surf_type, const char *name_suffix);
 static charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conductor_ID);
 static char *delcr(char *str);
@@ -43,22 +43,6 @@ static char *delcr(char *str);
 #define BIG 35000              /* Size of element and node serach table. */
 #define SMALL_NUMBER 0.005     /* See functions if_same_coord() and 
                                  grid_equiv_check(). */
-
-int type_number, ID, IV, KC, N1, N2, N3, N4, N5;
-int number_nodes, number_elements, number_grids=0, number_patches=0;
-NODE *list_nodes, *current_node, *node_search_table[BIG];
-ELEMENT *list_elements, *current_element, *element_search_table[BIG];
-GRID *start_grid;
-PATCH *start_patch;
-CFEG *start_cfeg;
-
-/* these are now only used for temporary name storage for patran surfaces */
-int conductor_count;
-
-/* these flags added to allow multiple calls; used to reset static variables */
-int first_grid;                 /* note that current_name static is not */
-int first_patch;                /*   reset since the name list must */
-int first_cfeg;                 /*   be preserved as new files are read */
 
 charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, const Matrix3d &rot, const Vector3d &trans,
                  const char *name_suffix, char **title)
@@ -68,9 +52,16 @@ charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, 
   char line[BUFSIZ];
   strncpy(line, header, sizeof(line));
 
-  sys->start_name_this_time = NULL;
-  first_grid = first_patch = first_cfeg = TRUE;
-  number_grids = number_patches = 0;
+  sys->pts.start_name_this_time = NULL;
+  sys->pts.first_grid = sys->pts.first_patch = sys->pts.first_cfeg = TRUE;
+  sys->pts.number_grids = sys->pts.number_patches = 0;
+
+  if (!sys->pts.element_search_table) {
+    sys->pts.element_search_table = sys->heap.alloc<ELEMENT *>(BIG);
+  }
+  if (!sys->pts.node_search_table) {
+    sys->pts.node_search_table = sys->heap.alloc<NODE *>(BIG);
+  }
 
   input(sys, stream, line, surf_type, rot, trans, title);
 
@@ -82,11 +73,11 @@ charge *patfront(ssystem *sys, FILE *stream, const char *header, int surf_type, 
 
   if(surf_type == CONDTR || surf_type == BOTH) {
 
-    patch_patch_table = sys->heap.alloc<int>(number_patches*number_patches, AMSC);
+    patch_patch_table = sys->heap.alloc<int>(sys->pts.number_patches*sys->pts.number_patches, AMSC);
 
-    fill_patch_patch_table(patch_patch_table);
+    fill_patch_patch_table(sys, patch_patch_table);
 
-    assign_conductor(patch_patch_table);
+    assign_conductor(sys, patch_patch_table);
 
   /*********************************************************************/
 
@@ -110,14 +101,16 @@ void input(ssystem *sys, FILE *stream, char *line, int surf_type, const Matrix3d
   /* Reads in the first line from each card, and branch off.  ID, IV, KC, 
      N1, N2, N3, N4 and N5 are global variables accessible by subroutines. */
 
+  int type_number = 0;
+
   while (!END) {
     if(line[0] == '2') {        /* if first line */
       sscanf(line,"%d %d %d %d %d %d %d %d %d", 
-           &type_number, &ID, &IV, &KC, &N1, &N2, &N3, &N4, &N5);    
+           &type_number, &sys->pts.ID, &sys->pts.IV, &sys->pts.KC, &sys->pts.N1, &sys->pts.N2, &sys->pts.N3, &sys->pts.N4, &sys->pts.N5);
       line[0] = '0';
     }
     else fscanf(stream,"%d %d %d %d %d %d %d %d %d", 
-                &type_number, &ID, &IV, &KC, &N1, &N2, &N3, &N4, &N5);
+                &type_number, &sys->pts.ID, &sys->pts.IV, &sys->pts.KC, &sys->pts.N1, &sys->pts.N2, &sys->pts.N3, &sys->pts.N4, &sys->pts.N5);
       
 
     switch (type_number) {
@@ -128,10 +121,10 @@ void input(ssystem *sys, FILE *stream, char *line, int surf_type, const Matrix3d
       summary_data(sys, stream);
       break;
     case 1:
-      node_data(stream, rot, trans);
+      node_data(sys, stream, rot, trans);
       break;
     case 2:
-      element_data(stream);
+      element_data(sys, stream);
       break;
     case 31:
       grid_data(sys, stream, rot, trans);
@@ -144,13 +137,13 @@ void input(ssystem *sys, FILE *stream, char *line, int surf_type, const Matrix3d
       break;
     case 21:
       if(surf_type == CONDTR || surf_type == BOTH) name_data(sys, stream);
-      else waste_line(KC, stream);
+      else waste_line(sys->pts.KC, stream);
       break;
     case 99:
       END = 1;
       break;
     default:
-      waste_line(KC,stream);
+      waste_line(sys->pts.KC,stream);
       break;
     }
   }
@@ -185,13 +178,13 @@ void file_title(ssystem *sys, FILE *stream, char **title)
 
 void summary_data(ssystem *sys, FILE *stream)
 {
-  number_nodes = N1; number_elements = N2;
+  sys->pts.number_nodes = sys->pts.N1; sys->pts.number_elements = sys->pts.N2;
 
-  list_nodes = sys->heap.alloc<NODE>(number_nodes, AMSC);
-  list_elements = sys->heap.alloc<ELEMENT>(number_elements, AMSC);
+  sys->pts.list_nodes = sys->heap.alloc<NODE>(sys->pts.number_nodes, AMSC);
+  sys->pts.list_elements = sys->heap.alloc<ELEMENT>(sys->pts.number_elements, AMSC);
 
-  current_node = list_nodes;
-  current_element = list_elements;
+  sys->pts.current_node = sys->pts.list_nodes;
+  sys->pts.current_element = sys->pts.list_elements;
 
   waste_line(1,stream); 
 }
@@ -201,7 +194,7 @@ void summary_data(ssystem *sys, FILE *stream)
    node array, list_nodes, which is preallocated by summary_data function. 
    Node_search_table is sorted by node ID to make indexing of a node easier. */
 
-void node_data(FILE *stream, const Matrix3d &rot, const Vector3d &trans)
+void node_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &trans)
 {
   double tmp_coord[3];
 
@@ -209,9 +202,9 @@ void node_data(FILE *stream, const Matrix3d &rot, const Vector3d &trans)
   waste_line(1,stream);
 
   Vector3d new_coord = rot * Vector3d(tmp_coord) + trans;
-  new_coord.store(current_node->coord);
-  node_search_table[ID] = current_node;
-  current_node++;
+  new_coord.store(sys->pts.current_node->coord);
+  sys->pts.node_search_table[sys->pts.ID] = sys->pts.current_node;
+  sys->pts.current_node++;
 }
 
 
@@ -220,28 +213,30 @@ void node_data(FILE *stream, const Matrix3d &rot, const Vector3d &trans)
    function.  Element_search_table is sorted by element ID to make indexing 
    of an element easier.  */
 
-void element_data(FILE *stream)
+void element_data(ssystem *sys, FILE *stream)
 {
   int num_nodes, corner[4], i, tmp;
   float tmp1;
 
-  current_element->shape = IV;
+  sys->pts.current_element->shape = sys->pts.IV;
 
-  if ((IV != 3) && (IV != 4)) waste_line(KC,stream);
+  if ((sys->pts.IV != 3) && (sys->pts.IV != 4)) waste_line(sys->pts.KC,stream);
   else {
     fscanf(stream,"%d %d %d %d %f %f %f",
            &num_nodes,&tmp,&tmp,&tmp,&tmp1,&tmp1,&tmp1); 
-    current_element->num_nodes = num_nodes;
+    sys->pts.current_element->num_nodes = num_nodes;
     
     /* IV==3 and 4 imply triangular and quad elements, respectively. */
-    if (IV==3) fscanf(stream,"%d %d %d",corner,corner+1,corner+2);
+    if (sys->pts.IV==3) fscanf(stream,"%d %d %d",corner,corner+1,corner+2);
     else fscanf(stream,"%d %d %d %d",corner,corner+1,corner+2,corner+3);
     
-    for (i=0; i<num_nodes; i++) current_element->corner[i] = corner[i];
-    element_search_table[ID] = current_element;
-    current_element++;
+    for (i=0; i<num_nodes; i++) {
+      sys->pts.current_element->corner[i] = corner[i];
+    }
+    sys->pts.element_search_table[sys->pts.ID] = sys->pts.current_element;
+    sys->pts.current_element++;
   
-    if (N1) waste_line(1,stream);
+    if (sys->pts.N1) waste_line(1,stream);
   }
 }
 
@@ -255,14 +250,14 @@ void grid_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &
   GRID *current_grid;
   double coord[3];
 
-  if(first_grid) {
+  if(sys->pts.first_grid) {
     prev_grid = NULL;
-    first_grid = FALSE;
+    sys->pts.first_grid = FALSE;
   }
 
   current_grid = sys->heap.alloc<GRID>(1, AMSC);
-  if (number_grids==0) start_grid=current_grid;
-  current_grid->ID = ID;
+  if (sys->pts.number_grids==0) sys->pts.start_grid=current_grid;
+  current_grid->ID = sys->pts.ID;
   current_grid->prev = prev_grid;
   if (prev_grid) prev_grid->next = current_grid;
 
@@ -271,7 +266,7 @@ void grid_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &
   new_coord.store(current_grid->coord);
   prev_grid = current_grid;    
   current_grid->next=0;
-  number_grids++;
+  sys->pts.number_grids++;
 }
 
 
@@ -286,14 +281,14 @@ void patch_data(ssystem *sys, FILE *stream)
   double tmp;
   int i, corner[4];
 
-  if(first_patch) {
+  if(sys->pts.first_patch) {
     prev_patch = NULL;
-    first_patch = FALSE;
+    sys->pts.first_patch = FALSE;
   }
 
   current_patch = sys->heap.alloc<PATCH>(1, AMSC);
-  if (number_patches==0) start_patch=current_patch;
-  current_patch->ID = ID;
+  if (sys->pts.number_patches==0) sys->pts.start_patch=current_patch;
+  current_patch->ID = sys->pts.ID;
   current_patch->prev = prev_patch;
   if (prev_patch) prev_patch->next = current_patch;
 
@@ -303,7 +298,7 @@ void patch_data(ssystem *sys, FILE *stream)
   for (i=0; i<4; i++) current_patch->corner[i] = corner[i];
   prev_patch = current_patch;
   current_patch->next=0;
-  number_patches++;
+  sys->pts.number_patches++;
 }
 
 
@@ -319,21 +314,21 @@ void CFEG_table(ssystem *sys, FILE *stream)
   int tmp, NELS, LPH, LPH_ID, LSHAPE, NDIM, NODES, ICONF;
   int i, *element_list, element_num1, element_num2;
 
-  if(first_cfeg) {
+  if(sys->pts.first_cfeg) {
     prev_cfeg = NULL;
-    first_cfeg = FALSE;
+    sys->pts.first_cfeg = FALSE;
   }
 
   waste_line(1,stream);
   fscanf(stream,"%d %d %d %d %d %d %d %d", 
          &NDIM, &LSHAPE, &NODES, &ICONF, &LPH, &LPH_ID, &tmp, &tmp);
 
-  if (LPH != 3) waste_line(KC-2,stream);
+  if (LPH != 3) waste_line(sys->pts.KC-2,stream);
   else {
     current_cfeg = sys->heap.alloc<CFEG>(1, AMSC);
-    if (!prev_cfeg) start_cfeg=current_cfeg;
-    current_cfeg->ID = ID;
-    current_cfeg->NELS = IV; NELS = IV;
+    if (!prev_cfeg) sys->pts.start_cfeg=current_cfeg;
+    current_cfeg->ID = sys->pts.ID;
+    current_cfeg->NELS = sys->pts.IV; NELS = sys->pts.IV;
     current_cfeg->prev = prev_cfeg;
     if (prev_cfeg) prev_cfeg->next = current_cfeg;
     
@@ -391,15 +386,15 @@ void name_data(ssystem *sys, FILE *stream)
   char line[BUFSIZ];
   SM_PATCH *current_patch = NULL;
 
-  if(sys->start_name == NULL) { /* if first time on first patfront() call */
-    sys->start_name = sys->heap.alloc<NAME>(1, AMSC);
-    sys->current_name = sys->start_name_this_time = sys->start_name;
+  if(sys->pts.start_name == NULL) { /* if first time on first patfront() call */
+    sys->pts.start_name = sys->heap.alloc<NAME>(1, AMSC);
+    sys->pts.current_name = sys->pts.start_name_this_time = sys->pts.start_name;
   }
   else{ 
-    sys->current_name->next = sys->heap.alloc<NAME>(1, AMSC);
-    sys->current_name = sys->current_name->next;
-    if(sys->start_name_this_time == NULL) {     /* if 1st time on this patfront call */
-      sys->start_name_this_time = sys->current_name;
+    sys->pts.current_name->next = sys->heap.alloc<NAME>(1, AMSC);
+    sys->pts.current_name = sys->pts.current_name->next;
+    if(sys->pts.start_name_this_time == NULL) {     /* if 1st time on this patfront call */
+      sys->pts.start_name_this_time = sys->pts.current_name;
     }
   }
 
@@ -407,16 +402,16 @@ void name_data(ssystem *sys, FILE *stream)
   fgets(line, sizeof(line), stream); /* eat CR */
   fgets(line, sizeof(line), stream);
   delcr(line);
-  sys->current_name->name = sys->heap.strdup(line);
+  sys->pts.current_name->name = sys->heap.strdup(line);
   
   /* input NTYPE ID pair lines until no more, save patch id's that come in */
-  for(i = iv = 0; i < KC-1; i++) {      /* loop on lines */
-    for(j = 0; j < 5 && iv < IV/2; j++, iv++) { /* loop on items */
+  for(i = iv = 0; i < sys->pts.KC-1; i++) {      /* loop on lines */
+    for(j = 0; j < 5 && iv < sys->pts.IV/2; j++, iv++) { /* loop on items */
       fscanf(stream, "%d %d", &ntype, &id);
       if(ntype == 3) {          /* if its a patch, save ID */
         if(current_patch == NULL) { /* if 1st patch */
-          sys->current_name->patch_list = sys->heap.alloc<SM_PATCH>(1, AMSC);
-          current_patch = sys->current_name->patch_list;
+          sys->pts.current_name->patch_list = sys->heap.alloc<SM_PATCH>(1, AMSC);
+          current_patch = sys->pts.current_name->patch_list;
         }
         else {
           current_patch->next = sys->heap.alloc<SM_PATCH>(1, AMSC);
@@ -429,7 +424,7 @@ void name_data(ssystem *sys, FILE *stream)
   }
   if(patch_cnt == 0) {
     sys->error("name_data: conductor '%s'\n  has no patch - redo naming so that one is included.",
-               sys->current_name->name);
+               sys->pts.current_name->name);
   }
 }
 
@@ -443,16 +438,16 @@ static void grid_equiv_check(ssystem *sys)
   GRID *grid_ptr_1, *grid_ptr_2;
 
   /* First, allocate spaces for equivalent grid arrays. */
-  grid_ptr_1 = start_grid;
+  grid_ptr_1 = sys->pts.start_grid;
   while (grid_ptr_1) {
-    grid_ptr_1->equiv_ID = sys->heap.alloc<int>(number_grids, AMSC);
+    grid_ptr_1->equiv_ID = sys->heap.alloc<int>(sys->pts.number_grids, AMSC);
     grid_ptr_1->number_equiv_grids = 0;
     grid_ptr_1 = grid_ptr_1->next;
   }
 
   /* Begin search.  Grid N is compared with grids from N+1 through the end 
      of the list.  */
-  grid_ptr_1 = start_grid;
+  grid_ptr_1 = sys->pts.start_grid;
   while (grid_ptr_1) {
     grid_ptr_2 = grid_ptr_1->next;
     while (grid_ptr_2) {
@@ -518,13 +513,13 @@ static char *delcr(char *str)
    patches that are connected by the grid point.  The end result table is
    symmetric.  */   
 
-void fill_patch_patch_table(int *patch_patch_table)
+void fill_patch_patch_table(ssystem *sys, int *patch_patch_table)
 {
   int patch_count, patch_count_save, *current_table_ptr, *corner, i;
   GRID *grid_ptr;
   PATCH *patch_ptr;
 
-  grid_ptr = start_grid;
+  grid_ptr = sys->pts.start_grid;
   while (grid_ptr) {
     
     /* Patch_count is generic counter of current position in the patch array,
@@ -533,7 +528,7 @@ void fill_patch_patch_table(int *patch_patch_table)
     patch_count = 0;
     patch_count_save = 0;
     current_table_ptr = 0;
-    patch_ptr = start_patch;
+    patch_ptr = sys->pts.start_patch;
 
     while (patch_ptr) {
       corner = patch_ptr->corner;
@@ -542,10 +537,10 @@ void fill_patch_patch_table(int *patch_patch_table)
           if (current_table_ptr) {  /* Have we already found another patch 
                                        with the same grid as its corner?  */
             *(current_table_ptr+patch_count)=1;
-            *(patch_patch_table + (patch_count * number_patches) 
+            *(patch_patch_table + (patch_count * sys->pts.number_patches)
               + patch_count_save)=1;
           }
-          current_table_ptr = patch_patch_table + patch_count*number_patches;
+          current_table_ptr = patch_patch_table + patch_count*sys->pts.number_patches;
           patch_count_save = patch_count;
         }
       patch_ptr = patch_ptr->next;
@@ -576,16 +571,16 @@ int if_same_grid(int ID, GRID *grid_ptr)
 /* This function searches through the patch_patch_table and finds groups of
    patches that are connected only among themselves. */
 
-void assign_conductor(int *patch_patch_table)
+void assign_conductor(ssystem *sys, int *patch_patch_table)
 {
   PATCH *patch_ptr;
   int patch_count=0, *current_table_ptr;
 
-  conductor_count=1;
+  sys->pts.conductor_count=1;
 
   /* Sets all the patches to conductor 0, meaning that it is yet to be 
      assigned a conductor_ID.  */
-  patch_ptr = start_patch;
+  patch_ptr = sys->pts.start_patch;
   while (patch_ptr) {
     patch_ptr->conductor_ID = 0;
     patch_ptr = patch_ptr->next;
@@ -595,16 +590,16 @@ void assign_conductor(int *patch_patch_table)
      That row is associated with the current patch in need of a conductor
      number.  */
   current_table_ptr = patch_patch_table;
-  patch_ptr = start_patch;
+  patch_ptr = sys->pts.start_patch;
   while (patch_ptr) {
     if ((patch_ptr->conductor_ID) == 0) {  /* If the patch is not assigned 
                                               a conductor number. */
-      patch_ptr->conductor_ID = conductor_count;
-      depth_search(patch_patch_table,current_table_ptr,conductor_count);
-      conductor_count++;
+      patch_ptr->conductor_ID = sys->pts.conductor_count;
+      depth_search(sys,patch_patch_table,current_table_ptr,sys->pts.conductor_count);
+      sys->pts.conductor_count++;
     }
     patch_count++;
-    current_table_ptr = patch_patch_table + patch_count*number_patches;
+    current_table_ptr = patch_patch_table + patch_count*sys->pts.number_patches;
     patch_ptr = patch_ptr->next;
   }
 
@@ -621,24 +616,24 @@ void assign_conductor(int *patch_patch_table)
 /* This function searches through patch_patch_table recursively to
    find all patches that are somehow connected the current patch. */
 
-void depth_search(int *patch_patch_table,int *current_table_ptr,int conductor_count)
+void depth_search(ssystem *sys, int *patch_patch_table,int *current_table_ptr,int conductor_count)
 {
   PATCH *patch_ptr;
   int i, *new_table_ptr;
 
-  patch_ptr=start_patch;
+  patch_ptr=sys->pts.start_patch;
   new_table_ptr=patch_patch_table;
-  for (i=0; i<number_patches; i++) {
+  for (i=0; i<sys->pts.number_patches; i++) {
     if ((*(current_table_ptr+i)) != 0) {  /* If the current patch is connected
                                              to i'th patch. */
       if (patch_ptr->conductor_ID == 0) {  /* If the patch is yet to be 
                                               assigned a conductor number. */
         patch_ptr -> conductor_ID = conductor_count;
-        new_table_ptr = patch_patch_table+i*number_patches;
+        new_table_ptr = patch_patch_table+i*sys->pts.number_patches;
 
         /* Call depth_search recursively to continue searching for 
            connected patches. */
-        depth_search(patch_patch_table,new_table_ptr,conductor_count);  
+        depth_search(sys,patch_patch_table,new_table_ptr,sys->pts.conductor_count);
       }
     }
     patch_ptr=patch_ptr->next;
@@ -653,7 +648,7 @@ static char *getPatranName(ssystem *sys, int cond_num)
 {
   NAME *cname;
 
-  cname = sys->start_name_this_time;
+  cname = sys->pts.start_name_this_time;
   while(cname != NULL) {
     if((cname->patch_list)->conductor_ID == cond_num) return(cname->name);
     else cname = cname->next;
@@ -680,7 +675,7 @@ charge *make_charges_all_patches(ssystem *sys, int surf_type, const char *name_s
   PATCH *patch_ptr;
   charge *first_pq = 0, *current_pq = 0;
 
-  cfeg_ptr = start_cfeg;
+  cfeg_ptr = sys->pts.start_cfeg;
   while (cfeg_ptr) {
     if (cfeg_ptr->LPH == 3) {
       NELS = cfeg_ptr->NELS;
@@ -688,7 +683,7 @@ charge *make_charges_all_patches(ssystem *sys, int surf_type, const char *name_s
 
       /* Find the patch structure that is associated with the current cfeg
          pointer in order to find the conductor number. */
-      patch_ptr = start_patch;
+      patch_ptr = sys->pts.start_patch;
       while (patch_ptr) {
         if (patch_ptr->ID == LPH_ID) {
           if(surf_type == CONDTR || surf_type == BOTH) {
@@ -749,30 +744,30 @@ charge *make_charges_patch(ssystem *sys, int NELS, int *element_list, int conduc
     
     /* Original element number in Neutral file can be a negative number.  */
     if ((element_number= *(element_list+i))<0) element_number= -element_number;
-    element_ptr = element_search_table[element_number];
+    element_ptr = sys->pts.element_search_table[element_number];
     element_corner_ptr = element_ptr->corner;
     
     /* Pointers to the corner points' coordinates are set.  */
 
     if ((element_ptr->shape) == 4) {  /* Quadrilateral panels. */
       (pq+i)->shape = 4;
-      node_ptr = node_search_table[*(element_corner_ptr++)]; 
+      node_ptr = sys->pts.node_search_table[*(element_corner_ptr++)];
       VCOPY((pq+i)->corner[0], node_ptr->coord);
-      node_ptr = node_search_table[*(element_corner_ptr++)]; 
+      node_ptr = sys->pts.node_search_table[*(element_corner_ptr++)];
       VCOPY((pq+i)->corner[1], node_ptr->coord);
-      node_ptr = node_search_table[*(element_corner_ptr++)]; 
+      node_ptr = sys->pts.node_search_table[*(element_corner_ptr++)];
       VCOPY((pq+i)->corner[2], node_ptr->coord);
-      node_ptr = node_search_table[*(element_corner_ptr++)]; 
+      node_ptr = sys->pts.node_search_table[*(element_corner_ptr++)];
       VCOPY((pq+i)->corner[3], node_ptr->coord);
     }
     else {  /* Triangular panels. */
 /*sys->msg("\nTTT\n");*/
       (pq+i)->shape = 3;
-      node_ptr = node_search_table[*(element_corner_ptr++)]; 
+      node_ptr = sys->pts.node_search_table[*(element_corner_ptr++)];
       VCOPY((pq+i)->corner[0], node_ptr->coord);
-      node_ptr = node_search_table[*(element_corner_ptr++)]; 
+      node_ptr = sys->pts.node_search_table[*(element_corner_ptr++)];
       VCOPY((pq+i)->corner[1], node_ptr->coord);
-      node_ptr = node_search_table[*(element_corner_ptr++)]; 
+      node_ptr = sys->pts.node_search_table[*(element_corner_ptr++)];
       VCOPY((pq+i)->corner[2], node_ptr->coord);
     }
   }
@@ -793,9 +788,9 @@ static void assign_names(ssystem *sys)
   int quit, current_conductor, cnt = 0;
   PATCH *current_patch;
   SM_PATCH *current_name_patch;
-  NAME *cur_name = sys->start_name_this_time;
+  NAME *cur_name = sys->pts.start_name_this_time;
 
-  if(sys->start_name_this_time == NULL) {
+  if(sys->pts.start_name_this_time == NULL) {
     sys->error("assign_names: no conductor names specified");
   }
 
@@ -804,7 +799,7 @@ static void assign_names(ssystem *sys)
     current_name_patch = cur_name->patch_list;
     current_conductor = 0;
     while(current_name_patch != NULL) {
-      current_patch = start_patch;
+      current_patch = sys->pts.start_patch;
       quit = 0;
       while(current_patch != NULL && quit == 0) {
         if(current_patch->ID == current_name_patch->ID) {
@@ -829,13 +824,13 @@ static void assign_names(ssystem *sys)
   }
 
   /* check to see if all conductors have a name and if too many names */
-  if(cnt < conductor_count - 1) {
+  if(cnt < sys->pts.conductor_count - 1) {
     sys->error("assign_names: %d conductors have no names",
-               conductor_count - 1 - cnt);
+               sys->pts.conductor_count - 1 - cnt);
   }
-  if(cnt > conductor_count - 1) {
+  if(cnt > sys->pts.conductor_count - 1) {
     sys->error("assign_names: %d names given for %d conductors",
-               cnt, conductor_count - 1);
+               cnt, sys->pts.conductor_count - 1);
   }
 
 }

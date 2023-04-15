@@ -25,6 +25,7 @@ core_src=[
   "src/mulStruct.cc",
   "src/psMatDisplay.cc",
   "src/quickif.cc",
+  "src/patran.cc",
   "src/savemat_mod.cc",
   "src/zbuf2fastcap.cc",
   "src/zbufInOut.cc",

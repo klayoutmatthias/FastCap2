@@ -5,9 +5,7 @@
 #include "zbufGlobal.h"
 #include "input.h"
 #include "calcp.h"
-#if !defined(BUILD_FASTCAP2_PYMOD)
-# include "patran_f.h"
-#endif
+#include "patran_f.h"
 #include "quickif.h"
 
 #include <cstdio>
@@ -515,14 +513,8 @@ static charge *read_panels(ssystem *sys)
         patran_file = FALSE;
         panels_read = quickif(sys, fp, header, cur_surf->type, cur_surf->rot, cur_surf->trans, surf_name, &title);
       } else {
-#if !defined(BUILD_FASTCAP2_PYMOD)
         patran_file = TRUE;
         panels_read = patfront(sys, fp, header, cur_surf->type, cur_surf->rot, cur_surf->trans, surf_name, &title);
-#else
-        //  The patran reader is not reentrant, so we do not allow this one
-        //  in the context of the Python module
-        sys->error("Only 'quickif' style geometry files are supported in Python module - look for header line starting with '0'. Unsupported file is '%s'", cur_surf->name);
-#endif
       }
 
       if(!patran_file && patran_file_read) {

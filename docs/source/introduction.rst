@@ -14,7 +14,11 @@ FastCap2 documentation. The tool takes input files describing
 the geometry in two different formats. The most commonly and
 easiest to use format is the "generic file" format.
 
-TODO: more.
+It is also possible to generate geometry from Python
+by building surfaces from triangles and quads. These
+surfaces are then combined into a conductor/dielectrics geometry.
+With such a geometry, the Python module allows computing the
+capacitance matrix inside Python.
 
 
 Building and installing
@@ -215,8 +219,6 @@ surfaces.
 
 The geometry can be set up by loading geometry files
 (list files or multiple individual geometry files).
-Only "generic file" style geometry files are supported
-inside the Python module currently.
 
 Here is an example for using the mentioned list file
 from the `samples/sample1` directory: ::

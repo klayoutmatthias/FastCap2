@@ -2,6 +2,7 @@
 #if !defined(mulStruct_H)
 #define mulStruct_H
 
+#include "patran.h"
 #include "heap.h"
 #include "vector.h"
 #include "matrix.h"
@@ -11,9 +12,6 @@
 
 struct SurfaceData;
 struct ssystem;
-
-//  used by patran.cc
-struct NAME;
 
 /* used to build linked list of conductor names */
 struct Name {
@@ -197,9 +195,7 @@ struct ssystem
   FILE *log;                    //  log stream (0 to turn off output)
 
   //  patran only
-  NAME *start_name;             //  conductor name linked list head
-  NAME *current_name;           //  conductor name linked list tail
-  NAME *start_name_this_time;   //  cond name list for the current surface
+  PTState pts;
 
   //  misc global
   const char *kill_name_list;   //  cond names whose columns are omitted
