@@ -398,7 +398,7 @@ class TestProblem(unittest.TestCase):
     problem.add(surface)
     self.assertEqual(problem.extent(), [[1.0, 2.0, 3.0], [11.0, 12.0, 3.0]])
 
-  def test_add_surface_flip(self):
+  def test_add_surface_flipx(self):
 
     problem = fc2.Problem()
 
@@ -407,6 +407,26 @@ class TestProblem(unittest.TestCase):
 
     problem.add(surface, flipx = True)
     self.assertEqual(problem.extent(), [[-11.0, 2.0, 3.0], [-1.0, 12.0, 3.0]])
+
+  def test_add_surface_flipy(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, flipy = True)
+    self.assertEqual(problem.extent(), [[1.0, -12.0, 3.0], [11.0, -2.0, 3.0]])
+
+  def test_add_surface_flipz(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, flipz = True)
+    self.assertEqual(problem.extent(), [[1.0, 2.0, -3.0], [11.0, 12.0, -3.0]])
 
   def test_add_surface_triple(self):
 
