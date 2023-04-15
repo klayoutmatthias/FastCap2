@@ -108,6 +108,13 @@ public:
     return sqrt(norm_sq());
   }
 
+  void store(double *a)
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      a[i] = m_v[i];
+    }
+  }
+
   double operator*(const vector<N> &other) const
   {
     double s = 0.0;

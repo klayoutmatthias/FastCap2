@@ -129,9 +129,7 @@ void read_list_file(ssystem *sys, Surface **surf_list, const char *list_file)
       }
       
       cur_surf->type = CONDTR;
-      cur_surf->trans[0] = tx;
-      cur_surf->trans[1] = ty;
-      cur_surf->trans[2] = tz;
+      cur_surf->trans = Vector3d(tx, ty, tz);
       cur_surf->end_of_chain = end_of_chain;
       cur_surf->name = sys->heap.strdup(file_name);
       cur_surf->outer_perm = outer_perm;
@@ -180,12 +178,8 @@ void read_list_file(ssystem *sys, Surface **surf_list, const char *list_file)
       }
       
       cur_surf->type = BOTH;
-      cur_surf->trans[0] = tx;
-      cur_surf->trans[1] = ty;
-      cur_surf->trans[2] = tz;
-      cur_surf->ref[0] = rx;
-      cur_surf->ref[1] = ry;
-      cur_surf->ref[2] = rz;
+      cur_surf->trans = Vector3d(tx, ty, tz);
+      cur_surf->ref = Vector3d(rx, ry, rz);
       cur_surf->ref_inside = ref_pnt_is_inside;
       cur_surf->end_of_chain = end_of_chain;
       cur_surf->name = sys->heap.strdup(file_name);
@@ -230,12 +224,8 @@ void read_list_file(ssystem *sys, Surface **surf_list, const char *list_file)
       }
       
       cur_surf->type = DIELEC;
-      cur_surf->trans[0] = tx;
-      cur_surf->trans[1] = ty;
-      cur_surf->trans[2] = tz;
-      cur_surf->ref[0] = rx;
-      cur_surf->ref[1] = ry;
-      cur_surf->ref[2] = rz;
+      cur_surf->trans = Vector3d(tx, ty, tz);
+      cur_surf->ref = Vector3d(rx, ry, rz);
       cur_surf->ref_inside = ref_pnt_is_inside;
       cur_surf->end_of_chain = TRUE;
       cur_surf->name = sys->heap.strdup(file_name);

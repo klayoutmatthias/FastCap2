@@ -18,6 +18,14 @@ TEST(matrix, basic)
   EXPECT_EQ(mm.to_string(), "(1,0,0)\n(0,1,2)\n(0,0,1)");
   Matrix3d mm2(mm);
   EXPECT_EQ(mm2.to_string(), "(1,0,0)\n(0,1,2)\n(0,0,1)");
+
+  double mdd[3][3] = {
+    { 1, 0, 0 }, { 1, 2, -1 }, { 0, 1, -3 }
+  };
+  double *md[3] = { mdd[0], mdd[1], mdd[2] };
+  EXPECT_EQ(Matrix3d(md).to_string(), "(1,0,0)\n(1,2,-1)\n(0,1,-3)");
+  mm.store(md);
+  EXPECT_EQ(Matrix3d(md).to_string(), "(1,0,0)\n(0,1,2)\n(0,0,1)");
 }
 
 TEST(matrix, arith)

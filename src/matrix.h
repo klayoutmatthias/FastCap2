@@ -22,6 +22,15 @@ public:
     }
   }
 
+  matrix(double **a)
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      for (unsigned int j = 0; j < M; ++j) {
+        m_m[i][j] = a[i][j];
+      }
+    }
+  }
+
   matrix(const matrix<N, M> &other)
   {
     for (unsigned int i = 0; i < N; ++i) {
@@ -97,6 +106,15 @@ public:
       return m_m[n][m];
     } else {
       return 0.0;
+    }
+  }
+
+  void store(double **a)
+  {
+    for (unsigned int i = 0; i < N; ++i) {
+      for (unsigned int j = 0; j < M; ++j) {
+        a[i][j] = m_m[i][j];
+      }
     }
   }
 

@@ -242,15 +242,9 @@ charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, const Matrix3
     nq = c;
 
     /* fill in corners */
-    for (int i = 0; i < 3; ++i) {
-      (nq->corner[0])[i] = curtri->p1[i];
-    }
-    for (int i = 0; i < 3; ++i) {
-      (nq->corner[1])[i] = curtri->p2[i];
-    }
-    for (int i = 0; i < 3; ++i) {
-      (nq->corner[2])[i] = curtri->p3[i];
-    }
+    curtri->p1.store(nq->corner[0]);
+    curtri->p2.store(nq->corner[1]);
+    curtri->p3.store(nq->corner[2]);
 
     /* fill in remaining */
     nq->shape = 3;
@@ -270,18 +264,10 @@ charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, const Matrix3
     nq = c;
 
     /* fill in corners */
-    for (int i = 0; i < 3; ++i) {
-      (nq->corner[0])[i] = curquad->p1[i];
-    }
-    for (int i = 0; i < 3; ++i) {
-      (nq->corner[1])[i] = curquad->p2[i];
-    }
-    for (int i = 0; i < 3; ++i) {
-      (nq->corner[2])[i] = curquad->p3[i];
-    }
-    for (int i = 0; i < 3; ++i) {
-      (nq->corner[3])[i] = curquad->p4[i];
-    }
+    curquad->p1.store(nq->corner[0]);
+    curquad->p2.store(nq->corner[1]);
+    curquad->p3.store(nq->corner[2]);
+    curquad->p4.store(nq->corner[3]);
 
     /* fill in remaining */
     nq->shape = 4;
@@ -292,9 +278,7 @@ charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, const Matrix3
   for (nq = chglst; nq; nq = nq->next) {
     for (int c = 0; c < nq->shape; ++c) {
       Vector3d new_coord = rot * Vector3d(nq->corner[c]) + trans;
-      for (int i = 0; i < 3; ++i) {
-        (nq->corner[c])[i] = new_coord[i];
-      }
+      new_coord.store(nq->corner[c]);
     }
   }
 

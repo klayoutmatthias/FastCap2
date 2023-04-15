@@ -14,6 +14,11 @@ TEST(vector, basic)
   EXPECT_EQ(Vector3d(vv).to_string(), "(1,2,3)");
   EXPECT_EQ(Vector3d(vv.z(), vv.y(), vv.x()).to_string(), "(3,2,1)");
   EXPECT_EQ(Vector3d(vv[2], vv[1], vv[0]).to_string(), "(3,2,1)");
+
+  double vd[3] = { 5, 6, 7 };
+  EXPECT_EQ(Vector3d(vd).to_string(), "(5,6,7)");
+  Vector3d(10, 11, 12).store(vd);
+  EXPECT_EQ(Vector3d(vd).to_string(), "(10,11,12)");
 }
 
 TEST(vector, arith)

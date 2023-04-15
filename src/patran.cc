@@ -204,14 +204,12 @@ void summary_data(ssystem *sys, FILE *stream)
 void node_data(FILE *stream, const Matrix3d &rot, const Vector3d &trans)
 {
   double tmp_coord[3];
-  int i;
 
   fscanf(stream,"%lf %lf %lf",tmp_coord,tmp_coord+1,tmp_coord+2);  
   waste_line(1,stream);
 
   Vector3d new_coord = rot * Vector3d(tmp_coord) + trans;
-  for (i=0; i<3; i++) 
-      current_node->coord[i] = new_coord[i];
+  new_coord.store(current_node->coord);
   node_search_table[ID] = current_node;
   current_node++;
 }
@@ -256,7 +254,6 @@ void grid_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &
   static GRID *prev_grid=0;
   GRID *current_grid;
   double coord[3];
-  int i;
 
   if(first_grid) {
     prev_grid = NULL;
@@ -271,9 +268,7 @@ void grid_data(ssystem *sys, FILE *stream, const Matrix3d &rot, const Vector3d &
 
   fscanf(stream, "%lf %lf %lf", coord, coord+1, coord+2);
   Vector3d new_coord = rot * Vector3d(coord) + trans;
-  for (i=0; i<3; i++) {
-    current_grid->coord[i] = new_coord[i];
-  }
+  new_coord.store(current_grid->coord);
   prev_grid = current_grid;    
   current_grid->next=0;
   number_grids++;

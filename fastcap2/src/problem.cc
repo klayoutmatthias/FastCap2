@@ -645,6 +645,18 @@ problem_set_verbose(PyProblemObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+static bool
+parse_vector(PyObject *arg, Vector3d &v)
+{
+  double x, y, z;
+  if (!PyArg_ParseTuple(arg, "ddd", &x, &y, &z)) {
+    return false;
+  } else {
+    v = Vector3d(x, y, z);
+    return true;
+  }
+}
+
 static Matrix3d
 build_transformation(int flipx, int flipy, int flipz,
                      double rotx, double roty, double rotz,
@@ -699,9 +711,9 @@ problem_load_or_add(PyProblemObject *self, PyObject *args, bool load)
   if (load) {
 
     if (!PyArg_ParseTuple(args, "spzipddOOpppdddddd", &filename, &link, &group, &kind,
-                                                    &ref_point_inside, &outer_perm, &inner_perm,
-                                                    &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz,
-                                                    &scalex, &scaley, &scalez)) {
+                                                      &ref_point_inside, &outer_perm, &inner_perm,
+                                                      &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz,
+                                                      &scalex, &scaley, &scalez)) {
       return NULL;
     }
 
@@ -709,9 +721,9 @@ problem_load_or_add(PyProblemObject *self, PyObject *args, bool load)
 
     PyObject *py_surf = NULL;
     if (!PyArg_ParseTuple(args, "OpzipddOOpppdddddd", &py_surf, &link, &group, &kind,
-                                                    &ref_point_inside, &outer_perm, &inner_perm,
-                                                    &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz,
-                                                    &scalex, &scaley, &scalez)) {
+                                                      &ref_point_inside, &outer_perm, &inner_perm,
+                                                      &d, &r, &flipx, &flipy, &flipz, &rotx, &roty, &rotz,
+                                                      &scalex, &scaley, &scalez)) {
       return NULL;
     }
 
@@ -729,13 +741,11 @@ problem_load_or_add(PyProblemObject *self, PyObject *args, bool load)
 
   }
 
-  double dx = 0.0, dy = 0.0, dz = 0.0;
-  double rx = 0.0, ry = 0.0, rz = 0.0;
-  if (!PyArg_ParseTuple(d, "ddd", &dx, &dy, &dz)) {
+  Vector3d dv, rv;
+  if (!parse_vector(d, dv)) {
     return NULL;
   }
-
-  if (!PyArg_ParseTuple(r, "ddd", &rx, &ry, &rz)) {
+  if (!parse_vector(r, rv)) {
     return NULL;
   }
 
@@ -761,7 +771,7 @@ problem_load_or_add(PyProblemObject *self, PyObject *args, bool load)
     self->sys.surf_list = new_surf;
   }
 
-  Matrix3d m = build_transformation(flipx, flipy, flipz, rotx, roty, rotz, scalex, scaley, scalez);
+  Matrix3d rot = build_transformation(flipx, flipy, flipz, rotx, roty, rotz, scalex, scaley, scalez);
 
   new_surf->type = CONDTR;
   new_surf->name = self->sys.heap.strdup(filename);
@@ -770,14 +780,10 @@ problem_load_or_add(PyProblemObject *self, PyObject *args, bool load)
   new_surf->inner_perm = inner_perm;
   new_surf->type = kind;
   new_surf->ref_inside = ref_point_inside;
-  new_surf->ref[0] = rx;
-  new_surf->ref[1] = ry;
-  new_surf->ref[2] = rz;
-  new_surf->trans[0] = dx;
-  new_surf->trans[1] = dy;
-  new_surf->trans[2] = dz;
+  new_surf->ref = rv;
+  new_surf->trans = dv;
+  new_surf->rot = rot;
   new_surf->end_of_chain = TRUE;
-  // @@@ not yet: flip, scale, rot
 
   //  set up group name
   if (link) {
