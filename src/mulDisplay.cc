@@ -963,12 +963,14 @@ void mksCapDump(ssystem *sys, double **sym_mat)
 
   /* figure the units to use for the matrix entries 
      - set up so smallest element is between 0.1 and 10 */
-  if (minoffd > 1e-20) {
-    while(minoffd*FPIEPS*sys->perm_factor*scale > 10.0) {
+  double min_value = 1e-20;
+  double scale_value = minoffd < min_value ? maxdiag : minoffd;
+  if (scale_value > 1e-20) {
+    while(scale_value*FPIEPS*sys->perm_factor*scale > 10.0) {
       scale *= 1e-3;
       scale_mag += 3;
     }
-    while(minoffd*FPIEPS*sys->perm_factor*scale < 0.1) {
+    while(scale_value*FPIEPS*sys->perm_factor*scale < 0.1) {
       scale *= 1e+3;
       scale_mag -= 3;
     }
