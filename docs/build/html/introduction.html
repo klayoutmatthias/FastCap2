@@ -14,6 +14,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to FastCap2’s documentation!" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -56,7 +57,7 @@ easiest to use format is the “quickif” format.</p>
 <p>The following sample code assumes that <cite>fastcap</cite> and the generator
 tools (<cite>cubegen</cite>, <cite>pltcapgen</cite> etc.) are in the path and you
 changed to the samples directory of the source package:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">samples</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">samples</span><span class="o">/</span><span class="n">sample1</span>
 </pre></div>
 </div>
 <p>Running fastcap with a list file (a geometry collection file)</p>
@@ -73,7 +74,11 @@ changed to the samples directory of the source package:</p>
 </div>
 <p>The arrangement in <cite>all.lst</cite> consists of a bottom plate and
 two conductors, resolved into four interdigitated stripes each:</p>
-<p>TODO: image</p>
+<img alt="_images/scene1.svg" src="_images/scene1.svg" /><p>The top conductors or colored red and blue, the bottom
+conductor is colored green. The connections between the fingers
+is not explicitly modelled. The connection is made by
+placing all four connected fingers in the same conductor
+group.</p>
 <p><cite>all.lst</cite> combines three files, describing the bottom plate
 and one strip each for the different conductors (<cite>cb.geo</cite>,
 <cite>ct1.geo</cite> and <cite>ct2.geo</cite>):</p>
@@ -89,7 +94,7 @@ and one strip each for the different conductors (<cite>cb.geo</cite>,
 <span class="n">C</span> <span class="n">cb</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mi">0</span>
 </pre></div>
 </div>
-<p>You can use fastcap with the provided geometry generators:</p>
+<p>You can also use fastcap with the provided geometry generators:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pltcapgen</span> <span class="o">|</span> <span class="n">fastcap</span>
 </pre></div>
 </div>
@@ -246,6 +251,111 @@ capacitance matrix of</p>
 </div>
 <p>picofarads.</p>
 </section>
+<section id="a-python-coded-sample">
+<h2>A Python coded sample<a class="headerlink" href="#a-python-coded-sample" title="Permalink to this heading">¶</a></h2>
+<p>The following sample describes a square two-plate capacitor semi-filled
+with a dielectric layer:</p>
+<img alt="_images/scene2.svg" src="_images/scene2.svg" /><p>The bottom and top conductive capacitor plates are colored red and blue,
+the dielectric layer is colored green.</p>
+<p>The geometry is build by the following code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;A demo script for fastcap2 Python module</span>
+
+<span class="sd">The geometry is a square two-plate capacitor with a plate</span>
+<span class="sd">thickness of 0.2 and a plate distance of 2.0.</span>
+
+<span class="sd">The gap is partially filled with a dielectic layer of</span>
+<span class="sd">thickness 1.0 above the bottom plate. The volume above</span>
+<span class="sd">that layer is air (k = 1).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">fastcap2</span> <span class="k">as</span> <span class="nn">fc2</span>
+
+<span class="n">problem</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Problem</span><span class="p">()</span>
+
+<span class="c1"># enable printing of logs:</span>
+<span class="c1"># problem.verbose = True</span>
+
+<span class="n">problem</span><span class="o">.</span><span class="n">perm_factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+<span class="c1"># PS picture file or None for no file</span>
+<span class="n">ps_file</span> <span class="o">=</span> <span class="s2">&quot;cap.ps&quot;</span>
+
+<span class="c1"># height of dielectic layer</span>
+<span class="n">diel_height</span>     <span class="o">=</span> <span class="mf">1.0</span>
+<span class="c1"># dielectric layer k</span>
+<span class="n">diel_k</span>          <span class="o">=</span> <span class="mf">1.5</span>
+<span class="c1"># distance of top plate vs. bottom plate (air + dielectric layer)</span>
+<span class="n">top_plate</span>       <span class="o">=</span> <span class="mf">2.0</span>
+<span class="c1"># width and length of capacitor</span>
+<span class="n">width</span>           <span class="o">=</span> <span class="mf">10.0</span>
+<span class="c1"># capacitor top and bottom plate thickness</span>
+<span class="n">cond_height</span>     <span class="o">=</span> <span class="mf">0.2</span>
+
+<span class="c1"># mesh resolution</span>
+<span class="n">max_dim</span>         <span class="o">=</span> <span class="mf">0.5</span>
+
+<span class="c1"># inside reference point for face orientation of sides</span>
+<span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">plate</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+<span class="n">plate</span><span class="o">.</span><span class="n">add_meshed_quad</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">edge_width</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">max_dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">cside</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+<span class="n">cside</span><span class="o">.</span><span class="n">add_meshed_quad</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="n">cond_height</span><span class="p">),</span> <span class="n">max_dim</span> <span class="o">=</span> <span class="n">max_dim</span><span class="p">)</span>
+
+<span class="n">dside</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Surface</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
+<span class="n">dside</span><span class="o">.</span><span class="n">add_meshed_quad</span><span class="p">((</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span><span class="p">,</span> <span class="n">diel_height</span><span class="p">),</span> <span class="n">max_dim</span> <span class="o">=</span> <span class="n">max_dim</span><span class="p">)</span>
+
+<span class="c1"># the bottom conductor - group &quot;B&quot;</span>
+<span class="c1"># bottom plate</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">plate</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cond_height</span><span class="p">))</span>
+<span class="c1"># sides</span>
+<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">90</span><span class="p">):</span>
+  <span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cside</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">cond_height</span><span class="p">),</span> <span class="n">rotz</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="c1"># the interface between bottom conductor and dielectric cap</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">plate</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">outside_perm</span> <span class="o">=</span> <span class="n">diel_k</span><span class="p">)</span>
+
+<span class="c1"># the dielectric cap</span>
+<span class="c1"># top plate</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">plate</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">diel_height</span><span class="p">),</span>
+                     <span class="n">kind</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Problem</span><span class="o">.</span><span class="n">DIELEC</span><span class="p">,</span> <span class="n">inside_perm</span> <span class="o">=</span> <span class="n">diel_k</span><span class="p">,</span> <span class="n">outside_perm</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">)</span>
+<span class="c1"># sides</span>
+<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">90</span><span class="p">):</span>
+  <span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dside</span><span class="p">,</span> <span class="n">kind</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Problem</span><span class="o">.</span><span class="n">DIELEC</span><span class="p">,</span> <span class="n">inside_perm</span> <span class="o">=</span> <span class="n">diel_k</span><span class="p">,</span> <span class="n">outside_perm</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">,</span> <span class="n">rotz</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="c1"># the top conductor - group &quot;T&quot;</span>
+<span class="c1"># bottom plate</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">plate</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">top_plate</span><span class="p">))</span>
+<span class="c1"># top plate</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">plate</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">top_plate</span> <span class="o">+</span> <span class="mf">0.2</span><span class="p">))</span>
+<span class="c1"># sides</span>
+<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">,</span> <span class="mi">90</span><span class="p">):</span>
+  <span class="n">problem</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cside</span><span class="p">,</span> <span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">top_plate</span><span class="p">),</span> <span class="n">rotz</span> <span class="o">=</span> <span class="n">a</span><span class="p">)</span>
+
+<span class="c1"># computes the capacitance matrix</span>
+<span class="n">cap_matrix</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">format_cap_matrix</span><span class="p">(</span><span class="n">cap_matrix</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="mf">1e-12</span><span class="p">):</span>
+  <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="s2">&quot;  &quot;</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="s2">&quot;</span><span class="si">%-8.1f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">m</span> <span class="o">/</span> <span class="n">unit</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">row</span> <span class="p">])</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cap_matrix</span> <span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Capacitance Matrix:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">format_cap_matrix</span><span class="p">(</span><span class="n">cap_matrix</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>which renders:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Capacitance</span> <span class="n">Matrix</span><span class="p">:</span>
+  <span class="mf">946.5</span>   <span class="o">-</span><span class="mf">683.8</span>
+  <span class="o">-</span><span class="mf">683.8</span>  <span class="mf">929.1</span>
+</pre></div>
+</div>
+<p>For building the geometry, a number of surfaces is used.</p>
+<p>It is important to note that you cannot place surfaces in a
+face-to-face touching way. Instead, the geometry has to be divided
+into separate surfaces, each forming the boundary between
+functionally different volumes (conductive, dielectric, air).</p>
+<p>Also, reference points are needed to define the inside and
+outside face of the dielectric surfaces.</p>
+</section>
 </section>
 
 
@@ -265,11 +375,22 @@ capacitance matrix of</p>
 
 
 <h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#building-and-installing">Building and installing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-command-line-tool">Using the command line tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-python-module">Using the Python module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-python-coded-sample">A Python coded sample</a></li>
+</ul>
+</li>
+</ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to FastCap2’s documentation!</a></li>
   </ul></li>
 </ul>
 </div>

@@ -428,6 +428,76 @@ class TestProblem(unittest.TestCase):
     problem.add(surface, flipz = True)
     self.assertEqual(problem.extent(), [[1.0, 2.0, -3.0], [11.0, 12.0, -3.0]])
 
+  def test_add_surface_scale(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, scale = 2.0)
+    self.assertEqual(problem.extent(), [[2.0, 4.0, 6.0], [22.0, 24.0, 6.0]])
+
+  def test_add_surface_scalex(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, scalex = 2.0)
+    self.assertEqual(problem.extent(), [[2.0, 2.0, 3.0], [22.0, 12.0, 3.0]])
+
+  def test_add_surface_scaley(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, scaley = 2.0)
+    self.assertEqual(problem.extent(), [[1.0, 4.0, 3.0], [11.0, 24.0, 3.0]])
+
+  def test_add_surface_scalez(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, scalez = 2.0)
+    self.assertEqual(problem.extent(), [[1.0, 2.0, 6.0], [11.0, 12.0, 6.0]])
+
+  def test_add_surface_rotx(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, rotx = 90.0)
+    self.assertEqual(problem.extent(), [[1.0, -3.0, 2.0], [11.0, -3.0, 12.0]])
+
+  def test_add_surface_roty(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, roty = 90.0)
+    self.assertEqual(problem.extent(), [[-3.0, 2.0, 1.0], [-3.0, 12.0, 11.0]])
+
+  def test_add_surface_rotz(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, rotz = 90.0)
+    self.assertEqual(problem.extent(), [[-12.0, 1.0, 3.0], [-2.0, 11.0, 3.0]])
+
   def test_add_surface_triple(self):
 
     problem = fc2.Problem()

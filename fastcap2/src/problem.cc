@@ -667,6 +667,20 @@ vector_to_pylist(const Vector3d &v)
   return pyv;
 }
 
+static double
+round_sincos(double v)
+{
+  double epsilon = 1e-12;
+  if (fabs(v) < epsilon) {
+    return 0.0;
+  } else if (fabs(v + 1.0) < epsilon) {
+    return -1.0;
+  } else if (fabs(v - 1.0) < epsilon) {
+    return 1.0;
+  } else {
+    return v;
+  }
+}
 static Matrix3d
 build_transformation(int flipx, int flipy, int flipz,
                      double rotx, double roty, double rotz,
@@ -685,13 +699,15 @@ build_transformation(int flipx, int flipy, int flipz,
     unsigned int n2 = (n + 2) % 3;
 
     double a = rotn[n] / 180.0 * M_PI;
+    double sa = round_sincos(sin(a));
+    double ca = round_sincos(cos(a));
 
     Matrix3d rot;
     rot.set(n, n, 1.0);
-    rot.set(n1, n1, cos(a));
-    rot.set(n1, n2, sin(a));
-    rot.set(n2, n1, -sin(a));
-    rot.set(n2, n2, cos(a));
+    rot.set(n1, n1, ca);
+    rot.set(n1, n2, n == 1 ? sa : -sa);
+    rot.set(n2, n1, n == 1 ? -sa : sa);
+    rot.set(n2, n2, ca);
 
     res = res * rot;
 
