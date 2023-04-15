@@ -28,18 +28,41 @@ Files and file structure:
 
 Building Python module:
 
-  python3 setup.py build
+  $ python3 setup.py build
+
+Using Python module:
+
+  # Note: path may be different
+  $ PYTHONPATH=build/lib.linux-x86_64-3.10 python3 samples/sample2/test.py
+
+  Capacitance Matrix:
+    946.5   -683.8  
+    -683.8  929.1   
 
 
-Building command line tools:
+Building command line tools (in "bin"):
 
-  cmake .
+  $ cmake -S. -Bbin
+  $ cd bin
+  $ make
+
+Run command line tool ("1x1bus" example):
+
+  $ cd examples
+  $ ../bin/fastcap -l1x1bus.lst
+
+  ... (output shortened)
+
+  CAPACITANCE MATRIX, picofarads
+                     1          2 
+  1%GROUP1 1      203.5     -85.13
+  2%GROUP1 2     -85.13      153.9
 
 
 Building documentation:
 
-  cd docs
-  make html
+  $ cd docs
+  $ make html
 
 
 =========================================
