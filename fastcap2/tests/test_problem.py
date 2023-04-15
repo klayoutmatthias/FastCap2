@@ -369,6 +369,32 @@ class TestProblem(unittest.TestCase):
 
     self.assertEqual(problem.conductors(), ['ct1%GROUP1', 'ct2%GROUP2', 'cb%GROUP3'])
     
+  def test_load_list_file_patran(self):
+
+    test_data_path = os.path.join(os.path.dirname(__file__), "data")
+
+    with open(os.path.join(test_data_path, "1x1bus.lst"), "r") as f:
+      data = f.read()
+      
+    data = data.replace("%", os.path.join(test_data_path, ""))
+
+    tmp = tempfile.NamedTemporaryFile()
+    tmp.write(str.encode(data))
+    tmp.flush()
+
+    problem = fc2.Problem()
+    problem.load_list(tmp.name)
+
+    cap_matrix = problem.solve()
+
+    # a single conductor 
+    self.assertEqual(format_cap_matrix(cap_matrix, unit = 1e-12),
+        "203   -85   \n"
+        "-85   154   "
+    )
+
+    self.assertEqual(problem.conductors(), ['1%GROUP1', '2%GROUP1'])
+    
   def test_add_surface(self):
 
     problem = fc2.Problem()
