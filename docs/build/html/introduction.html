@@ -41,7 +41,7 @@ of the FastCap2 tool for integration into Python scripts.</p>
 <p>Using the command-line tool is well described in the
 FastCap2 documentation. The tool takes input files describing
 the geometry in two different formats. The most commonly and
-easiest to use format is the “quickif” format.</p>
+easiest to use format is the “generic file” format.</p>
 <p>TODO: more.</p>
 <section id="building-and-installing">
 <h2>Building and installing<a class="headerlink" href="#building-and-installing" title="Permalink to this heading">¶</a></h2>
@@ -94,6 +94,51 @@ and one strip each for the different conductors (<cite>cb.geo</cite>,
 <span class="n">C</span> <span class="n">cb</span><span class="o">.</span><span class="n">geo</span> <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mi">0</span>
 </pre></div>
 </div>
+<section id="generic-file-format">
+<h3>Generic file format<a class="headerlink" href="#generic-file-format" title="Permalink to this heading">¶</a></h3>
+<p>The generic file format is a simple text file listing geometry
+faces which are triangles (<cite>T</cite> shapes) or quads (<cite>Q</cite> shapes).</p>
+<p>The first line is a title and starts with “0” (zero):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span> <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The geometry is specifies as quads or triangles:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Q</span> <span class="o">&lt;</span><span class="n">cond</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">x1</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">y1</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">z1</span><span class="o">&gt;</span> <span class="o">...</span> <span class="o">&lt;</span><span class="n">x3</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">y3</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">z3</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">x4</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">y4</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">z4</span><span class="o">&gt;</span>
+<span class="n">T</span> <span class="o">&lt;</span><span class="n">cond</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">x1</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">y1</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">z1</span><span class="o">&gt;</span> <span class="o">...</span> <span class="o">&lt;</span><span class="n">x3</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">y3</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">z3</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p><cite>&lt;cond-name&gt;</cite> is the name of the conductor the quad or triangle
+belongs to. Spaces can be inserted everywhere in these commands
+for readability.</p>
+<p>Conductors can be renamed using a <cite>N</cite> command line. This allows
+using short names for the <cite>Q</cite> and <cite>T</cite> lines:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">N</span> <span class="o">&lt;</span><span class="n">old</span><span class="o">-</span><span class="n">cond</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">new</span><span class="o">-</span><span class="n">cond</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Lines starting with <cite>*</cite> are regarded comment lines.</p>
+<p>Here is an example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span> <span class="mi">1</span><span class="n">mX1mX1m</span> <span class="n">cube</span> <span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span> <span class="n">e</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="o">*</span> <span class="n">xo</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">yo</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">zo</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="o">*</span> <span class="n">view</span> <span class="kn">from</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">+</span><span class="n">z</span>
+<span class="o">*</span> <span class="n">front</span> <span class="n">left</span>
+<span class="n">Q</span>  <span class="mi">1</span>  <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">0.0</span>  <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span>  <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">1.0</span>  <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span>
+<span class="o">*</span> <span class="n">front</span> <span class="n">right</span>
+<span class="n">Q</span>  <span class="mi">1</span>  <span class="mf">0.0</span> <span class="mf">1.0</span> <span class="mf">0.0</span>  <span class="mf">0.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span>  <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span>  <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">0.0</span>
+<span class="o">*</span> <span class="n">back</span> <span class="n">left</span>
+<span class="n">Q</span>  <span class="mi">1</span>  <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span>  <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">1.0</span>  <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">1.0</span>  <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span>
+<span class="o">*</span> <span class="n">back</span> <span class="n">right</span>
+<span class="n">Q</span>  <span class="mi">1</span>  <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span>  <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">1.0</span>  <span class="mf">0.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span>  <span class="mf">0.0</span> <span class="mf">1.0</span> <span class="mf">0.0</span>
+<span class="o">*</span> <span class="n">bottom</span>
+<span class="n">Q</span>  <span class="mi">1</span>  <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span>  <span class="mf">0.0</span> <span class="mf">1.0</span> <span class="mf">0.0</span>  <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">0.0</span>  <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">0.0</span>
+<span class="o">*</span> <span class="n">top</span>
+<span class="n">Q</span>  <span class="mi">1</span>  <span class="mf">0.0</span> <span class="mf">0.0</span> <span class="mf">1.0</span>  <span class="mf">0.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span>  <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span>  <span class="mf">1.0</span> <span class="mf">0.0</span> <span class="mf">1.0</span>
+<span class="o">*</span>
+<span class="n">N</span> <span class="mi">1</span> <span class="n">CUBE</span>
+</pre></div>
+</div>
+</section>
+<section id="sample-generators">
+<h3>Sample generators<a class="headerlink" href="#sample-generators" title="Permalink to this heading">¶</a></h3>
 <p>You can also use fastcap with the provided geometry generators:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pltcapgen</span> <span class="o">|</span> <span class="n">fastcap</span>
 </pre></div>
@@ -105,10 +150,16 @@ and one strip each for the different conductors (<cite>cb.geo</cite>,
 <span class="mi">2</span><span class="o">%</span><span class="n">GROUP1</span> <span class="mi">2</span>     <span class="o">-</span><span class="mf">98.28</span>      <span class="mf">120.1</span>
 </pre></div>
 </div>
+</section>
+<section id="postscript-output">
+<h3>Postscript output<a class="headerlink" href="#postscript-output" title="Permalink to this heading">¶</a></h3>
 <p>To generate postfile pictures of the geometry, use:</p>
 <blockquote>
 <div><p>pltcapgen | fastcap -m</p>
 </div></blockquote>
+</section>
+<section id="command-line-options">
+<h3>Command line options<a class="headerlink" href="#command-line-options" title="Permalink to this heading">¶</a></h3>
 <p><cite>fastcap</cite> has a number of options, most of which configure
 postscript output:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="s1">&#39;fastcap [-o&lt;expansion order&gt;] [-d&lt;partitioning depth&gt;] [&lt;input file&gt;]</span>
@@ -151,6 +202,7 @@ postscript output:</p>
 </div>
 <p>For details please see the original documentation.</p>
 </section>
+</section>
 <section id="using-the-python-module">
 <h2>Using the Python module<a class="headerlink" href="#using-the-python-module" title="Permalink to this heading">¶</a></h2>
 <p>The <cite>fastcap2</cite> module provides a basic class to describe
@@ -175,10 +227,10 @@ which is used as the default description text for
 surfaces.</p>
 <p>The geometry can be set up by loading geometry files
 (list files or multiple individual geometry files).
-Only “quickif” style geometry files are supported
-inside the Python module.</p>
+Only “generic file” style geometry files are supported
+inside the Python module currently.</p>
 <p>Here is an example for using the mentioned list file
-from the <cite>samples</cite> directory:</p>
+from the <cite>samples/sample1</cite> directory:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">fastcap2</span> <span class="k">as</span> <span class="nn">fc2</span>
 
 <span class="n">problem</span> <span class="o">=</span> <span class="n">fc2</span><span class="o">.</span><span class="n">Problem</span><span class="p">()</span>

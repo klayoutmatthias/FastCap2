@@ -12,7 +12,7 @@ of the FastCap2 tool for integration into Python scripts.
 Using the command-line tool is well described in the 
 FastCap2 documentation. The tool takes input files describing
 the geometry in two different formats. The most commonly and
-easiest to use format is the "quickif" format.
+easiest to use format is the "generic file" format.
 
 TODO: more.
 
@@ -76,6 +76,55 @@ and one strip each for the different conductors (`cb.geo`,
   C ct2.geo 1.0 8.25 0.0 2.5
   C cb.geo 1.0 0.0 0.0 0
 
+Generic file format
+...................
+
+The generic file format is a simple text file listing geometry
+faces which are triangles (`T` shapes) or quads (`Q` shapes).
+
+The first line is a title and starts with "0" (zero): ::
+
+  0 <title>
+
+The geometry is specifies as quads or triangles: ::
+
+  Q <cond-name> <x1> <y1> <z1> ... <x3> <y3> <z3> <x4> <y4> <z4>
+  T <cond-name> <x1> <y1> <z1> ... <x3> <y3> <z3>
+
+`<cond-name>` is the name of the conductor the quad or triangle 
+belongs to. Spaces can be inserted everywhere in these commands
+for readability.
+
+Conductors can be renamed using a `N` command line. This allows
+using short names for the `Q` and `T` lines: ::
+
+  N <old-cond-name> <new-cond-name>
+
+Lines starting with `*` are regarded comment lines.
+
+Here is an example: ::
+
+  0 1mX1mX1m cube (n=1 e=0.1)
+  * xo = 0, yo = 0, zo = 0
+  * view from -x, -y, +z
+  * front left
+  Q  1  1.0 1.0 0.0  1.0 1.0 1.0  1.0 0.0 1.0  1.0 0.0 0.0
+  * front right
+  Q  1  0.0 1.0 0.0  0.0 1.0 1.0  1.0 1.0 1.0  1.0 1.0 0.0
+  * back left
+  Q  1  1.0 0.0 0.0  1.0 0.0 1.0  0.0 0.0 1.0  0.0 0.0 0.0
+  * back right
+  Q  1  0.0 0.0 0.0  0.0 0.0 1.0  0.0 1.0 1.0  0.0 1.0 0.0
+  * bottom
+  Q  1  0.0 0.0 0.0  0.0 1.0 0.0  1.0 1.0 0.0  1.0 0.0 0.0
+  * top
+  Q  1  0.0 0.0 1.0  0.0 1.0 1.0  1.0 1.0 1.0  1.0 0.0 1.0
+  *
+  N 1 CUBE
+
+Sample generators
+.................
+
 You can also use fastcap with the provided geometry generators: ::
 
   pltcapgen | fastcap 
@@ -87,9 +136,15 @@ which produces: ::
   1%GROUP1 1      120.1     -98.28
   2%GROUP1 2     -98.28      120.1
 
+Postscript output
+.................
+
 To generate postfile pictures of the geometry, use:
 
   pltcapgen | fastcap -m
+
+Command line options
+....................
 
 `fastcap` has a number of options, most of which configure
 postscript output: ::
@@ -160,11 +215,11 @@ surfaces.
 
 The geometry can be set up by loading geometry files
 (list files or multiple individual geometry files).
-Only "quickif" style geometry files are supported
-inside the Python module.
+Only "generic file" style geometry files are supported
+inside the Python module currently.
 
 Here is an example for using the mentioned list file
-from the `samples` directory: ::
+from the `samples/sample1` directory: ::
 
   import fastcap2 as fc2
 
