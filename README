@@ -1,4 +1,48 @@
 =========================================
+              fastcap2
+=========================================
+
+"fastcap2" is an Python module providing a Python interface for the FastCap engine.
+
+This project includes some major refactoring with following goals:
+
+* Port to modern language standards
+* Encapsulate data for Python object binding
+* Release memory after solver object end of life
+* Remove global and static variables to enable concurrent execution
+* Programmatic geometry generation API
+
+Files and file structure:
+
+  CMakeLists.txt  - CMake build script (command-line tools)
+  fastcap2        - Python module, sources and tests
+  docs            - new documentation (Sphinx)
+  samples         - new samples
+  setup.py        - setuptools driver for Python module generation
+  src             - the original sources, modified (command-line tools, corelib.a)
+  doc             - original documentation (command-line tools)
+  examples        - original examples (still functional)
+  LICENSE         - original LICENSE
+  README.mit      - original README (obsolete)
+
+
+Building Python module:
+
+  python3 setup.py build
+
+
+Building command line tools:
+
+  cmake .
+
+
+Building documentation:
+
+  cd docs
+  make html
+
+
+=========================================
               FastCap
 =========================================
 
