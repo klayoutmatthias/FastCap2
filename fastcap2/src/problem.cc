@@ -657,6 +657,16 @@ parse_vector(PyObject *arg, Vector3d &v)
   }
 }
 
+static PyObject *
+vector_to_pylist(const Vector3d &v)
+{
+  PyObject *pyv = PyList_New(3);
+  for (int i = 0; i < 3; ++i) {
+    PyList_SetItem(pyv, i, PyFloat_FromDouble(v[i]));
+  }
+  return pyv;
+}
+
 static Matrix3d
 build_transformation(int flipx, int flipy, int flipz,
                      double rotx, double roty, double rotz,
@@ -884,7 +894,7 @@ problem_conductors(PyProblemObject *self)
   try {
     build_charge_list(&self->sys);
   } catch (std::runtime_error &ex) {
-    raise_error(ex);
+    return raise_error(ex);
   }
 
   int i = 0;
@@ -922,10 +932,53 @@ problem_dump_ps(PyProblemObject *self, PyObject *args)
     dump_ps_geometry(&self->sys, filename, chglist, NULL, self->sys.dd_);
 
   } catch (std::runtime_error &ex) {
-    raise_error(ex);
+    return raise_error(ex);
   }
 
   Py_RETURN_NONE;
+}
+
+static PyObject *
+problem_extent(PyProblemObject *self)
+{
+  try {
+
+    charge *chglist = build_charge_list(&self->sys);
+    if (!chglist) {
+      PyErr_SetString(PyExc_RuntimeError, "Geometry is empty - cannot dump to PS");
+      return NULL;
+    }
+
+    Vector3d min, max;
+    bool first = true;
+    while (chglist) {
+      Vector3d x(chglist->X), y(chglist->Y), z(chglist->Z);
+      Vector3d o(chglist->x, chglist->y, chglist->z);
+      for (int i = 0; i < chglist->shape; ++i) {
+        Vector3d c = chglist->corner[i][0] * x + chglist->corner[i][1] * y + chglist->corner[i][2] * z + o;
+        if (first) {
+          min = max = c;
+          first = false;
+        } else {
+          for (int j = 0; j < 3; ++j) {
+            min[j] = std::min(min[j], c[j]);
+          }
+          for (int j = 0; j < 3; ++j) {
+            max[j] = std::max(max[j], c[j]);
+          }
+        }
+      }
+      chglist = chglist->next;
+    }
+
+    PyObject *res = PyList_New(2);
+    PyList_SetItem(res, 0, vector_to_pylist(min));
+    PyList_SetItem(res, 1, vector_to_pylist(max));
+    return res;
+
+  } catch (std::runtime_error &ex) {
+    return raise_error(ex);
+  }
 }
 
 static PyMethodDef problem_methods[] = {
@@ -985,6 +1038,7 @@ static PyMethodDef problem_methods[] = {
   { "_solve", (PyCFunction) problem_solve, METH_NOARGS, NULL },
   { "_conductors", (PyCFunction) problem_conductors, METH_NOARGS, NULL },
   { "_dump_ps", (PyCFunction) problem_dump_ps, METH_VARARGS, NULL },
+  { "_extent", (PyCFunction) problem_extent, METH_NOARGS, NULL },
   {NULL}
 };
 

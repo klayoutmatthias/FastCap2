@@ -192,6 +192,9 @@ public:
   double x() const { return this->operator[](0); }
   double y() const { return this->operator[](1); }
   double z() const { return this->operator[](2); }
+  double &x() { return this->operator[](0); }
+  double &y() { return this->operator[](1); }
+  double &z() { return this->operator[](2); }
 
 private:
   double m_v[N];

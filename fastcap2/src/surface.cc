@@ -114,6 +114,16 @@ parse_vector(PyObject *arg, Vector3d &v)
 }
 
 static PyObject *
+vector_to_pylist(const Vector3d &v)
+{
+  PyObject *pyv = PyList_New(3);
+  for (int i = 0; i < 3; ++i) {
+    PyList_SetItem(pyv, i, PyFloat_FromDouble(v[i]));
+  }
+  return pyv;
+}
+
+static PyObject *
 surface_add_quad(PySurfaceObject *self, PyObject *args)
 {
   PyObject *p1, *p2, *p3, *p4;

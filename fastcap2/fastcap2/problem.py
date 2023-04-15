@@ -643,6 +643,14 @@ class Problem(_Problem):
                         outside_perm, inside_perm, d, r, flipx, flipy, flipz, 
                         rotx, roty, rotz, scale * scalex, scale * scaley, scale * scalez)
 
+  def extent(slef) -> list[ list[float], list[float] ]:
+    """Gets the extent of all geometries of all surfaces (bounding box)
+
+    The first tuple is the minimum x, y and z,
+    the second one the maximum x, y and z.
+    """
+    return super()._extent()
+
   def solve(self) -> list[ list[float] ]:
     """Solves the problem and returns the capacitance matrix
 

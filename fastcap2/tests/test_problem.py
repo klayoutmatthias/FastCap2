@@ -388,6 +388,26 @@ class TestProblem(unittest.TestCase):
 
     self.assertEqual(problem.conductors(), ["C%GROUP1", "C%GROUP2"])
 
+  def test_extent(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface)
+    self.assertEqual(problem.extent(), [[1.0, 2.0, 3.0], [11.0, 12.0, 3.0]])
+
+  def test_add_surface_flip(self):
+
+    problem = fc2.Problem()
+
+    surface = fc2.Surface(name = "C")
+    surface.add_tri((1, 2, 3), (11, 2, 3), (1, 12, 3))
+
+    problem.add(surface, flipx = True)
+    self.assertEqual(problem.extent(), [[-11.0, 2.0, 3.0], [-1.0, 12.0, 3.0]])
+
   def test_add_surface_triple(self):
 
     problem = fc2.Problem()

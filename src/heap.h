@@ -37,6 +37,7 @@ private:
   class DestructorBase
   {
   public:
+    virtual ~DestructorBase() { }
     virtual void destroy() = 0;
   };
 
