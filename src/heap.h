@@ -87,7 +87,7 @@ public:
   size_t total_memory() const;
 
 private:
-  friend class HeapPrivate;
+  friend struct HeapPrivate;
 
   HeapPrivate *mp_data;
   size_t m_memory [NumTypes];

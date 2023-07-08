@@ -344,7 +344,11 @@ struct ssystem
   void msg(const char *fmt, ...) const;
   void info(const char *fmt, ...) const;
   void warn(const char *fmt, ...) const;
+#if __cplusplus >= 201103L
   [[noreturn]] void error(const char *fmt, ...) const;
+#else
+  void error(const char *fmt, ...) const;
+#endif
   void flush();
 
 private:
