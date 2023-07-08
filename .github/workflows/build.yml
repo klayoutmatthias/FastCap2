@@ -55,7 +55,7 @@ jobs:
       with:
         path: dist/*.tar.gz
 
-  upload_to_test_pypy:
+  upload_to_test_pypi:
     needs: [build, make_sdist]
     runs-on: ubuntu-latest
     steps:
