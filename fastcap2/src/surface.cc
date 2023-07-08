@@ -171,7 +171,7 @@ surface_get_name(PySurfaceObject *self)
 static PyObject *
 surface_set_name(PySurfaceObject *self, PyObject *value)
 {
-  if (Py_IsNone(value)) {
+  if (value == Py_None) {
     self->surface.set_name(0);
   } else {
     PyObject *name_str = PyObject_Str(value);
@@ -200,7 +200,7 @@ surface_get_title(PySurfaceObject *self)
 static PyObject *
 surface_set_title(PySurfaceObject *self, PyObject *value)
 {
-  if (Py_IsNone(value)) {
+  if (value == Py_None) {
     self->surface.set_title(0);
   } else {
     PyObject *title_str = PyObject_Str(value);

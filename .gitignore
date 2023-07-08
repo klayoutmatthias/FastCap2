@@ -7,3 +7,4 @@ dist
 CMakeFiles
 CMakeLists.txt.user
 cmake_install.cmake
+FastCap2.egg-info

@@ -255,7 +255,7 @@ problem_set_skip_conductors(PyProblemObject *self, PyObject *value)
   self->sys.reset_read();
 
   char *list = NULL;
-  if (Py_IsNone(value)) {
+  if (value == Py_None) {
     //  set list to NULL
   } else {
     list = make_conductor_list(&self->sys, value);
@@ -279,7 +279,7 @@ problem_set_remove_conductors(PyProblemObject *self, PyObject *value)
   self->sys.reset_read();
 
   char *list = NULL;
-  if (Py_IsNone(value)) {
+  if (value == Py_None) {
     //  set list to NULL
   } else {
     list = make_conductor_list(&self->sys, value);
@@ -304,7 +304,7 @@ problem_get_qps_file_base(PyProblemObject *self)
 static PyObject *
 problem_set_qps_file_base(PyProblemObject *self, PyObject *value)
 {
-  if (Py_IsNone(value)) {
+  if (value == Py_None) {
     self->sys.ps_file_base = 0;
     self->sys.q_ = FALSE;
   } else {
@@ -334,7 +334,7 @@ problem_set_qps_select_q(PyProblemObject *self, PyObject *value)
   self->sys.reset_read();
 
   char *list = NULL;
-  if (Py_IsNone(value)) {
+  if (value == Py_None) {
     //  set list to NULL
   } else {
     list = make_conductor_list(&self->sys, value);
@@ -358,7 +358,7 @@ problem_set_qps_remove_q(PyProblemObject *self, PyObject *value)
   self->sys.reset_read();
 
   char *list = NULL;
-  if (Py_IsNone(value)) {
+  if (value == Py_None) {
     //  set list to NULL
   } else {
     list = make_conductor_list(&self->sys, value);
