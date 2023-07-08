@@ -1,0 +1,87 @@
+---
+name: Build Python Wheels
+# https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python
+
+on:
+  pull_request:
+  # Running on PRs and main branch only
+  push:
+    branches:
+      - master
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - os: "macos-latest"
+            cibuild: "*macosx*"
+          - os: "ubuntu-latest"
+            cibuild: "*manylinux*"
+          - os: "ubuntu-latest"
+            cibuild: "*musllinux*"
+    steps:
+      - name: Cancel Workflow Action
+        uses: styfle/cancel-workflow-action@0.11.0
+      - uses: actions/checkout@v3
+      - name: Build wheels  # check https://cibuildwheel.readthedocs.io/en/stable/setup/#github-actions
+        uses: pypa/cibuildwheel@v2.13.1
+        # to supply options, put them in 'env', like:
+        # env:
+        #   CIBW_SOME_OPTION: value
+        env:
+          CIBW_BUILD: ${{ matrix.cibuild }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
+
+  # The following was taken from https://cibuildwheel.readthedocs.io/en/stable/deliver-to-pypi/
+  make_sdist:
+    name: Make SDist
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build SDist
+      run: pipx run build --sdist
+
+    - uses: actions/upload-artifact@v3
+      with:
+        path: dist/*.tar.gz
+
+  upload_to_test_pypy:
+    needs: [build, make_sdist]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: artifact
+        path: dist
+
+    - uses: pypa/gh-action-pypi-publish@v1.8.7
+      continue-on-error: true   # might fail if we don't bump the version
+      with:
+        user: __token__
+        password: ${{ secrets.test_pypi_password }}
+        repository-url: https://test.pypi.org/legacy/
+
+  upload_to_pypi:
+    needs: [build, make_sdist]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: artifact
+        path: dist
+
+    - uses: pypa/gh-action-pypi-publish@v1.8.7
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
