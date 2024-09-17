@@ -214,6 +214,9 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, const
     }
     else if(line1[0] == '%' || line1[0] == '*' ||
             line1[0] == '#') linecnt++; /* ignore comments */
+    else if(line1[0] == '\n' || line1[0] == '\r') {
+        linecnt++;
+    }
     else {
       sys->error("quickif: bad line format, line %d:\n%s",
                  linecnt, line1);
