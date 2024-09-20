@@ -184,10 +184,10 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, const
       /* load tri struct */
       if(surf_type == CONDTR || surf_type == BOTH)
           curtri->cond = sys->get_conductor_number(condstr);
-      else curquad->cond = 0;
-      curquad->p1 = Vector3d(x1, y1, z1);
-      curquad->p2 = Vector3d(x2, y2, z2);
-      curquad->p3 = Vector3d(x3, y3, z3);
+      else curtri->cond = 0;
+      curtri->p1 = Vector3d(x1, y1, z1);
+      curtri->p2 = Vector3d(x2, y2, z2);
+      curtri->p3 = Vector3d(x3, y3, z3);
 
       linecnt++;
     }
@@ -214,6 +214,9 @@ charge *quickif(ssystem *sys, FILE *fp, const char *header, int surf_type, const
     }
     else if(line1[0] == '%' || line1[0] == '*' ||
             line1[0] == '#') linecnt++; /* ignore comments */
+    else if(line1[0] == '\n' || line1[0] == '\r') {
+        linecnt++;
+    }
     else {
       sys->error("quickif: bad line format, line %d:\n%s",
                  linecnt, line1);
