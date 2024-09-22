@@ -73,6 +73,7 @@ ssystem::ssystem() :
   argv(0),
   argc(0),
   log(NULL),
+  pts(),
   kill_name_list(0),
   kinp_name_list(0),
   qpic_name_list(0),

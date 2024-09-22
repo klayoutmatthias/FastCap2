@@ -2,6 +2,8 @@
 #if !defined(patran_H)
 #define patran_H
 
+#include <cstddef>
+
 /***************************************************************************
 
   This is the header file for patran.c.  
@@ -54,6 +56,16 @@ struct NAME {
 /* Provides all information the PATRAN reader needs */
 struct PTState
 {
+  PTState()
+    : start_name(NULL), current_name(NULL), start_name_this_time(NULL),
+      ID(0), IV(0), KC(0), N1(0), N2(0), N3(0), N4(0), N5(0),
+      number_nodes(0), number_elements(0), number_grids(0), number_patches(0),
+      list_nodes(NULL), current_node(NULL), node_search_table(NULL),
+      list_elements(NULL), current_element(NULL), element_search_table(NULL),
+      start_grid(NULL), start_patch(NULL), start_cfeg(NULL),
+      conductor_count(0), first_grid(0), first_patch(0), first_cfeg(0)
+  { }
+
   NAME *start_name;             //  conductor name linked list head
   NAME *current_name;           //  conductor name linked list tail
   NAME *start_name_this_time;   //  cond name list for the current surface
