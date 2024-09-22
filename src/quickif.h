@@ -16,12 +16,16 @@ struct quadl {                  /* quadralateral element */
   int cond;                     /* conductor number */
   struct quadl *next;           /* linked list pntr */
   Vector3d p1, p2, p3, p4;      /* four corner coordinates */
+  Vector3d rp;                  /* per-panel reference point */
+  bool has_rp;                  /* has per-panel reference point */
 };
 
 struct tri {                    /* triangular element */
   int cond;                     /* conductor number */
   struct tri *next;             /* linked list pntr */
   Vector3d p1, p2, p3;          /* three corner coordinates */
+  Vector3d rp;                  /* per-panel reference point */
+  bool has_rp;                  /* has per-panel reference point */
 };
 
 struct SurfaceData

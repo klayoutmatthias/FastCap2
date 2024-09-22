@@ -156,6 +156,7 @@ void initcalcp(ssystem *sys, charge *panel_list)
       npq = sys->heap.alloc<charge>(1, AMSC);
       npq->next = pq->next;
       pq->next = npq;
+      npq->ref_pt = pq->ref_pt;
       npq->shape = 3;
       pq->shape = 3;
       npq->cond = pq->cond;
@@ -219,16 +220,16 @@ int flip_normal(ssystem *sys, charge *panel)
   double norm, norm_sq;
   const Surface *surf = panel->surf;
   int ref_inside = surf->ref_inside, flip_normal;
-  const Vector3d &ref = surf->ref;
+  const Vector3d *ref = panel->ref_pt ? panel->ref_pt : &surf->ref;
   double *normal, angle, norm_n;
   char *surf_name = surf->name;
 
   if(surf->type != DIELEC && surf->type != BOTH) return(FALSE);
 
   /* get panel corner (relative to reference point) and normal */
-  x = panel->corner[0][0] - ref[0]; 
-  y = panel->corner[0][1] - ref[1]; 
-  z = panel->corner[0][2] - ref[2];
+  x = panel->corner[0][0] - ref->x();
+  y = panel->corner[0][1] - ref->y();
+  z = panel->corner[0][2] - ref->z();
   norm_sq = x*x + y*y + z*z;
   norm = sqrt(norm_sq);
   normal = panel->Z;

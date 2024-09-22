@@ -15,7 +15,8 @@ void PySurface::add_quad(int cond_num,
                          const Vector3d &p1,
                          const Vector3d &p2,
                          const Vector3d &p3,
-                         const Vector3d &p4)
+                         const Vector3d &p4,
+                         const Vector3d *rp)
 {
   quadl *new_quad = heap.alloc<quadl>(1);
   new_quad->cond = cond_num;
@@ -23,6 +24,8 @@ void PySurface::add_quad(int cond_num,
   new_quad->p2 = p2;
   new_quad->p3 = p3;
   new_quad->p4 = p4;
+  new_quad->rp = (rp != 0 ? *rp : Vector3d());
+  new_quad->has_rp = (rp != 0);
   new_quad->next = quads;
   quads = new_quad;
 }
@@ -30,13 +33,16 @@ void PySurface::add_quad(int cond_num,
 void PySurface::add_tri(int cond_num,
                          const Vector3d &p1,
                          const Vector3d &p2,
-                         const Vector3d &p3)
+                         const Vector3d &p3,
+                         const Vector3d *rp)
 {
   tri *new_tri = heap.alloc<tri>(1);
   new_tri->cond = cond_num;
   new_tri->p1 = p1;
   new_tri->p2 = p2;
   new_tri->p3 = p3;
+  new_tri->rp = (rp != 0 ? *rp : Vector3d());
+  new_tri->has_rp = (rp != 0);
   new_tri->next = tris;
   tris = new_tri;
 }
@@ -116,22 +122,23 @@ parse_vector(PyObject *arg, Vector3d &v)
 static PyObject *
 surface_add_quad(PySurfaceObject *self, PyObject *args)
 {
-  PyObject *p1, *p2, *p3, *p4;
-  if (!PyArg_ParseTuple(args, "OOOO", &p1, &p2, &p3, &p4)) {
+  PyObject *p1, *p2, *p3, *p4, *rp = NULL;
+  if (!PyArg_ParseTuple(args, "OOOO|O", &p1, &p2, &p3, &p4, &rp)) {
     return NULL;
   }
 
-  Vector3d c1, c2, c3, c4;
+  Vector3d c1, c2, c3, c4, crp;
 
   int ok = parse_vector(p1, c1) &&
            parse_vector(p2, c2) &&
            parse_vector(p3, c3) &&
-           parse_vector(p4, c4);
+           parse_vector(p4, c4) &&
+           (rp == NULL || parse_vector(rp, crp));
 
   if (! ok) {
     return NULL;
   } else {
-    self->surface.add_quad(0, c1, c2, c3, c4);
+    self->surface.add_quad(0, c1, c2, c3, c4, rp == NULL ? 0 : &crp);
     Py_RETURN_NONE;
   }
 }
@@ -139,21 +146,22 @@ surface_add_quad(PySurfaceObject *self, PyObject *args)
 static PyObject *
 surface_add_tri(PySurfaceObject *self, PyObject *args)
 {
-  PyObject *p1, *p2, *p3;
-  if (!PyArg_ParseTuple(args, "OOO", &p1, &p2, &p3)) {
+  PyObject *p1, *p2, *p3, *rp = NULL;
+  if (!PyArg_ParseTuple(args, "OOO|O", &p1, &p2, &p3, &rp)) {
     return NULL;
   }
 
-  Vector3d c1, c2, c3;
+  Vector3d c1, c2, c3, crp;
 
   int ok = parse_vector(p1, c1) &&
            parse_vector(p2, c2) &&
-           parse_vector(p3, c3);
+           parse_vector(p3, c3) &&
+           (rp == NULL || parse_vector(rp, crp));
 
   if (! ok) {
     return NULL;
   } else {
-    self->surface.add_tri(0, c1, c2, c3);
+    self->surface.add_tri(0, c1, c2, c3, rp == NULL ? 0 : &crp);
     Py_RETURN_NONE;
   }
 }

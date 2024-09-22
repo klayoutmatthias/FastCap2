@@ -16,12 +16,14 @@ struct PySurface
                 const Vector3d &p1,
                 const Vector3d &p2,
                 const Vector3d &p3,
-                const Vector3d &p4);
+                const Vector3d &p4,
+                const Vector3d *rp);
 
   void add_tri(int cond_num,
                const Vector3d &p1,
                const Vector3d &p2,
-               const Vector3d &p3);
+               const Vector3d &p3,
+               const Vector3d *rp);
 
   void set_name(const char *name);
   void set_title(const char *title);

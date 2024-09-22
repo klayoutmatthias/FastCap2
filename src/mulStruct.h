@@ -57,6 +57,7 @@ struct charge {                 /* point charge */
   struct charge *next;          /* Next charge in linked list. */
   double corner[4][3];          /* Corner point coordinates. */
   int shape;                    /* 4=quad panel, 3 = triangular panel. */
+  Vector3d *ref_pt;             /* Pointer to reference point or NULL */
   int index;                    /* charge value index in q array */
   double X[3], Y[3], Z[3];      /* Def coord system, Z is normal direction. */
   double max_diag;              /* Longest diagonal of panel. */
