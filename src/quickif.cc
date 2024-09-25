@@ -302,11 +302,14 @@ charge *quickif2charges(ssystem *sys, quadl *fstquad, tri *fsttri, const Matrix3
     nq->cond = (cond_num >= 0 ? cond_num : curquad->cond);
   }
 
-  /* transform the corners */
+  /* transform the corners and the reference point */
   for (nq = chglst; nq; nq = nq->next) {
     for (int c = 0; c < nq->shape; ++c) {
       Vector3d new_coord = rot * Vector3d(nq->corner[c]) + trans;
       new_coord.store(nq->corner[c]);
+    }
+    if (nq->ref_pt) {
+      *nq->ref_pt = rot * *nq->ref_pt + trans;
     }
   }
 

@@ -1,6 +1,7 @@
 __pycache__
 .*.swp
 .*.swo
+*.ps
 build
 build-*
 dist

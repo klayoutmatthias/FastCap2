@@ -547,6 +547,9 @@ class Problem(_Problem):
     specification is not required - "outside" refers to both sides of the surface.
     Specify the reference point with the `r` parameter which is a triple of x, y and z values.
 
+    Alternatively, the reference point can be specified individually per triangle
+    or quad.
+
     By default, the reference point is taken to be inside the surface. 
     By using `ref_point_inside = False`, the reference point is taken to be outside
     the surface.

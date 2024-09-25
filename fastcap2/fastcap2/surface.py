@@ -90,8 +90,24 @@ class Surface(_Surface):
     return super()._set_name(value)
 
   def add_quad(self, p1: Tuple[float, float, float], p2: Tuple[float, float, float],
-                     p3: Tuple[float, float, float], p4: Tuple[float, float, float]):
-    """Adds a quad to the surface"""
+                     p3: Tuple[float, float, float], p4: Tuple[float, float, float], 
+                     rp: Optional[Tuple[float, float, float]] = None):
+    """Adds a quad to the surface
+
+    :param p1 The first point of the quad
+    :param p2 The second point of the quad
+    :param p3 The third point of the quad
+    :param p4 The forth point of the quad
+    :param rp An optional reference per-panel reference point
+
+    "rp" will replace the global reference point for a dielectric surface in 
+    case it is missing. This feature allows specifying a reference point 
+    per panel. That enables building convex geometries in a single surface -
+    something which is not possible with a single reference point.
+    The per-panel reference point has priority over the global reference point.
+    Other that the global reference point, the per-panel reference point 
+    is transformed with the panel.
+    """
     if type(p1) is list:
       p1 = tuple(p1)
     if type(p2) is list:
@@ -100,17 +116,44 @@ class Surface(_Surface):
       p3 = tuple(p3)
     if type(p4) is list:
       p4 = tuple(p4)
-    return super()._add_quad(p1, p2, p3, p4)
+    args = [ p1, p2, p3, p4 ]
+    if rp is not None:
+      if type(rp) is list:
+        rp = tuple(rp)
+      args.append(rp)
+    return super()._add_quad(*args)
 
-  def add_tri(self, p1: Tuple[float, float, float], p2: Tuple[float, float, float], p3: Tuple[float, float, float]):
-    """Adds a triangle to the surface"""
+  def add_tri(self, p1: Tuple[float, float, float], 
+                    p2: Tuple[float, float, float], 
+                    p3: Tuple[float, float, float],
+                    rp: Optional[Tuple[float, float, float]] = None):
+    """Adds a triangle to the surface
+
+    :param p1 The first point of the triangle
+    :param p2 The second point of the triangle
+    :param p3 The third point of the triangle
+    :param rp An optional reference per-panel reference point
+
+    "rp" will replace the global reference point for a dielectric surface in 
+    case it is missing. This feature allows specifying a reference point 
+    per panel. That enables building convex geometries in a single surface -
+    something which is not possible with a single reference point.
+    The per-panel reference point has priority over the global reference point.
+    Other that the global reference point, the per-panel reference point 
+    is transformed with the panel.
+    """
     if type(p1) is list:
       p1 = tuple(p1)
     if type(p2) is list:
       p2 = tuple(p2)
     if type(p3) is list:
       p3 = tuple(p3)
-    return super()._add_tri(p1, p2, p3)
+    args = [ p1, p2, p3 ]
+    if rp is not None:
+      if type(rp) is list:
+        rp = tuple(rp)
+      args.append(rp)
+    return super()._add_quad(*args)
 
   def add_meshed_quad(self,
                       p0: Tuple[float, float, float], 
@@ -119,7 +162,8 @@ class Surface(_Surface):
                       max_dim: Optional[float] = None,
                       num: Optional[float] = None,
                       edge_width: Optional[float] = None,
-                      edge_fraction: Optional[float] = None):
+                      edge_fraction: Optional[float] = None,
+                      rp: Optional[Tuple[float, float, float]] = None):
     """Generates a meshed quad (actually a diamond or rectangle)
 
     :param p0: the first corner.
@@ -129,6 +173,7 @@ class Surface(_Surface):
     :param num: the number of mesh tiles per shorter side.
     :param edge_width: the width of the edge.
     :param edge_fraction: the width of the edge as a fraction of the shorter side.
+    :param rp: the optional per-panel reference point
 
     The diamond or rectangle is defined by three vectors defining 
     a point (`p0`) and the adjacent other points (`p1` and
@@ -204,6 +249,9 @@ class Surface(_Surface):
         p2 = [ p0[i] + q1[i] * s1[i1 + 1] + q2[i] * s2[i2]     for i in range(0, 3) ]
         p3 = [ p0[i] + q1[i] * s1[i1 + 1] + q2[i] * s2[i2 + 1] for i in range(0, 3) ]
         p4 = [ p0[i] + q1[i] * s1[i1]     + q2[i] * s2[i2 + 1] for i in range(0, 3) ]
-        self.add_quad(p1, p2, p3, p4)
+        args = [ p1, p2, p3, p4 ]
+        if rp is not None:
+          args.append(rp)
+        self.add_quad(*args)
 
 
