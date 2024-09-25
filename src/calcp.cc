@@ -252,7 +252,7 @@ int flip_normal(ssystem *sys, charge *panel)
             "flip_normal: inconclusive test for normal flipping\n");
     sys->info("  Surface: %s\n", hack_path(surf_name));
     sys->info("  Translation: (%g %g %g)\n", surf->trans[0], surf->trans[1], surf->trans[2]);
-    sys->info("  Reference point: (%g %g %g)\n", ref[0], ref[1], ref[2]);
+    sys->info("  Reference point: (%g %g %g)\n", ref->x(), ref->y(), ref->z());
     sys->info("  Panel corner: (%g %g %g)\n",
             panel->corner[0][0], panel->corner[0][1], panel->corner[0][2]);
     sys->info("  Normal: (%g %g %g)\n",
