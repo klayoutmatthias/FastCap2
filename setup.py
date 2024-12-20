@@ -41,7 +41,7 @@ fastcap2_core_module = Extension(
 )
 
 setup(name='FastCap2',
-  version='2.0',
+  version='2.1',
   description='FastCap2 Python port',
   long_description='FastCap2 is a venerable state-of-the art tool to compute the capacitance matrix from an arrangement of (ideal) conductors and dielectric surfaces in the quasi-static case. This module provides a Python API for this tool.\n\nFor more details see https://klayoutmatthias.github.io/FastCap2/introduction.html',
   long_description_content_type='text/x-rst',
